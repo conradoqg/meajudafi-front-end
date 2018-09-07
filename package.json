@@ -1,0 +1,25 @@
+{
+  "name": "cvm-fund-exploration-front-end",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "budo ./js/index.js:dist/bundle.js --live -- -t babelify",
+    "dist": "browserify ./js/index.js -t node-lessify -t babelify | uglifyjs > ./dist/bundle.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "react": "^16.5.0",
+    "react-dom": "^16.5.0"
+  },
+  "devDependencies": {
+    "babelify": "^10.0.0",
+    "budo": "^11.3.2",
+    "uglifyjs": "^2.4.11",
+    "@babel/core": "^7.0.0",
+    "@babel/preset-env": "^7.0.0",
+    "@babel/preset-react": "^7.0.0"
+  }
+}
