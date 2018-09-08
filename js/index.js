@@ -1,5 +1,4 @@
-const React = require('react');
-const ReactDOM = require('react-dom');
+require('@babel/polyfill');
 const AppView = require('./view/appView');
 
 $(document).ready(function () {

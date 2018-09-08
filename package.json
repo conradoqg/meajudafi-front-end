@@ -5,21 +5,27 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "budo ./js/index.js:dist/bundle.js --live -- -t babelify",
-    "dist": "browserify ./js/index.js -t node-lessify -t babelify | uglifyjs > ./dist/bundle.js"
+    "start": "budo ./js/index.js:dist/bundle.js --live -- -t babelify -t browserify-shim",
+    "dist": "browserify ./js/index.js -t babelify -t browserify-shim | uglifyjs > ./dist/bundle.js"
+  },
+  "browserify-shim": {
+    "react": "global:React",
+    "react-dom": "global:ReactDOM"
   },
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
+    "@babel/polyfill": "^7.0.0",
     "react": "^16.5.0",
     "react-dom": "^16.5.0"
   },
   "devDependencies": {
-    "babelify": "^10.0.0",
-    "budo": "^11.3.2",
-    "uglifyjs": "^2.4.11",
     "@babel/core": "^7.0.0",
     "@babel/preset-env": "^7.0.0",
-    "@babel/preset-react": "^7.0.0"
+    "@babel/preset-react": "^7.0.0",
+    "babelify": "^10.0.0",
+    "browserify-shim": "^3.8.14",
+    "budo": "^11.3.2",
+    "uglify-js": "^3.4.9"
   }
 }

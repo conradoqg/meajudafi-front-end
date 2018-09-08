@@ -1,9 +1,7 @@
 {
     "env": {
         "browser": true,
-        "commonjs": true,
-        "node": true,
-        "mocha": true,
+        "commonjs": true,        
         "es6": true
     },
     "parserOptions": {
@@ -15,7 +13,11 @@
     },
     "globals": {
         "step": true,
-        "$": true
+        "$": true,
+        "React": true,
+        "ReactDOM": true,
+        "createPlotlyComponent": true,
+        "Plotly": true
     },
     "rules": {
         "no-const-assign": "warn",
@@ -40,7 +42,8 @@
             2,
             "always"
         ],
-        "no-console": 0
+        "no-console": 0,
+        "react/prop-types": 0
     },
     "extends": [
         "eslint:recommended",
