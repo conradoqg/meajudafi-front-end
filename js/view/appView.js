@@ -18,7 +18,7 @@ class AppView extends React.Component {
         const y_consistency_1y = dailyReturnObject.map(item => item.consistency_1y);
         const name = infCadastralObject[0].denom_social;
 
-        const investment_return_monthly_complete = await fetch('http://localhost:82/investment_return_monthly_complete?select=xf_name%2Cirm_dt_comptc%2Cirm_accumulated_investment_return%2Cirm_accumulated_risk%2Cicf_classe');
+        const investment_return_monthly_complete = await fetch('http://localhost:82/xpi_funds_with_investment_return_monthly_complete_and_expanded_');
         const investment_return_monthly_completeObject = await investment_return_monthly_complete.json();
 
         const fundsOverviewChartConfig = this.createFundsOverviewChartConfig(investment_return_monthly_completeObject);
@@ -127,7 +127,8 @@ class AppView extends React.Component {
                 args: [[irm_dt_comptcs[i]], {
                     mode: 'immediate',
                     transition: { duration: 300 },
-                    frame: { duration: 300/*, redraw: false */ },
+                    layout: { xaxis: { autorange: true }, yaxis: { autorange: true } },
+                    frame: { duration: 300, redraw: true },
                 }]
             });
         }
@@ -170,7 +171,8 @@ class AppView extends React.Component {
                         mode: 'immediate',
                         fromcurrent: true,
                         transition: { duration: 300 },
-                        frame: { duration: 500/*, redraw: false */ }
+                        //layout: { xaxis: { autorange: true }, yaxis: { autorange: true } },
+                        frame: { duration: 500, redraw: false }
                     }],
                     label: 'Play'
                 }, {
@@ -178,7 +180,8 @@ class AppView extends React.Component {
                     args: [[null], {
                         mode: 'immediate',
                         transition: { duration: 0 },
-                        frame: { duration: 0/*, redraw: false */ }
+                        //layout: { xaxis: { autorange: true }, yaxis: { autorange: true } },
+                        frame: { duration: 0, redraw: false }
                     }],
                     label: 'Pause'
                 }]
@@ -189,7 +192,7 @@ class AppView extends React.Component {
                 pad: { l: 130, t: 55 },
                 currentvalue: {
                     visible: true,
-                    prefix: 'IRM_dt_comptc:',
+                    prefix: 'Data:',
                     xanchor: 'right',
                     font: { size: 20, color: '#666' }
                 },
@@ -214,7 +217,7 @@ class AppView extends React.Component {
                         layout={this.state.fundsOverviewChartConfig.layout}
                         frames={this.state.fundsOverviewChartConfig.frames}
                         useResizeHandler={true}
-                        style={{ width: '100%', height: '100%' }}
+                        style={{ width: '100%', height: '800px' }}
                     />
                 </div>
                 <div>
