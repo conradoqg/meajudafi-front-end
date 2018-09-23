@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
@@ -11,16 +11,17 @@ import List from '@material-ui/core/List';
 import Typography from '@material-ui/core/Typography';
 import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
-import Badge from '@material-ui/core/Badge';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
-import NotificationsIcon from '@material-ui/icons/Notifications';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import ShowChartIcon from '@material-ui/icons/ShowChart';
 import TableChartIcon from '@material-ui/icons/TableChart';
 import ScatterPlotIcon from '@material-ui/icons/ScatterPlot';
+import IndicatorsView from './indicatorsView';
+import FundListView from './fundList';
+import FundComparisonView from './fundComparison';
 
 const drawerWidth = 270;
 
@@ -104,40 +105,19 @@ const routes = [
         name: 'Indicadores',
         exact: true,
         icon: () => (<ShowChartIcon />),
-        main: (classes) => (
-            <div>
-                <div className={classes.appBarSpacer} />
-                <Typography variant="display1" gutterBottom>Indicadores</Typography>
-                <Typography component="div" className={classes.chartContainer}>
-                    a
-                        </Typography>
-                <Typography variant="display1" gutterBottom>
-                    Products
-                        </Typography>
-                <div className={classes.tableContainer}>
-                    a
-                        </div>
-            </div>)
+        main: (props, classes) => <IndicatorsView {...props} classes={classes} />
     },
     {
-        path: "/fundList",
+        path: '/fundList',
         name: 'Lista de Fundos',
         icon: () => (<TableChartIcon />),
-        main: (classes) => (
-            <div>
-                <div className={classes.appBarSpacer} />
-                <Typography variant="display1" gutterBottom>Lista de Fundos</Typography>
-            </div>)
+        main: (props, classes) => <FundListView {...props} classes={classes} />
     },
     {
-        path: "/fundComparison",
+        path: '/fundComparison',
         name: 'Comparação de Fundos',
         icon: () => (<ScatterPlotIcon />),
-        main: (classes) => (
-            <div>
-                <div className={classes.appBarSpacer} />
-                <Typography variant="display1" gutterBottom>Comparação de Fundos</Typography>
-            </div>)
+        main: (props, classes) => <FundComparisonView {...props} classes={classes} />
     }
 ];
 
@@ -160,7 +140,7 @@ const MenuLink = ({ label, to, activeOnlyWhenExact, icon }) => (
 
 class Dashboard extends React.Component {
     state = {
-        open: true,
+        open: true
     };
 
     handleDrawerOpen = () => {
@@ -194,11 +174,6 @@ class Dashboard extends React.Component {
                                     <MenuIcon />
                                 </IconButton>
                                 <Typography variant="title" color="inherit" noWrap className={classes.title}>Explorador de Investimentos</Typography>
-                                <IconButton color="inherit">
-                                    <Badge badgeContent={4} color="secondary">
-                                        <NotificationsIcon />
-                                    </Badge>
-                                </IconButton>
                             </Toolbar>
                         </AppBar>
                         <Drawer
@@ -215,7 +190,7 @@ class Dashboard extends React.Component {
                             <Divider />
                             <List>
                                 {routes.map((route, index) => (
-                                    <MenuLink activeOnlyWhenExact={route.exact} to={route.path} label={route.name} icon={route.icon} key={index}/>
+                                    <MenuLink activeOnlyWhenExact={route.exact} to={route.path} label={route.name} icon={route.icon} key={index} />
                                 ))}
                             </List>
                             <Divider />
@@ -226,7 +201,7 @@ class Dashboard extends React.Component {
                                     key={index}
                                     path={route.path}
                                     exact={route.exact}
-                                    render={() => route.main(classes)}
+                                    render={(props) => route.main(props, classes)}
                                 />
                             ))}
                         </main>
