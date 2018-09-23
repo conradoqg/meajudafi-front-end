@@ -1,6 +1,8 @@
 require('@babel/polyfill');
-const AppView = require('./view/appView');
+const ReactDOM = require('react-dom');
+const React = require('react');
+const DashboardView = require('./view/dashboardView');
 
-$(document).ready(function () {
-    ReactDOM.render(<AppView />, document.getElementById('app'));
-});
+//$(document).ready(function () {
+ReactDOM.render(<DashboardView />, document.getElementById('app'));
+//});
