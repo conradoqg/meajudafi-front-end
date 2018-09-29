@@ -12,9 +12,7 @@ class IndicatorsView extends React.Component {
             <div>
                 <div className={classes.appBarSpacer} />
                 <Typography variant="display1" gutterBottom>Indicadores</Typography>
-                <Typography component="div" className={classes.chartContainer}>a</Typography>
-                <Typography variant="display1" gutterBottom>Products</Typography>
-                <div className={classes.tableContainer}>a</div>
+                Em desenvolvimento
             </div>
         );
     }
