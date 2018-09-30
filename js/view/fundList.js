@@ -21,6 +21,11 @@ import Select from '@material-ui/core/Select';
 import Checkbox from '@material-ui/core/Checkbox';
 import Input from '@material-ui/core/Input';
 import Button from '@material-ui/core/Button';
+import Slider from 'rc-slider';
+import 'rc-slider/assets/index.css';
+
+const createSliderWithTooltip = Slider.createSliderWithTooltip;
+const Range = createSliderWithTooltip(Slider.Range);
 
 const styles = theme => ({
     filterPaper: {
@@ -115,7 +120,14 @@ class FundListView extends React.Component {
         sort: sortOptions[0],
         showingFilter: false,
         filter: {
-            class: []
+            class: [],
+            iry_investment_return_1y: {
+                min: -2,
+                max: 2
+            }
+        },
+        filterOptions: {
+            iry_investment_return_1y: [2, -2]
         }
     };
 
@@ -194,16 +206,39 @@ class FundListView extends React.Component {
         const result = await this.getData({
             ...this.state,
             filter: {
-                class: []
+                ...this.state.filter,
+                class: [],
+                iry_investment_return_1y: {
+                    min: -2,
+                    max: 2
+                }
             }
         });
         this.setState({
             ...this.state,
             filter: {
-                class: []
+                ...this.state.filter,
+                class: [],
+                iry_investment_return_1y: {
+                    min: -2,
+                    max: 2
+                }
             },
             count: result.count,
             data: result.data
+        });
+    }
+
+    handleFilter_iry_investment_return_1y_Click = async (range) => {
+        this.setState({
+            ...this.state,
+            filter: {
+                ...this.state.filter,
+                iry_investment_return_1y: {
+                    min: range[0],
+                    max: range[1]
+                }
+            }
         });
     }
 
@@ -218,7 +253,11 @@ class FundListView extends React.Component {
             });
             classFilter = `or=(${selectedFilterOptions.join(',')})&`;
         }
-        const fundListObject = await fetch(`http://localhost:82/inf_cadastral_fi_with_xpi_and_iryf_of_last_year?${classFilter}order=${sort}`, {
+        let iry_investment_return_1yFilter = '';
+        if (options.filter.iry_investment_return_1y) {
+            iry_investment_return_1yFilter = `and=(iry_investment_return_1y.gte.${options.filter.iry_investment_return_1y.min},iry_investment_return_1y.lte.${options.filter.iry_investment_return_1y.max})&`;
+        }
+        const fundListObject = await fetch(`http://localhost:82/inf_cadastral_fi_with_xpi_and_iryf_of_last_year?${classFilter}${iry_investment_return_1yFilter}order=${sort}`, {
             method: 'GET',
             headers: {
                 'Range-Unit': 'items',
@@ -238,11 +277,34 @@ class FundListView extends React.Component {
         };
     }
 
+    async getDataAgreggation() {
+        const fundListObject = await fetch('http://localhost:82/inf_cadastral_fi_with_xpi_and_iryf_of_last_year_max_min');
+        return await fundListObject.json();
+    }
+
     async componentDidMount() {
         const result = await this.getData(this.state);
+        const result2 = await this.getDataAgreggation();
+
+        const min = isNaN(result2[0].iry_investment_return_1y_min) || !isFinite(result2[0].iry_investment_return_1y_min) || result2[0].iry_investment_return_1y_min < -2 ? -2 : Math.floor(result2[0].iry_investment_return_1y_min);
+        const max = isNaN(result2[0].iry_investment_return_1y_max) || !isFinite(result2[0].iry_investment_return_1y_max) || result2[0].iry_investment_return_1y_max > 2 ? 2 : Math.ceil(result2[0].iry_investment_return_1y_max);        
+
         this.setState({
             count: result.count,
-            data: result.data
+            data: result.data,
+            filter: {
+                ...this.state.filter,
+                iry_investment_return_1y: {
+                    min,
+                    max
+                }
+            },
+            filterOptions: {
+                iry_investment_return_1y: {
+                    min,
+                    max                    
+                }
+            }
         });
     }
 
@@ -304,7 +366,7 @@ class FundListView extends React.Component {
                                         <Grid item xs={4}>
                                             <Grid container spacing={8}>
                                                 <Grid item xs={3}>
-                                                    <Typography>Performance</Typography>
+                                                    <Typography>Desempenho</Typography>
                                                 </Grid>
                                                 <Grid item xs={3}>
                                                     <Typography>Risco</Typography>
@@ -395,6 +457,18 @@ class FundListView extends React.Component {
                                                 </MenuItem>
                                             ))}
                                         </Select>
+                                    </Grid>
+                                    <Grid item xs={12} className={classes.filterPaper}>
+                                        <Typography variant="subheading" className={classes.filterPaper}>Desempenho 1Y:</Typography>
+                                    </Grid>
+                                    <Grid item xs={12} className={classes.filterPaper}>
+                                        <Range 
+                                            min={this.state.filterOptions.iry_investment_return_1y.min} 
+                                            tipFormatter={value => `${(value*100).toFixed(2)}%`} 
+                                            max={this.state.filterOptions.iry_investment_return_1y.max} 
+                                            step={Math.abs((this.state.filterOptions.iry_investment_return_1y.max-this.state.filterOptions.iry_investment_return_1y.min)/50)} 
+                                            onChange={this.handleFilter_iry_investment_return_1y_Click} 
+                                            value={[this.state.filter.iry_investment_return_1y.min, this.state.filter.iry_investment_return_1y.max]} />
                                     </Grid>
                                     <Grid item xs={6} className={classes.filterPaper}>
                                         <Button variant="contained" color="primary" onClick={this.handleFilterApplyClick} >Aplicar</Button>
