@@ -2,6 +2,22 @@
 
 ## Planning
 
+### Data cleaning and transforming
+
+- More data
+    - nr_cotst in investment_return
+    - vl_patrim_liq in investment_return
+    - moviment in investment_return (captc_dia+rest_dia)
+    - for Performance, Risk, Consistency, Sharpe
+        - YTD
+        - MTD
+        - 1M
+        - 3M
+        - 6M
+- Cleaning
+    - Strange data for CNPJ 20815620000196 after 2018-05-15 (should it filter by nr_cotst? or should it filter bug CNPJs?)
+    - What's the deal with Infinity and NaN fields
+
 ### Pages
 
 - Main
