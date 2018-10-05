@@ -23,6 +23,7 @@ import Input from '@material-ui/core/Input';
 import Button from '@material-ui/core/Button';
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
+import Plot from 'react-plotly.js';
 
 const createSliderWithTooltip = Slider.createSliderWithTooltip;
 const Range = createSliderWithTooltip(Slider.Range);
@@ -113,6 +114,7 @@ const MenuProps = {
 class FundListView extends React.Component {
     state = {
         data: [],
+        fundData: {},
         page: 0,
         count: 0,
         rowsPerPage: 5,
@@ -130,6 +132,8 @@ class FundListView extends React.Component {
             iry_investment_return_1y: [2, -2]
         }
     };
+
+    child = React.createRef();
 
     handleChangePage = async (object, page) => {
         const result = await this.getData({
@@ -177,9 +181,10 @@ class FundListView extends React.Component {
     }
 
     handleFilterClick = () => {
-        this.setState({
-            showingFilter: !this.state.showingFilter
+        this.setState((state) => {
+            return { showingFilter: !state.showingFilter };
         });
+        //if (this.child.current) this.child.current.resizeHandler();
     }
 
     handleFilterClassChange = event => {
@@ -242,6 +247,19 @@ class FundListView extends React.Component {
         });
     }
 
+    handleFundExpansion = async (expanded, fund) => {
+        const data = (expanded ? await this.getFundData(fund.icf_cnpj_fundo) : null);
+
+        this.setState((state) => {
+            return {
+                fundData: {
+                    ...state.fundData,
+                    [fund.icf_cnpj_fundo]: data
+                }
+            };
+        });
+    }
+
     async getData(options) {
         const range = `${options.page * options.rowsPerPage}-${((options.page * options.rowsPerPage) + options.rowsPerPage)}`;
         const sort = `${options.sort.field}.${options.sort.order}`;
@@ -266,14 +284,35 @@ class FundListView extends React.Component {
             }
         });
         // TODO: This doesn't work when no rows are returned
-        const CONTENT_RANGE_REGEX = /(?<start>\d+)-(?<finish>\d+)\/(?<count>\d+)/gm;
+        const CONTENT_RANGE_REGEX = /(\d+)-(\d+)\/(\d+)/gm;
         const contentRange = fundListObject.headers.get('Content-Range');
-        const contentRangeFormatted = CONTENT_RANGE_REGEX.exec(contentRange);
+        const count = CONTENT_RANGE_REGEX.exec(contentRange)[3];
 
         return {
             range,
-            count: parseInt(contentRangeFormatted.groups.count),
+            count: parseInt(count),
             data: await fundListObject.json()
+        };
+    }
+
+    async getFundData(cnpj) {
+        const dailyReturn = await fetch(`http://localhost:82/investment_return_daily?cnpj_fundo=eq.${cnpj}&order=dt_comptc`);
+        const infCadastral = await fetch(`http://localhost:82/inf_cadastral_fi?cnpj_fundo=eq.${cnpj}`);
+
+        const dailyReturnObject = await dailyReturn.json();
+        const infCadastralObject = await infCadastral.json();
+        const x = dailyReturnObject.map(item => item.dt_comptc);
+        const y_performance = dailyReturnObject.map(item => item.accumulated_investment_return);
+        const y_risk = dailyReturnObject.map(item => item.accumulated_risk);
+        const y_consistency_1y = dailyReturnObject.map(item => item.consistency_1y);
+        const name = infCadastralObject[0].denom_social;
+
+        return {
+            x,
+            y_performance,
+            y_risk,
+            y_consistency_1y,
+            name
         };
     }
 
@@ -287,7 +326,7 @@ class FundListView extends React.Component {
         const result2 = await this.getDataAgreggation();
 
         const min = isNaN(result2[0].iry_investment_return_1y_min) || !isFinite(result2[0].iry_investment_return_1y_min) || result2[0].iry_investment_return_1y_min < -2 ? -2 : Math.floor(result2[0].iry_investment_return_1y_min);
-        const max = isNaN(result2[0].iry_investment_return_1y_max) || !isFinite(result2[0].iry_investment_return_1y_max) || result2[0].iry_investment_return_1y_max > 2 ? 2 : Math.ceil(result2[0].iry_investment_return_1y_max);        
+        const max = isNaN(result2[0].iry_investment_return_1y_max) || !isFinite(result2[0].iry_investment_return_1y_max) || result2[0].iry_investment_return_1y_max > 2 ? 2 : Math.ceil(result2[0].iry_investment_return_1y_max);
 
         this.setState({
             count: result.count,
@@ -302,7 +341,7 @@ class FundListView extends React.Component {
             filterOptions: {
                 iry_investment_return_1y: {
                     min,
-                    max                    
+                    max
                 }
             }
         });
@@ -357,7 +396,7 @@ class FundListView extends React.Component {
                             </Grid>
                         </Paper>
                         {this.state.data.map((fund, index) => (
-                            <ExpansionPanel key={index}>
+                            <ExpansionPanel key={index} expanded={this.state.fundData[fund.icf_cnpj_fundo] ? true : false} onChange={(e, expanded) => this.handleFundExpansion(expanded, fund)}>
                                 <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
                                     <Grid container spacing={8}>
                                         <Grid item xs={8}>
@@ -413,7 +452,11 @@ class FundListView extends React.Component {
                                 </ExpansionPanelSummary>
                                 <Divider />
                                 <ExpansionPanelDetails className={classes.details}>
-                                    In Development
+                                    <Grid container spacing={8}>
+                                        <Grid item xs>
+                                            <FundHistoryChart fund={this.state.fundData[fund.icf_cnpj_fundo]} child={this.child} />
+                                        </Grid>
+                                    </Grid>
                                 </ExpansionPanelDetails>
                             </ExpansionPanel>
                         ))}
@@ -436,54 +479,124 @@ class FundListView extends React.Component {
                         />
                     </Grid>
                     <Slide direction="left" in={this.state.showingFilter} mountOnEnter unmountOnExit>
-                        <Grid item xs={4}>
-                            <Paper elevation={1} square={true} className={classes.filterPaper}>
-                                <Typography variant="title" className={classes.filterPaper}>Filtros:</Typography>
-                                <Grid container spacing={16}>
-                                    <Grid item xs={12} className={classes.filterPaper}>
-                                        <InputLabel htmlFor="select-multiple-checkbox">Classe</InputLabel>
-                                        <Select
-                                            multiple
-                                            value={this.state.filter.class}
-                                            onChange={this.handleFilterClassChange}
-                                            input={<Input id="select-multiple-checkbox" />}
-                                            renderValue={selected => selected.map(item => filterOptions.class.options.find(clazz => clazz.value == item).displayName).join(', ')}
-                                            MenuProps={MenuProps}
-                                            fullWidth>
-                                            {filterOptions.class.options.map(classOption => (
-                                                <MenuItem key={classOption.displayName} value={classOption.value}>
-                                                    <Checkbox checked={this.state.filter.class.indexOf(classOption.value) > -1} />
-                                                    <ListItemText primary={classOption.displayName} />
-                                                </MenuItem>
-                                            ))}
-                                        </Select>
+                        {this.state.showingFilter ?
+                            <Grid item xs={4}>
+                                <Paper elevation={1} square={true} className={classes.filterPaper}>
+                                    <Typography variant="title" className={classes.filterPaper}>Filtros:</Typography>
+                                    <Grid container spacing={16}>
+                                        <Grid item xs={12} className={classes.filterPaper}>
+                                            <InputLabel htmlFor="select-multiple-checkbox">Classe</InputLabel>
+                                            <Select
+                                                multiple
+                                                value={this.state.filter.class}
+                                                onChange={this.handleFilterClassChange}
+                                                input={<Input id="select-multiple-checkbox" />}
+                                                renderValue={selected => selected.map(item => filterOptions.class.options.find(clazz => clazz.value == item).displayName).join(', ')}
+                                                MenuProps={MenuProps}
+                                                fullWidth>
+                                                {filterOptions.class.options.map(classOption => (
+                                                    <MenuItem key={classOption.displayName} value={classOption.value}>
+                                                        <Checkbox checked={this.state.filter.class.indexOf(classOption.value) > -1} />
+                                                        <ListItemText primary={classOption.displayName} />
+                                                    </MenuItem>
+                                                ))}
+                                            </Select>
+                                        </Grid>
+                                        <Grid item xs={12} className={classes.filterPaper}>
+                                            <Typography variant="subheading" className={classes.filterPaper}>Desempenho 1Y:</Typography>
+                                        </Grid>
+                                        <Grid item xs={12} className={classes.filterPaper}>
+                                            <Range
+                                                min={this.state.filterOptions.iry_investment_return_1y.min}
+                                                tipFormatter={value => `${(value * 100).toFixed(2)}%`}
+                                                max={this.state.filterOptions.iry_investment_return_1y.max}
+                                                step={Math.abs((this.state.filterOptions.iry_investment_return_1y.max - this.state.filterOptions.iry_investment_return_1y.min) / 50)}
+                                                onChange={this.handleFilter_iry_investment_return_1y_Click}
+                                                value={[this.state.filter.iry_investment_return_1y.min, this.state.filter.iry_investment_return_1y.max]} />
+                                        </Grid>
+                                        <Grid item xs={6} className={classes.filterPaper}>
+                                            <Button variant="contained" color="primary" onClick={this.handleFilterApplyClick} >Aplicar</Button>
+                                        </Grid>
+                                        <Grid item xs={6} className={classes.filterPaper}>
+                                            <Button variant="contained" color="secondary" onClick={this.handleFilterClearClick} >Limpar</Button>
+                                        </Grid>
                                     </Grid>
-                                    <Grid item xs={12} className={classes.filterPaper}>
-                                        <Typography variant="subheading" className={classes.filterPaper}>Desempenho 1Y:</Typography>
-                                    </Grid>
-                                    <Grid item xs={12} className={classes.filterPaper}>
-                                        <Range 
-                                            min={this.state.filterOptions.iry_investment_return_1y.min} 
-                                            tipFormatter={value => `${(value*100).toFixed(2)}%`} 
-                                            max={this.state.filterOptions.iry_investment_return_1y.max} 
-                                            step={Math.abs((this.state.filterOptions.iry_investment_return_1y.max-this.state.filterOptions.iry_investment_return_1y.min)/50)} 
-                                            onChange={this.handleFilter_iry_investment_return_1y_Click} 
-                                            value={[this.state.filter.iry_investment_return_1y.min, this.state.filter.iry_investment_return_1y.max]} />
-                                    </Grid>
-                                    <Grid item xs={6} className={classes.filterPaper}>
-                                        <Button variant="contained" color="primary" onClick={this.handleFilterApplyClick} >Aplicar</Button>
-                                    </Grid>
-                                    <Grid item xs={6} className={classes.filterPaper}>
-                                        <Button variant="contained" color="secondary" onClick={this.handleFilterClearClick} >Limpar</Button>
-                                    </Grid>
-                                </Grid>
-                            </Paper>
-                        </Grid>
+                                </Paper>
+                            </Grid> : <div></div>
+                        }
                     </Slide>
                 </Grid>
             </div >
         );
     }
 }
+
+const FundHistoryChart = (props) => {
+    const { fund, child } = props;
+
+    if (!fund) return <Typography variant="title">Carregando...</Typography>;
+    else {
+        return <Plot
+            data={[
+                {
+                    x: fund.x,
+                    y: fund.y_performance,
+                    type: 'scatter',
+                    name: 'Performance'
+                },
+                {
+                    x: fund.x,
+                    y: fund.y_risk,
+                    type: 'scatter',
+                    name: 'Risk',
+                    yaxis: 'y2'
+                },
+                {
+                    x: fund.x,
+                    y: fund.y_consistency_1y,
+                    type: 'scatter',
+                    name: 'Consistency 1Y',
+                    yaxis: 'y3'
+                }
+            ]}
+            layout={{
+                title: fund.name,
+                autosize: true,
+                showlegend: true,
+                xaxis: {
+                    title: 'Data',
+                    showspikes: true,
+                    spikemode: 'across',
+                    domain: [0, 0.96]
+                },
+                yaxis: {
+                    title: 'Performance',
+                    tickformat: '.0%',
+                    hoverformat: '.2%'
+                },
+                yaxis2: {
+                    title: 'Risk',
+                    tickformat: '.0%',
+                    hoverformat: '.2%',
+                    anchor: 'x',
+                    overlaying: 'y',
+                    side: 'right'
+                },
+                yaxis3: {
+                    title: 'Consistency 1Y',
+                    tickformat: '.0%',
+                    hoverformat: '.2%',
+                    anchor: 'free',
+                    overlaying: 'y',
+                    side: 'right',
+                    position: 1
+                }
+            }}
+            useResizeHandler={true}
+            style={{ width: '99%', height: '99%' }}
+        />;
+
+    }
+};
 
 module.exports = withStyles(styles)(FundListView);
