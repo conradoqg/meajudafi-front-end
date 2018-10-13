@@ -105,19 +105,19 @@ const routes = [
         name: 'Indicadores',
         exact: true,
         icon: () => (<ShowChartIcon />),
-        main: (props, classes) => <IndicatorsView {...props} classes={classes} />
+        main: (props, classes) => <IndicatorsView {...props} globalClasses={classes} />
     },
     {
         path: '/fundList',
         name: 'Lista de Fundos',
         icon: () => (<TableChartIcon />),
-        main: (props, classes) => <FundListView {...props} classes={classes} />
+        main: (props, classes) => <FundListView {...props} globalClasses={classes} />
     },
     {
         path: '/fundComparison',
         name: 'Comparação de Fundos',
         icon: () => (<ScatterPlotIcon />),
-        main: (props, classes) => <FundComparisonView {...props} classes={classes} />
+        main: (props, classes) => <FundComparisonView {...props} globalClasses={classes} />
     }
 ];
 

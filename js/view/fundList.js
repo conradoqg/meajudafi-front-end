@@ -14,7 +14,7 @@ import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import ReorderIcon from '@material-ui/icons/Reorder';
 import FilterListIcon from '@material-ui/icons/FilterList';
-import Slide from '@material-ui/core/Slide';
+import Collapse from '@material-ui/core/Collapse';
 import InputLabel from '@material-ui/core/InputLabel';
 import ListItemText from '@material-ui/core/ListItemText';
 import Select from '@material-ui/core/Select';
@@ -133,8 +133,6 @@ class FundListView extends React.Component {
         }
     };
 
-    child = React.createRef();
-
     handleChangePage = async (object, page) => {
         const result = await this.getData({
             ...this.state,
@@ -184,7 +182,7 @@ class FundListView extends React.Component {
         this.setState((state) => {
             return { showingFilter: !state.showingFilter };
         });
-        //if (this.child.current) this.child.current.resizeHandler();
+
     }
 
     handleFilterClassChange = event => {
@@ -283,7 +281,7 @@ class FundListView extends React.Component {
                 'Prefer': 'count=exact'
             }
         });
-        // TODO: This doesn't work when no rows are returned
+        // TODO: This doesn't work when zero rows are returned
         const CONTENT_RANGE_REGEX = /(\d+)-(\d+)\/(\d+)/gm;
         const contentRange = fundListObject.headers.get('Content-Range');
         const count = CONTENT_RANGE_REGEX.exec(contentRange)[3];
@@ -348,13 +346,13 @@ class FundListView extends React.Component {
     }
 
     render() {
-        const { classes } = this.props;
+        const { classes, globalClasses } = this.props;
         const { anchorEl } = this.state;
         const open = Boolean(anchorEl);
 
         return (
             <div>
-                <div className={classes.appBarSpacer} />
+                <div className={globalClasses.appBarSpacer} />
                 <Typography variant="display1" gutterBottom>Lista de Fundos</Typography>
                 <Grid container spacing={16}>
                     <Grid item xs>
@@ -395,6 +393,55 @@ class FundListView extends React.Component {
                                 </IconButton>
                             </Grid>
                         </Paper>
+
+                        <Paper elevation={1} square={true}>
+                            <Collapse in={this.state.showingFilter} mountOnEnter unmountOnExit>
+                                {this.state.showingFilter ?
+                                    <React.Fragment>
+                                        <Typography variant="title" className={classes.filterPaper}>Filtros:</Typography>
+                                        <Grid container spacing={16} className={classes.filterPaper}>
+                                            <Grid item xs={12} className={classes.filterPaper}>
+                                                <InputLabel htmlFor="select-multiple-checkbox">Classe</InputLabel>
+                                                <Select
+                                                    multiple
+                                                    value={this.state.filter.class}
+                                                    onChange={this.handleFilterClassChange}
+                                                    input={<Input id="select-multiple-checkbox" />}
+                                                    renderValue={selected => selected.map(item => filterOptions.class.options.find(clazz => clazz.value == item).displayName).join(', ')}
+                                                    MenuProps={MenuProps}
+                                                    fullWidth>
+                                                    {filterOptions.class.options.map(classOption => (
+                                                        <MenuItem key={classOption.displayName} value={classOption.value}>
+                                                            <Checkbox checked={this.state.filter.class.indexOf(classOption.value) > -1} />
+                                                            <ListItemText primary={classOption.displayName} />
+                                                        </MenuItem>
+                                                    ))}
+                                                </Select>
+                                            </Grid>
+                                            <Grid item xs={12} className={classes.filterPaper}>
+                                                <Typography variant="subheading" className={classes.filterPaper}>Desempenho 1Y:</Typography>
+                                            </Grid>
+                                            <Grid item xs={12} className={classes.filterPaper}>
+                                                <Range
+                                                    min={this.state.filterOptions.iry_investment_return_1y.min}
+                                                    tipFormatter={value => `${(value * 100).toFixed(2)}%`}
+                                                    max={this.state.filterOptions.iry_investment_return_1y.max}
+                                                    step={Math.abs((this.state.filterOptions.iry_investment_return_1y.max - this.state.filterOptions.iry_investment_return_1y.min) / 50)}
+                                                    onChange={this.handleFilter_iry_investment_return_1y_Click}
+                                                    value={[this.state.filter.iry_investment_return_1y.min, this.state.filter.iry_investment_return_1y.max]} />
+                                            </Grid>
+                                            <Grid item xs={6} className={classes.filterPaper}>
+                                                <Button variant="contained" color="primary" onClick={this.handleFilterApplyClick} >Aplicar</Button>
+                                            </Grid>
+                                            <Grid item xs={6} className={classes.filterPaper}>
+                                                <Button variant="contained" color="secondary" onClick={this.handleFilterClearClick} >Limpar</Button>
+                                            </Grid>
+                                        </Grid>
+                                    </React.Fragment> : <div></div>
+                                }
+                            </Collapse>
+                        </Paper>
+
                         {this.state.data.map((fund, index) => (
                             <ExpansionPanel key={index} expanded={this.state.fundData[fund.icf_cnpj_fundo] ? true : false} onChange={(e, expanded) => this.handleFundExpansion(expanded, fund)}>
                                 <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
@@ -451,10 +498,10 @@ class FundListView extends React.Component {
                                     </Grid>
                                 </ExpansionPanelSummary>
                                 <Divider />
-                                <ExpansionPanelDetails className={classes.details}>
+                                <ExpansionPanelDetails>
                                     <Grid container spacing={8}>
                                         <Grid item xs>
-                                            <FundHistoryChart fund={this.state.fundData[fund.icf_cnpj_fundo]} child={this.child} />
+                                            <FundHistoryChart fund={this.state.fundData[fund.icf_cnpj_fundo]} />
                                         </Grid>
                                     </Grid>
                                 </ExpansionPanelDetails>
@@ -478,53 +525,6 @@ class FundListView extends React.Component {
                             rowsPerPageOptions={[5, 10, 25, 50, 100]}
                         />
                     </Grid>
-                    <Slide direction="left" in={this.state.showingFilter} mountOnEnter unmountOnExit>
-                        {this.state.showingFilter ?
-                            <Grid item xs={4}>
-                                <Paper elevation={1} square={true} className={classes.filterPaper}>
-                                    <Typography variant="title" className={classes.filterPaper}>Filtros:</Typography>
-                                    <Grid container spacing={16}>
-                                        <Grid item xs={12} className={classes.filterPaper}>
-                                            <InputLabel htmlFor="select-multiple-checkbox">Classe</InputLabel>
-                                            <Select
-                                                multiple
-                                                value={this.state.filter.class}
-                                                onChange={this.handleFilterClassChange}
-                                                input={<Input id="select-multiple-checkbox" />}
-                                                renderValue={selected => selected.map(item => filterOptions.class.options.find(clazz => clazz.value == item).displayName).join(', ')}
-                                                MenuProps={MenuProps}
-                                                fullWidth>
-                                                {filterOptions.class.options.map(classOption => (
-                                                    <MenuItem key={classOption.displayName} value={classOption.value}>
-                                                        <Checkbox checked={this.state.filter.class.indexOf(classOption.value) > -1} />
-                                                        <ListItemText primary={classOption.displayName} />
-                                                    </MenuItem>
-                                                ))}
-                                            </Select>
-                                        </Grid>
-                                        <Grid item xs={12} className={classes.filterPaper}>
-                                            <Typography variant="subheading" className={classes.filterPaper}>Desempenho 1Y:</Typography>
-                                        </Grid>
-                                        <Grid item xs={12} className={classes.filterPaper}>
-                                            <Range
-                                                min={this.state.filterOptions.iry_investment_return_1y.min}
-                                                tipFormatter={value => `${(value * 100).toFixed(2)}%`}
-                                                max={this.state.filterOptions.iry_investment_return_1y.max}
-                                                step={Math.abs((this.state.filterOptions.iry_investment_return_1y.max - this.state.filterOptions.iry_investment_return_1y.min) / 50)}
-                                                onChange={this.handleFilter_iry_investment_return_1y_Click}
-                                                value={[this.state.filter.iry_investment_return_1y.min, this.state.filter.iry_investment_return_1y.max]} />
-                                        </Grid>
-                                        <Grid item xs={6} className={classes.filterPaper}>
-                                            <Button variant="contained" color="primary" onClick={this.handleFilterApplyClick} >Aplicar</Button>
-                                        </Grid>
-                                        <Grid item xs={6} className={classes.filterPaper}>
-                                            <Button variant="contained" color="secondary" onClick={this.handleFilterClearClick} >Limpar</Button>
-                                        </Grid>
-                                    </Grid>
-                                </Paper>
-                            </Grid> : <div></div>
-                        }
-                    </Slide>
                 </Grid>
             </div >
         );
@@ -532,7 +532,7 @@ class FundListView extends React.Component {
 }
 
 const FundHistoryChart = (props) => {
-    const { fund, child } = props;
+    const { fund } = props;
 
     if (!fund) return <Typography variant="title">Carregando...</Typography>;
     else {
