@@ -6,11 +6,11 @@ class FundComparisonView extends React.Component {
     state = null;
 
     render() {
-        const { classes } = this.props;
+        const { globalClasses } = this.props;
 
         return (
             <div>
-                <div className={classes.appBarSpacer} />
+                <div className={globalClasses.appBarSpacer} />
                 <Typography variant="display1" gutterBottom>Comparação de Fundos</Typography>                
                 Em desenvolvimento
             </div>

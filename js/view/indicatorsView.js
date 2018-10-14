@@ -6,11 +6,11 @@ class IndicatorsView extends React.Component {
     state = null;
 
     render() {
-        const { classes } = this.props;
+        const { globalClasses } = this.props;
 
         return (
             <div>
-                <div className={classes.appBarSpacer} />
+                <div className={globalClasses.appBarSpacer} />
                 <Typography variant="display1" gutterBottom>Indicadores</Typography>
                 Em desenvolvimento
             </div>
