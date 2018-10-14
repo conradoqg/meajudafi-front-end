@@ -245,6 +245,28 @@ class FundListView extends React.Component {
         });
     }
 
+    handleChartInitialized = async (fund, figure) => {
+        this.setState((state) => {
+            return {
+                fundData: {
+                    ...state.fundData,
+                    [fund.icf_cnpj_fundo]: figure
+                }
+            };
+        });
+    }
+
+    handleChartUpdate = async (fund, figure) => {
+        this.setState((state) => {
+            return {
+                fundData: {
+                    ...state.fundData,
+                    [fund.icf_cnpj_fundo]: figure
+                }
+            };
+        });
+    }
+
     handleFundExpansion = async (expanded, fund) => {
         const data = (expanded ? await this.getFundData(fund.icf_cnpj_fundo) : null);
 
@@ -306,11 +328,61 @@ class FundListView extends React.Component {
         const name = infCadastralObject[0].denom_social;
 
         return {
-            x,
-            y_performance,
-            y_risk,
-            y_consistency_1y,
-            name
+            data: [
+                {
+                    x: x,
+                    y: y_performance,
+                    type: 'scatter',
+                    name: 'Performance'
+                },
+                {
+                    x: x,
+                    y: y_risk,
+                    type: 'scatter',
+                    name: 'Risk',
+                    yaxis: 'y2'
+                },
+                {
+                    x: x,
+                    y: y_consistency_1y,
+                    type: 'scatter',
+                    name: 'Consistency 1Y',
+                    yaxis: 'y3'
+                }
+            ],
+            layout: {
+                title: name,
+                autosize: true,
+                showlegend: true,
+                xaxis: {
+                    title: 'Data',
+                    showspikes: true,
+                    spikemode: 'across',
+                    domain: [0, 0.96]
+                },
+                yaxis: {
+                    title: 'Performance',
+                    tickformat: '.0%',
+                    hoverformat: '.2%'
+                },
+                yaxis2: {
+                    title: 'Risk',
+                    tickformat: '.0%',
+                    hoverformat: '.2%',
+                    anchor: 'x',
+                    overlaying: 'y',
+                    side: 'right'
+                },
+                yaxis3: {
+                    title: 'Consistency 1Y',
+                    tickformat: '.0%',
+                    hoverformat: '.2%',
+                    anchor: 'free',
+                    overlaying: 'y',
+                    side: 'right',
+                    position: 1
+                }
+            }
         };
     }
 
@@ -441,7 +513,6 @@ class FundListView extends React.Component {
                                 }
                             </Collapse>
                         </Paper>
-
                         {this.state.data.map((fund, index) => (
                             <ExpansionPanel key={index} expanded={this.state.fundData[fund.icf_cnpj_fundo] ? true : false} onChange={(e, expanded) => this.handleFundExpansion(expanded, fund)}>
                                 <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
@@ -467,30 +538,30 @@ class FundListView extends React.Component {
                                             <Grid container spacing={8}>
                                                 <Grid item xs={3}>
                                                     <Typography>
-                                                        1y: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_investment_return_1y))}%<br />
-                                                        2y: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_investment_return_2y))}%<br />
-                                                        3y: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_investment_return_3y))}%
+                                                        1a: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_investment_return_1y))}%<br />
+                                                        2a: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_investment_return_2y))}%<br />
+                                                        3a: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_investment_return_3y))}%
                                                     </Typography>
                                                 </Grid>
                                                 <Grid item xs={3}>
                                                     <Typography>
-                                                        1y: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_risk_1y))}%<br />
-                                                        2y: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_risk_2y))}%<br />
-                                                        3y: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_risk_3y))}%<br />
+                                                        1a: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_risk_1y))}%<br />
+                                                        2a: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_risk_2y))}%<br />
+                                                        3a: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_risk_3y))}%<br />
                                                     </Typography>
                                                 </Grid>
                                                 <Grid item xs={3}>
                                                     <Typography>
-                                                        1y: {formatters.aValueOrTrace(formatters.somethingToValue(fund.iry_sharpe_1y))}<br />
-                                                        2y: {formatters.aValueOrTrace(formatters.somethingToValue(fund.iry_sharpe_2y))}<br />
-                                                        3y: {formatters.aValueOrTrace(formatters.somethingToValue(fund.iry_sharpe_3y))}<br />
+                                                        1a: {formatters.aValueOrTrace(formatters.somethingToValue(fund.iry_sharpe_1y))}<br />
+                                                        2a: {formatters.aValueOrTrace(formatters.somethingToValue(fund.iry_sharpe_2y))}<br />
+                                                        3a: {formatters.aValueOrTrace(formatters.somethingToValue(fund.iry_sharpe_3y))}<br />
                                                     </Typography>
                                                 </Grid>
                                                 <Grid item xs={3}>
                                                     <Typography>
-                                                        1y: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_consistency_1y))}%<br />
-                                                        2y: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_consistency_2y))}%<br />
-                                                        3y: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_consistency_3y))}%<br />
+                                                        1a: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_consistency_1y))}%<br />
+                                                        2a: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_consistency_2y))}%<br />
+                                                        3a: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_consistency_3y))}%<br />
                                                     </Typography>
                                                 </Grid>
                                             </Grid>
@@ -501,7 +572,11 @@ class FundListView extends React.Component {
                                 <ExpansionPanelDetails>
                                     <Grid container spacing={8}>
                                         <Grid item xs>
-                                            <FundHistoryChart fund={this.state.fundData[fund.icf_cnpj_fundo]} />
+                                            <FundHistoryChart
+                                                fund={this.state.fundData[fund.icf_cnpj_fundo]}
+                                                onInitialized={(figure) => this.handleChartInitialized(fund, figure)}
+                                                onUpdate={(figure) => this.handleChartUpdate(fund, figure)}
+                                            />
                                         </Grid>
                                     </Grid>
                                 </ExpansionPanelDetails>
@@ -532,70 +607,20 @@ class FundListView extends React.Component {
 }
 
 const FundHistoryChart = (props) => {
-    const { fund } = props;
+    const { fund, handleChartInitialized, handleChartUpdate } = props;
 
     if (!fund) return <Typography variant="title">Carregando...</Typography>;
     else {
-        return <Plot
-            data={[
-                {
-                    x: fund.x,
-                    y: fund.y_performance,
-                    type: 'scatter',
-                    name: 'Performance'
-                },
-                {
-                    x: fund.x,
-                    y: fund.y_risk,
-                    type: 'scatter',
-                    name: 'Risk',
-                    yaxis: 'y2'
-                },
-                {
-                    x: fund.x,
-                    y: fund.y_consistency_1y,
-                    type: 'scatter',
-                    name: 'Consistency 1Y',
-                    yaxis: 'y3'
-                }
-            ]}
-            layout={{
-                title: fund.name,
-                autosize: true,
-                showlegend: true,
-                xaxis: {
-                    title: 'Data',
-                    showspikes: true,
-                    spikemode: 'across',
-                    domain: [0, 0.96]
-                },
-                yaxis: {
-                    title: 'Performance',
-                    tickformat: '.0%',
-                    hoverformat: '.2%'
-                },
-                yaxis2: {
-                    title: 'Risk',
-                    tickformat: '.0%',
-                    hoverformat: '.2%',
-                    anchor: 'x',
-                    overlaying: 'y',
-                    side: 'right'
-                },
-                yaxis3: {
-                    title: 'Consistency 1Y',
-                    tickformat: '.0%',
-                    hoverformat: '.2%',
-                    anchor: 'free',
-                    overlaying: 'y',
-                    side: 'right',
-                    position: 1
-                }
-            }}
-            useResizeHandler={true}
-            style={{ width: '99%', height: '99%' }}
-        />;
-
+        return (
+            <Plot
+                key={fund.name}
+                data={fund.data}
+                layout={fund.layout}
+                onInitialized={handleChartInitialized}
+                onUpdate={handleChartUpdate}
+                useResizeHandler={true}
+                style={{ width: '100%', height: '100%' }}
+            />);
     }
 };
 
