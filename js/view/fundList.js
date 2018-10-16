@@ -278,7 +278,7 @@ class FundListView extends React.Component {
     }
 
     async getData(options) {
-        const range = `${options.page * options.rowsPerPage}-${((options.page * options.rowsPerPage) + options.rowsPerPage)}`;
+        const range = `${(options.page * options.rowsPerPage)}-${((options.page * options.rowsPerPage) + options.rowsPerPage - 1)}`;
         const sort = `${options.sort.field}.${options.sort.order}`;
         let classFilter = '';
         if (options.filter.class.length > 0) {
@@ -303,7 +303,8 @@ class FundListView extends React.Component {
         // TODO: This doesn't work when zero rows are returned
         const CONTENT_RANGE_REGEX = /(\d+)-(\d+)\/(\d+)/gm;
         const contentRange = fundListObject.headers.get('Content-Range');
-        const count = CONTENT_RANGE_REGEX.exec(contentRange)[3];
+        const matchResult = CONTENT_RANGE_REGEX.exec(contentRange);
+        const count = matchResult && matchResult.length > 3 ? matchResult[3] : 0;
 
         return {
             range,
@@ -470,7 +471,7 @@ class FundListView extends React.Component {
                                         <Typography variant="title" align="center" gutterBottom>Filtros:</Typography>
                                         <Grid container spacing={24}>
                                             <Grid item xs={12}>
-                                                <Typography variant="subheading" align="center" gutterBottom>Classe:</Typography>                                            
+                                                <Typography variant="subheading" align="center" gutterBottom>Classe:</Typography>
                                                 <Select
                                                     multiple
                                                     value={this.state.filter.class}
@@ -488,7 +489,7 @@ class FundListView extends React.Component {
                                                 </Select>
                                             </Grid>
                                             <Grid item xs={12}>
-                                                <Typography variant="subheading" align="center" gutterBottom>Desempenho 1A:</Typography>                                            
+                                                <Typography variant="subheading" align="center" gutterBottom>Desempenho 1A:</Typography>
                                                 <Range
                                                     min={this.state.filterOptions.iry_investment_return_1y.min}
                                                     tipFormatter={value => `${(value * 100).toFixed(2)}%`}
@@ -508,7 +509,7 @@ class FundListView extends React.Component {
                                 }
                             </Collapse>
                         </Paper>
-                        {this.state.data.map((fund, index) => (
+                        {this.state.data.length > 0 ? this.state.data.map((fund, index) => (
                             <ExpansionPanel key={index} expanded={this.state.fundData[fund.icf_cnpj_fundo] ? true : false} onChange={(e, expanded) => this.handleFundExpansion(expanded, fund)}>
                                 <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
                                     <Grid container spacing={8}>
@@ -576,7 +577,11 @@ class FundListView extends React.Component {
                                     </Grid>
                                 </ExpansionPanelDetails>
                             </ExpansionPanel>
-                        ))}
+                        )) :
+                            <Paper elevation={1} square={true} className={classes.filterPaperContent}>
+                                <Typography variant="subtitle" align="center">Sem dados para exibir</Typography>
+                            </Paper>
+                        }
                         <TablePagination
                             component="div"
                             count={this.state.count}
