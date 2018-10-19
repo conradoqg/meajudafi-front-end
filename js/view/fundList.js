@@ -13,12 +13,14 @@ import IconButton from '@material-ui/core/IconButton';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import ReorderIcon from '@material-ui/icons/Reorder';
+import SearchIcon from '@material-ui/icons/Search';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import Collapse from '@material-ui/core/Collapse';
 import ListItemText from '@material-ui/core/ListItemText';
 import Select from '@material-ui/core/Select';
 import Checkbox from '@material-ui/core/Checkbox';
 import Input from '@material-ui/core/Input';
+import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
@@ -108,27 +110,31 @@ const MenuProps = {
     },
 };
 
-class FundListView extends React.Component {
-    state = {
-        data: [],
-        fundData: {},
-        page: 0,
-        count: 0,
-        rowsPerPage: 5,
-        anchorEl: null,
-        sort: sortOptions[0],
-        showingFilter: false,
-        filter: {
-            class: [],
-            iry_investment_return_1y: {
-                min: -2,
-                max: 2
-            }
+const emptyState = {
+    data: [],
+    fundData: {},
+    page: 0,
+    count: 0,
+    rowsPerPage: 5,
+    anchorEl: null,
+    sort: sortOptions[0],
+    showingFilter: false,
+    showingSearch: false,
+    filter: {
+        class: [],
+        iry_investment_return_1y: {
+            min: -2,
+            max: 2
         },
-        filterOptions: {
-            iry_investment_return_1y: [2, -2]
-        }
-    };
+        searchTerm: ''
+    },
+    filterOptions: {
+        iry_investment_return_1y: [2, -2]
+    }
+};
+
+class FundListView extends React.Component {
+    state = emptyState;
 
     handleChangePage = async (object, page) => {
         const result = await this.getData({
@@ -182,12 +188,58 @@ class FundListView extends React.Component {
 
     }
 
+    handleSearchClick = () => {
+        this.setState((state) => {
+            return { showingSearch: !state.showingSearch };
+        });
+    }
+
     handleFilterClassChange = event => {
         this.setState({
             filter: {
                 ...this.state.filter,
                 class: event.target.value
             }
+        });
+    }
+
+    handleSearchChange = (event) => {
+        this.setState({
+            ...this.state,
+            filter: {
+                ...this.state.filter,
+                searchTerm: event.target.value
+            }
+        });
+    }
+
+    handleSearchApplyClick = async () => {
+        const result = await this.getData({
+            ...this.state
+        });
+        this.setState({
+            ...this.state,
+            count: result.count,
+            data: result.data
+        });
+    }
+
+    handleSearchClearClick = async () => {
+        const result = await this.getData({            
+            ...this.state,
+            filter: {
+                ...this.state.filter,
+                searchTerm: ''
+            }
+        });
+        this.setState({
+            ...this.state,
+            filter: {
+                ...this.state.filter,
+                searchTerm: ''
+            },
+            count: result.count,
+            data: result.data
         });
     }
 
@@ -292,7 +344,17 @@ class FundListView extends React.Component {
         if (options.filter.iry_investment_return_1y) {
             iry_investment_return_1yFilter = `and=(iry_investment_return_1y.gte.${options.filter.iry_investment_return_1y.min},iry_investment_return_1y.lte.${options.filter.iry_investment_return_1y.max})&`;
         }
-        const fundListObject = await fetch(`http://localhost:82/inf_cadastral_fi_with_xpi_and_iryf_of_last_year?${classFilter}${iry_investment_return_1yFilter}order=${sort}`, {
+        let searchPart = '';
+        if (options.filter.searchTerm != '') {
+            // Identify if it's a CNPJ or a fund name
+            if (/^\d+$/.test(options.filter.searchTerm)) {
+                searchPart = `and=(icf_cnpj_fundo.ilike.*${options.filter.searchTerm}*)`;
+            } else {
+                searchPart = `and=(icf_denom_social.ilike.*${options.filter.searchTerm}*)`;
+            }
+
+        }
+        const fundListObject = await fetch(`http://localhost:82/inf_cadastral_fi_with_xpi_and_iryf_of_last_year?${classFilter}${iry_investment_return_1yFilter}${searchPart}order=${sort}`, {
             method: 'GET',
             headers: {
                 'Range-Unit': 'items',
@@ -433,6 +495,11 @@ class FundListView extends React.Component {
                                 justify="flex-end"
                                 alignItems="center">
                                 <IconButton
+                                    aria-label="Procurar"
+                                    onClick={this.handleSearchClick}>
+                                    <SearchIcon />
+                                </IconButton>
+                                <IconButton
                                     aria-label="Ordem"
                                     aria-owns={open ? 'long-menu' : null}
                                     aria-haspopup="true"
@@ -462,6 +529,38 @@ class FundListView extends React.Component {
                                     <FilterListIcon />
                                 </IconButton>
                             </Grid>
+                        </Paper>
+
+                        <Paper elevation={1} square={true}>
+                            <Collapse in={this.state.showingSearch} mountOnEnter unmountOnExit>
+                                {this.state.showingSearch ?
+                                    <div className={classes.filterPaperContent}>
+                                        <Typography variant="title" align="center" gutterBottom>Procurar:</Typography>
+                                        <Grid container spacing={24}>
+                                            <Grid item xs={12}>                                                
+                                                <TextField
+                                                    id="standard-full-width"                                                    
+                                                    style={{ margin: 8 }}
+                                                    placeholder="Nome do fundo"
+                                                    value={this.state.filter.searchTerm}                                                   
+                                                    fullWidth
+                                                    margin="normal"
+                                                    onChange={this.handleSearchChange}
+                                                    InputLabelProps={{
+                                                        shrink: true,
+                                                    }}
+                                                />
+                                            </Grid>
+                                            <Grid item xs={6} align="center">
+                                                <Button variant="contained" color="primary" onClick={this.handleSearchApplyClick}>Aplicar</Button>
+                                            </Grid>
+                                            <Grid item xs={6} align="center">
+                                                <Button variant="contained" color="secondary" onClick={this.handleSearchClearClick}>Limpar</Button>
+                                            </Grid>
+                                        </Grid>
+                                    </div>
+                                    : <div></div>}
+                            </Collapse>
                         </Paper>
 
                         <Paper elevation={1} square={true}>
@@ -498,10 +597,10 @@ class FundListView extends React.Component {
                                                     onChange={this.handleFilter_iry_investment_return_1y_Click}
                                                     value={[this.state.filter.iry_investment_return_1y.min, this.state.filter.iry_investment_return_1y.max]} />
                                             </Grid>
-                                            <Grid item xs={6}>
+                                            <Grid item xs={6} align="center">
                                                 <Button variant="contained" color="primary" onClick={this.handleFilterApplyClick} >Aplicar</Button>
                                             </Grid>
-                                            <Grid item xs={6}>
+                                            <Grid item xs={6} align="center">
                                                 <Button variant="contained" color="secondary" onClick={this.handleFilterClearClick} >Limpar</Button>
                                             </Grid>
                                         </Grid>
@@ -579,7 +678,7 @@ class FundListView extends React.Component {
                             </ExpansionPanel>
                         )) :
                             <Paper elevation={1} square={true} className={classes.filterPaperContent}>
-                                <Typography variant="subtitle" align="center">Sem dados para exibir</Typography>
+                                <Typography variant="subheading" align="center">Sem dados para exibir</Typography>
                             </Paper>
                         }
                         <TablePagination
