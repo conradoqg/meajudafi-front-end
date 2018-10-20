@@ -122,7 +122,7 @@
         - [ ] v1 - Add github link
         - [ ] v1 - Add about
         - [ ] v1 - Remove inexistent links
-    - [ ] Indicators page
+    - [ ] v3 - Indicators page
         - [ ] Chart feature
             - [ ] Indicators (CDI, Ibovesp, IPCA, IGM*)
             - [ ] Time range
@@ -134,51 +134,51 @@
             - [ ] Top Consistency (Day, Month, Year)
     - [ ] Fund list page
         - [ ] Changes to the fund list feature
-            - [ ] Remove search button from search panel
-            - [ ] Add net worth to the fund item
-            - [ ] Add number of quoteholders
-            - [ ] Add benchmark
+            - [ ] v2 - Remove search button from search panel
+            - [ ] v2 - Add net worth to the fund item
+            - [ ] v2 - Add number of quoteholders
+            - [ ] v2 - Add benchmark
         - [ ] Changes to the fund item feature
-            - [ ] Add time range buttons to choose which column will be used
-            - [ ] Add benchmark data
-            - [ ] Add benchmark button to choose the benchmark
+            - [ ] v2 - Add time range buttons to choose which column will be used
+            - [ ] v2 - Add benchmark data
+            - [ ] v2 - Add benchmark button to choose the benchmark
         - [ ] Changes to the filter feature
             - [ ] v1 - Add missing fields to filter
             - [ ] Add filter suggestions
-            - [ ] Filter options must be dinamically determined
+            - [ ] v2 - Filter options must be dinamically determined
         - [ ] Changes to the order feature
             - [ ] v1 - Add missing fields to order
             - [ ] v1 - Replace (ASC) and (DESC) by icons
-        - [ ] Add column selector
+        - [ ] v2 - Add column selector
         - [ ] Changes to the code
             - [ ] v1 - Componentize to an API lib
             - [ ] v1 - Reorganize state
-            - [ ] Componentize fund listing
+            - [ ] v2 - Componentize fund listing
             - [ ] v1 - Componentize ui parts in separate components
             - [ ] v1 - Add loading state
             - [ ] v1 - Add error handling
-    - [ ] Fund Comparison page 
+    - [ ] v4 - Fund Comparison page 
         - [ ] Reuse fund list page
         - [ ] Add fund selector
         - [ ] Add bubble chart
-    - [ ] Miscellaneous
+    - [ ] v5 - Miscellaneous
         - [ ] Improve UI for mobile 
 - [ ] Back-end
     - [ ] Worker
-        - [ ] Get Ibovespa Index
-        - [ ] Get IPCA index
-        - [ ] Get IGP* index
-        - [ ] Add Ibovespa Index quote to investment return table
-        - [ ] Add CDI quote to investment return table
-        - [ ] Add IPCA quote to investment return table
-        - [ ] Add IGP* quote to investment return table
+        - [ ] v2 - Get Ibovespa Index
+        - [ ] v2 - Get IPCA index
+        - [ ] v2 - Get IGP* index
+        - [ ] v2 - Add Ibovespa Index quote to investment return table
+        - [ ] v2 - Add CDI quote to investment return table
+        - [ ] v2 - Add IPCA quote to investment return table
+        - [ ] v2 - Add IGP* quote to investment return table
         - [ ] v1 - Add an unaccented fund name to inf_cadastral    
-        - [ ] Add YTD, MTD, 1M, 3M, 6M performance, risk, sharpe and consistency to investment return table
-        - [ ] Add YTD, MTD, 1M, 3M, 6M quote performance, risk, sharpe and consistency to investment return table
-        - [ ] Add 1Y, 2Y, 3Y quote performance to investment return table
-        - [ ] Add nr_cotst to investment_return
-        - [ ] Add vl_patrim_liq to investment_return
-        - [ ] Add moviment to investment_return (captc_dia+rest_dia)
+        - [ ] v2 - Add YTD, MTD, 1M, 3M, 6M performance, risk, sharpe and consistency to investment return table
+        - [ ] v2 - Add YTD, MTD, 1M, 3M, 6M quote performance, risk, sharpe and consistency to investment return table
+        - [ ] v2 - Add 1Y, 2Y, 3Y quote performance to investment return table
+        - [ ] v2 - Add nr_cotst to investment_return
+        - [ ] v2 - Add vl_patrim_liq to investment_return
+        - [ ] v2 - Add moviment to investment_return (captc_dia+rest_dia)
 - [ ] Deployment
     - [ ] v1 - Worker container
     - [ ] v1 - Front-end container
@@ -186,7 +186,7 @@
     - [ ] v1 - Create and use read-only user in the front-end
     - [ ] v1 - Add ratelimit to the proxy
     - [ ] v1 - Monitor resource usage
-- [ ] UX
+- [ ] v5 - UX
     - [ ] Optimizations
         - [ ] Check response times
 
