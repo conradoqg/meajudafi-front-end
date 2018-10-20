@@ -15,7 +15,7 @@
         - 3M
         - 6M
 - Cleaning
-    - Strange data for CNPJ 20815620000196 after 2018-05-15 (should it filter by nr_cotst? or should it filter bug CNPJs?)
+    - Strange data for CNPJ 20815620000196 after 2018-05-15 (should it filter by nr_cotst? or should it filter buggy CNPJs?)
     - What's the deal with Infinity and NaN fields
 
 ### Pages
@@ -26,7 +26,7 @@
         - History
     - Top Changes
         - Great Looser
-        - Greate Winners
+        - Great Winners
         - Largest
         - Top Performers
         - Top Performer/Risk Ratio
@@ -115,5 +115,79 @@
         - Size
         - Transparency
 
+### TODO
 
-    
+- [ ] Front-end
+    - [ ] Main page
+        - [ ] v1 - Add github link
+        - [ ] v1 - Add about
+        - [ ] v1 - Remove inexistent links
+    - [ ] Indicators page
+        - [ ] Chart feature
+            - [ ] Indicators (CDI, Ibovesp, IPCA, IGM*)
+            - [ ] Time range
+            - [ ] Add Great Looser (Day, Month, Year)
+            - [ ] Great Winners (Day, Month, Year)
+            - [ ] Largest (Day, Month, Year)
+            - [ ] Top Performers (Day, Month, Year)
+            - [ ] Top Performer/Risk Ratio (Day, Month, Year)
+            - [ ] Top Consistency (Day, Month, Year)
+    - [ ] Fund list page
+        - [ ] Changes to the fund list feature
+            - [ ] Remove search button from search panel
+            - [ ] Add net worth to the fund item
+            - [ ] Add number of quoteholders
+            - [ ] Add benchmark
+        - [ ] Changes to the fund item feature
+            - [ ] Add time range buttons to choose which column will be used
+            - [ ] Add benchmark data
+            - [ ] Add benchmark button to choose the benchmark
+        - [ ] Changes to the filter feature
+            - [ ] v1 - Add missing fields to filter
+            - [ ] Add filter suggestions
+            - [ ] Filter options must be dinamically determined
+        - [ ] Changes to the order feature
+            - [ ] v1 - Add missing fields to order
+            - [ ] v1 - Replace (ASC) and (DESC) by icons
+        - [ ] Add column selector
+        - [ ] Changes to the code
+            - [ ] v1 - Componentize to an API lib
+            - [ ] v1 - Reorganize state
+            - [ ] Componentize fund listing
+            - [ ] v1 - Componentize ui parts in separate components
+            - [ ] v1 - Add loading state
+            - [ ] v1 - Add error handling
+    - [ ] Fund Comparison page 
+        - [ ] Reuse fund list page
+        - [ ] Add fund selector
+        - [ ] Add bubble chart
+    - [ ] Miscellaneous
+        - [ ] Improve UI for mobile 
+- [ ] Back-end
+    - [ ] Worker
+        - [ ] Get Ibovespa Index
+        - [ ] Get IPCA index
+        - [ ] Get IGP* index
+        - [ ] Add Ibovespa Index quote to investment return table
+        - [ ] Add CDI quote to investment return table
+        - [ ] Add IPCA quote to investment return table
+        - [ ] Add IGP* quote to investment return table
+        - [ ] v1 - Add an unaccented fund name to inf_cadastral    
+        - [ ] Add YTD, MTD, 1M, 3M, 6M performance, risk, sharpe and consistency to investment return table
+        - [ ] Add YTD, MTD, 1M, 3M, 6M quote performance, risk, sharpe and consistency to investment return table
+        - [ ] Add 1Y, 2Y, 3Y quote performance to investment return table
+        - [ ] Add nr_cotst to investment_return
+        - [ ] Add vl_patrim_liq to investment_return
+        - [ ] Add moviment to investment_return (captc_dia+rest_dia)
+- [ ] Deployment
+    - [ ] v1 - Worker container
+    - [ ] v1 - Front-end container
+    - [ ] v1 - Expose only-especific end-points
+    - [ ] v1 - Create and use read-only user in the front-end
+    - [ ] v1 - Add ratelimit to the proxy
+    - [ ] v1 - Monitor resource usage
+- [ ] UX
+    - [ ] Optimizations
+        - [ ] Check response times
+
+
