@@ -25,15 +25,29 @@ import Button from '@material-ui/core/Button';
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
 import Plot from 'react-plotly.js';
+import { produce, setAutoFreeze } from 'immer';
 
 const createSliderWithTooltip = Slider.createSliderWithTooltip;
 const Range = createSliderWithTooltip(Slider.Range);
+setAutoFreeze(false);
 
 const styles = theme => ({
     filterPaperContent: {
         padding: theme.spacing.unit * 2
-    }
+    },
 });
+
+// TODO: This should be moved to styles, but I need to understand how to do it
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+    PaperProps: {
+        style: {
+            maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+            width: 250,
+        },
+    },
+};
 
 const formatters = {
     somethingToPercentage: (value) => !isNaN(value) ? (value * 100).toFixed(2) : null,
@@ -99,18 +113,11 @@ const filterOptions = {
     }
 };
 
-const ITEM_HEIGHT = 48;
-const ITEM_PADDING_TOP = 8;
-const MenuProps = {
-    PaperProps: {
-        style: {
-            maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-            width: 250,
-        },
-    },
-};
-
 const emptyState = {
+    // data: {
+    //     fundList: [],
+    //     fundData: {}
+    // },    
     data: [],
     fundData: {},
     page: 0,
@@ -137,196 +144,157 @@ class FundListView extends React.Component {
     state = emptyState;
 
     handleChangePage = async (object, page) => {
-        const result = await this.getData({
-            ...this.state,
-            page
+        const nextState = produce(this.state, draft => {
+            draft.page = page;
         });
-        this.setState({
-            page,
-            count: result.count,
-            data: result.data
-        });
+
+        const result = await this.getData(nextState);
+
+        this.setState(produce(nextState, draft => {
+            draft.count = result.count;
+            draft.data = result.data;
+        }));
     }
 
     handleChangeRowsPerPage = async (event) => {
-        const result = await this.getData({
-            ...this.state,
-            rowsPerPage: event.target.value,
+        const nextState = produce(this.state, draft => {
+            draft.rowsPerPage = event.target.value;
         });
-        this.setState({
-            rowsPerPage: event.target.value,
-            count: result.count,
-            data: result.data
-        });
+
+        const result = await this.getData(nextState);
+
+        this.setState(produce(nextState, draft => {
+            draft.rowsPerPage = event.target.value;
+            draft.count = result.count;
+            draft.data = result.data;
+        }));
     }
 
     handleSortClick = event => {
-        this.setState({ anchorEl: event.currentTarget });
+        const anchorEl = event.currentTarget;
+        this.setState(produce(draft => { draft.anchorEl = anchorEl; }));
     };
 
     handleSortClose = () => {
-        this.setState({ anchorEl: null });
+        this.setState(produce(draft => { draft.anchorEl = null; }));
     };
 
     handleSortMenuItemClick = async (event, index) => {
-        const result = await this.getData({
-            ...this.state,
-            sort: sortOptions[index]
+        const nextState = produce(this.state, draft => {
+            draft.sort = sortOptions[index];
         });
-        this.setState({
-            sort: sortOptions[index],
-            anchorEl: null,
-            count: result.count,
-            data: result.data
-        });
+
+        const result = await this.getData(nextState);
+
+        this.setState(produce(nextState, draft => {
+            draft.anchorEl = null;
+            draft.count = result.count;
+            draft.data = result.data;
+        }));
     }
 
     handleFilterClick = () => {
-        this.setState((state) => {
-            return { showingFilter: !state.showingFilter };
-        });
-
+        this.setState(produce(draft => {
+            draft.showingFilter = !draft.showingFilter;
+        }));
     }
 
     handleSearchClick = () => {
-        this.setState((state) => {
-            return { showingSearch: !state.showingSearch };
-        });
+        this.setState(produce(draft => {
+            draft.showingSearch = !draft.showingSearch;
+        }));
     }
 
     handleFilterClassChange = event => {
-        this.setState({
-            filter: {
-                ...this.state.filter,
-                class: event.target.value
-            }
-        });
+        const value = event.target.value;
+        this.setState(produce(draft => {
+            draft.filter.class = value;
+        }));
     }
 
     handleSearchChange = (event) => {
-        this.setState({
-            ...this.state,
-            filter: {
-                ...this.state.filter,
-                searchTerm: event.target.value
-            }
-        });
+        // FIXME: This is slow within ui, it needs to be checked        
+        const value = event.target.value;
+        this.setState(produce(draft => {
+            draft.filter.searchTerm = value;
+        }));
     }
 
     handleSearchApplyClick = async () => {
-        const result = await this.getData({
-            ...this.state
-        });
-        this.setState({
-            ...this.state,
-            count: result.count,
-            data: result.data
-        });
+        const result = await this.getData(this.state);
+
+        this.setState(produce(draft => {
+            draft.count = result.count;
+            draft.data = result.data;
+        }));
     }
 
     handleSearchClearClick = async () => {
-        const result = await this.getData({            
-            ...this.state,
-            filter: {
-                ...this.state.filter,
-                searchTerm: ''
-            }
+        const nextState = produce(this.state, draft => {
+            draft.filter.searchTerm = '';
         });
-        this.setState({
-            ...this.state,
-            filter: {
-                ...this.state.filter,
-                searchTerm: ''
-            },
-            count: result.count,
-            data: result.data
-        });
+
+        const result = await this.getData(nextState);
+
+        this.setState(produce(nextState, draft => {
+            draft.count = result.count;
+            draft.data = result.data;
+        }));
     }
 
     handleFilterApplyClick = async () => {
-        const result = await this.getData({
-            ...this.state
-        });
-        this.setState({
-            ...this.state,
-            count: result.count,
-            data: result.data
-        });
+        const result = await this.getData(this.state);
+
+        this.setState(produce(draft => {
+            draft.count = result.count;
+            draft.data = result.data;
+        }));
     }
 
     handleFilterClearClick = async () => {
-        const result = await this.getData({
-            ...this.state,
-            filter: {
-                ...this.state.filter,
-                class: [],
-                iry_investment_return_1y: {
-                    min: -2,
-                    max: 2
-                }
-            }
+        const nextState = produce(this.state, draft => {
+            draft.filter.class = [];
+            draft.filter.iry_investment_return_1y = {
+                min: -2,
+                max: 2
+            };
         });
-        this.setState({
-            ...this.state,
-            filter: {
-                ...this.state.filter,
-                class: [],
-                iry_investment_return_1y: {
-                    min: -2,
-                    max: 2
-                }
-            },
-            count: result.count,
-            data: result.data
-        });
+
+        const result = await this.getData(nextState);
+
+        this.setState(produce(nextState, draft => {
+            draft.count = result.count;
+            draft.data = result.data;
+        }));
     }
 
-    handleFilter_iry_investment_return_1y_Click = async (range) => {
-        this.setState({
-            ...this.state,
-            filter: {
-                ...this.state.filter,
-                iry_investment_return_1y: {
-                    min: range[0],
-                    max: range[1]
-                }
-            }
-        });
+    handleFilter_iry_investment_return_1y_Click = (range) => {
+        this.setState(produce(draft => {
+            draft.filter.iry_investment_return_1y = {
+                min: range[0],
+                max: range[1]
+            };
+        }));
     }
 
     handleChartInitialized = async (fund, figure) => {
-        this.setState((state) => {
-            return {
-                fundData: {
-                    ...state.fundData,
-                    [fund.icf_cnpj_fundo]: figure
-                }
-            };
-        });
+        this.setState(produce(draft => {
+            draft.fundData[fund.icf_cnpj_fundo] = figure;
+        }));
     }
 
     handleChartUpdate = async (fund, figure) => {
-        this.setState((state) => {
-            return {
-                fundData: {
-                    ...state.fundData,
-                    [fund.icf_cnpj_fundo]: figure
-                }
-            };
-        });
+        this.setState(produce(draft => {
+            draft.fundData[fund.icf_cnpj_fundo] = figure;
+        }));
     }
 
     handleFundExpansion = async (expanded, fund) => {
         const data = (expanded ? await this.getFundData(fund.icf_cnpj_fundo) : null);
 
-        this.setState((state) => {
-            return {
-                fundData: {
-                    ...state.fundData,
-                    [fund.icf_cnpj_fundo]: data
-                }
-            };
-        });
+        this.setState(produce(draft => {
+            draft.fundData[fund.icf_cnpj_fundo] = data;
+        }));
     }
 
     async getData(options) {
@@ -362,7 +330,7 @@ class FundListView extends React.Component {
                 'Prefer': 'count=exact'
             }
         });
-        // TODO: This doesn't work when zero rows are returned
+
         const CONTENT_RANGE_REGEX = /(\d+)-(\d+)\/(\d+)/gm;
         const contentRange = fundListObject.headers.get('Content-Range');
         const matchResult = CONTENT_RANGE_REGEX.exec(contentRange);
@@ -458,23 +426,18 @@ class FundListView extends React.Component {
         const min = isNaN(result2[0].iry_investment_return_1y_min) || !isFinite(result2[0].iry_investment_return_1y_min) || result2[0].iry_investment_return_1y_min < -2 ? -2 : Math.floor(result2[0].iry_investment_return_1y_min);
         const max = isNaN(result2[0].iry_investment_return_1y_max) || !isFinite(result2[0].iry_investment_return_1y_max) || result2[0].iry_investment_return_1y_max > 2 ? 2 : Math.ceil(result2[0].iry_investment_return_1y_max);
 
-        this.setState({
-            count: result.count,
-            data: result.data,
-            filter: {
-                ...this.state.filter,
-                iry_investment_return_1y: {
-                    min,
-                    max
-                }
-            },
-            filterOptions: {
-                iry_investment_return_1y: {
-                    min,
-                    max
-                }
-            }
-        });
+        this.setState(produce(draft => {
+            draft.count = result.count;
+            draft.data = result.data;
+            draft.filter.iry_investment_return_1y = {
+                min,
+                max
+            };
+            draft.filterOptions.iry_investment_return_1y = {
+                min,
+                max
+            };
+        }));
     }
 
     render() {
@@ -537,12 +500,12 @@ class FundListView extends React.Component {
                                     <div className={classes.filterPaperContent}>
                                         <Typography variant="title" align="center" gutterBottom>Procurar:</Typography>
                                         <Grid container spacing={24}>
-                                            <Grid item xs={12}>                                                
+                                            <Grid item xs={12}>
                                                 <TextField
-                                                    id="standard-full-width"                                                    
+                                                    id="standard-full-width"
                                                     style={{ margin: 8 }}
                                                     placeholder="Nome do fundo"
-                                                    value={this.state.filter.searchTerm}                                                   
+                                                    value={this.state.filter.searchTerm}
                                                     fullWidth
                                                     margin="normal"
                                                     onChange={this.handleSearchChange}
@@ -708,7 +671,7 @@ class FundListView extends React.Component {
 const FundHistoryChart = (props) => {
     const { fund, handleChartInitialized, handleChartUpdate } = props;
 
-    if (!fund) return <Typography variant="title">Carregando...</Typography>;
+    if (!fund) return <Typography variant="title" align="center">Carregando...</Typography>;
     else {
         return (
             <Plot
