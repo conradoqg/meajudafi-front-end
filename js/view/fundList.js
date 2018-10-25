@@ -26,6 +26,7 @@ import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
 import Plot from 'react-plotly.js';
 import { produce, setAutoFreeze } from 'immer';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 const createSliderWithTooltip = Slider.createSliderWithTooltip;
 const Range = createSliderWithTooltip(Slider.Range);
@@ -35,6 +36,9 @@ const styles = theme => ({
     filterPaperContent: {
         padding: theme.spacing.unit * 2
     },
+    progress: {
+        margin: theme.spacing.unit * 2,
+    }
 });
 
 // TODO: This should be moved to styles, but I need to understand how to do it
@@ -113,12 +117,94 @@ const filterOptions = {
     }
 };
 
+const newState = {
+    data: {
+        fundList: [],
+        fundDetail: {},
+        totalRows: 0,
+        sortOptions: [
+            {
+                displayName: 'CNPJ',
+                field: 'icf_cnpj_fundo',
+                order: 'asc'
+            },
+            {
+                displayName: 'Desempenho 1 Ano (Asc)',
+                field: 'iry_investment_return_1y',
+                order: 'asc'
+            },
+            {
+                displayName: 'Desempenho 1 Ano (Desc)',
+                field: 'iry_investment_return_1y',
+                order: 'desc'
+            }
+        ],
+        filterOptions: {
+            class: {
+                field: 'icf_classe',
+                options: [
+                    {
+                        displayName: 'Dívida Externa',
+                        value: 'Fundo da Dívida Externa'
+                    },
+                    {
+                        displayName: 'Renda Fixa',
+                        value: 'Fundo de Renda Fixa'
+                    },
+                    {
+                        displayName: 'Ações',
+                        value: 'Fundo de Ações'
+                    },
+                    {
+                        displayName: 'Curto Prazo',
+                        value: 'Fundo de Curto Prazo'
+                    },
+                    {
+                        displayName: 'Cambial',
+                        value: 'Fundo Cambial'
+                    },
+                    {
+                        displayName: 'Multimercado',
+                        value: 'Fundo Multimercado'
+                    },
+                    {
+                        displayName: 'Referenciado',
+                        value: 'Fundo Referenciado'
+                    },
+                    {
+                        displayName: 'Não Identificado',
+                        value: null
+                    }
+                ]
+            },
+            iry_investment_return_1y: [2, -2]
+        }
+    },
+    config: {
+        page: 0,
+        rowsPerPage: 0,
+        sort: sortOptions[0],
+        filter: {
+            class: [],
+            iry_investment_return_1y: {
+                min: -2,
+                max: 2
+            }
+        },
+        search: {
+            term: ''
+        }
+    },
+    layout: {
+        anchorEl: null
+    }
+};
+
 const emptyState = {
-    // data: {
-    //     fundList: [],
-    //     fundData: {}
-    // },    
-    data: [],
+    data: {
+        fundList: null
+    },
+    dataOld: [],
     fundData: {},
     page: 0,
     count: 0,
@@ -152,7 +238,7 @@ class FundListView extends React.Component {
 
         this.setState(produce(nextState, draft => {
             draft.count = result.count;
-            draft.data = result.data;
+            draft.data.fundList = result.data;
         }));
     }
 
@@ -166,7 +252,7 @@ class FundListView extends React.Component {
         this.setState(produce(nextState, draft => {
             draft.rowsPerPage = event.target.value;
             draft.count = result.count;
-            draft.data = result.data;
+            draft.data.fundList = result.data;
         }));
     }
 
@@ -189,7 +275,7 @@ class FundListView extends React.Component {
         this.setState(produce(nextState, draft => {
             draft.anchorEl = null;
             draft.count = result.count;
-            draft.data = result.data;
+            draft.data.fundList = result.data;
         }));
     }
 
@@ -225,7 +311,7 @@ class FundListView extends React.Component {
 
         this.setState(produce(draft => {
             draft.count = result.count;
-            draft.data = result.data;
+            draft.data.fundList = result.data;
         }));
     }
 
@@ -238,7 +324,7 @@ class FundListView extends React.Component {
 
         this.setState(produce(nextState, draft => {
             draft.count = result.count;
-            draft.data = result.data;
+            draft.data.fundList = result.data;
         }));
     }
 
@@ -247,7 +333,7 @@ class FundListView extends React.Component {
 
         this.setState(produce(draft => {
             draft.count = result.count;
-            draft.data = result.data;
+            draft.data.fundList = result.data;
         }));
     }
 
@@ -264,7 +350,7 @@ class FundListView extends React.Component {
 
         this.setState(produce(nextState, draft => {
             draft.count = result.count;
-            draft.data = result.data;
+            draft.data.fundList = result.data;
         }));
     }
 
@@ -428,7 +514,7 @@ class FundListView extends React.Component {
 
         this.setState(produce(draft => {
             draft.count = result.count;
-            draft.data = result.data;
+            draft.data.fundList = result.data;
             draft.filter.iry_investment_return_1y = {
                 min,
                 max
@@ -571,78 +657,93 @@ class FundListView extends React.Component {
                                 }
                             </Collapse>
                         </Paper>
-                        {this.state.data.length > 0 ? this.state.data.map((fund, index) => (
-                            <ExpansionPanel key={index} expanded={this.state.fundData[fund.icf_cnpj_fundo] ? true : false} onChange={(e, expanded) => this.handleFundExpansion(expanded, fund)}>
-                                <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-                                    <Grid container spacing={8}>
-                                        <Grid item xs={8}>
-                                            <Typography>{fund.icf_denom_social}</Typography>
-                                        </Grid>
-                                        <Grid item xs={4}>
+                        {
+                            chooseState(this.state.data.fundList,
+                                () => this.state.data.fundList.map((fund, index) => (
+                                    <ExpansionPanel key={index} expanded={this.state.fundData[fund.icf_cnpj_fundo] ? true : false} onChange={(e, expanded) => this.handleFundExpansion(expanded, fund)}>
+                                        <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
                                             <Grid container spacing={8}>
-                                                <Grid item xs={3}>
-                                                    <Typography>Desempenho</Typography>
+                                                <Grid item xs={8}>
+                                                    <Typography>{fund.icf_denom_social}</Typography>
                                                 </Grid>
-                                                <Grid item xs={3}>
-                                                    <Typography>Risco</Typography>
-                                                </Grid>
-                                                <Grid item xs={3}>
-                                                    <Typography>Sharpe</Typography>
-                                                </Grid>
-                                                <Grid item xs={3}>
-                                                    <Typography>Consistência</Typography>
+                                                <Grid item xs={4}>
+                                                    <Grid container spacing={8}>
+                                                        <Grid item xs={3}>
+                                                            <Typography>Desempenho</Typography>
+                                                        </Grid>
+                                                        <Grid item xs={3}>
+                                                            <Typography>Risco</Typography>
+                                                        </Grid>
+                                                        <Grid item xs={3}>
+                                                            <Typography>Sharpe</Typography>
+                                                        </Grid>
+                                                        <Grid item xs={3}>
+                                                            <Typography>Consistência</Typography>
+                                                        </Grid>
+                                                    </Grid>
+                                                    <Grid container spacing={8}>
+                                                        <Grid item xs={3}>
+                                                            <Typography>
+                                                                1A: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_investment_return_1y))}%<br />
+                                                                2A: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_investment_return_2y))}%<br />
+                                                                3A: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_investment_return_3y))}%
+                                                            </Typography>
+                                                        </Grid>
+                                                        <Grid item xs={3}>
+                                                            <Typography>
+                                                                1A: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_risk_1y))}%<br />
+                                                                2A: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_risk_2y))}%<br />
+                                                                3A: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_risk_3y))}%<br />
+                                                            </Typography>
+                                                        </Grid>
+                                                        <Grid item xs={3}>
+                                                            <Typography>
+                                                                1A: {formatters.aValueOrTrace(formatters.somethingToValue(fund.iry_sharpe_1y))}<br />
+                                                                2A: {formatters.aValueOrTrace(formatters.somethingToValue(fund.iry_sharpe_2y))}<br />
+                                                                3A: {formatters.aValueOrTrace(formatters.somethingToValue(fund.iry_sharpe_3y))}<br />
+                                                            </Typography>
+                                                        </Grid>
+                                                        <Grid item xs={3}>
+                                                            <Typography>
+                                                                1A: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_consistency_1y))}%<br />
+                                                                2A: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_consistency_2y))}%<br />
+                                                                3A: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_consistency_3y))}%<br />
+                                                            </Typography>
+                                                        </Grid>
+                                                    </Grid>
                                                 </Grid>
                                             </Grid>
+                                        </ExpansionPanelSummary>
+                                        <Divider />
+                                        <ExpansionPanelDetails>
                                             <Grid container spacing={8}>
-                                                <Grid item xs={3}>
-                                                    <Typography>
-                                                        1A: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_investment_return_1y))}%<br />
-                                                        2A: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_investment_return_2y))}%<br />
-                                                        3A: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_investment_return_3y))}%
-                                                    </Typography>
-                                                </Grid>
-                                                <Grid item xs={3}>
-                                                    <Typography>
-                                                        1A: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_risk_1y))}%<br />
-                                                        2A: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_risk_2y))}%<br />
-                                                        3A: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_risk_3y))}%<br />
-                                                    </Typography>
-                                                </Grid>
-                                                <Grid item xs={3}>
-                                                    <Typography>
-                                                        1A: {formatters.aValueOrTrace(formatters.somethingToValue(fund.iry_sharpe_1y))}<br />
-                                                        2A: {formatters.aValueOrTrace(formatters.somethingToValue(fund.iry_sharpe_2y))}<br />
-                                                        3A: {formatters.aValueOrTrace(formatters.somethingToValue(fund.iry_sharpe_3y))}<br />
-                                                    </Typography>
-                                                </Grid>
-                                                <Grid item xs={3}>
-                                                    <Typography>
-                                                        1A: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_consistency_1y))}%<br />
-                                                        2A: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_consistency_2y))}%<br />
-                                                        3A: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_consistency_3y))}%<br />
-                                                    </Typography>
+                                                <Grid item xs>
+                                                    <FundHistoryChart
+                                                        fund={this.state.fundData[fund.icf_cnpj_fundo]}
+                                                        onInitialized={(figure) => this.handleChartInitialized(fund, figure)}
+                                                        onUpdate={(figure) => this.handleChartUpdate(fund, figure)}
+                                                    />
                                                 </Grid>
                                             </Grid>
-                                        </Grid>
-                                    </Grid>
-                                </ExpansionPanelSummary>
-                                <Divider />
-                                <ExpansionPanelDetails>
-                                    <Grid container spacing={8}>
-                                        <Grid item xs>
-                                            <FundHistoryChart
-                                                fund={this.state.fundData[fund.icf_cnpj_fundo]}
-                                                onInitialized={(figure) => this.handleChartInitialized(fund, figure)}
-                                                onUpdate={(figure) => this.handleChartUpdate(fund, figure)}
-                                            />
-                                        </Grid>
-                                    </Grid>
-                                </ExpansionPanelDetails>
-                            </ExpansionPanel>
-                        )) :
-                            <Paper elevation={1} square={true} className={classes.filterPaperContent}>
-                                <Typography variant="subheading" align="center">Sem dados para exibir</Typography>
-                            </Paper>
+                                        </ExpansionPanelDetails>
+                                    </ExpansionPanel>
+                                )),
+                                () => (
+                                    <Paper elevation={1} square={true} className={classes.filterPaperContent}>
+                                        <Typography variant="subheading" align="center"><CircularProgress className={classes.progress} /></Typography>
+                                    </Paper>
+                                ),
+                                () => (
+                                    <Paper elevation={1} square={true} className={classes.filterPaperContent}>
+                                        <Typography variant="subheading" align="center">Não foi possível carregar o dado</Typography>
+                                    </Paper>
+                                ),
+                                () => (
+                                    <Paper elevation={1} square={true} className={classes.filterPaperContent}>
+                                        <Typography variant="subheading" align="center">Sem dados para exibir</Typography>
+                                    </Paper>
+                                )
+                            )
                         }
                         <TablePagination
                             component="div"
@@ -684,6 +785,19 @@ const FundHistoryChart = (props) => {
                 style={{ width: '100%', height: '100%' }}
             />);
     }
+};
+
+const chooseState = (data, hasData, isNull, isError, isEmpty) => {
+    if (data == null) return isNull();
+    if (typeof (data) == 'string') return isError();
+    if (Array.isArray(data) && data.length == 0) return isEmpty();
+    return hasData();
+};
+
+const sleeper = (ms) => {
+    return (x) => {
+        return new Promise(resolve => setTimeout(() => resolve(x), ms));
+    };
 };
 
 module.exports = withStyles(styles)(FundListView);
