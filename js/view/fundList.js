@@ -30,6 +30,9 @@ import Plot from 'react-plotly.js';
 import { produce, setAutoFreeze } from 'immer';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import API from '../api';
+import sortOptions from './sortOptions';
+import filterOptions from './filterOptions';
+import { formatters, chooseState } from '../util';
 
 const createSliderWithTooltip = Slider.createSliderWithTooltip;
 const Range = createSliderWithTooltip(Slider.Range);
@@ -53,70 +56,6 @@ const MenuProps = {
             maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP
         },
     },
-};
-
-const formatters = {
-    somethingToPercentage: (value) => !isNaN(value) ? (value * 100).toFixed(2) : null,
-    somethingToValue: (value) => value != null && !isNaN(value) ? value.toFixed(2) : null,
-    aValueOrTrace: (value) => value == null ? '-' : value
-};
-
-const sortOptions = [
-    {
-        displayName: 'CNPJ',
-        field: 'icf_cnpj_fundo',
-        order: 'asc'
-    },
-    {
-        displayName: 'Desempenho 1 Ano',
-        field: 'iry_investment_return_1y',
-        order: 'asc'
-    },
-    {
-        displayName: 'Desempenho 1 Ano',
-        field: 'iry_investment_return_1y',
-        order: 'desc'
-    }
-];
-
-const filterOptions = {
-    class: {
-        field: 'icf_classe',
-        options: [
-            {
-                displayName: 'Dívida Externa',
-                value: 'Fundo da Dívida Externa'
-            },
-            {
-                displayName: 'Renda Fixa',
-                value: 'Fundo de Renda Fixa'
-            },
-            {
-                displayName: 'Ações',
-                value: 'Fundo de Ações'
-            },
-            {
-                displayName: 'Curto Prazo',
-                value: 'Fundo de Curto Prazo'
-            },
-            {
-                displayName: 'Cambial',
-                value: 'Fundo Cambial'
-            },
-            {
-                displayName: 'Multimercado',
-                value: 'Fundo Multimercado'
-            },
-            {
-                displayName: 'Referenciado',
-                value: 'Fundo Referenciado'
-            },
-            {
-                displayName: 'Não Identificado',
-                value: null
-            }
-        ]
-    }
 };
 
 const emptyState = {
@@ -767,19 +706,6 @@ const FundHistoryChart = (props) => {
         () => (
             <Typography variant="subheading" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>
         ));
-};
-
-const chooseState = (data, hasData, isNull, isError, isEmpty) => {
-    if (data == null) return isNull();
-    if (typeof (data) == 'string') return isError(data);
-    if (Array.isArray(data) && data.length == 0) return isEmpty();
-    return hasData();
-};
-
-const sleeper = (ms) => {
-    return (x) => {
-        return new Promise(resolve => setTimeout(() => resolve(x), ms));
-    };
 };
 
 module.exports = withStyles(styles)(FundListView);

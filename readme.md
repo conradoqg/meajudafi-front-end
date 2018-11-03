@@ -150,7 +150,7 @@
             - [ ] v2 - Filter options must be dinamically determined
         - [ ] Changes to the order feature
             - [ ] v1 - Add missing fields to order
-            - [ ] v1 - Replace (ASC) and (DESC) by icons
+            - [X] v1 - Replace (ASC) and (DESC) by icons
         - [ ] v2 - Add column selector
         - [ ] Changes to the code
             - [X] v1 - Componentize to an API lib
