@@ -153,7 +153,7 @@
             - [ ] v1 - Replace (ASC) and (DESC) by icons
         - [ ] v2 - Add column selector
         - [ ] Changes to the code
-            - [ ] v1 - Componentize to an API lib
+            - [X] v1 - Componentize to an API lib
             - [X] v1 - Reorganize state
             - [ ] v2 - Componentize fund listing
             - [ ] v1 - Componentize ui parts in separate components
