@@ -13,6 +13,8 @@ import IconButton from '@material-ui/core/IconButton';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import ReorderIcon from '@material-ui/icons/Reorder';
+import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
+import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 import SearchIcon from '@material-ui/icons/Search';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import Collapse from '@material-ui/core/Collapse';
@@ -48,8 +50,7 @@ const ITEM_PADDING_TOP = 8;
 const MenuProps = {
     PaperProps: {
         style: {
-            maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-            width: 250,
+            maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP            
         },
     },
 };
@@ -67,12 +68,12 @@ const sortOptions = [
         order: 'asc'
     },
     {
-        displayName: 'Desempenho 1 Ano (Asc)',
+        displayName: 'Desempenho 1 Ano',
         field: 'iry_investment_return_1y',
         order: 'asc'
     },
     {
-        displayName: 'Desempenho 1 Ano (Desc)',
+        displayName: 'Desempenho 1 Ano',
         field: 'iry_investment_return_1y',
         order: 'desc'
     }
@@ -535,15 +536,11 @@ class FundListView extends React.Component {
                                     anchorEl={layout.anchorEl}
                                     open={open}
                                     onClose={this.handleSortClose}
-                                    PaperProps={{
-                                        style: {
-                                            maxHeight: ITEM_HEIGHT * 4.5,
-                                            width: 220,
-                                        },
-                                    }}>
+                                    PaperProps={MenuProps.PaperProps}>
                                     {this.state.data.sortOptions.map((option, index) => (
                                         <MenuItem key={option.displayName} selected={option.displayName === this.state.config.sort.displayName} onClick={event => this.handleSortMenuItemClick(event, index)}>
-                                            {option.displayName}
+                                            {option.displayName}&nbsp;
+                                            {option.order == 'asc' ? <ArrowDownwardIcon /> : <ArrowUpwardIcon />}
                                         </MenuItem>
                                     ))}
                                 </Menu>
