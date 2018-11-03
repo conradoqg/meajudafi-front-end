@@ -119,9 +119,9 @@
 
 - [ ] Front-end
     - [ ] Main page
-        - [ ] v1 - Add github link
+        - [X] v1 - Add github link
         - [ ] v1 - Add about
-        - [ ] v1 - Remove inexistent links
+        - [X] v1 - Remove inexistent links
     - [ ] v3 - Indicators page
         - [ ] Chart feature
             - [ ] Indicators (CDI, Ibovesp, IPCA, IGM*)

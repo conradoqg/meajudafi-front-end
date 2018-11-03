@@ -12,7 +12,7 @@ class FundComparisonView extends React.Component {
             <div>
                 <div className={globalClasses.appBarSpacer} />
                 <Typography variant="display1" gutterBottom>Comparação de Fundos</Typography>                
-                Em desenvolvimento
+                <Typography variant="subheading">Em breve, aguarde...</Typography>
             </div>
         );
     }

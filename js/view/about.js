@@ -2,7 +2,7 @@
 import Typography from '@material-ui/core/Typography';
 import React from 'react';
 
-class IndicatorsView extends React.Component {
+class About extends React.Component {
     state = null;
 
     render() {
@@ -11,11 +11,11 @@ class IndicatorsView extends React.Component {
         return (
             <div>
                 <div className={globalClasses.appBarSpacer} />
-                <Typography variant="display1" gutterBottom>Indicadores</Typography>
+                <Typography variant="display1" gutterBottom>Sobre</Typography>
                 <Typography variant="subheading">Em breve, aguarde...</Typography>
             </div>
         );
     }
 }
 
-module.exports = IndicatorsView;
+module.exports = About;
