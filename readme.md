@@ -142,9 +142,11 @@
             - [ ] v2 - Add time range buttons to choose which column will be used
             - [ ] v2 - Add benchmark data
             - [ ] v2 - Add benchmark button to choose the benchmark
+        - [ ] Changes to the search feature
+            - [ ] v1 - Remove accents from the search term and results
         - [ ] Changes to the filter feature
             - [ ] v1 - Add missing fields to filter
-            - [ ] Add filter suggestions
+            - [ ] v2 - Add filter suggestions
             - [ ] v2 - Filter options must be dinamically determined
         - [ ] Changes to the order feature
             - [ ] v1 - Add missing fields to order
@@ -152,10 +154,10 @@
         - [ ] v2 - Add column selector
         - [ ] Changes to the code
             - [ ] v1 - Componentize to an API lib
-            - [ ] v1 - Reorganize state
+            - [X] v1 - Reorganize state
             - [ ] v2 - Componentize fund listing
             - [ ] v1 - Componentize ui parts in separate components
-            - [ ] v1 - Add loading state
+            - [X] v1 - Add loading state
             - [ ] v1 - Add error handling
     - [ ] v4 - Fund Comparison page 
         - [ ] Reuse fund list page

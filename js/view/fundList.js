@@ -117,72 +117,20 @@ const filterOptions = {
     }
 };
 
-const newState = {
+const emptyState = {
     data: {
-        fundList: [],
+        fundList: null,
         fundDetail: {},
-        totalRows: 0,
-        sortOptions: [
-            {
-                displayName: 'CNPJ',
-                field: 'icf_cnpj_fundo',
-                order: 'asc'
-            },
-            {
-                displayName: 'Desempenho 1 Ano (Asc)',
-                field: 'iry_investment_return_1y',
-                order: 'asc'
-            },
-            {
-                displayName: 'Desempenho 1 Ano (Desc)',
-                field: 'iry_investment_return_1y',
-                order: 'desc'
-            }
-        ],
-        filterOptions: {
-            class: {
-                field: 'icf_classe',
-                options: [
-                    {
-                        displayName: 'Dívida Externa',
-                        value: 'Fundo da Dívida Externa'
-                    },
-                    {
-                        displayName: 'Renda Fixa',
-                        value: 'Fundo de Renda Fixa'
-                    },
-                    {
-                        displayName: 'Ações',
-                        value: 'Fundo de Ações'
-                    },
-                    {
-                        displayName: 'Curto Prazo',
-                        value: 'Fundo de Curto Prazo'
-                    },
-                    {
-                        displayName: 'Cambial',
-                        value: 'Fundo Cambial'
-                    },
-                    {
-                        displayName: 'Multimercado',
-                        value: 'Fundo Multimercado'
-                    },
-                    {
-                        displayName: 'Referenciado',
-                        value: 'Fundo Referenciado'
-                    },
-                    {
-                        displayName: 'Não Identificado',
-                        value: null
-                    }
-                ]
-            },
+        totalRows: null,
+        sortOptions: sortOptions,
+        filterOptions: filterOptions,
+        filterRange: {
             iry_investment_return_1y: [2, -2]
         }
     },
     config: {
         page: 0,
-        rowsPerPage: 0,
+        rowsPerPage: 5,
         sort: sortOptions[0],
         filter: {
             class: [],
@@ -196,33 +144,9 @@ const newState = {
         }
     },
     layout: {
-        anchorEl: null
-    }
-};
-
-const emptyState = {
-    data: {
-        fundList: null
-    },
-    dataOld: [],
-    fundData: {},
-    page: 0,
-    count: 0,
-    rowsPerPage: 5,
-    anchorEl: null,
-    sort: sortOptions[0],
-    showingFilter: false,
-    showingSearch: false,
-    filter: {
-        class: [],
-        iry_investment_return_1y: {
-            min: -2,
-            max: 2
-        },
-        searchTerm: ''
-    },
-    filterOptions: {
-        iry_investment_return_1y: [2, -2]
+        anchorEl: null,
+        showingFilter: false,
+        showingSearch: false
     }
 };
 
@@ -230,71 +154,88 @@ class FundListView extends React.Component {
     state = emptyState;
 
     handleChangePage = async (object, page) => {
+        this.setState(produce(draft => {
+            draft.data.totalRows = emptyState.data.totalRows;
+            draft.data.fundList = emptyState.data.fundList;
+        }));
+
         const nextState = produce(this.state, draft => {
-            draft.page = page;
+            draft.config.page = page;
         });
 
-        const result = await this.getData(nextState);
+        const result = await this.getData(nextState.config);
 
         this.setState(produce(nextState, draft => {
-            draft.count = result.count;
+            draft.data.totalRows = result.totalRows;
             draft.data.fundList = result.data;
         }));
     }
 
     handleChangeRowsPerPage = async (event) => {
         const nextState = produce(this.state, draft => {
-            draft.rowsPerPage = event.target.value;
+            draft.config.rowsPerPage = event.target.value;
         });
 
-        const result = await this.getData(nextState);
+        this.setState(produce(draft => {
+            draft.config.rowsPerPage = emptyState.config.rowsPerPage;
+            draft.data.totalRows = emptyState.data.totalRows;
+            draft.data.fundList = emptyState.data.fundList;
+        }));
+
+        const result = await this.getData(nextState.config);
 
         this.setState(produce(nextState, draft => {
-            draft.rowsPerPage = event.target.value;
-            draft.count = result.count;
+            draft.config.rowsPerPage = event.target.value;
+            draft.data.totalRows = result.totalRows;
             draft.data.fundList = result.data;
         }));
     }
 
     handleSortClick = event => {
         const anchorEl = event.currentTarget;
-        this.setState(produce(draft => { draft.anchorEl = anchorEl; }));
+        this.setState(produce(draft => { draft.layout.anchorEl = anchorEl; }));
     };
 
     handleSortClose = () => {
-        this.setState(produce(draft => { draft.anchorEl = null; }));
+        this.setState(produce(draft => { draft.layout.anchorEl = null; }));
     };
 
     handleSortMenuItemClick = async (event, index) => {
         const nextState = produce(this.state, draft => {
-            draft.sort = sortOptions[index];
+            draft.config.sort = draft.data.sortOptions[index];
         });
 
-        const result = await this.getData(nextState);
+        this.setState(produce(draft => {
+            draft.layout.anchorEl = emptyState.layout.anchorEl;
+            draft.data.totalRows = emptyState.data.totalRows;
+            draft.data.fundList = emptyState.data.fundList;
+        }));
+
+        const result = await this.getData(nextState.config);
 
         this.setState(produce(nextState, draft => {
-            draft.anchorEl = null;
-            draft.count = result.count;
+            draft.layout.anchorEl = null;
+            draft.data.totalRows = result.totalRows;
             draft.data.fundList = result.data;
         }));
     }
 
     handleFilterClick = () => {
         this.setState(produce(draft => {
-            draft.showingFilter = !draft.showingFilter;
+            draft.layout.showingFilter = !draft.layout.showingFilter;
         }));
     }
 
     handleSearchClick = () => {
         this.setState(produce(draft => {
-            draft.showingSearch = !draft.showingSearch;
+            draft.layout.showingSearch = !draft.layout.showingSearch;
         }));
     }
 
     handleFilterClassChange = event => {
         const value = event.target.value;
         this.setState(produce(draft => {
-            draft.filter.class = value;
+            draft.config.filter.class = value;
         }));
     }
 
@@ -302,61 +243,81 @@ class FundListView extends React.Component {
         // FIXME: This is slow within ui, it needs to be checked        
         const value = event.target.value;
         this.setState(produce(draft => {
-            draft.filter.searchTerm = value;
+            draft.config.search.term = value;
         }));
     }
 
     handleSearchApplyClick = async () => {
-        const result = await this.getData(this.state);
+        this.setState(produce(draft => {
+            draft.data.totalRows = emptyState.data.totalRows;
+            draft.data.fundList = emptyState.data.fundList;
+        }));
+
+        const result = await this.getData(this.state.config);
 
         this.setState(produce(draft => {
-            draft.count = result.count;
+            draft.data.totalRows = result.totalRows;
             draft.data.fundList = result.data;
         }));
     }
 
     handleSearchClearClick = async () => {
         const nextState = produce(this.state, draft => {
-            draft.filter.searchTerm = '';
+            draft.config.search.term = '';
         });
 
-        const result = await this.getData(nextState);
+        this.setState(produce(draft => {
+            draft.data.totalRows = emptyState.data.totalRows;
+            draft.data.fundList = emptyState.data.fundList;
+        }));
+
+        const result = await this.getData(nextState.config);
 
         this.setState(produce(nextState, draft => {
-            draft.count = result.count;
+            draft.data.totalRows = result.totalRows;
             draft.data.fundList = result.data;
         }));
     }
 
     handleFilterApplyClick = async () => {
-        const result = await this.getData(this.state);
+        this.setState(produce(draft => {
+            draft.data.totalRows = emptyState.data.totalRows;
+            draft.data.fundList = emptyState.data.fundList;
+        }));
+
+        const result = await this.getData(this.state.config);
 
         this.setState(produce(draft => {
-            draft.count = result.count;
+            draft.data.totalRows = result.totalRows;
             draft.data.fundList = result.data;
         }));
     }
 
     handleFilterClearClick = async () => {
         const nextState = produce(this.state, draft => {
-            draft.filter.class = [];
-            draft.filter.iry_investment_return_1y = {
+            draft.config.filter.class = [];
+            draft.config.filter.iry_investment_return_1y = {
                 min: -2,
                 max: 2
             };
         });
 
-        const result = await this.getData(nextState);
+        this.setState(produce(draft => {
+            draft.data.totalRows = emptyState.data.totalRows;
+            draft.data.fundList = emptyState.data.fundList;
+        }));
+
+        const result = await this.getData(nextState.config);
 
         this.setState(produce(nextState, draft => {
-            draft.count = result.count;
+            draft.data.totalRows = result.totalRows;
             draft.data.fundList = result.data;
         }));
     }
 
     handleFilter_iry_investment_return_1y_Click = (range) => {
         this.setState(produce(draft => {
-            draft.filter.iry_investment_return_1y = {
+            draft.config.filter.iry_investment_return_1y = {
                 min: range[0],
                 max: range[1]
             };
@@ -365,21 +326,25 @@ class FundListView extends React.Component {
 
     handleChartInitialized = async (fund, figure) => {
         this.setState(produce(draft => {
-            draft.fundData[fund.icf_cnpj_fundo] = figure;
+            draft.data.fundDetail[fund.icf_cnpj_fundo] = figure;
         }));
     }
 
     handleChartUpdate = async (fund, figure) => {
         this.setState(produce(draft => {
-            draft.fundData[fund.icf_cnpj_fundo] = figure;
+            draft.data.fundDetail[fund.icf_cnpj_fundo] = figure;
         }));
     }
 
     handleFundExpansion = async (expanded, fund) => {
+        this.setState(produce(draft => {
+            draft.data.fundDetail[fund.icf_cnpj_fundo] = null;
+        }));
+
         const data = (expanded ? await this.getFundData(fund.icf_cnpj_fundo) : null);
 
         this.setState(produce(draft => {
-            draft.fundData[fund.icf_cnpj_fundo] = data;
+            draft.data.fundDetail[fund.icf_cnpj_fundo] = data;
         }));
     }
 
@@ -399,12 +364,12 @@ class FundListView extends React.Component {
             iry_investment_return_1yFilter = `and=(iry_investment_return_1y.gte.${options.filter.iry_investment_return_1y.min},iry_investment_return_1y.lte.${options.filter.iry_investment_return_1y.max})&`;
         }
         let searchPart = '';
-        if (options.filter.searchTerm != '') {
+        if (options.search.term != '') {
             // Identify if it's a CNPJ or a fund name
-            if (/^\d+$/.test(options.filter.searchTerm)) {
-                searchPart = `and=(icf_cnpj_fundo.ilike.*${options.filter.searchTerm}*)`;
+            if (/^\d+$/.test(options.search.term)) {
+                searchPart = `and=(icf_cnpj_fundo.ilike.*${options.search.term}*)`;
             } else {
-                searchPart = `and=(icf_denom_social.ilike.*${options.filter.searchTerm}*)`;
+                searchPart = `and=(icf_denom_social.ilike.*${options.search.term}*)`;
             }
 
         }
@@ -420,11 +385,11 @@ class FundListView extends React.Component {
         const CONTENT_RANGE_REGEX = /(\d+)-(\d+)\/(\d+)/gm;
         const contentRange = fundListObject.headers.get('Content-Range');
         const matchResult = CONTENT_RANGE_REGEX.exec(contentRange);
-        const count = matchResult && matchResult.length > 3 ? matchResult[3] : 0;
+        const totalRows = matchResult && matchResult.length > 3 ? matchResult[3] : 0;
 
         return {
             range,
-            count: parseInt(count),
+            totalRows: parseInt(totalRows),
             data: await fundListObject.json()
         };
     }
@@ -506,30 +471,36 @@ class FundListView extends React.Component {
     }
 
     async componentDidMount() {
-        const result = await this.getData(this.state);
-        const result2 = await this.getDataAgreggation();
+        try {
+            const result = await this.getData(this.state.config);
+            const result2 = await this.getDataAgreggation();
 
-        const min = isNaN(result2[0].iry_investment_return_1y_min) || !isFinite(result2[0].iry_investment_return_1y_min) || result2[0].iry_investment_return_1y_min < -2 ? -2 : Math.floor(result2[0].iry_investment_return_1y_min);
-        const max = isNaN(result2[0].iry_investment_return_1y_max) || !isFinite(result2[0].iry_investment_return_1y_max) || result2[0].iry_investment_return_1y_max > 2 ? 2 : Math.ceil(result2[0].iry_investment_return_1y_max);
+            const min = isNaN(result2[0].iry_investment_return_1y_min) || !isFinite(result2[0].iry_investment_return_1y_min) || result2[0].iry_investment_return_1y_min < -2 ? -2 : Math.floor(result2[0].iry_investment_return_1y_min);
+            const max = isNaN(result2[0].iry_investment_return_1y_max) || !isFinite(result2[0].iry_investment_return_1y_max) || result2[0].iry_investment_return_1y_max > 2 ? 2 : Math.ceil(result2[0].iry_investment_return_1y_max);
 
-        this.setState(produce(draft => {
-            draft.count = result.count;
-            draft.data.fundList = result.data;
-            draft.filter.iry_investment_return_1y = {
-                min,
-                max
-            };
-            draft.filterOptions.iry_investment_return_1y = {
-                min,
-                max
-            };
-        }));
+            this.setState(produce(draft => {
+                draft.data.totalRows = result.totalRows;
+                draft.data.fundList = result.data;
+                draft.config.filter.iry_investment_return_1y = {
+                    min,
+                    max
+                };
+                draft.data.filterRange.iry_investment_return_1y = {
+                    min,
+                    max
+                };
+            }));
+        } catch (ex) {
+            this.setState(produce(draft => {
+                draft.data.fundList = ex.message;
+            }));
+        }
     }
 
     render() {
         const { classes, globalClasses } = this.props;
-        const { anchorEl } = this.state;
-        const open = Boolean(anchorEl);
+        const { layout } = this.state;
+        const open = Boolean(layout.anchorEl);
 
         return (
             <div>
@@ -557,7 +528,7 @@ class FundListView extends React.Component {
                                 </IconButton>
                                 <Menu
                                     id="long-menu"
-                                    anchorEl={anchorEl}
+                                    anchorEl={layout.anchorEl}
                                     open={open}
                                     onClose={this.handleSortClose}
                                     PaperProps={{
@@ -566,8 +537,8 @@ class FundListView extends React.Component {
                                             width: 220,
                                         },
                                     }}>
-                                    {sortOptions.map((option, index) => (
-                                        <MenuItem key={option.displayName} selected={option.displayName === this.state.sort.displayName} onClick={event => this.handleSortMenuItemClick(event, index)}>
+                                    {this.state.data.sortOptions.map((option, index) => (
+                                        <MenuItem key={option.displayName} selected={option.displayName === this.state.config.sort.displayName} onClick={event => this.handleSortMenuItemClick(event, index)}>
                                             {option.displayName}
                                         </MenuItem>
                                     ))}
@@ -581,8 +552,8 @@ class FundListView extends React.Component {
                         </Paper>
 
                         <Paper elevation={1} square={true}>
-                            <Collapse in={this.state.showingSearch} mountOnEnter unmountOnExit>
-                                {this.state.showingSearch ?
+                            <Collapse in={layout.showingSearch} mountOnEnter unmountOnExit>
+                                {layout.showingSearch ?
                                     <div className={classes.filterPaperContent}>
                                         <Typography variant="title" align="center" gutterBottom>Procurar:</Typography>
                                         <Grid container spacing={24}>
@@ -591,7 +562,7 @@ class FundListView extends React.Component {
                                                     id="standard-full-width"
                                                     style={{ margin: 8 }}
                                                     placeholder="Nome do fundo"
-                                                    value={this.state.filter.searchTerm}
+                                                    value={this.state.config.search.term}
                                                     fullWidth
                                                     margin="normal"
                                                     onChange={this.handleSearchChange}
@@ -613,8 +584,8 @@ class FundListView extends React.Component {
                         </Paper>
 
                         <Paper elevation={1} square={true}>
-                            <Collapse in={this.state.showingFilter} mountOnEnter unmountOnExit>
-                                {this.state.showingFilter ?
+                            <Collapse in={layout.showingFilter} mountOnEnter unmountOnExit>
+                                {layout.showingFilter ?
                                     <div className={classes.filterPaperContent}>
                                         <Typography variant="title" align="center" gutterBottom>Filtros:</Typography>
                                         <Grid container spacing={24}>
@@ -622,15 +593,15 @@ class FundListView extends React.Component {
                                                 <Typography variant="subheading" align="center" gutterBottom>Classe:</Typography>
                                                 <Select
                                                     multiple
-                                                    value={this.state.filter.class}
+                                                    value={this.state.config.filter.class}
                                                     onChange={this.handleFilterClassChange}
                                                     input={<Input id="select-multiple-checkbox" />}
-                                                    renderValue={selected => selected.map(item => filterOptions.class.options.find(clazz => clazz.value == item).displayName).join(', ')}
+                                                    renderValue={selected => selected.map(item => this.state.data.filterOptions.class.options.find(clazz => clazz.value == item).displayName).join(', ')}
                                                     MenuProps={MenuProps}
                                                     fullWidth>
-                                                    {filterOptions.class.options.map(classOption => (
+                                                    {this.state.data.filterOptions.class.options.map(classOption => (
                                                         <MenuItem key={classOption.displayName} value={classOption.value}>
-                                                            <Checkbox checked={this.state.filter.class.indexOf(classOption.value) > -1} />
+                                                            <Checkbox checked={this.state.config.filter.class.indexOf(classOption.value) > -1} />
                                                             <ListItemText primary={classOption.displayName} />
                                                         </MenuItem>
                                                     ))}
@@ -639,12 +610,12 @@ class FundListView extends React.Component {
                                             <Grid item xs={12}>
                                                 <Typography variant="subheading" align="center" gutterBottom>Desempenho 1A:</Typography>
                                                 <Range
-                                                    min={this.state.filterOptions.iry_investment_return_1y.min}
                                                     tipFormatter={value => `${(value * 100).toFixed(2)}%`}
-                                                    max={this.state.filterOptions.iry_investment_return_1y.max}
-                                                    step={Math.abs((this.state.filterOptions.iry_investment_return_1y.max - this.state.filterOptions.iry_investment_return_1y.min) / 50)}
+                                                    min={this.state.data.filterRange.iry_investment_return_1y.min}
+                                                    max={this.state.data.filterRange.iry_investment_return_1y.max}
+                                                    step={Math.abs((this.state.data.filterRange.iry_investment_return_1y.max - this.state.data.filterRange.iry_investment_return_1y.min) / 50)}
                                                     onChange={this.handleFilter_iry_investment_return_1y_Click}
-                                                    value={[this.state.filter.iry_investment_return_1y.min, this.state.filter.iry_investment_return_1y.max]} />
+                                                    value={[this.state.config.filter.iry_investment_return_1y.min, this.state.config.filter.iry_investment_return_1y.max]} />
                                             </Grid>
                                             <Grid item xs={6} align="center">
                                                 <Button variant="contained" color="primary" onClick={this.handleFilterApplyClick} >Aplicar</Button>
@@ -660,7 +631,7 @@ class FundListView extends React.Component {
                         {
                             chooseState(this.state.data.fundList,
                                 () => this.state.data.fundList.map((fund, index) => (
-                                    <ExpansionPanel key={index} expanded={this.state.fundData[fund.icf_cnpj_fundo] ? true : false} onChange={(e, expanded) => this.handleFundExpansion(expanded, fund)}>
+                                    <ExpansionPanel key={index} expanded={this.state.data.fundDetail[fund.icf_cnpj_fundo] ? true : false} onChange={(e, expanded) => this.handleFundExpansion(expanded, fund)}>
                                         <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
                                             <Grid container spacing={8}>
                                                 <Grid item xs={8}>
@@ -719,7 +690,7 @@ class FundListView extends React.Component {
                                             <Grid container spacing={8}>
                                                 <Grid item xs>
                                                     <FundHistoryChart
-                                                        fund={this.state.fundData[fund.icf_cnpj_fundo]}
+                                                        fund={this.state.data.fundDetail[fund.icf_cnpj_fundo]}
                                                         onInitialized={(figure) => this.handleChartInitialized(fund, figure)}
                                                         onUpdate={(figure) => this.handleChartUpdate(fund, figure)}
                                                     />
@@ -735,33 +706,35 @@ class FundListView extends React.Component {
                                 ),
                                 () => (
                                     <Paper elevation={1} square={true} className={classes.filterPaperContent}>
-                                        <Typography variant="subheading" align="center">Não foi possível carregar o dado</Typography>
+                                        <Typography variant="subheading" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>
                                     </Paper>
                                 ),
                                 () => (
                                     <Paper elevation={1} square={true} className={classes.filterPaperContent}>
-                                        <Typography variant="subheading" align="center">Sem dados para exibir</Typography>
+                                        <Typography variant="subheading" align="center">Sem dados à exibir</Typography>
                                     </Paper>
                                 )
                             )
                         }
-                        <TablePagination
-                            component="div"
-                            count={this.state.count}
-                            rowsPerPage={this.state.rowsPerPage}
-                            page={this.state.page}
-                            backIconButtonProps={{
-                                'aria-label': 'Página Anterior',
-                            }}
-                            nextIconButtonProps={{
-                                'aria-label': 'Próxima Página',
-                            }}
-                            onChangePage={this.handleChangePage}
-                            onChangeRowsPerPage={this.handleChangeRowsPerPage}
-                            labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
-                            labelRowsPerPage={'Registros por página:'}
-                            rowsPerPageOptions={[5, 10, 25, 50, 100]}
-                        />
+                        {this.state.data.totalRows ?
+                            <TablePagination
+                                component="div"
+                                count={this.state.data.totalRows}
+                                rowsPerPage={this.state.config.rowsPerPage}
+                                page={this.state.config.page}
+                                backIconButtonProps={{
+                                    'aria-label': 'Página Anterior',
+                                }}
+                                nextIconButtonProps={{
+                                    'aria-label': 'Próxima Página',
+                                }}
+                                onChangePage={this.handleChangePage}
+                                onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                                labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
+                                labelRowsPerPage={'Registros por página:'}
+                                rowsPerPageOptions={[5, 10, 25, 50, 100]}
+                            />
+                            : null}
                     </Grid>
                 </Grid>
             </div >
@@ -789,7 +762,7 @@ const FundHistoryChart = (props) => {
 
 const chooseState = (data, hasData, isNull, isError, isEmpty) => {
     if (data == null) return isNull();
-    if (typeof (data) == 'string') return isError();
+    if (typeof (data) == 'string') return isError(data);
     if (Array.isArray(data) && data.length == 0) return isEmpty();
     return hasData();
 };
