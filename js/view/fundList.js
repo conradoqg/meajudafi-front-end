@@ -50,7 +50,7 @@ const ITEM_PADDING_TOP = 8;
 const MenuProps = {
     PaperProps: {
         style: {
-            maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP            
+            maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP
         },
     },
 };
@@ -148,7 +148,8 @@ const emptyState = {
     layout: {
         anchorEl: null,
         showingFilter: false,
-        showingSearch: false
+        showingSearch: false,
+        showingFundDetail: {}
     }
 };
 
@@ -383,6 +384,7 @@ class FundListView extends React.Component {
     handleFundExpansion = async (expanded, fund) => {
         this.setState(produce(draft => {
             draft.data.fundDetail[fund.icf_cnpj_fundo] = null;
+            draft.layout.showingFundDetail[fund.icf_cnpj_fundo] = expanded;
         }));
 
         try {
@@ -632,7 +634,7 @@ class FundListView extends React.Component {
                         {
                             chooseState(this.state.data.fundList,
                                 () => this.state.data.fundList.map((fund, index) => (
-                                    <ExpansionPanel key={index} expanded={this.state.data.fundDetail[fund.icf_cnpj_fundo] ? true : false} onChange={(e, expanded) => this.handleFundExpansion(expanded, fund)}>
+                                    <ExpansionPanel key={index} expanded={this.state.layout.showingFundDetail[fund.icf_cnpj_fundo]} onChange={(e, expanded) => this.handleFundExpansion(expanded, fund)}>
                                         <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
                                             <Grid container spacing={8}>
                                                 <Grid item xs={8}>
