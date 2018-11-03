@@ -158,7 +158,7 @@
             - [ ] v2 - Componentize fund listing
             - [ ] v1 - Componentize ui parts in separate components
             - [X] v1 - Add loading state
-            - [ ] v1 - Add error handling
+            - [X] v1 - Add error handling
     - [ ] v4 - Fund Comparison page 
         - [ ] Reuse fund list page
         - [ ] Add fund selector

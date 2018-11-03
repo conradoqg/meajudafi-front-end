@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "budo ./js/index.js:dist/bundle.js --live -P -- -g browserify-css -t babelify -t browserify-shim ",
-    "dist": "browserify ./js/index.js -g browserify-css -t babelify -t browserify-shim | uglifyjs > ./dist/bundle.js"
+    "start": "budo ./js/index.js:dist/bundle.js --live -P -- -g browserify-css -t babelify -t browserify-shim",
+    "dist": "browserify ./js/index.js -g browserify-css -t babelify -t browserify-shim -p [ common-shakeify -v ] | uglifyjs > ./dist/bundle.js"
   },
   "browserify-shim": {},
   "browserify-css": {
@@ -23,6 +23,7 @@
     "classnames": "^2.2.6",
     "immer": "^1.7.2",
     "plotly.js": "^1.41.3",
+    "promise-results": "^0.6.2",
     "rc-slider": "^8.6.3",
     "react": "^16.5.0",
     "react-dom": "^16.5.0",
@@ -38,6 +39,7 @@
     "browserify-css": "^0.14.0",
     "browserify-shim": "^3.8.14",
     "budo": "^11.3.2",
+    "common-shakeify": "^0.5.1",
     "uglify-js": "^3.4.9"
   }
 }

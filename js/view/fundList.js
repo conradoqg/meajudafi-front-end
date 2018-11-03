@@ -164,12 +164,18 @@ class FundListView extends React.Component {
             draft.config.page = page;
         });
 
-        const result = await this.getFundList(nextState.config);
+        try {
+            const result = await this.getFundList(nextState.config);
 
-        this.setState(produce(nextState, draft => {
-            draft.data.totalRows = result.totalRows;
-            draft.data.fundList = result.data;
-        }));
+            this.setState(produce(nextState, draft => {
+                draft.data.totalRows = result.totalRows;
+                draft.data.fundList = result.data;
+            }));
+        } catch (ex) {
+            this.setState(produce(nextState, draft => {
+                draft.data.fundList = ex.message;
+            }));
+        }
     }
 
     handleChangeRowsPerPage = async (event) => {
@@ -183,13 +189,19 @@ class FundListView extends React.Component {
             draft.data.fundList = emptyState.data.fundList;
         }));
 
-        const result = await this.getFundList(nextState.config);
+        try {
+            const result = await this.getFundList(nextState.config);
 
-        this.setState(produce(nextState, draft => {
-            draft.config.rowsPerPage = event.target.value;
-            draft.data.totalRows = result.totalRows;
-            draft.data.fundList = result.data;
-        }));
+            this.setState(produce(nextState, draft => {
+                draft.config.rowsPerPage = event.target.value;
+                draft.data.totalRows = result.totalRows;
+                draft.data.fundList = result.data;
+            }));
+        } catch (ex) {
+            this.setState(produce(nextState, draft => {
+                draft.data.fundList = ex.message;
+            }));
+        }
     }
 
     handleSortClick = event => {
@@ -212,13 +224,19 @@ class FundListView extends React.Component {
             draft.data.fundList = emptyState.data.fundList;
         }));
 
-        const result = await this.getFundList(nextState.config);
+        try {
+            const result = await this.getFundList(nextState.config);
 
-        this.setState(produce(nextState, draft => {
-            draft.layout.anchorEl = null;
-            draft.data.totalRows = result.totalRows;
-            draft.data.fundList = result.data;
-        }));
+            this.setState(produce(nextState, draft => {
+                draft.layout.anchorEl = null;
+                draft.data.totalRows = result.totalRows;
+                draft.data.fundList = result.data;
+            }));
+        } catch (ex) {
+            this.setState(produce(nextState, draft => {
+                draft.data.fundList = ex.message;
+            }));
+        }
     }
 
     handleFilterClick = () => {
@@ -254,12 +272,18 @@ class FundListView extends React.Component {
             draft.data.fundList = emptyState.data.fundList;
         }));
 
-        const result = await this.getFundList(this.state.config);
+        try {
+            const result = await this.getFundList(this.state.config);
 
-        this.setState(produce(draft => {
-            draft.data.totalRows = result.totalRows;
-            draft.data.fundList = result.data;
-        }));
+            this.setState(produce(draft => {
+                draft.data.totalRows = result.totalRows;
+                draft.data.fundList = result.data;
+            }));
+        } catch (ex) {
+            this.setState(produce(draft => {
+                draft.data.fundList = ex.message;
+            }));
+        }
     }
 
     handleSearchClearClick = async () => {
@@ -272,12 +296,18 @@ class FundListView extends React.Component {
             draft.data.fundList = emptyState.data.fundList;
         }));
 
-        const result = await this.getFundList(nextState.config);
+        try {
+            const result = await this.getFundList(nextState.config);
 
-        this.setState(produce(nextState, draft => {
-            draft.data.totalRows = result.totalRows;
-            draft.data.fundList = result.data;
-        }));
+            this.setState(produce(nextState, draft => {
+                draft.data.totalRows = result.totalRows;
+                draft.data.fundList = result.data;
+            }));
+        } catch (ex) {
+            this.setState(produce(nextState, draft => {
+                draft.data.fundList = ex.message;
+            }));
+        }
     }
 
     handleFilterApplyClick = async () => {
@@ -286,12 +316,18 @@ class FundListView extends React.Component {
             draft.data.fundList = emptyState.data.fundList;
         }));
 
-        const result = await this.getFundList(this.state.config);
+        try {
+            const result = await this.getFundList(this.state.config);
 
-        this.setState(produce(draft => {
-            draft.data.totalRows = result.totalRows;
-            draft.data.fundList = result.data;
-        }));
+            this.setState(produce(draft => {
+                draft.data.totalRows = result.totalRows;
+                draft.data.fundList = result.data;
+            }));
+        } catch (ex) {
+            this.setState(produce(draft => {
+                draft.data.fundList = ex.message;
+            }));
+        }
     }
 
     handleFilterClearClick = async () => {
@@ -308,12 +344,18 @@ class FundListView extends React.Component {
             draft.data.fundList = emptyState.data.fundList;
         }));
 
-        const result = await this.getFundList(nextState.config);
+        try {
+            const result = await this.getFundList(nextState.config);
 
-        this.setState(produce(nextState, draft => {
-            draft.data.totalRows = result.totalRows;
-            draft.data.fundList = result.data;
-        }));
+            this.setState(produce(nextState, draft => {
+                draft.data.totalRows = result.totalRows;
+                draft.data.fundList = result.data;
+            }));
+        } catch (ex) {
+            this.setState(produce(nextState, draft => {
+                draft.data.fundList = ex.message;
+            }));
+        }
     }
 
     handleFilter_iry_investment_return_1y_Click = (range) => {
@@ -342,11 +384,17 @@ class FundListView extends React.Component {
             draft.data.fundDetail[fund.icf_cnpj_fundo] = null;
         }));
 
-        const data = (expanded ? await this.getFundDetail(fund.icf_cnpj_fundo) : null);
+        try {
+            const data = (expanded ? await this.getFundDetail(fund.icf_cnpj_fundo) : null);
 
-        this.setState(produce(draft => {
-            draft.data.fundDetail[fund.icf_cnpj_fundo] = data;
-        }));
+            this.setState(produce(draft => {
+                draft.data.fundDetail[fund.icf_cnpj_fundo] = data;
+            }));
+        } catch (ex) {
+            this.setState(produce(draft => {
+                draft.data.fundDetail[fund.icf_cnpj_fundo] = ex.message;
+            }));
+        }
     }
 
     async getFundList(options) {
@@ -701,9 +749,9 @@ class FundListView extends React.Component {
 const FundHistoryChart = (props) => {
     const { fund, handleChartInitialized, handleChartUpdate } = props;
 
-    if (!fund) return <Typography variant="title" align="center">Carregando...</Typography>;
-    else {
-        return (
+    return chooseState(
+        fund,
+        () => (
             <Plot
                 key={fund.name}
                 data={fund.data}
@@ -712,8 +760,14 @@ const FundHistoryChart = (props) => {
                 onUpdate={handleChartUpdate}
                 useResizeHandler={true}
                 style={{ width: '100%', height: '100%' }}
-            />);
-    }
+            />
+        ),
+        () => (
+            <Typography variant="subheading" align="center"><CircularProgress /></Typography>
+        ),
+        () => (
+            <Typography variant="subheading" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>
+        ));
 };
 
 const chooseState = (data, hasData, isNull, isError, isEmpty) => {
