@@ -149,7 +149,7 @@
             - [ ] v2 - Add filter suggestions
             - [ ] v2 - Filter options must be dinamically determined
         - [ ] Changes to the order feature
-            - [ ] v1 - Add missing fields to order
+            - [X] v1 - Add missing fields to order
             - [X] v1 - Replace (ASC) and (DESC) by icons
         - [ ] v2 - Add column selector
         - [ ] Changes to the code

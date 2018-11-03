@@ -479,7 +479,7 @@ class FundListView extends React.Component {
                                     onClose={this.handleSortClose}
                                     PaperProps={MenuProps.PaperProps}>
                                     {this.state.data.sortOptions.map((option, index) => (
-                                        <MenuItem key={option.displayName} selected={option.displayName === this.state.config.sort.displayName} onClick={event => this.handleSortMenuItemClick(event, index)}>
+                                        <MenuItem key={option.displayName} selected={option.displayName === this.state.config.sort.displayName && option.order === this.state.config.sort.order} onClick={event => this.handleSortMenuItemClick(event, index)}>
                                             {option.displayName}&nbsp;
                                             {option.order == 'asc' ? <ArrowDownwardIcon /> : <ArrowUpwardIcon />}
                                         </MenuItem>
