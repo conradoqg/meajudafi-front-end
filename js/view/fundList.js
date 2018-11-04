@@ -66,7 +66,9 @@ const emptyState = {
         sortOptions: sortOptions,
         filterOptions: filterOptions,
         filterRange: {
-            iry_investment_return_1y: [2, -2]
+            iry_investment_return_1y: [4, -4],
+            iry_investment_return_2y: [4, -4],
+            iry_investment_return_3y: [4, -4]
         }
     },
     config: {
@@ -75,10 +77,9 @@ const emptyState = {
         sort: sortOptions[0],
         filter: {
             class: [],
-            iry_investment_return_1y: {
-                min: -2,
-                max: 2
-            }
+            iry_investment_return_1y: { min: -4, max: 4 },
+            iry_investment_return_2y: { min: -4, max: 4 },
+            iry_investment_return_3y: { min: -4, max: 4 }
         },
         search: {
             term: ''
@@ -274,10 +275,10 @@ class FundListView extends React.Component {
     handleFilterClearClick = async () => {
         const nextState = produce(this.state, draft => {
             draft.config.filter.class = [];
-            draft.config.filter.iry_investment_return_1y = {
-                min: -2,
-                max: 2
-            };
+            // TODO: This reset should be better implemented
+            draft.config.filter.iry_investment_return_1y = emptyState.config.filter.iry_investment_return_1y;
+            draft.config.filter.iry_investment_return_2y = emptyState.config.filter.iry_investment_return_2y;
+            draft.config.filter.iry_investment_return_3y = emptyState.config.filter.iry_investment_return_3y;
         });
 
         this.setState(produce(draft => {
@@ -299,13 +300,12 @@ class FundListView extends React.Component {
         }
     }
 
-    handleFilter_iry_investment_return_1y_Click = (range) => {
-        this.setState(produce(draft => {
-            draft.config.filter.iry_investment_return_1y = {
-                min: range[0],
-                max: range[1]
-            };
-        }));
+    handleFilterRangeClick = iry_investment_return => {
+        return range => {
+            this.setState(produce(draft => {
+                draft.config.filter[iry_investment_return] = { min: range[0], max: range[1] };
+            }));
+        };
     }
 
     handleChartInitialized = async (fund, figure) => {
@@ -411,30 +411,22 @@ class FundListView extends React.Component {
         };
     }
 
-    async getDataAgreggation() {
-        const fundListObject = await fetch('http://localhost:82/inf_cadastral_fi_with_xpi_and_iryf_of_last_year_max_min');
-        return await fundListObject.json();
-    }
-
     async componentDidMount() {
         try {
             const result = await this.getFundList(this.state.config);
-            const result2 = await this.getDataAgreggation();
 
-            const min = isNaN(result2[0].iry_investment_return_1y_min) || !isFinite(result2[0].iry_investment_return_1y_min) || result2[0].iry_investment_return_1y_min < -2 ? -2 : Math.floor(result2[0].iry_investment_return_1y_min);
-            const max = isNaN(result2[0].iry_investment_return_1y_max) || !isFinite(result2[0].iry_investment_return_1y_max) || result2[0].iry_investment_return_1y_max > 2 ? 2 : Math.ceil(result2[0].iry_investment_return_1y_max);
+            const min = -4;
+            const max = 4;
 
             this.setState(produce(draft => {
                 draft.data.totalRows = result.totalRows;
                 draft.data.fundList = result.data;
-                draft.config.filter.iry_investment_return_1y = {
-                    min,
-                    max
-                };
-                draft.data.filterRange.iry_investment_return_1y = {
-                    min,
-                    max
-                };
+                draft.config.filter.iry_investment_return_1y = { min, max };
+                draft.data.filterRange.iry_investment_return_1y = { min, max };
+                draft.config.filter.iry_investment_return_2y = { min, max };
+                draft.data.filterRange.iry_investment_return_2y = { min, max };
+                draft.config.filter.iry_investment_return_3y = { min, max };
+                draft.data.filterRange.iry_investment_return_3y = { min, max };
             }));
         } catch (ex) {
             this.setState(produce(draft => {
@@ -479,7 +471,7 @@ class FundListView extends React.Component {
                                     onClose={this.handleSortClose}
                                     PaperProps={MenuProps.PaperProps}>
                                     {this.state.data.sortOptions.map((option, index) => (
-                                        <MenuItem key={option.displayName} selected={option.displayName === this.state.config.sort.displayName && option.order === this.state.config.sort.order} onClick={event => this.handleSortMenuItemClick(event, index)}>
+                                        <MenuItem key={option.displayName + option.order} selected={option.displayName === this.state.config.sort.displayName && option.order === this.state.config.sort.order} onClick={event => this.handleSortMenuItemClick(event, index)}>
                                             {option.displayName}&nbsp;
                                             {option.order == 'asc' ? <ArrowDownwardIcon /> : <ArrowUpwardIcon />}
                                         </MenuItem>
@@ -549,15 +541,35 @@ class FundListView extends React.Component {
                                                     ))}
                                                 </Select>
                                             </Grid>
-                                            <Grid item xs={12}>
+                                            <Grid item xs={6}>
                                                 <Typography variant="subheading" align="center" gutterBottom>Desempenho 1A:</Typography>
                                                 <Range
                                                     tipFormatter={value => `${(value * 100).toFixed(2)}%`}
                                                     min={this.state.data.filterRange.iry_investment_return_1y.min}
                                                     max={this.state.data.filterRange.iry_investment_return_1y.max}
-                                                    step={Math.abs((this.state.data.filterRange.iry_investment_return_1y.max - this.state.data.filterRange.iry_investment_return_1y.min) / 50)}
-                                                    onChange={this.handleFilter_iry_investment_return_1y_Click}
+                                                    step={Math.abs((this.state.data.filterRange.iry_investment_return_1y.max - this.state.data.filterRange.iry_investment_return_1y.min) / 100)}
+                                                    onChange={this.handleFilterRangeClick('iry_investment_return_1y')}
                                                     value={[this.state.config.filter.iry_investment_return_1y.min, this.state.config.filter.iry_investment_return_1y.max]} />
+                                            </Grid>
+                                            <Grid item xs={6}>
+                                                <Typography variant="subheading" align="center" gutterBottom>Desempenho 2A:</Typography>
+                                                <Range
+                                                    tipFormatter={value => `${(value * 100).toFixed(2)}%`}
+                                                    min={this.state.data.filterRange.iry_investment_return_2y.min}
+                                                    max={this.state.data.filterRange.iry_investment_return_2y.max}
+                                                    step={Math.abs((this.state.data.filterRange.iry_investment_return_2y.max - this.state.data.filterRange.iry_investment_return_2y.min) / 100)}
+                                                    onChange={this.handleFilterRangeClick('iry_investment_return_2y')}
+                                                    value={[this.state.config.filter.iry_investment_return_2y.min, this.state.config.filter.iry_investment_return_2y.max]} />
+                                            </Grid>
+                                            <Grid item xs={6}>
+                                                <Typography variant="subheading" align="center" gutterBottom>Desempenho 3A:</Typography>
+                                                <Range
+                                                    tipFormatter={value => `${(value * 100).toFixed(2)}%`}
+                                                    min={this.state.data.filterRange.iry_investment_return_3y.min}
+                                                    max={this.state.data.filterRange.iry_investment_return_3y.max}
+                                                    step={Math.abs((this.state.data.filterRange.iry_investment_return_3y.max - this.state.data.filterRange.iry_investment_return_3y.min) / 100)}
+                                                    onChange={this.handleFilterRangeClick('iry_investment_return_3y')}
+                                                    value={[this.state.config.filter.iry_investment_return_3y.min, this.state.config.filter.iry_investment_return_3y.max]} />
                                             </Grid>
                                             <Grid item xs={6} align="center">
                                                 <Button variant="contained" color="primary" onClick={this.handleFilterApplyClick} >Aplicar</Button>

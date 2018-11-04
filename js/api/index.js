@@ -16,6 +16,14 @@ module.exports = {
         if (options.filter.iry_investment_return_1y) {
             iry_investment_return_1yFilter = `and=(iry_investment_return_1y.gte.${options.filter.iry_investment_return_1y.min},iry_investment_return_1y.lte.${options.filter.iry_investment_return_1y.max})&`;
         }
+        let iry_investment_return_2yFilter = '';
+        if (options.filter.iry_investment_return_2y) {
+            iry_investment_return_2yFilter = `and=(iry_investment_return_2y.gte.${options.filter.iry_investment_return_2y.min},iry_investment_return_2y.lte.${options.filter.iry_investment_return_2y.max})&`;
+        }
+        let iry_investment_return_3yFilter = '';
+        if (options.filter.iry_investment_return_3y) {
+            iry_investment_return_3yFilter = `and=(iry_investment_return_3y.gte.${options.filter.iry_investment_return_3y.min},iry_investment_return_3y.lte.${options.filter.iry_investment_return_3y.max})&`;
+        }
         let searchPart = '';
         if (options.search.term != '') {
             // Identify if it's a CNPJ or a fund name
@@ -26,7 +34,7 @@ module.exports = {
             }
 
         }
-        const fundListObject = await fetch(`http://localhost:82/inf_cadastral_fi_with_xpi_and_iryf_of_last_year?${classFilter}${iry_investment_return_1yFilter}${searchPart}order=${sort}`, {
+        const fundListObject = await fetch(`http://localhost:82/inf_cadastral_fi_with_xpi_and_iryf_of_last_year?${classFilter}${iry_investment_return_1yFilter}${iry_investment_return_2yFilter}${iry_investment_return_3yFilter}${searchPart}order=${sort}`, {
             method: 'GET',
             headers: {
                 'Range-Unit': 'items',
