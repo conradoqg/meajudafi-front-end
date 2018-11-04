@@ -1,0 +1,9 @@
+language: node_js
+
+node_js:
+  - "node"
+
+script: 
+  - npm install
+  - npm run dist
+  - ls dist/ -lh
