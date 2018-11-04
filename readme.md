@@ -145,7 +145,7 @@
         - [ ] Changes to the search feature
             - [ ] v1 - Remove accents from the search term and results
         - [ ] Changes to the filter feature
-            - [ ] v1 - Add missing fields to filter
+            - [X] v1 - Add missing fields to filter
             - [ ] v2 - Add filter suggestions
             - [ ] v2 - Filter options must be dinamically determined
         - [ ] Changes to the order feature

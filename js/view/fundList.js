@@ -68,7 +68,16 @@ const emptyState = {
         filterRange: {
             iry_investment_return_1y: [4, -4],
             iry_investment_return_2y: [4, -4],
-            iry_investment_return_3y: [4, -4]
+            iry_investment_return_3y: [4, -4],
+            iry_risk_1y: [4, -4],
+            iry_risk_2y: [4, -4],
+            iry_risk_3y: [4, -4],
+            iry_sharpe_1y: [4, -4],
+            iry_sharpe_2y: [4, -4],
+            iry_sharpe_3y: [4, -4],
+            iry_consistency_1y: [4, -4],
+            iry_consistency_2y: [4, -4],
+            iry_consistency_3y: [4, -4]
         }
     },
     config: {
@@ -79,7 +88,16 @@ const emptyState = {
             class: [],
             iry_investment_return_1y: { min: -4, max: 4 },
             iry_investment_return_2y: { min: -4, max: 4 },
-            iry_investment_return_3y: { min: -4, max: 4 }
+            iry_investment_return_3y: { min: -4, max: 4 },
+            iry_risk_1y: { min: -4, max: 4 },
+            iry_risk_2y: { min: -4, max: 4 },
+            iry_risk_3y: { min: -4, max: 4 },
+            iry_sharpe_1y: { min: -4, max: 4 },
+            iry_sharpe_2y: { min: -4, max: 4 },
+            iry_sharpe_3y: { min: -4, max: 4 },
+            iry_consistency_1y: { min: -4, max: 4 },
+            iry_consistency_2y: { min: -4, max: 4 },
+            iry_consistency_3y: { min: -4, max: 4 }
         },
         search: {
             term: ''
@@ -275,10 +293,18 @@ class FundListView extends React.Component {
     handleFilterClearClick = async () => {
         const nextState = produce(this.state, draft => {
             draft.config.filter.class = [];
-            // TODO: This reset should be better implemented
             draft.config.filter.iry_investment_return_1y = emptyState.config.filter.iry_investment_return_1y;
             draft.config.filter.iry_investment_return_2y = emptyState.config.filter.iry_investment_return_2y;
             draft.config.filter.iry_investment_return_3y = emptyState.config.filter.iry_investment_return_3y;
+            draft.config.filter.iry_risk_1y = emptyState.config.filter.iry_risk_1y;
+            draft.config.filter.iry_risk_2y = emptyState.config.filter.iry_risk_2y;
+            draft.config.filter.iry_risk_3y = emptyState.config.filter.iry_risk_3y;
+            draft.config.filter.iry_sharpe_1y = emptyState.config.filter.iry_sharpe_1y;
+            draft.config.filter.iry_sharpe_2y = emptyState.config.filter.iry_sharpe_2y;
+            draft.config.filter.iry_sharpe_3y = emptyState.config.filter.iry_sharpe_3y;
+            draft.config.filter.iry_consistency_1y = emptyState.config.filter.iry_consistency_1y;
+            draft.config.filter.iry_consistency_2y = emptyState.config.filter.iry_consistency_2y;
+            draft.config.filter.iry_consistency_3y = emptyState.config.filter.iry_consistency_3y;
         });
 
         this.setState(produce(draft => {
@@ -427,6 +453,24 @@ class FundListView extends React.Component {
                 draft.data.filterRange.iry_investment_return_2y = { min, max };
                 draft.config.filter.iry_investment_return_3y = { min, max };
                 draft.data.filterRange.iry_investment_return_3y = { min, max };
+                draft.config.filter.iry_risk_1y = { min, max };
+                draft.data.filterRange.iry_risk_1y = { min, max };
+                draft.config.filter.iry_risk_2y = { min, max };
+                draft.data.filterRange.iry_risk_2y = { min, max };
+                draft.config.filter.iry_risk_3y = { min, max };
+                draft.data.filterRange.iry_risk_3y = { min, max };
+                draft.config.filter.iry_sharpe_1y = { min, max };
+                draft.data.filterRange.iry_sharpe_1y = { min, max };
+                draft.config.filter.iry_sharpe_2y = { min, max };
+                draft.data.filterRange.iry_sharpe_2y = { min, max };
+                draft.config.filter.iry_sharpe_3y = { min, max };
+                draft.data.filterRange.iry_sharpe_3y = { min, max };
+                draft.config.filter.iry_consistency_1y = { min, max };
+                draft.data.filterRange.iry_consistency_1y = { min, max };
+                draft.config.filter.iry_consistency_2y = { min, max };
+                draft.data.filterRange.iry_consistency_2y = { min, max };
+                draft.config.filter.iry_consistency_3y = { min, max };
+                draft.data.filterRange.iry_consistency_3y = { min, max };
             }));
         } catch (ex) {
             this.setState(produce(draft => {
@@ -552,6 +596,16 @@ class FundListView extends React.Component {
                                                     value={[this.state.config.filter.iry_investment_return_1y.min, this.state.config.filter.iry_investment_return_1y.max]} />
                                             </Grid>
                                             <Grid item xs={6}>
+                                                <Typography variant="subheading" align="center" gutterBottom>Risco 1A:</Typography>
+                                                <Range
+                                                    tipFormatter={value => `${(value * 100).toFixed(2)}%`}
+                                                    min={this.state.data.filterRange.iry_risk_1y.min}
+                                                    max={this.state.data.filterRange.iry_risk_1y.max}
+                                                    step={Math.abs((this.state.data.filterRange.iry_risk_1y.max - this.state.data.filterRange.iry_risk_1y.min) / 100)}
+                                                    onChange={this.handleFilterRangeClick('iry_risk_1y')}
+                                                    value={[this.state.config.filter.iry_risk_1y.min, this.state.config.filter.iry_risk_1y.max]} />
+                                            </Grid>
+                                            <Grid item xs={6}>
                                                 <Typography variant="subheading" align="center" gutterBottom>Desempenho 2A:</Typography>
                                                 <Range
                                                     tipFormatter={value => `${(value * 100).toFixed(2)}%`}
@@ -562,6 +616,16 @@ class FundListView extends React.Component {
                                                     value={[this.state.config.filter.iry_investment_return_2y.min, this.state.config.filter.iry_investment_return_2y.max]} />
                                             </Grid>
                                             <Grid item xs={6}>
+                                                <Typography variant="subheading" align="center" gutterBottom>Risco 2A:</Typography>
+                                                <Range
+                                                    tipFormatter={value => `${(value * 100).toFixed(2)}%`}
+                                                    min={this.state.data.filterRange.iry_risk_2y.min}
+                                                    max={this.state.data.filterRange.iry_risk_2y.max}
+                                                    step={Math.abs((this.state.data.filterRange.iry_risk_2y.max - this.state.data.filterRange.iry_risk_2y.min) / 100)}
+                                                    onChange={this.handleFilterRangeClick('iry_risk_2y')}
+                                                    value={[this.state.config.filter.iry_risk_2y.min, this.state.config.filter.iry_risk_2y.max]} />
+                                            </Grid>
+                                            <Grid item xs={6}>
                                                 <Typography variant="subheading" align="center" gutterBottom>Desempenho 3A:</Typography>
                                                 <Range
                                                     tipFormatter={value => `${(value * 100).toFixed(2)}%`}
@@ -570,6 +634,76 @@ class FundListView extends React.Component {
                                                     step={Math.abs((this.state.data.filterRange.iry_investment_return_3y.max - this.state.data.filterRange.iry_investment_return_3y.min) / 100)}
                                                     onChange={this.handleFilterRangeClick('iry_investment_return_3y')}
                                                     value={[this.state.config.filter.iry_investment_return_3y.min, this.state.config.filter.iry_investment_return_3y.max]} />
+                                            </Grid>
+                                            <Grid item xs={6}>
+                                                <Typography variant="subheading" align="center" gutterBottom>Risco 3A:</Typography>
+                                                <Range
+                                                    tipFormatter={value => `${(value * 100).toFixed(2)}%`}
+                                                    min={this.state.data.filterRange.iry_risk_3y.min}
+                                                    max={this.state.data.filterRange.iry_risk_3y.max}
+                                                    step={Math.abs((this.state.data.filterRange.iry_risk_3y.max - this.state.data.filterRange.iry_risk_3y.min) / 100)}
+                                                    onChange={this.handleFilterRangeClick('iry_risk_3y')}
+                                                    value={[this.state.config.filter.iry_risk_3y.min, this.state.config.filter.iry_risk_3y.max]} />
+                                            </Grid>
+                                            <Grid item xs={6}>
+                                                <Typography variant="subheading" align="center" gutterBottom>Sharpe 1A:</Typography>
+                                                <Range
+                                                    tipFormatter={value => `${(value * 100).toFixed(2)}%`}
+                                                    min={this.state.data.filterRange.iry_sharpe_1y.min}
+                                                    max={this.state.data.filterRange.iry_sharpe_1y.max}
+                                                    step={Math.abs((this.state.data.filterRange.iry_sharpe_1y.max - this.state.data.filterRange.iry_sharpe_1y.min) / 100)}
+                                                    onChange={this.handleFilterRangeClick('iry_sharpe_1y')}
+                                                    value={[this.state.config.filter.iry_sharpe_1y.min, this.state.config.filter.iry_sharpe_1y.max]} />
+                                            </Grid>
+                                            <Grid item xs={6}>
+                                                <Typography variant="subheading" align="center" gutterBottom>Consistência 1A:</Typography>
+                                                <Range
+                                                    tipFormatter={value => `${(value * 100).toFixed(2)}%`}
+                                                    min={this.state.data.filterRange.iry_consistency_1y.min}
+                                                    max={this.state.data.filterRange.iry_consistency_1y.max}
+                                                    step={Math.abs((this.state.data.filterRange.iry_consistency_1y.max - this.state.data.filterRange.iry_consistency_1y.min) / 100)}
+                                                    onChange={this.handleFilterRangeClick('iry_consistency_1y')}
+                                                    value={[this.state.config.filter.iry_consistency_1y.min, this.state.config.filter.iry_consistency_1y.max]} />
+                                            </Grid>
+                                            <Grid item xs={6}>
+                                                <Typography variant="subheading" align="center" gutterBottom>Sharpe 2A:</Typography>
+                                                <Range
+                                                    tipFormatter={value => `${(value * 100).toFixed(2)}%`}
+                                                    min={this.state.data.filterRange.iry_sharpe_2y.min}
+                                                    max={this.state.data.filterRange.iry_sharpe_2y.max}
+                                                    step={Math.abs((this.state.data.filterRange.iry_sharpe_2y.max - this.state.data.filterRange.iry_sharpe_2y.min) / 100)}
+                                                    onChange={this.handleFilterRangeClick('iry_sharpe_2y')}
+                                                    value={[this.state.config.filter.iry_sharpe_2y.min, this.state.config.filter.iry_sharpe_2y.max]} />
+                                            </Grid>
+                                            <Grid item xs={6}>
+                                                <Typography variant="subheading" align="center" gutterBottom>Consistência 2A:</Typography>
+                                                <Range
+                                                    tipFormatter={value => `${(value * 100).toFixed(2)}%`}
+                                                    min={this.state.data.filterRange.iry_consistency_2y.min}
+                                                    max={this.state.data.filterRange.iry_consistency_2y.max}
+                                                    step={Math.abs((this.state.data.filterRange.iry_consistency_2y.max - this.state.data.filterRange.iry_consistency_2y.min) / 100)}
+                                                    onChange={this.handleFilterRangeClick('iry_consistency_2y')}
+                                                    value={[this.state.config.filter.iry_consistency_2y.min, this.state.config.filter.iry_consistency_2y.max]} />
+                                            </Grid>
+                                            <Grid item xs={6}>
+                                                <Typography variant="subheading" align="center" gutterBottom>Sharpe 3A:</Typography>
+                                                <Range
+                                                    tipFormatter={value => `${(value * 100).toFixed(2)}%`}
+                                                    min={this.state.data.filterRange.iry_sharpe_3y.min}
+                                                    max={this.state.data.filterRange.iry_sharpe_3y.max}
+                                                    step={Math.abs((this.state.data.filterRange.iry_sharpe_3y.max - this.state.data.filterRange.iry_sharpe_3y.min) / 100)}
+                                                    onChange={this.handleFilterRangeClick('iry_sharpe_3y')}
+                                                    value={[this.state.config.filter.iry_sharpe_3y.min, this.state.config.filter.iry_sharpe_3y.max]} />
+                                            </Grid>
+                                            <Grid item xs={6}>
+                                                <Typography variant="subheading" align="center" gutterBottom>Consistência 3A:</Typography>
+                                                <Range
+                                                    tipFormatter={value => `${(value * 100).toFixed(2)}%`}
+                                                    min={this.state.data.filterRange.iry_consistency_3y.min}
+                                                    max={this.state.data.filterRange.iry_consistency_3y.max}
+                                                    step={Math.abs((this.state.data.filterRange.iry_consistency_3y.max - this.state.data.filterRange.iry_consistency_3y.min) / 100)}
+                                                    onChange={this.handleFilterRangeClick('iry_consistency_3y')}
+                                                    value={[this.state.config.filter.iry_consistency_3y.min, this.state.config.filter.iry_consistency_3y.max]} />
                                             </Grid>
                                             <Grid item xs={6} align="center">
                                                 <Button variant="contained" color="primary" onClick={this.handleFilterApplyClick} >Aplicar</Button>
