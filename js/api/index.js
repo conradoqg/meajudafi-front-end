@@ -2,74 +2,94 @@ import allKeys from 'promise-results/allKeys';
 
 module.exports = {
     getFundList: async (options) => {
+        console.dir(options);
         const range = `${(options.page * options.rowsPerPage)}-${((options.page * options.rowsPerPage) + options.rowsPerPage - 1)}`;
         const sort = `${options.sort.field}.${options.sort.order}`;
+
         let classFilter = '';
-        if (options.filter.class.length > 0) {
-            const selectedFilterOptions = options.filter.class.map(selectedFilter => {
-                if (selectedFilter == null) return 'icf_classe.is.null';
-                else return `icf_classe.eq."${selectedFilter}"`;
-            });
-            classFilter = `or=(${selectedFilterOptions.join(',')})&`;
-        }
         let iry_investment_return_1yFilter = '';
-        if (options.filter.iry_investment_return_1y) {
-            iry_investment_return_1yFilter = `and=(iry_investment_return_1y.gte.${options.filter.iry_investment_return_1y.min},iry_investment_return_1y.lte.${options.filter.iry_investment_return_1y.max})&`;
-        }
         let iry_investment_return_2yFilter = '';
-        if (options.filter.iry_investment_return_2y) {
-            iry_investment_return_2yFilter = `and=(iry_investment_return_2y.gte.${options.filter.iry_investment_return_2y.min},iry_investment_return_2y.lte.${options.filter.iry_investment_return_2y.max})&`;
-        }
         let iry_investment_return_3yFilter = '';
-        if (options.filter.iry_investment_return_3y) {
-            iry_investment_return_3yFilter = `and=(iry_investment_return_3y.gte.${options.filter.iry_investment_return_3y.min},iry_investment_return_3y.lte.${options.filter.iry_investment_return_3y.max})&`;
-        }
         let iry_risk_1yFilter = '';
-        if (options.filter.iry_risk_1y) {
-            iry_risk_1yFilter = `and=(iry_risk_1y.gte.${options.filter.iry_risk_1y.min},iry_risk_1y.lte.${options.filter.iry_risk_1y.max})&`;
-        }
         let iry_risk_2yFilter = '';
-        if (options.filter.iry_risk_2y) {
-            iry_risk_2yFilter = `and=(iry_risk_2y.gte.${options.filter.iry_risk_2y.min},iry_risk_2y.lte.${options.filter.iry_risk_2y.max})&`;
-        }
         let iry_risk_3yFilter = '';
-        if (options.filter.iry_risk_3y) {
-            iry_risk_3yFilter = `and=(iry_risk_3y.gte.${options.filter.iry_risk_3y.min},iry_risk_3y.lte.${options.filter.iry_risk_3y.max})&`;
-        }
         let iry_sharpe_1yFilter = '';
-        if (options.filter.iry_sharpe_1y) {
-            iry_sharpe_1yFilter = `and=(iry_sharpe_1y.gte.${options.filter.iry_sharpe_1y.min},iry_sharpe_1y.lte.${options.filter.iry_sharpe_1y.max})&`;
-        }
         let iry_sharpe_2yFilter = '';
-        if (options.filter.iry_sharpe_2y) {
-            iry_sharpe_2yFilter = `and=(iry_sharpe_2y.gte.${options.filter.iry_sharpe_2y.min},iry_sharpe_2y.lte.${options.filter.iry_sharpe_2y.max})&`;
-        }
         let iry_sharpe_3yFilter = '';
-        if (options.filter.iry_sharpe_3y) {
-            iry_sharpe_3yFilter = `and=(iry_sharpe_3y.gte.${options.filter.iry_sharpe_3y.min},iry_sharpe_3y.lte.${options.filter.iry_sharpe_3y.max})&`;
-        }
         let iry_consistency_1yFilter = '';
-        if (options.filter.iry_consistency_1y) {
-            iry_consistency_1yFilter = `and=(iry_consistency_1y.gte.${options.filter.iry_consistency_1y.min},iry_consistency_1y.lte.${options.filter.iry_consistency_1y.max})&`;
-        }
         let iry_consistency_2yFilter = '';
-        if (options.filter.iry_consistency_2y) {
-            iry_consistency_2yFilter = `and=(iry_consistency_2y.gte.${options.filter.iry_consistency_2y.min},iry_consistency_2y.lte.${options.filter.iry_consistency_2y.max})&`;
-        }
         let iry_consistency_3yFilter = '';
-        if (options.filter.iry_consistency_3y) {
-            iry_consistency_3yFilter = `and=(iry_consistency_3y.gte.${options.filter.iry_consistency_3y.min},iry_consistency_3y.lte.${options.filter.iry_consistency_3y.max})&`;
-        }
-        let searchPart = '';
-        if (options.search.term != '') {
-            // Identify if it's a CNPJ or a fund name
-            if (/^\d+$/.test(options.search.term)) {
-                searchPart = `and=(icf_cnpj_fundo.ilike.*${options.search.term}*)`;
-            } else {
-                searchPart = `and=(icf_denom_social_unaccented.ilike.*${options.search.term.normalize('NFD').replace(/[\u0300-\u036f]/g, '')}*)`;
+
+        if (options.filter) {
+            if (options.filter.class.length > 0) {
+                const selectedFilterOptions = options.filter.class.map(selectedFilter => {
+                    if (selectedFilter == null) return 'icf_classe.is.null';
+                    else return `icf_classe.eq."${selectedFilter}"`;
+                });
+                classFilter = `or=(${selectedFilterOptions.join(',')})&`;
             }
 
+            if (options.filter.iry_investment_return_1y) {
+                iry_investment_return_1yFilter = `and=(iry_investment_return_1y.gte.${options.filter.iry_investment_return_1y.min},iry_investment_return_1y.lte.${options.filter.iry_investment_return_1y.max})&`;
+            }
+
+            if (options.filter.iry_investment_return_2y) {
+                iry_investment_return_2yFilter = `and=(iry_investment_return_2y.gte.${options.filter.iry_investment_return_2y.min},iry_investment_return_2y.lte.${options.filter.iry_investment_return_2y.max})&`;
+            }
+
+            if (options.filter.iry_investment_return_3y) {
+                iry_investment_return_3yFilter = `and=(iry_investment_return_3y.gte.${options.filter.iry_investment_return_3y.min},iry_investment_return_3y.lte.${options.filter.iry_investment_return_3y.max})&`;
+            }
+
+            if (options.filter.iry_risk_1y) {
+                iry_risk_1yFilter = `and=(iry_risk_1y.gte.${options.filter.iry_risk_1y.min},iry_risk_1y.lte.${options.filter.iry_risk_1y.max})&`;
+            }
+
+            if (options.filter.iry_risk_2y) {
+                iry_risk_2yFilter = `and=(iry_risk_2y.gte.${options.filter.iry_risk_2y.min},iry_risk_2y.lte.${options.filter.iry_risk_2y.max})&`;
+            }
+
+            if (options.filter.iry_risk_3y) {
+                iry_risk_3yFilter = `and=(iry_risk_3y.gte.${options.filter.iry_risk_3y.min},iry_risk_3y.lte.${options.filter.iry_risk_3y.max})&`;
+            }
+
+            if (options.filter.iry_sharpe_1y) {
+                iry_sharpe_1yFilter = `and=(iry_sharpe_1y.gte.${options.filter.iry_sharpe_1y.min},iry_sharpe_1y.lte.${options.filter.iry_sharpe_1y.max})&`;
+            }
+
+            if (options.filter.iry_sharpe_2y) {
+                iry_sharpe_2yFilter = `and=(iry_sharpe_2y.gte.${options.filter.iry_sharpe_2y.min},iry_sharpe_2y.lte.${options.filter.iry_sharpe_2y.max})&`;
+            }
+
+            if (options.filter.iry_sharpe_3y) {
+                iry_sharpe_3yFilter = `and=(iry_sharpe_3y.gte.${options.filter.iry_sharpe_3y.min},iry_sharpe_3y.lte.${options.filter.iry_sharpe_3y.max})&`;
+            }
+
+            if (options.filter.iry_consistency_1y) {
+                iry_consistency_1yFilter = `and=(iry_consistency_1y.gte.${options.filter.iry_consistency_1y.min},iry_consistency_1y.lte.${options.filter.iry_consistency_1y.max})&`;
+            }
+
+            if (options.filter.iry_consistency_2y) {
+                iry_consistency_2yFilter = `and=(iry_consistency_2y.gte.${options.filter.iry_consistency_2y.min},iry_consistency_2y.lte.${options.filter.iry_consistency_2y.max})&`;
+            }
+
+            if (options.filter.iry_consistency_3y) {
+                iry_consistency_3yFilter = `and=(iry_consistency_3y.gte.${options.filter.iry_consistency_3y.min},iry_consistency_3y.lte.${options.filter.iry_consistency_3y.max})&`;
+            }
         }
+
+        let searchPart = '';
+        if (options.search) {            
+            if (options.search.term != '') {
+                // Identify if it's a CNPJ or a fund name
+                if (/^\d+$/.test(options.search.term)) {
+                    searchPart = `and=(icf_cnpj_fundo.ilike.*${options.search.term}*)`;
+                } else {
+                    searchPart = `and=(icf_denom_social_unaccented.ilike.*${options.search.term.normalize('NFD').replace(/[\u0300-\u036f]/g, '')}*)`;
+                }
+            }
+        }
+
         const fundListObject = await fetch(`http://localhost:82/inf_cadastral_fi_with_xpi_and_iryf_of_last_year?${classFilter}${iry_investment_return_1yFilter}${iry_investment_return_2yFilter}${iry_investment_return_3yFilter}${iry_risk_1yFilter}${iry_risk_2yFilter}${iry_risk_3yFilter}${iry_sharpe_1yFilter}${iry_sharpe_2yFilter}${iry_sharpe_3yFilter}${iry_consistency_1yFilter}${iry_consistency_2yFilter}${iry_consistency_3yFilter}${searchPart}order=${sort}`, {
             method: 'GET',
             headers: {

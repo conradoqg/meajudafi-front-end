@@ -102,7 +102,13 @@ const styles = theme => ({
     },
 });
 
-const routes = [
+const routes = [    
+    {
+        path: '/indicators',
+        name: 'Indicadores',        
+        icon: () => (<ShowChartIcon />),
+        main: (props, classes) => <IndicatorsView {...props} globalClasses={classes} />
+    },    
     {
         path: '/',
         name: 'Lista de Fundos',
@@ -110,12 +116,6 @@ const routes = [
         icon: () => (<TableChartIcon />),
         main: (props, classes) => <FundListView {...props} globalClasses={classes} />
     },
-    {
-        path: '/indicators',
-        name: 'Indicadores',        
-        icon: () => (<ShowChartIcon />),
-        main: (props, classes) => <IndicatorsView {...props} globalClasses={classes} />
-    },    
     {
         path: '/fundComparison',
         name: 'Comparação de Fundos',

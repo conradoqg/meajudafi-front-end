@@ -120,7 +120,7 @@
 - [ ] Front-end
     - [ ] Main page
         - [X] v1 - Add github link
-        - [ ] v1 - Add about
+        - [ ] v2 - Add about
         - [X] v1 - Remove inexistent links
     - [ ] v3 - Indicators page
         - [ ] Chart feature
@@ -156,7 +156,7 @@
             - [X] v1 - Componentize to an API lib
             - [X] v1 - Reorganize state
             - [ ] v2 - Componentize fund listing
-            - [ ] v1 - Componentize ui parts in separate components
+            - [X] v1 - Componentize ui parts in separate components
             - [X] v1 - Add loading state
             - [X] v1 - Add error handling
     - [ ] v4 - Fund Comparison page 
