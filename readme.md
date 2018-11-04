@@ -143,7 +143,7 @@
             - [ ] v2 - Add benchmark data
             - [ ] v2 - Add benchmark button to choose the benchmark
         - [ ] Changes to the search feature
-            - [ ] v1 - Remove accents from the search term and results
+            - [X] v1 - Remove accents from the search term and results
         - [ ] Changes to the filter feature
             - [X] v1 - Add missing fields to filter
             - [ ] v2 - Add filter suggestions
@@ -174,7 +174,7 @@
         - [ ] v2 - Add CDI quote to investment return table
         - [ ] v2 - Add IPCA quote to investment return table
         - [ ] v2 - Add IGP* quote to investment return table
-        - [ ] v1 - Add an unaccented fund name to inf_cadastral    
+        - [X] v1 - Add an unaccented fund name to inf_cadastral    
         - [ ] v2 - Add YTD, MTD, 1M, 3M, 6M performance, risk, sharpe and consistency to investment return table
         - [ ] v2 - Add YTD, MTD, 1M, 3M, 6M quote performance, risk, sharpe and consistency to investment return table
         - [ ] v2 - Add 1Y, 2Y, 3Y quote performance to investment return table

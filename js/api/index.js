@@ -66,7 +66,7 @@ module.exports = {
             if (/^\d+$/.test(options.search.term)) {
                 searchPart = `and=(icf_cnpj_fundo.ilike.*${options.search.term}*)`;
             } else {
-                searchPart = `and=(icf_denom_social.ilike.*${options.search.term}*)`;
+                searchPart = `and=(icf_denom_social_unaccented.ilike.*${options.search.term.normalize('NFD').replace(/[\u0300-\u036f]/g, '')}*)`;
             }
 
         }
