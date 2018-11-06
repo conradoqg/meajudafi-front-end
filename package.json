@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "budo ./js/index.js:build/bundle.js --live -P -- -g browserify-css -t babelify -t browserify-shim",
+    "start": "budo ./js/index.js:build/bundle.js --ssl --live -P -- -g browserify-css -t babelify -t browserify-shim",
     "build": "browserify ./js/index.js -g browserify-css -t babelify -t browserify-shim -p [ common-shakeify -v ] | uglifyjs > ./build/bundle.js",
     "dist": "cp index.html ./build ./dist -r && sed -i -e 's/null/\"\\/\\/api.conradoqg.eti.br\"/g' ./dist/index.html"
   },
