@@ -1,2 +1,5 @@
 node_modules
-dist/**/*.js
+dist/**/*
+!dist/**/.gitkeep
+build/**/*
+!build/**/.gitkeep

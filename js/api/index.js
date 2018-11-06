@@ -1,5 +1,7 @@
 import allKeys from 'promise-results/allKeys';
 
+const API_URL = window.API_URL;
+
 module.exports = {
     getFundList: async (options) => {
         console.dir(options);
@@ -90,7 +92,7 @@ module.exports = {
             }
         }
 
-        const fundListObject = await fetch(`http://localhost:82/inf_cadastral_fi_with_xpi_and_iryf_of_last_year?${classFilter}${iry_investment_return_1yFilter}${iry_investment_return_2yFilter}${iry_investment_return_3yFilter}${iry_risk_1yFilter}${iry_risk_2yFilter}${iry_risk_3yFilter}${iry_sharpe_1yFilter}${iry_sharpe_2yFilter}${iry_sharpe_3yFilter}${iry_consistency_1yFilter}${iry_consistency_2yFilter}${iry_consistency_3yFilter}${searchPart}order=${sort}`, {
+        const fundListObject = await fetch(`${API_URL}/inf_cadastral_fi_with_xpi_and_iryf_of_last_year?${classFilter}${iry_investment_return_1yFilter}${iry_investment_return_2yFilter}${iry_investment_return_3yFilter}${iry_risk_1yFilter}${iry_risk_2yFilter}${iry_risk_3yFilter}${iry_sharpe_1yFilter}${iry_sharpe_2yFilter}${iry_sharpe_3yFilter}${iry_consistency_1yFilter}${iry_consistency_2yFilter}${iry_consistency_3yFilter}${searchPart}order=${sort}`, {
             method: 'GET',
             headers: {
                 'Range-Unit': 'items',
@@ -111,8 +113,8 @@ module.exports = {
         };
     },
     getFundDetail: async (cnpj) => {
-        const dailyReturn = await fetch(`http://localhost:82/investment_return_daily?cnpj_fundo=eq.${cnpj}&order=dt_comptc`);
-        const infCadastral = await fetch(`http://localhost:82/inf_cadastral_fi?cnpj_fundo=eq.${cnpj}`);
+        const dailyReturn = await fetch(`${API_URL}/investment_return_daily?cnpj_fundo=eq.${cnpj}&order=dt_comptc`);
+        const infCadastral = await fetch(`${API_URL}/inf_cadastral_fi?cnpj_fundo=eq.${cnpj}`);
 
         return allKeys({ dailyReturn: dailyReturn.json(), infCadastral: infCadastral.json() });
     }

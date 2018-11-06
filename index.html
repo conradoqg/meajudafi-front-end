@@ -5,8 +5,8 @@
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500">    
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500">
 
     <title>CVM Fund Exploration</title>
 </head>
@@ -14,9 +14,14 @@
 <body>
     <div id="app" class='wrapper'></div>
 
-    <!-- Optional JavaScript -->        
+    <!-- Optional JavaScript -->
+    <script type="text/javascript">
+        var API_URL = null;
+
+        window.API_URL = !API_URL ? "//localhost:82" : API_URL;
+    </script>
     <!-- App JS -->
-    <script type="text/javascript" src="dist/bundle.js"></script>
+    <script type="text/javascript" src="build/bundle.js"></script>
 </body>
 
 </html>
