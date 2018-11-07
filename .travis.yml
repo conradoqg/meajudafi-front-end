@@ -3,6 +3,9 @@ language: node_js
 node_js:
   - "node"
 
+env:
+  - API_URL: api.cvmfundexplorer.conradoqg.eti.br
+
 script: 
   - npm install
   - npm run build
@@ -17,7 +20,7 @@ deploy:
   provider: s3
   access_key_id: $AWS_ACCESS_KEY
   secret_access_key: $AWS_SECRET_KEY
-  bucket: "api.cvmfundexplorer.conradoqg.eti.br"
+  bucket: "cvmfundexplorer.conradoqg.eti.br"
   skip_cleanup: true
   region: "sa-east-1"
   on:

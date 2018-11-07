@@ -6,8 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "budo ./js/index.js:build/bundle.js --ssl --live -P -- -g browserify-css -t babelify -t browserify-shim",
-    "build": "browserify ./js/index.js -g browserify-css -t babelify -t browserify-shim -p [ common-shakeify -v ] | uglifyjs > ./build/bundle.js",
-    "dist": "cp index.html ./build ./dist -r && sed -i -e 's/null/\"\\/\\/api.conradoqg.eti.br\"/g' ./dist/index.html"
+    "build": "browserify ./js/index.js -g browserify-css -t babelify -t browserify-shim -t envify -p [ common-shakeify -v ] | uglifyjs > ./build/bundle.js",
+    "dist": "cp index.html ./build ./dist -r"
   },
   "browserify-shim": {},
   "browserify-css": {
@@ -42,6 +42,7 @@
     "browserify-shim": "^3.8.14",
     "budo": "^11.3.2",
     "common-shakeify": "^0.5.1",
+    "envify": "^4.1.0",
     "uglify-js": "^3.4.9"
   }
 }
