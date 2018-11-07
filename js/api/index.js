@@ -1,10 +1,10 @@
 import allKeys from 'promise-results/allKeys';
 
+/* global process */
 const API_URL = process.env.API_URL || 'api.cvmfundexplorer.conradoqg.eti.br';
 
 module.exports = {
-    getFundList: async (options) => {
-        console.dir(options);
+    getFundList: async (options) => {        
         const range = `${(options.page * options.rowsPerPage)}-${((options.page * options.rowsPerPage) + options.rowsPerPage - 1)}`;
         const sort = `${options.sort.field}.${options.sort.order}`;
 
