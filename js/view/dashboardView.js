@@ -182,7 +182,7 @@ class Dashboard extends React.Component {
                                     )}>
                                     <MenuIcon />
                                 </IconButton>
-                                <Typography variant="title" color="inherit" noWrap className={classes.title}>Explorador de Investimentos</Typography>
+                                <Typography variant="title" color="inherit" noWrap className={classes.title}>Explorador de Fundos da CVM</Typography>
                                 <IconButton color="inherit" aria-label="Repositório no Github" href="https://github.com/conradoqg/cvm-fund-exploration-front-end" target="_new">
                                     <GithubCircleIcon fontSize="large" />
                                 </IconButton>
