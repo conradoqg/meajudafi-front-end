@@ -21,7 +21,7 @@ const emptyState = {
         }
     },
     layout: {
-        showingSearch: false        
+        showingSearch: false
     }
 };
 
@@ -34,14 +34,25 @@ class FundSearchView extends React.Component {
         return this.props.onSearchChanged(this.state.config.search);
     };
 
-    handleSearchChange = (event) => {        
+    handleSearchChange = (event) => {
         const value = event.target.value;
         this.setState(produce(draft => {
             draft.config.search.term = value;
         }));
         if (this.timeout) clearTimeout(this.timeout);
         this.timeout = setTimeout(this.triggerOnSearchChanged, 1000);
-    }    
+    }
+
+    handleKeyPress = (event) => {
+        if (event.key === 'Enter') {
+            const value = event.target.value;
+            this.setState(produce(draft => {
+                draft.config.search.term = value;
+            }));            
+            if (this.timeout) clearTimeout(this.timeout);
+            this.triggerOnSearchChanged();
+        }
+    }
 
     render = () => {
         const { classes } = this.props;
@@ -59,11 +70,12 @@ class FundSearchView extends React.Component {
                             fullWidth
                             margin="normal"
                             onChange={this.handleSearchChange}
+                            onKeyPress={this.handleKeyPress}
                             InputLabelProps={{
                                 shrink: true,
                             }}
                         />
-                    </Grid>                    
+                    </Grid>
                 </Grid>
             </div>
         );
