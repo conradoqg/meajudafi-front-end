@@ -180,7 +180,7 @@ class FundListView extends React.Component {
         try {
             const result = await this.getFundList(nextState.config);
 
-            this.setState(produce(draft => {
+            this.setState(produce(nextState, draft => {
                 draft.data.totalRows = result.totalRows;
                 draft.data.fundList = result.data;
             }));
@@ -204,7 +204,7 @@ class FundListView extends React.Component {
         try {
             const result = await this.getFundList(nextState.config);
 
-            this.setState(produce(draft => {
+            this.setState(produce(nextState, draft => {
                 draft.data.totalRows = result.totalRows;
                 draft.data.fundList = result.data;
             }));
