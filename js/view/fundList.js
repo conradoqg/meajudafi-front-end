@@ -18,15 +18,22 @@ import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 import SearchIcon from '@material-ui/icons/Search';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import Collapse from '@material-ui/core/Collapse';
-import Plot from 'react-plotly.js';
 import { produce, setAutoFreeze } from 'immer';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import API from '../api';
 import sortOptions from './sortOptions';
-import { formatters, chooseState } from '../util';
+import { chooseState } from '../util';
 import FundFilterView from './components/fundFilterView';
 import FundSearchView from './components/fundSearchView';
+import * as d3Format from 'd3-format';
+import * as ptBRLocaleD3 from 'd3-format/locale/pt-BR.json';
+import * as Plotly from 'plotly.js';
+import * as csDictionary from 'plotly.js/lib/locales/pt-br.js';
+import createPlotlyComponent from 'react-plotly.js/factory';
+const Plot = createPlotlyComponent(Plotly);
 
+Plotly.register(csDictionary);
+d3Format.formatDefaultLocale(ptBRLocaleD3);
 setAutoFreeze(false);
 
 const styles = theme => ({
@@ -257,6 +264,8 @@ class FundListView extends React.Component {
         const y_performance = dailyReturn.map(item => item.accumulated_investment_return);
         const y_risk = dailyReturn.map(item => item.accumulated_risk);
         const y_consistency_1y = dailyReturn.map(item => item.consistency_1y);
+        const y_networth = dailyReturn.map(item => item.networth);
+        const y_quotaholders = dailyReturn.map(item => item.quotaholders);
         const name = infCadastral[0].denom_social;
 
         return {
@@ -265,32 +274,47 @@ class FundListView extends React.Component {
                     x: x,
                     y: y_performance,
                     type: 'scatter',
-                    name: 'Performance'
+                    name: 'Desempenho'
                 },
                 {
                     x: x,
                     y: y_risk,
                     type: 'scatter',
-                    name: 'Risk',
+                    name: 'Risco',
                     yaxis: 'y2'
                 },
                 {
                     x: x,
                     y: y_consistency_1y,
                     type: 'scatter',
-                    name: 'Consistency 1Y',
+                    name: 'Consistência 1A',
                     yaxis: 'y3'
+                },
+                {
+                    x: x,
+                    y: y_networth,
+                    type: 'scatter',
+                    name: 'Patrimônio',
+                    yaxis: 'y4'
+                },
+                {
+                    x: x,
+                    y: y_quotaholders,
+                    type: 'scatter',
+                    name: 'Cotistas',
+                    yaxis: 'y5'
                 }
             ],
             layout: {
                 title: name,
+                separators: ',.',
                 autosize: true,
-                showlegend: true,
+                showlegend: false,
                 xaxis: {
                     title: 'Data',
                     showspikes: true,
                     spikemode: 'across',
-                    domain: [0, 0.96]
+                    domain: [0, 0.80]
                 },
                 yaxis: {
                     title: 'Desempenho',
@@ -309,6 +333,24 @@ class FundListView extends React.Component {
                     title: 'Consistência 1A',
                     tickformat: '.0%',
                     hoverformat: '.2%',
+                    anchor: 'free',
+                    overlaying: 'y',
+                    side: 'right',
+                    position: 0.85
+                },
+                yaxis4: {
+                    title: 'Patrimônio',
+                    type: 'linear',
+                    tickprefix: 'R$ ',
+                    tickformat: ',2f',
+                    hoverformat: ',2f',
+                    anchor: 'free',
+                    overlaying: 'y',
+                    side: 'right',
+                    position: 0.90
+                },
+                yaxis5: {
+                    title: 'Cotistas',
                     anchor: 'free',
                     overlaying: 'y',
                     side: 'right',
@@ -404,8 +446,8 @@ class FundListView extends React.Component {
                                                     <Typography>
                                                         <b>{fund.icf_denom_social}</b><br />
                                                         <small>
-                                                            <b>Patrimônio:</b> R$ {formatters.somethingToMoney(fund.icf_vl_patrim_liq)}<br />
-                                                            <b>Quotistas:</b> ?<br />
+                                                            <b>Patrimônio:</b> R$ {d3Format.format(',.2f')(fund.iry_networth)}<br />
+                                                            <b>Quotistas:</b> {fund.iry_quotaholders} <br />
                                                             <b>Benchmark:</b> {fund.icf_rentab_fundo ? fund.icf_rentab_fundo : 'Não informado'}
                                                         </small>
                                                     </Typography>
@@ -429,35 +471,35 @@ class FundListView extends React.Component {
                                                         <Grid item xs={3}>
                                                             <Typography>
                                                                 <small>
-                                                                    1A: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_investment_return_1y))}%<br />
-                                                                    2A: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_investment_return_2y))}%<br />
-                                                                    3A: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_investment_return_3y))}%
+                                                                    1A: {d3Format.format('.2%')(fund.iry_investment_return_1y)}<br />
+                                                                    2A: {d3Format.format('.2%')(fund.iry_investment_return_2y)}<br />
+                                                                    3A: {d3Format.format('.2%')(fund.iry_investment_return_3y)}
                                                                 </small>
                                                             </Typography>
                                                         </Grid>
                                                         <Grid item xs={3}>
                                                             <Typography>
                                                                 <small>
-                                                                    1A: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_risk_1y))}%<br />
-                                                                    2A: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_risk_2y))}%<br />
-                                                                    3A: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_risk_3y))}%<br />
+                                                                    1A: {d3Format.format('.2%')(fund.iry_risk_1y)}<br />
+                                                                    2A: {d3Format.format('.2%')(fund.iry_risk_2y)}<br />
+                                                                    3A: {d3Format.format('.2%')(fund.iry_risk_3y)}<br />
                                                                 </small>
                                                             </Typography>
                                                         </Grid>
                                                         <Grid item xs={3}>
                                                             <Typography>
                                                                 <small>
-                                                                    1A: {formatters.aValueOrTrace(formatters.somethingToValue(fund.iry_sharpe_1y))}<br />
-                                                                    2A: {formatters.aValueOrTrace(formatters.somethingToValue(fund.iry_sharpe_2y))}<br />
-                                                                    3A: {formatters.aValueOrTrace(formatters.somethingToValue(fund.iry_sharpe_3y))}<br />
+                                                                    1A: {d3Format.format('.2')(fund.iry_sharpe_1y)}<br />
+                                                                    2A: {d3Format.format('.2')(fund.iry_sharpe_2y)}<br />
+                                                                    3A: {d3Format.format('.2')(fund.iry_sharpe_3y)}<br />
                                                                 </small>
                                                             </Typography>
                                                         </Grid>
                                                         <Grid item xs={3}>
                                                             <Typography>
-                                                                1A: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_consistency_1y))}%<br />
-                                                                2A: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_consistency_2y))}%<br />
-                                                                3A: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_consistency_3y))}%<br />
+                                                                1A: {d3Format.format('.2%')(fund.iry_consistency_1y)}<br />
+                                                                2A: {d3Format.format('.2%')(fund.iry_consistency_2y)}<br />
+                                                                3A: {d3Format.format('.2%')(fund.iry_consistency_3y)}<br />
                                                             </Typography>
                                                         </Grid>
                                                     </Grid>
@@ -531,6 +573,12 @@ const FundHistoryChart = (props) => {
                 key={fund.name}
                 data={fund.data}
                 layout={fund.layout}
+                config={
+                    {
+                        locale: 'pt-BR',
+                        displayModeBar: true
+                    }
+                }
                 onInitialized={handleChartInitialized}
                 onUpdate={handleChartUpdate}
                 useResizeHandler={true}

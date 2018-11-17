@@ -1,10 +1,10 @@
 const formatCurrency = require('format-currency');
 
 module.exports = {
-    formatters: {
-        somethingToPercentage: (value) => !isNaN(value) ? (value * 100).toFixed(2) : null,
-        somethingToValue: (value) => value != null && !isNaN(value) ? value.toFixed(2) : null,
-        aValueOrTrace: (value) => value == null ? '-' : value,
+    formatters: {        
+        somethingToPercentage: (value) => value != null && !isNaN(value) ? parseFloat((value * 100)).toFixed(2) : value,
+        somethingToValue: (value) => value != null && !isNaN(value) ? parseFloat(value).toFixed(2) : null,
+        aValueOrTrace: (value) => value == null ? '-' : value.toLocaleString(),
         somethingToMoney: (value) => {
             return formatCurrency(value, { symbol: 'R$', locale: 'pt-BR' });
         }
