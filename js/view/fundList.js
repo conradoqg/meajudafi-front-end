@@ -59,10 +59,10 @@ const emptyState = {
     config: {
         page: 0,
         rowsPerPage: 5,
-        sort: sortOptions[0]        
+        sort: sortOptions[0]
     },
     layout: {
-        anchorEl: null,        
+        anchorEl: null,
         showingFundDetail: {}
     }
 };
@@ -293,12 +293,12 @@ class FundListView extends React.Component {
                     domain: [0, 0.96]
                 },
                 yaxis: {
-                    title: 'Performance',
+                    title: 'Desempenho',
                     tickformat: '.0%',
                     hoverformat: '.2%'
                 },
                 yaxis2: {
-                    title: 'Risk',
+                    title: 'Risco',
                     tickformat: '.0%',
                     hoverformat: '.2%',
                     anchor: 'x',
@@ -306,7 +306,7 @@ class FundListView extends React.Component {
                     side: 'right'
                 },
                 yaxis3: {
-                    title: 'Consistency 1Y',
+                    title: 'Consistência 1A',
                     tickformat: '.0%',
                     hoverformat: '.2%',
                     anchor: 'free',
@@ -385,13 +385,13 @@ class FundListView extends React.Component {
 
                         <Paper elevation={1} square={true}>
                             <Collapse in={layout.showingSearch} mountOnEnter unmountOnExit>
-                                { layout.showingSearch ? <FundSearchView onSearchChanged={this.handleSearchChanged} /> : <div></div> }
+                                {layout.showingSearch ? <FundSearchView onSearchChanged={this.handleSearchChanged} /> : <div></div>}
                             </Collapse>
                         </Paper>
 
                         <Paper elevation={1} square={true}>
                             <Collapse in={layout.showingFilter} mountOnEnter unmountOnExit>
-                                { layout.showingFilter ? <FundFilterView onFilterChanged={this.handleFilterChanged} /> : <div></div> }
+                                {layout.showingFilter ? <FundFilterView onFilterChanged={this.handleFilterChanged} /> : <div></div>}
                             </Collapse>
                         </Paper>
                         {
@@ -401,43 +401,56 @@ class FundListView extends React.Component {
                                         <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
                                             <Grid container spacing={8}>
                                                 <Grid item xs={8}>
-                                                    <Typography>{fund.icf_denom_social}</Typography>
+                                                    <Typography>
+                                                        <b>{fund.icf_denom_social}</b><br />
+                                                        <small>
+                                                            <b>Patrimônio:</b> R$ {formatters.somethingToMoney(fund.icf_vl_patrim_liq)}<br />
+                                                            <b>Quotistas:</b> ?<br />
+                                                            <b>Benchmark:</b> {fund.icf_rentab_fundo ? fund.icf_rentab_fundo : 'Não informado'}
+                                                        </small>
+                                                    </Typography>
                                                 </Grid>
                                                 <Grid item xs={4}>
                                                     <Grid container spacing={8}>
                                                         <Grid item xs={3}>
-                                                            <Typography>Desempenho</Typography>
+                                                            <Typography><b>Desempenho</b></Typography>
                                                         </Grid>
                                                         <Grid item xs={3}>
-                                                            <Typography>Risco</Typography>
+                                                            <Typography><b>Risco</b></Typography>
                                                         </Grid>
                                                         <Grid item xs={3}>
-                                                            <Typography>Sharpe</Typography>
+                                                            <Typography><b>Sharpe</b></Typography>
                                                         </Grid>
                                                         <Grid item xs={3}>
-                                                            <Typography>Consistência</Typography>
+                                                            <Typography><b>Consistência</b></Typography>
                                                         </Grid>
                                                     </Grid>
                                                     <Grid container spacing={8}>
                                                         <Grid item xs={3}>
                                                             <Typography>
-                                                                1A: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_investment_return_1y))}%<br />
-                                                                2A: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_investment_return_2y))}%<br />
-                                                                3A: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_investment_return_3y))}%
+                                                                <small>
+                                                                    1A: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_investment_return_1y))}%<br />
+                                                                    2A: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_investment_return_2y))}%<br />
+                                                                    3A: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_investment_return_3y))}%
+                                                                </small>
                                                             </Typography>
                                                         </Grid>
                                                         <Grid item xs={3}>
                                                             <Typography>
-                                                                1A: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_risk_1y))}%<br />
-                                                                2A: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_risk_2y))}%<br />
-                                                                3A: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_risk_3y))}%<br />
+                                                                <small>
+                                                                    1A: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_risk_1y))}%<br />
+                                                                    2A: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_risk_2y))}%<br />
+                                                                    3A: {formatters.aValueOrTrace(formatters.somethingToPercentage(fund.iry_risk_3y))}%<br />
+                                                                </small>
                                                             </Typography>
                                                         </Grid>
                                                         <Grid item xs={3}>
                                                             <Typography>
-                                                                1A: {formatters.aValueOrTrace(formatters.somethingToValue(fund.iry_sharpe_1y))}<br />
-                                                                2A: {formatters.aValueOrTrace(formatters.somethingToValue(fund.iry_sharpe_2y))}<br />
-                                                                3A: {formatters.aValueOrTrace(formatters.somethingToValue(fund.iry_sharpe_3y))}<br />
+                                                                <small>
+                                                                    1A: {formatters.aValueOrTrace(formatters.somethingToValue(fund.iry_sharpe_1y))}<br />
+                                                                    2A: {formatters.aValueOrTrace(formatters.somethingToValue(fund.iry_sharpe_2y))}<br />
+                                                                    3A: {formatters.aValueOrTrace(formatters.somethingToValue(fund.iry_sharpe_3y))}<br />
+                                                                </small>
                                                             </Typography>
                                                         </Grid>
                                                         <Grid item xs={3}>
