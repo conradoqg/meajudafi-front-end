@@ -177,11 +177,12 @@ class FundListView extends React.Component {
     handleSearchChanged = async (search) => {
         const nextState = produce(this.state, draft => {
             draft.config.search = search;
+            draft.config.page = 0;
         });
 
         this.setState(produce(draft => {
             draft.data.totalRows = emptyState.data.totalRows;
-            draft.data.fundList = emptyState.data.fundList;
+            draft.data.fundList = emptyState.data.fundList;            
         }));
 
         try {
