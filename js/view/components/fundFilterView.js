@@ -71,9 +71,6 @@ const emptyState = {
             iry_consistency_2y: { min, max },
             iry_consistency_3y: { min, max }
         }
-    },
-    layout: {
-        showingFilter: false
     }
 };
 
@@ -96,12 +93,10 @@ class FundFilterView extends React.Component {
     }
 
     handleFilterApplyClick = async () => {
-        // TODO: Not sure if this is the best way to handle that
         return this.props.onFilterChanged(this.state.config.filter);
     }
 
-    handleFilterClearClick = async () => {
-        // TODO: Not sure if this is the best way to handle that
+    handleFilterClearClick = async () => {        
         this.setState(produce(draft => {
             draft.config.filter.class = [];
             draft.config.filter.iry_investment_return_1y = emptyState.config.filter.iry_investment_return_1y;

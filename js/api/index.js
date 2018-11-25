@@ -112,8 +112,15 @@ module.exports = {
             data: await fundListObject.json()
         };
     },
-    getFundDetail: async (cnpj) => {
-        const dailyReturn = await fetch(`//${API_URL}/investment_return_daily?cnpj_fundo=eq.${cnpj}&order=dt_comptc`);
+    getFundDetail: async (cnpj, limit) => {        
+        const range = limit ? `0-${limit}` : '';
+        const dailyReturn = await fetch(`//${API_URL}/investment_return_daily?cnpj_fundo=eq.${cnpj}&order=dt_comptc.desc`,{
+            method: 'GET',
+            headers: {
+                'Range-Unit': 'items',
+                'Range': range             
+            }
+        });
         const infCadastral = await fetch(`//${API_URL}/inf_cadastral_fi?cnpj_fundo=eq.${cnpj}`);
 
         return allKeys({ dailyReturn: dailyReturn.json(), infCadastral: infCadastral.json() });

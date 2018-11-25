@@ -12,7 +12,8 @@ import Grid from '@material-ui/core/Grid';
 import IconButton from '@material-ui/core/IconButton';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
-import ReorderIcon from '@material-ui/icons/Reorder';
+import SortIcon from '@material-ui/icons/Sort';
+import ShowChartIcon from '@material-ui/icons/ShowChart';
 import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 import SearchIcon from '@material-ui/icons/Search';
@@ -25,6 +26,7 @@ import sortOptions from './sortOptions';
 import { chooseState } from '../util';
 import FundFilterView from './components/fundFilterView';
 import FundSearchView from './components/fundSearchView';
+import FundChartConfigView from './components/fundChartConfigView';
 import * as d3Format from 'd3-format';
 import * as ptBRLocaleD3 from 'd3-format/locale/pt-BR.json';
 import * as Plotly from 'plotly.js/dist/plotly';
@@ -169,9 +171,23 @@ class FundListView extends React.Component {
         }));
     }
 
+    handleChartConfigClick = () => {
+        this.setState(produce(draft => {
+            draft.layout.showingChartConfig = !draft.layout.showingChartConfig;
+        }));
+    }
+
     handleSearchClick = () => {
         this.setState(produce(draft => {
             draft.layout.showingSearch = !draft.layout.showingSearch;
+        }));
+    }
+
+    handleChartConfigChanged = async (chartConfig) => {
+        this.setState(produce(draft => {
+            draft.config.chartConfig = chartConfig;
+            draft.data.fundDetail = emptyState.data.fundDetail;
+            draft.layout.showingFundDetail = emptyState.layout.showingFundDetail;
         }));
     }
 
@@ -183,7 +199,7 @@ class FundListView extends React.Component {
 
         this.setState(produce(draft => {
             draft.data.totalRows = emptyState.data.totalRows;
-            draft.data.fundList = emptyState.data.fundList;            
+            draft.data.fundList = emptyState.data.fundList;
         }));
 
         try {
@@ -243,7 +259,7 @@ class FundListView extends React.Component {
         }));
 
         try {
-            const data = (expanded ? await this.getFundDetail(fund.icf_cnpj_fundo) : null);
+            const data = (expanded ? await this.getFundDetail(fund.icf_cnpj_fundo, this.state.config.chartConfig) : null);
 
             this.setState(produce(draft => {
                 draft.data.fundDetail[fund.icf_cnpj_fundo] = data;
@@ -259,15 +275,76 @@ class FundListView extends React.Component {
         return API.getFundList(options);
     }
 
-    async getFundDetail(cnpj) {
-        const { dailyReturn, infCadastral } = await API.getFundDetail(cnpj);
+    async getFundDetail(cnpj, chartConfig) {
+        let range = null;
+        if (chartConfig) {
+            switch (chartConfig.range) {
+                case '1y':
+                    range = 252;
+                    break;
+                case '2y':
+                    range = 504;
+                    break;
+                case '3y':
+                    range = 756;
+                    break;
+            }
+        }
+
+        let sharpeField = 'sharpe_1y';
+        let sharpeText = 'Sharpe 1A';
+        if (chartConfig) {
+            switch (chartConfig.sharpeRange) {
+                case '1y':
+                    sharpeField = 'sharpe_1y';
+                    sharpeText = 'Sharpe 1A';
+                    break;
+                case '2y':
+                    sharpeField = 'sharpe_2y';
+                    sharpeText = 'Sharpe 2A';
+                    break;
+                case '3y':
+                    sharpeField = 'sharpe_3y';
+                    sharpeText = 'Sharpe 3A';
+                    break;
+            }
+        }
+
+        let consistencyField = 'consistency_1y';
+        let consistencyText = 'Consistência 1A';
+        if (chartConfig) {
+            switch (chartConfig.sharpeRange) {
+                case '1y':
+                    consistencyField = 'consistency_1y';
+                    consistencyText = 'Consistência 1A';
+                    break;
+                case '2y':
+                    consistencyField = 'consistency_2y';
+                    consistencyText = 'Consistência 2A';
+                    break;
+                case '3y':
+                    consistencyField = 'consistency_3y';
+                    consistencyText = 'Consistência 3A';
+                    break;
+            }
+        }
+
+        const { dailyReturn, infCadastral } = await API.getFundDetail(cnpj, range);
+
+        const initialPerformance = chartConfig && chartConfig.performanceValue == 'relative' ? dailyReturn[dailyReturn.length - 1].accumulated_investment_return : 0;
+        const initialRisk = chartConfig && chartConfig.riskValue == 'relative' ? dailyReturn[dailyReturn.length - 1].accumulated_risk : 0;
+        const initialSharpe = chartConfig && chartConfig.sharpeValue == 'relative' ? dailyReturn[dailyReturn.length - 1][sharpeField] : 0;
+        const initialConsistency = chartConfig && chartConfig.consistencyValue == 'relative' ? dailyReturn[dailyReturn.length - 1][consistencyField] : 0;
+        const initialNetworth = chartConfig && chartConfig.networthValue == 'relative' ? dailyReturn[dailyReturn.length - 1].networth : 0;
+        const initialQuotaholders = chartConfig && chartConfig.quotaholdersValue == 'relative' ? dailyReturn[dailyReturn.length - 1].quotaholders : 0;
 
         const x = dailyReturn.map(item => item.dt_comptc);
-        const y_performance = dailyReturn.map(item => item.accumulated_investment_return);
-        const y_risk = dailyReturn.map(item => item.accumulated_risk);
-        const y_consistency_1y = dailyReturn.map(item => item.consistency_1y);
-        const y_networth = dailyReturn.map(item => item.networth);
-        const y_quotaholders = dailyReturn.map(item => item.quotaholders);
+        const y_performance = dailyReturn.map(item => item.accumulated_investment_return - initialPerformance);
+        const y_risk = dailyReturn.map(item => item.accumulated_risk - initialRisk);
+        const y_sharpe = dailyReturn.map(item => item[sharpeField] - initialSharpe);
+        const y_consistency = dailyReturn.map(item => item[consistencyField] - initialConsistency);
+        const y_networth = dailyReturn.map(item => item.networth - initialNetworth);
+        const y_quotaholders = dailyReturn.map(item => item.quotaholders - initialQuotaholders);
         const name = infCadastral[0].denom_social;
 
         return {
@@ -287,76 +364,92 @@ class FundListView extends React.Component {
                 },
                 {
                     x: x,
-                    y: y_consistency_1y,
+                    y: y_sharpe,
                     type: 'scatter',
-                    name: 'Consistência 1A',
+                    name: sharpeText,
                     yaxis: 'y3'
+                },
+                {
+                    x: x,
+                    y: y_consistency,
+                    type: 'scatter',
+                    name: consistencyText,
+                    yaxis: 'y4'
                 },
                 {
                     x: x,
                     y: y_networth,
                     type: 'scatter',
                     name: 'Patrimônio',
-                    yaxis: 'y4'
+                    yaxis: 'y5'
                 },
                 {
                     x: x,
                     y: y_quotaholders,
                     type: 'scatter',
                     name: 'Cotistas',
-                    yaxis: 'y5'
+                    yaxis: 'y6'
                 }
             ],
             layout: {
                 title: name,
                 separators: ',.',
                 autosize: true,
-                showlegend: false,
+                showlegend: true,
                 xaxis: {
                     title: 'Data',
                     showspikes: true,
                     spikemode: 'across',
-                    domain: [0, 0.80]
+                    domain: [0, 0.70]
                 },
                 yaxis: {
                     title: 'Desempenho',
-                    tickformat: '.0%',
-                    hoverformat: '.2%'
+                    tickformat: ',.0%',
+                    hoverformat: ',.2%'
                 },
                 yaxis2: {
                     title: 'Risco',
-                    tickformat: '.0%',
-                    hoverformat: '.2%',
+                    tickformat: ',.0%',
+                    hoverformat: ',.2%',
                     anchor: 'x',
                     overlaying: 'y',
                     side: 'right'
                 },
                 yaxis3: {
-                    title: 'Consistência 1A',
-                    tickformat: '.0%',
-                    hoverformat: '.2%',
+                    title: sharpeText,
+                    tickformat: ',.2f',
+                    hoverformat: ',.2f',
+                    anchor: 'free',
+                    overlaying: 'y',
+                    side: 'right',
+                    position: 0.75
+                },
+                yaxis4: {
+                    title: consistencyText,
+                    tickformat: ',.0%',
+                    hoverformat: ',.2%',
+                    anchor: 'free',
+                    overlaying: 'y',
+                    side: 'right',
+                    position: 0.80
+                },
+                yaxis5: {
+                    title: 'Patrimônio',
+                    type: 'linear',
+                    tickprefix: 'R$ ',
+                    tickformat: ',.2f',
+                    hoverformat: ',.2f',
                     anchor: 'free',
                     overlaying: 'y',
                     side: 'right',
                     position: 0.85
                 },
-                yaxis4: {
-                    title: 'Patrimônio',
-                    type: 'linear',
-                    tickprefix: 'R$ ',
-                    tickformat: ',2f',
-                    hoverformat: ',2f',
-                    anchor: 'free',
-                    overlaying: 'y',
-                    side: 'right',
-                    position: 0.90
-                },
-                yaxis5: {
+                yaxis6: {
                     title: 'Cotistas',
                     anchor: 'free',
                     overlaying: 'y',
                     side: 'right',
-                    position: 1
+                    position: 0.97
                 }
             }
         };
@@ -395,6 +488,11 @@ class FundListView extends React.Component {
                                 justify="flex-end"
                                 alignItems="center">
                                 <IconButton
+                                    aria-label="Configurações dos Indicadores"
+                                    onClick={this.handleChartConfigClick}>
+                                    <ShowChartIcon />
+                                </IconButton>
+                                <IconButton
                                     aria-label="Procurar"
                                     onClick={this.handleSearchClick}>
                                     <SearchIcon />
@@ -404,7 +502,7 @@ class FundListView extends React.Component {
                                     aria-owns={open ? 'long-menu' : null}
                                     aria-haspopup="true"
                                     onClick={this.handleSortClick}>
-                                    <ReorderIcon />
+                                    <SortIcon />
                                 </IconButton>
                                 <Menu
                                     id="long-menu"
@@ -428,6 +526,12 @@ class FundListView extends React.Component {
                         </Paper>
 
                         <Paper elevation={1} square={true}>
+                            <Collapse in={layout.showingChartConfig} mountOnEnter unmountOnExit>
+                                {layout.showingChartConfig ? <FundChartConfigView onChartConfigChanged={this.handleChartConfigChanged} /> : <div></div>}
+                            </Collapse>
+                        </Paper>
+
+                        <Paper elevation={1} square={true}>
                             <Collapse in={layout.showingSearch} mountOnEnter unmountOnExit>
                                 {layout.showingSearch ? <FundSearchView onSearchChanged={this.handleSearchChanged} /> : <div></div>}
                             </Collapse>
@@ -441,7 +545,7 @@ class FundListView extends React.Component {
                         {
                             chooseState(this.state.data.fundList,
                                 () => this.state.data.fundList.map((fund, index) => (
-                                    <ExpansionPanel key={index} expanded={this.state.layout.showingFundDetail[fund.icf_cnpj_fundo]} onChange={(e, expanded) => this.handleFundExpansion(expanded, fund)}>
+                                    <ExpansionPanel key={index} expanded={this.state.layout.showingFundDetail[fund.icf_cnpj_fundo] ? true : false} onChange={(e, expanded) => this.handleFundExpansion(expanded, fund)}>
                                         <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
                                             <Grid container spacing={8}>
                                                 <Grid item xs={8}>
