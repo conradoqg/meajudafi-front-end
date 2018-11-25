@@ -1,16 +1,16 @@
 import React from 'react';
 import { withStyles } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
+import SearchIcon from '@material-ui/icons/Search';
+import Input from '@material-ui/core/Input';
+import InputAdornment from '@material-ui/core/InputAdornment';
 import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
-import TextField from '@material-ui/core/TextField';
 import { produce, setAutoFreeze } from 'immer';
 
 setAutoFreeze(false);
 
 const styles = theme => ({
-    filterPaperContent: {
-        padding: theme.spacing.unit * 2
+    input: {
+        marginLeft: theme.spacing.unit
     },
 });
 
@@ -48,7 +48,7 @@ class FundSearchView extends React.Component {
             const value = event.target.value;
             this.setState(produce(draft => {
                 draft.config.search.term = value;
-            }));            
+            }));
             if (this.timeout) clearTimeout(this.timeout);
             this.triggerOnSearchChanged();
         }
@@ -58,26 +58,25 @@ class FundSearchView extends React.Component {
         const { classes } = this.props;
 
         return (
-            <div className={classes.filterPaperContent}>
-                <Typography variant="title" align="center" gutterBottom>Procurar:</Typography>
-                <Grid container spacing={24}>
-                    <Grid item xs={12}>
-                        <TextField
-                            id="standard-full-width"
-                            style={{ margin: 8 }}
-                            placeholder="Nome do fundo ou CNPJ"
-                            value={this.state.config.search.term}
-                            fullWidth
-                            margin="normal"
-                            onChange={this.handleSearchChange}
-                            onKeyPress={this.handleKeyPress}
-                            InputLabelProps={{
-                                shrink: true,
-                            }}
-                        />
-                    </Grid>
-                </Grid>
-            </div>
+            <Grid container alignItems="center" justify="flex-start">
+                <Input
+                    id="input-with-icon-grid"
+                    placeholder="Nome do fundo ou CNPJ"
+                    value={this.state.config.search.term}
+                    onChange={this.handleSearchChange}
+                    onKeyPress={this.handleKeyPress}
+                    className={classes.input}
+                    fullWidth
+                    startAdornment={
+                        <InputAdornment position="start">
+                            <SearchIcon />
+                        </InputAdornment>
+                    }
+                    inputProps={{
+                        'aria-label': 'Procura',
+                    }}
+                />
+            </Grid>
         );
     }
 

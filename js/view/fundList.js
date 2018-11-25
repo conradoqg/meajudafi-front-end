@@ -16,7 +16,6 @@ import SortIcon from '@material-ui/icons/Sort';
 import ShowChartIcon from '@material-ui/icons/ShowChart';
 import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
-import SearchIcon from '@material-ui/icons/Search';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import Collapse from '@material-ui/core/Collapse';
 import { produce, setAutoFreeze } from 'immer';
@@ -42,6 +41,9 @@ setAutoFreeze(false);
 const styles = theme => ({
     filterPaperContent: {
         padding: theme.spacing.unit * 2
+    },
+    optionsBar: {
+        padding: theme.spacing.unit
     },
     progress: {
         margin: theme.spacing.unit * 2,
@@ -483,59 +485,49 @@ class FundListView extends React.Component {
                 <Typography variant="display1" gutterBottom>Lista de Fundos</Typography>
                 <Grid container spacing={16}>
                     <Grid item xs>
-                        <Paper elevation={1} square={true}>
-                            <Grid
-                                container
-                                direction="row"
-                                justify="flex-end"
-                                alignItems="center">
-                                <IconButton
-                                    aria-label="Configurações dos Indicadores"
-                                    onClick={this.handleChartConfigClick}>
-                                    <ShowChartIcon />
-                                </IconButton>
-                                <IconButton
-                                    aria-label="Procurar"
-                                    onClick={this.handleSearchClick}>
-                                    <SearchIcon />
-                                </IconButton>
-                                <IconButton
-                                    aria-label="Ordem"
-                                    aria-owns={open ? 'long-menu' : null}
-                                    aria-haspopup="true"
-                                    onClick={this.handleSortClick}>
-                                    <SortIcon />
-                                </IconButton>
-                                <Menu
-                                    id="long-menu"
-                                    anchorEl={layout.anchorEl}
-                                    open={open}
-                                    onClose={this.handleSortClose}
-                                    PaperProps={MenuProps.PaperProps}>
-                                    {this.state.data.sortOptions.map((option, index) => (
-                                        <MenuItem key={option.displayName + option.order} selected={option.displayName === this.state.config.sort.displayName && option.order === this.state.config.sort.order} onClick={event => this.handleSortMenuItemClick(event, index)}>
-                                            {option.displayName}&nbsp;
-                                            {option.order == 'asc' ? <ArrowDownwardIcon /> : <ArrowUpwardIcon />}
-                                        </MenuItem>
-                                    ))}
-                                </Menu>
-                                <IconButton
-                                    aria-label="Filtro"
-                                    onClick={this.handleFilterClick}>
-                                    <FilterListIcon />
-                                </IconButton>
+                        <Paper elevation={1} square={true} >
+                            <Grid container wrap="nowrap" className={classes.optionsBar}>
+                                <FundSearchView onSearchChanged={this.handleSearchChanged} />
+                                <Grid container justify="flex-end">
+                                    <Grid item>
+                                        <IconButton
+                                            aria-label="Configurações dos Indicadores"
+                                            onClick={this.handleChartConfigClick}>
+                                            <ShowChartIcon />
+                                        </IconButton>
+                                        <IconButton
+                                            aria-label="Ordem"
+                                            aria-owns={open ? 'long-menu' : null}
+                                            aria-haspopup="true"
+                                            onClick={this.handleSortClick}>
+                                            <SortIcon />
+                                        </IconButton>
+                                        <Menu
+                                            id="long-menu"
+                                            anchorEl={layout.anchorEl}
+                                            open={open}
+                                            onClose={this.handleSortClose}
+                                            PaperProps={MenuProps.PaperProps}>
+                                            {this.state.data.sortOptions.map((option, index) => (
+                                                <MenuItem key={option.displayName + option.order} selected={option.displayName === this.state.config.sort.displayName && option.order === this.state.config.sort.order} onClick={event => this.handleSortMenuItemClick(event, index)}>
+                                                    {option.displayName}&nbsp;
+                                                    {option.order == 'asc' ? <ArrowDownwardIcon /> : <ArrowUpwardIcon />}
+                                                </MenuItem>
+                                            ))}
+                                        </Menu>
+                                        <IconButton
+                                            aria-label="Filtro"
+                                            onClick={this.handleFilterClick}>
+                                            <FilterListIcon />
+                                        </IconButton>
+                                    </Grid>
+                                </Grid>
                             </Grid>
                         </Paper>
 
                         <Paper elevation={1} square={true}>
                             <Collapse in={layout.showingChartConfig} mountOnEnter unmountOnExit>
                                 {layout.showingChartConfig ? <FundChartConfigView onChartConfigChanged={this.handleChartConfigChanged} /> : <div></div>}
-                            </Collapse>
-                        </Paper>
-
-                        <Paper elevation={1} square={true}>
-                            <Collapse in={layout.showingSearch} mountOnEnter unmountOnExit>
-                                {layout.showingSearch ? <FundSearchView onSearchChanged={this.handleSearchChanged} /> : <div></div>}
                             </Collapse>
                         </Paper>
 
