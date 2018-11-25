@@ -65,7 +65,7 @@ class FundChartConfigView extends React.Component {
 
         return (
             <div className={classes.filterPaperContent}>
-                <Typography variant="title" align="center" gutterBottom>Configurações dos Indicadores:</Typography>
+                <Typography variant="title" align="center" gutterBottom>Configurações dos Indicadores</Typography>
                 <Grid container spacing={24}>
                     <Grid item xs={4}>
                         <FormControl component="fieldset" className={classes.formControl}>

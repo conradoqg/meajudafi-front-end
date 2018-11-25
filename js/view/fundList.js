@@ -132,6 +132,47 @@ class FundListView extends React.Component {
         }
     }
 
+    handleSearchChanged = async (search) => {
+        const nextState = produce(this.state, draft => {
+            draft.config.search = search;
+            draft.config.page = 0;
+        });
+
+        this.setState(produce(draft => {
+            draft.data.totalRows = emptyState.data.totalRows;
+            draft.data.fundList = emptyState.data.fundList;
+        }));
+
+        try {
+            const result = await this.getFundList(nextState.config);
+
+            this.setState(produce(nextState, draft => {
+                draft.data.totalRows = result.totalRows;
+                draft.data.fundList = result.data;
+            }));
+        } catch (ex) {
+            this.setState(produce(draft => {
+                draft.data.fundList = ex.message;
+            }));
+        }
+    }
+
+    handleChartConfigClick = () => {
+        this.setState(produce(draft => {
+            draft.layout.showingChartConfig = !draft.layout.showingChartConfig;
+            draft.layout.showingFilter = false;
+        }));
+    }
+
+    handleChartConfigChanged = async (chartConfig) => {
+        this.setState(produce(draft => {
+            draft.config.chartConfig = chartConfig;
+            draft.data.fundDetail = emptyState.data.fundDetail;
+            draft.layout.showingFundDetail = emptyState.layout.showingFundDetail;
+            draft.layout.showingChartConfig = false;
+        }));
+    }
+
     handleSortClick = event => {
         const anchorEl = event.currentTarget;
         this.setState(produce(draft => { draft.layout.anchorEl = anchorEl; }));
@@ -170,53 +211,8 @@ class FundListView extends React.Component {
     handleFilterClick = () => {
         this.setState(produce(draft => {
             draft.layout.showingFilter = !draft.layout.showingFilter;
-        }));
-    }
-
-    handleChartConfigClick = () => {
-        this.setState(produce(draft => {
-            draft.layout.showingChartConfig = !draft.layout.showingChartConfig;
-        }));
-    }
-
-    handleSearchClick = () => {
-        this.setState(produce(draft => {
-            draft.layout.showingSearch = !draft.layout.showingSearch;
-        }));
-    }
-
-    handleChartConfigChanged = async (chartConfig) => {
-        this.setState(produce(draft => {
-            draft.config.chartConfig = chartConfig;
-            draft.data.fundDetail = emptyState.data.fundDetail;
-            draft.layout.showingFundDetail = emptyState.layout.showingFundDetail;
             draft.layout.showingChartConfig = false;
         }));
-    }
-
-    handleSearchChanged = async (search) => {
-        const nextState = produce(this.state, draft => {
-            draft.config.search = search;
-            draft.config.page = 0;
-        });
-
-        this.setState(produce(draft => {
-            draft.data.totalRows = emptyState.data.totalRows;
-            draft.data.fundList = emptyState.data.fundList;
-        }));
-
-        try {
-            const result = await this.getFundList(nextState.config);
-
-            this.setState(produce(nextState, draft => {
-                draft.data.totalRows = result.totalRows;
-                draft.data.fundList = result.data;
-            }));
-        } catch (ex) {
-            this.setState(produce(draft => {
-                draft.data.fundList = ex.message;
-            }));
-        }
     }
 
     handleFilterChanged = async (filter) => {

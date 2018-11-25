@@ -121,7 +121,7 @@ class FundFilterView extends React.Component {
 
         return (
             <div className={classes.filterPaperContent}>
-                <Typography variant="title" align="center" gutterBottom>Filtros:</Typography>
+                <Typography variant="title" align="center" gutterBottom>Filtros</Typography>
                 <Grid container spacing={24}>
                     <Grid item xs={12}>
                         <Typography variant="subheading" align="center" gutterBottom>Classe:</Typography>
