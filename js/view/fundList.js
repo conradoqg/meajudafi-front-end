@@ -68,7 +68,7 @@ const emptyState = {
     },
     config: {
         page: 0,
-        rowsPerPage: 5,
+        rowsPerPage: 25,
         sort: sortOptions[0]
     },
     layout: {
@@ -188,6 +188,7 @@ class FundListView extends React.Component {
             draft.config.chartConfig = chartConfig;
             draft.data.fundDetail = emptyState.data.fundDetail;
             draft.layout.showingFundDetail = emptyState.layout.showingFundDetail;
+            draft.layout.showingChartConfig = false;
         }));
     }
 
@@ -224,6 +225,7 @@ class FundListView extends React.Component {
         this.setState(produce(draft => {
             draft.data.totalRows = emptyState.data.totalRows;
             draft.data.fundList = emptyState.data.fundList;
+            draft.layout.showingFilter = false;
         }));
 
         try {
