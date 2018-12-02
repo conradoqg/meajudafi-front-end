@@ -149,7 +149,7 @@ const MenuLink = ({ label, to, activeOnlyWhenExact, icon }) => (
 
 class Dashboard extends React.Component {
     state = {
-        open: true
+        open: false
     };
 
     handleDrawerOpen = () => {

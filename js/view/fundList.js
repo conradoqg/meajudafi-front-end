@@ -337,15 +337,33 @@ class FundListView extends React.Component {
         const initialConsistency = chartConfig && chartConfig.consistencyValue == 'relative' ? dailyReturn[dailyReturn.length - 1][consistencyField] : 0;
         const initialNetworth = chartConfig && chartConfig.networthValue == 'relative' ? dailyReturn[dailyReturn.length - 1].networth : 0;
         const initialQuotaholders = chartConfig && chartConfig.quotaholdersValue == 'relative' ? dailyReturn[dailyReturn.length - 1].quotaholders : 0;
+        const initialBenchmarkPerformance = 0;
 
-        const x = dailyReturn.map(item => item.dt_comptc);
-        const y_performance = dailyReturn.map(item => item.accumulated_investment_return - initialPerformance);
-        const y_risk = dailyReturn.map(item => item.accumulated_risk - initialRisk);
-        const y_sharpe = dailyReturn.map(item => item[sharpeField] - initialSharpe);
-        const y_consistency = dailyReturn.map(item => item[consistencyField] - initialConsistency);
-        const y_networth = dailyReturn.map(item => item.networth - initialNetworth);
-        const y_quotaholders = dailyReturn.map(item => item.quotaholders - initialQuotaholders);
         const name = infCadastral[0].denom_social;
+        const x = [];
+        const y_performance = [];
+        const y_risk = [];
+        const y_sharpe = [];
+        const y_consistency = [];
+        const y_networth = [];
+        const y_quotaholders = [];
+        const y_benchmark_performance = [];
+        let min_y_performance = null;
+        let max_y_performance = null;
+
+        dailyReturn.forEach(item => {
+            const accumulated_investment_return = item.accumulated_investment_return - initialPerformance;
+            x.push(item.dt_comptc);
+            y_performance.push(accumulated_investment_return);
+            y_risk.push(item.accumulated_risk - initialRisk);
+            y_sharpe.push(item[sharpeField] - initialSharpe);
+            y_consistency.push(item[consistencyField] - initialConsistency);
+            y_networth.push(item.networth - initialNetworth);
+            y_quotaholders.push(item.quotaholders - initialQuotaholders);
+            y_benchmark_performance.push(item.cdi_investment_return - initialBenchmarkPerformance);
+            min_y_performance = Math.min(min_y_performance, accumulated_investment_return);
+            max_y_performance = Math.max(max_y_performance, accumulated_investment_return);
+        });
 
         return {
             data: [
@@ -357,38 +375,45 @@ class FundListView extends React.Component {
                 },
                 {
                     x: x,
+                    y: y_benchmark_performance,
+                    type: 'scatter',
+                    name: 'Benchmark (CDI)',
+                    yaxis: 'y2'
+                },
+                {
+                    x: x,
                     y: y_risk,
                     type: 'scatter',
                     name: 'Risco',
-                    yaxis: 'y2'
+                    yaxis: 'y3'
                 },
                 {
                     x: x,
                     y: y_sharpe,
                     type: 'scatter',
                     name: sharpeText,
-                    yaxis: 'y3'
+                    yaxis: 'y4'
                 },
                 {
                     x: x,
                     y: y_consistency,
                     type: 'scatter',
                     name: consistencyText,
-                    yaxis: 'y4'
+                    yaxis: 'y5'
                 },
                 {
                     x: x,
                     y: y_networth,
                     type: 'scatter',
                     name: 'Patrimônio',
-                    yaxis: 'y5'
+                    yaxis: 'y6'
                 },
                 {
                     x: x,
                     y: y_quotaholders,
                     type: 'scatter',
                     name: 'Cotistas',
-                    yaxis: 'y6'
+                    yaxis: 'y7'
                 }
             ],
             layout: {
@@ -396,44 +421,60 @@ class FundListView extends React.Component {
                 separators: ',.',
                 autosize: true,
                 showlegend: true,
+                legend: { 'orientation': 'h' },
                 xaxis: {
-                    title: 'Data',
                     showspikes: true,
                     spikemode: 'across',
-                    domain: [0, 0.70]
+                    domain: [0.05, 0.74]
                 },
                 yaxis: {
                     title: 'Desempenho',
                     tickformat: ',.0%',
-                    hoverformat: ',.2%'
+                    hoverformat: ',.2%',
+                    fixedrange: true,
+                    range: [min_y_performance, max_y_performance],
                 },
                 yaxis2: {
+                    title: 'Benchmark (CDI)',
+                    tickformat: ',.0%',
+                    hoverformat: ',.2%',
+                    anchor: 'free',
+                    overlaying: 'y',
+                    side: 'left',
+                    range: [min_y_performance, max_y_performance],
+                    fixedrange: true,
+                    position: 0
+                },
+                yaxis3: {
                     title: 'Risco',
                     tickformat: ',.0%',
                     hoverformat: ',.2%',
                     anchor: 'x',
                     overlaying: 'y',
-                    side: 'right'
+                    side: 'right',
+                    fixedrange: true
                 },
-                yaxis3: {
+                yaxis4: {
                     title: sharpeText,
                     tickformat: ',.2f',
                     hoverformat: ',.2f',
                     anchor: 'free',
                     overlaying: 'y',
                     side: 'right',
-                    position: 0.75
+                    fixedrange: true,
+                    position: 0.78
                 },
-                yaxis4: {
+                yaxis5: {
                     title: consistencyText,
                     tickformat: ',.0%',
                     hoverformat: ',.2%',
                     anchor: 'free',
                     overlaying: 'y',
                     side: 'right',
-                    position: 0.80
+                    fixedrange: true,
+                    position: 0.84
                 },
-                yaxis5: {
+                yaxis6: {
                     title: 'Patrimônio',
                     type: 'linear',
                     tickprefix: 'R$ ',
@@ -442,14 +483,16 @@ class FundListView extends React.Component {
                     anchor: 'free',
                     overlaying: 'y',
                     side: 'right',
-                    position: 0.85
+                    fixedrange: true,
+                    position: 0.89
                 },
-                yaxis6: {
+                yaxis7: {
                     title: 'Cotistas',
                     anchor: 'free',
                     overlaying: 'y',
                     side: 'right',
-                    position: 0.97
+                    fixedrange: true,
+                    position: 1
                 }
             }
         };
