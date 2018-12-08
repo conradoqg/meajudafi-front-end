@@ -27,15 +27,11 @@ import FundFilterView from './components/fundFilterView';
 import FundSearchView from './components/fundSearchView';
 import FundChartConfigView from './components/fundChartConfigView';
 import * as d3Format from 'd3-format';
-import * as ptBRLocaleD3 from 'd3-format/locale/pt-BR.json';
-import * as Plotly from 'plotly.js/dist/plotly';
-import * as csDictionary from 'plotly.js/lib/locales/pt-br.js';
 import createPlotlyComponent from 'react-plotly.js/factory';
+import Plotly from 'plotly';
 
 const Plot = createPlotlyComponent(Plotly);
-Plotly.register(csDictionary);
 
-d3Format.formatDefaultLocale(ptBRLocaleD3);
 setAutoFreeze(false);
 
 const styles = theme => ({

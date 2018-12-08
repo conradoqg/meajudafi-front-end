@@ -5,6 +5,7 @@ node_js:
 
 env:
   - API_URL: api.cvmfundexplorer.conradoqg.eti.br
+  - NODE_ENV: production
 
 script: 
   - npm install
