@@ -333,7 +333,7 @@ class FundListView extends React.Component {
         const initialConsistency = chartConfig && chartConfig.consistencyValue == 'relative' ? dailyReturn[dailyReturn.length - 1][consistencyField] : 0;
         const initialNetworth = chartConfig && chartConfig.networthValue == 'relative' ? dailyReturn[dailyReturn.length - 1].networth : 0;
         const initialQuotaholders = chartConfig && chartConfig.quotaholdersValue == 'relative' ? dailyReturn[dailyReturn.length - 1].quotaholders : 0;
-        const initialBenchmarkPerformance = chartConfig && chartConfig.benchmarkValue == 'relative' ? dailyReturn[dailyReturn.length - 1].cdi_investment_return : 0;
+        const initialBenchmarkPerformance = chartConfig && chartConfig.benchmarkValue == 'relative' ? dailyReturn[dailyReturn.length - 1].cdi_accumulated_investment_return : 0;
 
         const name = infCadastral[0].denom_social;
         const x = [];
@@ -356,7 +356,7 @@ class FundListView extends React.Component {
             y_consistency.push(item[consistencyField] - initialConsistency);
             y_networth.push(item.networth - initialNetworth);
             y_quotaholders.push(item.quotaholders - initialQuotaholders);
-            y_benchmark_performance.push(item.cdi_investment_return - initialBenchmarkPerformance);
+            y_benchmark_performance.push(item.cdi_accumulated_investment_return - initialBenchmarkPerformance);
             min_y_performance = Math.min(min_y_performance, accumulated_investment_return);
             max_y_performance = Math.max(max_y_performance, accumulated_investment_return);
         });
