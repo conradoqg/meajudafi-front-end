@@ -34,7 +34,8 @@ const emptyState = {
         sharpeValue: 'absolute',
         consistencyValue: 'absolute',
         networthValue: 'absolute',
-        quotaholdersValue: 'absolute'
+        quotaholdersValue: 'absolute',
+        benchmarkValue: 'absolute'
     }
 };
 
@@ -206,6 +207,22 @@ class FundChartConfigView extends React.Component {
                             </RadioGroup>
                         </FormControl>
                     </Grid>
+                    <Grid item xs={4}>
+                        <FormControl component="fieldset" className={classes.formControl}>
+                            <FormLabel component="legend">Benchmark</FormLabel>
+                            <RadioGroup
+                                aria-label="Benchmark"
+                                name="benchmark"
+                                className={classes.group}
+                                value={this.state.config.benchmarkValue}
+                                onChange={this.handleValueChange('benchmarkValue')}
+                            >
+                                <FormControlLabel value="absolute" control={<Radio />} label="Absoluto" />
+                                <FormControlLabel value="relative" control={<Radio />} label="Relativo" />
+                            </RadioGroup>
+                        </FormControl>
+                    </Grid>
+                    <Grid item xs={4}></Grid>
                     <Grid item xs={6} align="center">
                         <Button variant="contained" color="primary" onClick={this.handleFilterApplyClick} >Aplicar</Button>
                     </Grid>

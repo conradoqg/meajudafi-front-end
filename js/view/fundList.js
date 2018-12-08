@@ -333,7 +333,7 @@ class FundListView extends React.Component {
         const initialConsistency = chartConfig && chartConfig.consistencyValue == 'relative' ? dailyReturn[dailyReturn.length - 1][consistencyField] : 0;
         const initialNetworth = chartConfig && chartConfig.networthValue == 'relative' ? dailyReturn[dailyReturn.length - 1].networth : 0;
         const initialQuotaholders = chartConfig && chartConfig.quotaholdersValue == 'relative' ? dailyReturn[dailyReturn.length - 1].quotaholders : 0;
-        const initialBenchmarkPerformance = 0;
+        const initialBenchmarkPerformance = chartConfig && chartConfig.benchmarkValue == 'relative' ? dailyReturn[dailyReturn.length - 1].cdi_investment_return : 0;
 
         const name = infCadastral[0].denom_social;
         const x = [];
@@ -561,14 +561,14 @@ class FundListView extends React.Component {
                         </Paper>
 
                         <Paper elevation={1} square={true}>
-                            <Collapse in={layout.showingChartConfig} mountOnEnter unmountOnExit>
-                                {layout.showingChartConfig ? <FundChartConfigView onChartConfigChanged={this.handleChartConfigChanged} /> : <div></div>}
+                            <Collapse in={layout.showingChartConfig}>
+                                <FundChartConfigView onChartConfigChanged={this.handleChartConfigChanged} />
                             </Collapse>
                         </Paper>
 
                         <Paper elevation={1} square={true}>
-                            <Collapse in={layout.showingFilter} mountOnEnter unmountOnExit>
-                                {layout.showingFilter ? <FundFilterView onFilterChanged={this.handleFilterChanged} /> : <div></div>}
+                            <Collapse in={layout.showingFilter}>
+                                <FundFilterView onFilterChanged={this.handleFilterChanged} />
                             </Collapse>
                         </Paper>
                         {
