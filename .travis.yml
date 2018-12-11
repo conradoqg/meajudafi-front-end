@@ -4,10 +4,9 @@ node_js:
   - "node"
 
 env:
-  - API_URL: api.cvmfundexplorer.conradoqg.eti.br
-  - NODE_ENV: production
+  - API_URL=api.cvmfundexplorer.conradoqg.eti.br
 
-script: 
+script:  
   - npm install
   - npm run build
   - ls build/ -lh
