@@ -325,11 +325,20 @@ class FundListView extends React.Component {
             }
         }
 
-        // let benchmarkField = 'cdi_accumulated_investment_return';
-        // let benchmarkText = 'CDI';
-
-        let benchmarkField = 'bovespa_accumulated_investment_return';
-        let benchmarkText = 'Bovespa';
+        let benchmarkField = 'cdi_accumulated_investment_return';
+        let benchmarkText = 'CDI';
+        if (chartConfig) {
+            switch (chartConfig.benchmarkReference) {
+                case 'CDI':
+                    benchmarkField = 'cdi_accumulated_investment_return';
+                    benchmarkText = 'CDI';
+                    break;
+                case 'Bovespa':
+                    benchmarkField = 'bovespa_accumulated_investment_return';
+                    benchmarkText = 'Bovespa';
+                    break;
+            }
+        }
 
         const { dailyReturn, infCadastral } = await API.getFundDetail(cnpj, range);
 
@@ -364,9 +373,9 @@ class FundListView extends React.Component {
             y_consistency.push(item[consistencyField] - initialConsistency);
             y_networth.push(item.networth - initialNetworth);
             y_quotaholders.push(item.quotaholders - initialQuotaholders);
-            const benchmark_accumulated_investment_return = item[benchmarkField] - initialBenchmarkPerformance;            
-            y_benchmark_performance.push(benchmark_accumulated_investment_return);            
-            
+            const benchmark_accumulated_investment_return = item[benchmarkField] - initialBenchmarkPerformance;
+            y_benchmark_performance.push(benchmark_accumulated_investment_return);
+
             min_y_performance = Math.min(min_y_performance, accumulated_investment_return);
             max_y_performance = Math.max(max_y_performance, accumulated_investment_return);
             min_y_benchmark_performance = Math.min(min_y_benchmark_performance, benchmark_accumulated_investment_return);

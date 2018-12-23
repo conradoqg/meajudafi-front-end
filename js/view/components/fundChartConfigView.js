@@ -35,7 +35,8 @@ const emptyState = {
         consistencyValue: 'absolute',
         networthValue: 'absolute',
         quotaholdersValue: 'absolute',
-        benchmarkValue: 'absolute'
+        benchmarkValue: 'absolute',
+        benchmarkReference: 'CDI'
     }
 };
 
@@ -49,11 +50,11 @@ class FundChartConfigView extends React.Component {
         }));
     }
 
-    handleFilterApplyClick = async () => {        
+    handleFilterApplyClick = async () => {
         return this.props.onChartConfigChanged(this.state.config);
     }
 
-    handleFilterClearClick = async () => {        
+    handleFilterClearClick = async () => {
         this.setState(produce(draft => {
             draft.config = emptyState.config;
         }));
@@ -212,7 +213,7 @@ class FundChartConfigView extends React.Component {
                             <FormLabel component="legend">Benchmark</FormLabel>
                             <RadioGroup
                                 aria-label="Benchmark"
-                                name="benchmark"
+                                name="benchmarkValue"
                                 className={classes.group}
                                 value={this.state.config.benchmarkValue}
                                 onChange={this.handleValueChange('benchmarkValue')}
@@ -222,7 +223,21 @@ class FundChartConfigView extends React.Component {
                             </RadioGroup>
                         </FormControl>
                     </Grid>
-                    <Grid item xs={4}></Grid>
+                    <Grid item xs={4}>
+                        <FormControl component="fieldset" className={classes.formControl}>
+                            <FormLabel component="legend">Referência Benchmark</FormLabel>
+                            <RadioGroup
+                                aria-label="Referência Benchmark"
+                                name="benchmarkReference"
+                                className={classes.group}
+                                value={this.state.config.benchmarkReference}
+                                onChange={this.handleValueChange('benchmarkReference')}
+                            >
+                                <FormControlLabel value="CDI" control={<Radio />} label="CDI" />
+                                <FormControlLabel value="Bovespa" control={<Radio />} label="Bovespa" />
+                            </RadioGroup>
+                        </FormControl>
+                    </Grid>
                     <Grid item xs={6} align="center">
                         <Button variant="contained" color="primary" onClick={this.handleFilterApplyClick} >Aplicar</Button>
                     </Grid>
