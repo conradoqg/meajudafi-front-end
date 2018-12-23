@@ -325,6 +325,12 @@ class FundListView extends React.Component {
             }
         }
 
+        // let benchmarkField = 'cdi_accumulated_investment_return';
+        // let benchmarkText = 'CDI';
+
+        let benchmarkField = 'bovespa_accumulated_investment_return';
+        let benchmarkText = 'Bovespa';
+
         const { dailyReturn, infCadastral } = await API.getFundDetail(cnpj, range);
 
         const initialPerformance = chartConfig && chartConfig.performanceValue == 'relative' ? dailyReturn[dailyReturn.length - 1].accumulated_investment_return : 0;
@@ -333,7 +339,7 @@ class FundListView extends React.Component {
         const initialConsistency = chartConfig && chartConfig.consistencyValue == 'relative' ? dailyReturn[dailyReturn.length - 1][consistencyField] : 0;
         const initialNetworth = chartConfig && chartConfig.networthValue == 'relative' ? dailyReturn[dailyReturn.length - 1].networth : 0;
         const initialQuotaholders = chartConfig && chartConfig.quotaholdersValue == 'relative' ? dailyReturn[dailyReturn.length - 1].quotaholders : 0;
-        const initialBenchmarkPerformance = chartConfig && chartConfig.benchmarkValue == 'relative' ? dailyReturn[dailyReturn.length - 1].cdi_accumulated_investment_return : 0;
+        const initialBenchmarkPerformance = chartConfig && chartConfig.benchmarkValue == 'relative' ? dailyReturn[dailyReturn.length - 1][benchmarkField] : 0;
 
         const name = infCadastral[0].denom_social;
         const x = [];
@@ -346,6 +352,8 @@ class FundListView extends React.Component {
         const y_benchmark_performance = [];
         let min_y_performance = null;
         let max_y_performance = null;
+        let min_y_benchmark_performance = null;
+        let max_y_benchmark_performance = null;
 
         dailyReturn.forEach(item => {
             const accumulated_investment_return = item.accumulated_investment_return - initialPerformance;
@@ -356,10 +364,17 @@ class FundListView extends React.Component {
             y_consistency.push(item[consistencyField] - initialConsistency);
             y_networth.push(item.networth - initialNetworth);
             y_quotaholders.push(item.quotaholders - initialQuotaholders);
-            y_benchmark_performance.push(item.cdi_accumulated_investment_return - initialBenchmarkPerformance);
+            const benchmark_accumulated_investment_return = item[benchmarkField] - initialBenchmarkPerformance;            
+            y_benchmark_performance.push(benchmark_accumulated_investment_return);            
+            
             min_y_performance = Math.min(min_y_performance, accumulated_investment_return);
             max_y_performance = Math.max(max_y_performance, accumulated_investment_return);
+            min_y_benchmark_performance = Math.min(min_y_benchmark_performance, benchmark_accumulated_investment_return);
+            max_y_benchmark_performance = Math.max(max_y_benchmark_performance, benchmark_accumulated_investment_return);
         });
+
+        let min_y = Math.min(min_y_performance, min_y_benchmark_performance);
+        let max_y = Math.max(max_y_performance, max_y_benchmark_performance);
 
         return {
             data: [
@@ -373,7 +388,7 @@ class FundListView extends React.Component {
                     x: x,
                     y: y_benchmark_performance,
                     type: 'scatter',
-                    name: 'Benchmark (CDI)',
+                    name: `Benchmark (${benchmarkText})`,
                     yaxis: 'y2'
                 },
                 {
@@ -428,16 +443,16 @@ class FundListView extends React.Component {
                     tickformat: ',.0%',
                     hoverformat: ',.2%',
                     fixedrange: true,
-                    range: [min_y_performance, max_y_performance],
+                    range: [min_y, max_y],
                 },
                 yaxis2: {
-                    title: 'Benchmark (CDI)',
+                    title: `Benchmark (${benchmarkText})`,
                     tickformat: ',.0%',
                     hoverformat: ',.2%',
                     anchor: 'free',
                     overlaying: 'y',
                     side: 'left',
-                    range: [min_y_performance, max_y_performance],
+                    range: [min_y, max_y],
                     fixedrange: true,
                     position: 0
                 },
