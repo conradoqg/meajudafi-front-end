@@ -287,54 +287,54 @@ class FundListView extends React.Component {
             }
         }
 
-        let sharpeField = 'sharpe_1y';
+        let sharpeField = 'ird_cdi_sharpe_1y';
         let sharpeText = 'Sharpe 1A';
         if (chartConfig) {
             switch (chartConfig.sharpeRange) {
                 case '1y':
-                    sharpeField = 'sharpe_1y';
+                    sharpeField = 'ird_cdi_sharpe_1y';
                     sharpeText = 'Sharpe 1A';
                     break;
                 case '2y':
-                    sharpeField = 'sharpe_2y';
+                    sharpeField = 'ird_cdi_sharpe_2y';
                     sharpeText = 'Sharpe 2A';
                     break;
                 case '3y':
-                    sharpeField = 'sharpe_3y';
+                    sharpeField = 'ird_cdi_sharpe_3y';
                     sharpeText = 'Sharpe 3A';
                     break;
             }
         }
 
-        let consistencyField = 'consistency_1y';
+        let consistencyField = 'ird_cdi_consistency_1y';
         let consistencyText = 'Consistência 1A';
         if (chartConfig) {
             switch (chartConfig.sharpeRange) {
                 case '1y':
-                    consistencyField = 'consistency_1y';
+                    consistencyField = 'ird_cdi_consistency_1y';
                     consistencyText = 'Consistência 1A';
                     break;
                 case '2y':
-                    consistencyField = 'consistency_2y';
+                    consistencyField = 'ird_cdi_consistency_2y';
                     consistencyText = 'Consistência 2A';
                     break;
                 case '3y':
-                    consistencyField = 'consistency_3y';
+                    consistencyField = 'ird_cdi_consistency_3y';
                     consistencyText = 'Consistência 3A';
                     break;
             }
         }
 
-        let benchmarkField = 'cdi_accumulated_investment_return';
+        let benchmarkField = 'ird_cdi_accumulated_investment_return';
         let benchmarkText = 'CDI';
         if (chartConfig) {
             switch (chartConfig.benchmarkReference) {
-                case 'CDI':
-                    benchmarkField = 'cdi_accumulated_investment_return';
+                case 'cdi':
+                    benchmarkField = 'ird_cdi_accumulated_investment_return';
                     benchmarkText = 'CDI';
                     break;
-                case 'Bovespa':
-                    benchmarkField = 'bovespa_accumulated_investment_return';
+                case 'bovespa':
+                    benchmarkField = 'ird_bovespa_accumulated_investment_return';
                     benchmarkText = 'Bovespa';
                     break;
             }
@@ -342,12 +342,12 @@ class FundListView extends React.Component {
 
         const { dailyReturn, infCadastral } = await API.getFundDetail(cnpj, range);
 
-        const initialPerformance = chartConfig && chartConfig.performanceValue == 'relative' ? dailyReturn[dailyReturn.length - 1].accumulated_investment_return : 0;
-        const initialRisk = chartConfig && chartConfig.riskValue == 'relative' ? dailyReturn[dailyReturn.length - 1].accumulated_risk : 0;
+        const initialPerformance = chartConfig && chartConfig.performanceValue == 'relative' ? dailyReturn[dailyReturn.length - 1].ird_accumulated_investment_return : 0;
+        const initialRisk = chartConfig && chartConfig.riskValue == 'relative' ? dailyReturn[dailyReturn.length - 1].ird_accumulated_risk : 0;
         const initialSharpe = chartConfig && chartConfig.sharpeValue == 'relative' ? dailyReturn[dailyReturn.length - 1][sharpeField] : 0;
         const initialConsistency = chartConfig && chartConfig.consistencyValue == 'relative' ? dailyReturn[dailyReturn.length - 1][consistencyField] : 0;
-        const initialNetworth = chartConfig && chartConfig.networthValue == 'relative' ? dailyReturn[dailyReturn.length - 1].networth : 0;
-        const initialQuotaholders = chartConfig && chartConfig.quotaholdersValue == 'relative' ? dailyReturn[dailyReturn.length - 1].quotaholders : 0;
+        const initialNetworth = chartConfig && chartConfig.networthValue == 'relative' ? dailyReturn[dailyReturn.length - 1].ird_networth : 0;
+        const initialQuotaholders = chartConfig && chartConfig.quotaholdersValue == 'relative' ? dailyReturn[dailyReturn.length - 1].ird_quotaholders : 0;
         const initialBenchmarkPerformance = chartConfig && chartConfig.benchmarkValue == 'relative' ? dailyReturn[dailyReturn.length - 1][benchmarkField] : 0;
 
         const name = infCadastral[0].denom_social;
@@ -365,19 +365,19 @@ class FundListView extends React.Component {
         let max_y_benchmark_performance = null;
 
         dailyReturn.forEach(item => {
-            const accumulated_investment_return = item.accumulated_investment_return - initialPerformance;
-            x.push(item.dt_comptc);
-            y_performance.push(accumulated_investment_return);
-            y_risk.push(item.accumulated_risk - initialRisk);
+            const ird_accumulated_investment_return = item.ird_accumulated_investment_return - initialPerformance;
+            x.push(item.ird_dt_comptc);
+            y_performance.push(ird_accumulated_investment_return);
+            y_risk.push(item.ird_accumulated_risk - initialRisk);
             y_sharpe.push(item[sharpeField] - initialSharpe);
             y_consistency.push(item[consistencyField] - initialConsistency);
-            y_networth.push(item.networth - initialNetworth);
-            y_quotaholders.push(item.quotaholders - initialQuotaholders);
+            y_networth.push(item.ird_networth - initialNetworth);
+            y_quotaholders.push(item.ird_quotaholders - initialQuotaholders);
             const benchmark_accumulated_investment_return = item[benchmarkField] - initialBenchmarkPerformance;
             y_benchmark_performance.push(benchmark_accumulated_investment_return);
 
-            min_y_performance = Math.min(min_y_performance, accumulated_investment_return);
-            max_y_performance = Math.max(max_y_performance, accumulated_investment_return);
+            min_y_performance = Math.min(min_y_performance, ird_accumulated_investment_return);
+            max_y_performance = Math.max(max_y_performance, ird_accumulated_investment_return);
             min_y_benchmark_performance = Math.min(min_y_benchmark_performance, benchmark_accumulated_investment_return);
             max_y_benchmark_performance = Math.max(max_y_benchmark_performance, benchmark_accumulated_investment_return);
         });
@@ -639,26 +639,26 @@ class FundListView extends React.Component {
                                                         <Grid item xs={3}>
                                                             <Typography>
                                                                 <small>
-                                                                    1A: {d3Format.format('.2%')(fund.iry_risk_1y)}<br />
-                                                                    2A: {d3Format.format('.2%')(fund.iry_risk_2y)}<br />
-                                                                    3A: {d3Format.format('.2%')(fund.iry_risk_3y)}<br />
+                                                                    1A: {d3Format.format('.2%')(fund.iry_cdi_risk_1y)}<br />
+                                                                    2A: {d3Format.format('.2%')(fund.iry_cdi_risk_2y)}<br />
+                                                                    3A: {d3Format.format('.2%')(fund.iry_cdi_risk_3y)}<br />
                                                                 </small>
                                                             </Typography>
                                                         </Grid>
                                                         <Grid item xs={3}>
                                                             <Typography>
                                                                 <small>
-                                                                    1A: {d3Format.format('.2')(fund.iry_sharpe_1y)}<br />
-                                                                    2A: {d3Format.format('.2')(fund.iry_sharpe_2y)}<br />
-                                                                    3A: {d3Format.format('.2')(fund.iry_sharpe_3y)}<br />
+                                                                    1A: {d3Format.format('.2')(fund.iry_cdi_sharpe_1y)}<br />
+                                                                    2A: {d3Format.format('.2')(fund.iry_cdi_sharpe_2y)}<br />
+                                                                    3A: {d3Format.format('.2')(fund.iry_cdi_sharpe_3y)}<br />
                                                                 </small>
                                                             </Typography>
                                                         </Grid>
                                                         <Grid item xs={3}>
                                                             <Typography>
-                                                                1A: {d3Format.format('.2%')(fund.iry_consistency_1y)}<br />
-                                                                2A: {d3Format.format('.2%')(fund.iry_consistency_2y)}<br />
-                                                                3A: {d3Format.format('.2%')(fund.iry_consistency_3y)}<br />
+                                                                1A: {d3Format.format('.2%')(fund.iry_cdi_consistency_1y)}<br />
+                                                                2A: {d3Format.format('.2%')(fund.iry_cdi_consistency_2y)}<br />
+                                                                3A: {d3Format.format('.2%')(fund.iry_cdi_consistency_3y)}<br />
                                                             </Typography>
                                                         </Grid>
                                                     </Grid>

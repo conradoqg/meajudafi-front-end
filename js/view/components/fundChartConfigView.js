@@ -36,7 +36,7 @@ const emptyState = {
         networthValue: 'absolute',
         quotaholdersValue: 'absolute',
         benchmarkValue: 'absolute',
-        benchmarkReference: 'CDI'
+        benchmarkReference: 'cdi'
     }
 };
 
@@ -233,8 +233,8 @@ class FundChartConfigView extends React.Component {
                                 value={this.state.config.benchmarkReference}
                                 onChange={this.handleValueChange('benchmarkReference')}
                             >
-                                <FormControlLabel value="CDI" control={<Radio />} label="CDI" />
-                                <FormControlLabel value="Bovespa" control={<Radio />} label="Bovespa" />
+                                <FormControlLabel value="cdi" control={<Radio />} label="CDI" />
+                                <FormControlLabel value="bovespa" control={<Radio />} label="Bovespa" />
                             </RadioGroup>
                         </FormControl>
                     </Grid>
