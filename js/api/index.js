@@ -44,15 +44,15 @@ module.exports = {
             }
 
             if (options.filter.iry_risk_1y) {
-                iry_risk_1yFilter = `and=(iry_cdi_risk_1y.gte.${options.filter.iry_risk_1y.min},iry_cdi_risk_1y.lte.${options.filter.iry_risk_1y.max})&`;
+                iry_risk_1yFilter = `and=(iry_risk_1y.gte.${options.filter.iry_risk_1y.min},iry_risk_1y.lte.${options.filter.iry_risk_1y.max})&`;
             }
 
             if (options.filter.iry_risk_2y) {
-                iry_risk_2yFilter = `and=(iry_cdi_risk_2y.gte.${options.filter.iry_risk_2y.min},iry_cdi_risk_2y.lte.${options.filter.iry_risk_2y.max})&`;
+                iry_risk_2yFilter = `and=(iry_risk_2y.gte.${options.filter.iry_risk_2y.min},iry_risk_2y.lte.${options.filter.iry_risk_2y.max})&`;
             }
 
             if (options.filter.iry_risk_3y) {
-                iry_risk_3yFilter = `and=(iry_cdi_risk_3y.gte.${options.filter.iry_risk_3y.min},iry_cdi_risk_3y.lte.${options.filter.iry_risk_3y.max})&`;
+                iry_risk_3yFilter = `and=(iry_risk_3y.gte.${options.filter.iry_risk_3y.min},iry_risk_3y.lte.${options.filter.iry_risk_3y.max})&`;
             }
 
             if (options.filter.iry_sharpe_1y) {

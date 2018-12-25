@@ -639,9 +639,9 @@ class FundListView extends React.Component {
                                                         <Grid item xs={3}>
                                                             <Typography>
                                                                 <small>
-                                                                    1A: {d3Format.format('.2%')(fund.iry_cdi_risk_1y)}<br />
-                                                                    2A: {d3Format.format('.2%')(fund.iry_cdi_risk_2y)}<br />
-                                                                    3A: {d3Format.format('.2%')(fund.iry_cdi_risk_3y)}<br />
+                                                                    1A: {d3Format.format('.2%')(fund.iry_risk_1y)}<br />
+                                                                    2A: {d3Format.format('.2%')(fund.iry_risk_2y)}<br />
+                                                                    3A: {d3Format.format('.2%')(fund.iry_risk_3y)}<br />
                                                                 </small>
                                                             </Typography>
                                                         </Grid>
