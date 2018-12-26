@@ -19,11 +19,5 @@ module.exports = [
     ...createOptionsFor('Desempenho 3 anos', 'iry_investment_return_3y'),
     ...createOptionsFor('Risco 1 ano', 'iry_risk_1y'),
     ...createOptionsFor('Risco 2 ano', 'iry_risk_2y'),
-    ...createOptionsFor('Risco 3 ano', 'iry_risk_3y'),
-    ...createOptionsFor('Sharpe 1 ano', 'iry_cdi_sharpe_1y'),
-    ...createOptionsFor('Sharpe 2 ano', 'iry_cdi_sharpe_2y'),
-    ...createOptionsFor('Sharpe 3 ano', 'iry_cdi_sharpe_3y'),
-    ...createOptionsFor('Consistência 1 ano', 'iry_cdi_consistency_1y'),
-    ...createOptionsFor('Consistência 2 ano', 'iry_cdi_consistency_2y'),
-    ...createOptionsFor('Consistência 3 ano', 'iry_cdi_consistency_3y')
+    ...createOptionsFor('Risco 3 ano', 'iry_risk_3y')    
 ];

@@ -286,21 +286,37 @@ class FundListView extends React.Component {
                     break;
             }
         }
+        
+        let benchmarkField = 'ird_cdi_accumulated_investment_return';
+        let benchmarkText = 'CDI';
+        if (chartConfig) {
+            switch (chartConfig.benchmarkReference) {
+                case 'cdi':
+                    benchmarkField = 'ird_cdi_accumulated_investment_return';
+                    benchmarkText = 'CDI';
+
+                    break;
+                case 'bovespa':
+                    benchmarkField = 'ird_bovespa_accumulated_investment_return';
+                    benchmarkText = 'Bovespa';
+                    break;
+            }
+        }
 
         let sharpeField = 'ird_cdi_sharpe_1y';
         let sharpeText = 'Sharpe 1A';
         if (chartConfig) {
             switch (chartConfig.sharpeRange) {
-                case '1y':
-                    sharpeField = 'ird_cdi_sharpe_1y';
+                case '1y':                    
+                    sharpeField = benchmarkField == 'CDI' ? 'ird_cdi_sharpe_1y' : 'ird_bovespa_sharpe_1y';
                     sharpeText = 'Sharpe 1A';
                     break;
                 case '2y':
-                    sharpeField = 'ird_cdi_sharpe_2y';
+                    sharpeField = benchmarkField == 'CDI' ? 'ird_cdi_sharpe_2y' : 'ird_bovespa_sharpe_2y';
                     sharpeText = 'Sharpe 2A';
                     break;
                 case '3y':
-                    sharpeField = 'ird_cdi_sharpe_3y';
+                    sharpeField = benchmarkField == 'CDI' ? 'ird_cdi_sharpe_3y' : 'ird_bovespa_sharpe_3y';
                     sharpeText = 'Sharpe 3A';
                     break;
             }
@@ -311,34 +327,19 @@ class FundListView extends React.Component {
         if (chartConfig) {
             switch (chartConfig.sharpeRange) {
                 case '1y':
-                    consistencyField = 'ird_cdi_consistency_1y';
+                    consistencyField = benchmarkField == 'CDI' ? 'ird_cdi_consistency_1y' : 'ird_bovespa_consistency_1y';
                     consistencyText = 'Consistência 1A';
                     break;
                 case '2y':
-                    consistencyField = 'ird_cdi_consistency_2y';
+                    consistencyField = benchmarkField == 'CDI' ? 'ird_cdi_consistency_2y' : 'ird_bovespa_consistency_2y';
                     consistencyText = 'Consistência 2A';
                     break;
                 case '3y':
-                    consistencyField = 'ird_cdi_consistency_3y';
+                    consistencyField = benchmarkField == 'CDI' ? 'ird_cdi_consistency_3y' : 'ird_bovespa_consistency_3y';
                     consistencyText = 'Consistência 3A';
                     break;
             }
-        }
-
-        let benchmarkField = 'ird_cdi_accumulated_investment_return';
-        let benchmarkText = 'CDI';
-        if (chartConfig) {
-            switch (chartConfig.benchmarkReference) {
-                case 'cdi':
-                    benchmarkField = 'ird_cdi_accumulated_investment_return';
-                    benchmarkText = 'CDI';
-                    break;
-                case 'bovespa':
-                    benchmarkField = 'ird_bovespa_accumulated_investment_return';
-                    benchmarkText = 'Bovespa';
-                    break;
-            }
-        }
+        }        
 
         const { dailyReturn, infCadastral } = await API.getFundDetail(cnpj, range);
 
@@ -613,21 +614,15 @@ class FundListView extends React.Component {
                                                 </Grid>
                                                 <Grid item xs={4}>
                                                     <Grid container spacing={8}>
-                                                        <Grid item xs={3}>
+                                                        <Grid item xs={6}>
                                                             <Typography><b>Desempenho</b></Typography>
                                                         </Grid>
-                                                        <Grid item xs={3}>
+                                                        <Grid item xs={6}>
                                                             <Typography><b>Risco</b></Typography>
-                                                        </Grid>
-                                                        <Grid item xs={3}>
-                                                            <Typography><b>Sharpe</b></Typography>
-                                                        </Grid>
-                                                        <Grid item xs={3}>
-                                                            <Typography><b>Consistência</b></Typography>
-                                                        </Grid>
+                                                        </Grid>                                                        
                                                     </Grid>
                                                     <Grid container spacing={8}>
-                                                        <Grid item xs={3}>
+                                                        <Grid item xs={6}>
                                                             <Typography>
                                                                 <small>
                                                                     1A: {d3Format.format('.2%')(fund.iry_investment_return_1y)}<br />
@@ -636,7 +631,7 @@ class FundListView extends React.Component {
                                                                 </small>
                                                             </Typography>
                                                         </Grid>
-                                                        <Grid item xs={3}>
+                                                        <Grid item xs={6}>
                                                             <Typography>
                                                                 <small>
                                                                     1A: {d3Format.format('.2%')(fund.iry_risk_1y)}<br />
@@ -644,23 +639,7 @@ class FundListView extends React.Component {
                                                                     3A: {d3Format.format('.2%')(fund.iry_risk_3y)}<br />
                                                                 </small>
                                                             </Typography>
-                                                        </Grid>
-                                                        <Grid item xs={3}>
-                                                            <Typography>
-                                                                <small>
-                                                                    1A: {d3Format.format('.2')(fund.iry_cdi_sharpe_1y)}<br />
-                                                                    2A: {d3Format.format('.2')(fund.iry_cdi_sharpe_2y)}<br />
-                                                                    3A: {d3Format.format('.2')(fund.iry_cdi_sharpe_3y)}<br />
-                                                                </small>
-                                                            </Typography>
-                                                        </Grid>
-                                                        <Grid item xs={3}>
-                                                            <Typography>
-                                                                1A: {d3Format.format('.2%')(fund.iry_cdi_consistency_1y)}<br />
-                                                                2A: {d3Format.format('.2%')(fund.iry_cdi_consistency_2y)}<br />
-                                                                3A: {d3Format.format('.2%')(fund.iry_cdi_consistency_3y)}<br />
-                                                            </Typography>
-                                                        </Grid>
+                                                        </Grid>                                                       
                                                     </Grid>
                                                 </Grid>
                                             </Grid>

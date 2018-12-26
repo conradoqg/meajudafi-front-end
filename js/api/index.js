@@ -14,13 +14,7 @@ module.exports = {
         let iry_investment_return_3yFilter = '';
         let iry_risk_1yFilter = '';
         let iry_risk_2yFilter = '';
-        let iry_risk_3yFilter = '';
-        let iry_sharpe_1yFilter = '';
-        let iry_sharpe_2yFilter = '';
-        let iry_sharpe_3yFilter = '';
-        let iry_consistency_1yFilter = '';
-        let iry_consistency_2yFilter = '';
-        let iry_consistency_3yFilter = '';
+        let iry_risk_3yFilter = '';        
 
         if (options.filter) {
             if (options.filter.class.length > 0) {
@@ -54,30 +48,6 @@ module.exports = {
             if (options.filter.iry_risk_3y) {
                 iry_risk_3yFilter = `and=(iry_risk_3y.gte.${options.filter.iry_risk_3y.min},iry_risk_3y.lte.${options.filter.iry_risk_3y.max})&`;
             }
-
-            if (options.filter.iry_sharpe_1y) {
-                iry_sharpe_1yFilter = `and=(iry_cdi_sharpe_1y.gte.${options.filter.iry_sharpe_1y.min},iry_cdi_sharpe_1y.lte.${options.filter.iry_sharpe_1y.max})&`;
-            }
-
-            if (options.filter.iry_sharpe_2y) {
-                iry_sharpe_2yFilter = `and=(iry_cdi_sharpe_2y.gte.${options.filter.iry_sharpe_2y.min},iry_cdi_sharpe_2y.lte.${options.filter.iry_sharpe_2y.max})&`;
-            }
-
-            if (options.filter.iry_sharpe_3y) {
-                iry_sharpe_3yFilter = `and=(iry_cdi_sharpe_3y.gte.${options.filter.iry_sharpe_3y.min},iry_cdi_sharpe_3y.lte.${options.filter.iry_sharpe_3y.max})&`;
-            }
-
-            if (options.filter.iry_consistency_1y) {
-                iry_consistency_1yFilter = `and=(iry_cdi_consistency_1y.gte.${options.filter.iry_consistency_1y.min},iry_cdi_consistency_1y.lte.${options.filter.iry_consistency_1y.max})&`;
-            }
-
-            if (options.filter.iry_consistency_2y) {
-                iry_consistency_2yFilter = `and=(iry_cdi_consistency_2y.gte.${options.filter.iry_consistency_2y.min},iry_cdi_consistency_2y.lte.${options.filter.iry_consistency_2y.max})&`;
-            }
-
-            if (options.filter.iry_consistency_3y) {
-                iry_consistency_3yFilter = `and=(iry_cdi_consistency_3y.gte.${options.filter.iry_consistency_3y.min},iry_cdi_consistency_3y.lte.${options.filter.iry_consistency_3y.max})&`;
-            }
         }
 
         let searchPart = '';
@@ -92,7 +62,7 @@ module.exports = {
             }
         }
 
-        const fundListObject = await fetch(`//${API_URL}/icf_with_xf_and_iry_of_last_year?${classFilter}${iry_investment_return_1yFilter}${iry_investment_return_2yFilter}${iry_investment_return_3yFilter}${iry_risk_1yFilter}${iry_risk_2yFilter}${iry_risk_3yFilter}${iry_sharpe_1yFilter}${iry_sharpe_2yFilter}${iry_sharpe_3yFilter}${iry_consistency_1yFilter}${iry_consistency_2yFilter}${iry_consistency_3yFilter}${searchPart}order=${sort}`, {
+        const fundListObject = await fetch(`//${API_URL}/icf_with_xf_and_iry_of_last_year?${classFilter}${iry_investment_return_1yFilter}${iry_investment_return_2yFilter}${iry_investment_return_3yFilter}${iry_risk_1yFilter}${iry_risk_2yFilter}${iry_risk_3yFilter}${searchPart}order=${sort}`, {
             method: 'GET',
             headers: {
                 'Range-Unit': 'items',
