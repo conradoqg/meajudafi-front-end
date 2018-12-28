@@ -28,6 +28,8 @@ const emptyState = {
 class FundSearchView extends React.Component {
     state = emptyState;
 
+    static emptyState = emptyState;
+
     timeout = null;
 
     triggerOnSearchChanged = () => {

@@ -26,32 +26,36 @@ const styles = theme => ({
 
 const emptyState = {
     config: {
-        range: 'all',
-        sharpeRange: '1y',
-        consistencyRange: '1y',
-        performanceValue: 'absolute',
-        riskValue: 'absolute',
-        sharpeValue: 'absolute',
-        consistencyValue: 'absolute',
-        networthValue: 'absolute',
-        quotaholdersValue: 'absolute',
-        benchmarkValue: 'absolute',
-        benchmarkReference: 'cdi'
+        chartConfig: {
+            range: 'all',
+            sharpeRange: '1y',
+            consistencyRange: '1y',
+            performanceValue: 'absolute',
+            riskValue: 'absolute',
+            sharpeValue: 'absolute',
+            consistencyValue: 'absolute',
+            networthValue: 'absolute',
+            quotaholdersValue: 'absolute',
+            benchmarkValue: 'absolute',
+            benchmarkReference: 'cdi'
+        }
     }
 };
 
 class FundChartConfigView extends React.Component {
     state = emptyState;
 
+    static emptyState = emptyState;
+
     handleValueChange = field => event => {
         const value = event.target.value;
         this.setState(produce(draft => {
-            draft.config[field] = value;
+            draft.config.chartConfig[field] = value;
         }));
     }
 
     handleFilterApplyClick = async () => {
-        return this.props.onChartConfigChanged(this.state.config);
+        return this.props.onChartConfigChanged(this.state.config.chartConfig);
     }
 
     handleFilterClearClick = async () => {
@@ -76,7 +80,7 @@ class FundChartConfigView extends React.Component {
                                 aria-label="Período"
                                 name="range"
                                 className={classes.group}
-                                value={this.state.config.range}
+                                value={this.state.config.chartConfig.range}
                                 onChange={this.handleValueChange('range')}
                             >
                                 <FormControlLabel value="1y" control={<Radio />} label="1 ano" />
@@ -93,7 +97,7 @@ class FundChartConfigView extends React.Component {
                                 aria-label="Sharpe Período"
                                 name="sharpeRange"
                                 className={classes.group}
-                                value={this.state.config.sharpeRange}
+                                value={this.state.config.chartConfig.sharpeRange}
                                 onChange={this.handleValueChange('sharpeRange')}
                             >
                                 <FormControlLabel value="1y" control={<Radio />} label="1 ano" />
@@ -109,7 +113,7 @@ class FundChartConfigView extends React.Component {
                                 aria-label="Consistência Período"
                                 name="consistencyRange"
                                 className={classes.group}
-                                value={this.state.config.consistencyRange}
+                                value={this.state.config.chartConfig.consistencyRange}
                                 onChange={this.handleValueChange('consistencyRange')}
                             >
                                 <FormControlLabel value="1y" control={<Radio />} label="1 ano" />
@@ -125,7 +129,7 @@ class FundChartConfigView extends React.Component {
                                 aria-label="Desempenho"
                                 name="performance"
                                 className={classes.group}
-                                value={this.state.config.performanceValue}
+                                value={this.state.config.chartConfig.performanceValue}
                                 onChange={this.handleValueChange('performanceValue')}
                             >
                                 <FormControlLabel value="absolute" control={<Radio />} label="Absoluto" />
@@ -140,7 +144,7 @@ class FundChartConfigView extends React.Component {
                                 aria-label="Risco"
                                 name="risk"
                                 className={classes.group}
-                                value={this.state.config.riskValue}
+                                value={this.state.config.chartConfig.riskValue}
                                 onChange={this.handleValueChange('riskValue')}
                             >
                                 <FormControlLabel value="absolute" control={<Radio />} label="Absoluto" />
@@ -155,7 +159,7 @@ class FundChartConfigView extends React.Component {
                                 aria-label="Sharpe"
                                 name="sharpe"
                                 className={classes.group}
-                                value={this.state.config.sharpeValue}
+                                value={this.state.config.chartConfig.sharpeValue}
                                 onChange={this.handleValueChange('sharpeValue')}
                             >
                                 <FormControlLabel value="absolute" control={<Radio />} label="Absoluto" />
@@ -170,7 +174,7 @@ class FundChartConfigView extends React.Component {
                                 aria-label="Consistência"
                                 name="consistency"
                                 className={classes.group}
-                                value={this.state.config.consistencyValue}
+                                value={this.state.config.chartConfig.consistencyValue}
                                 onChange={this.handleValueChange('consistencyValue')}
                             >
                                 <FormControlLabel value="absolute" control={<Radio />} label="Absoluto" />
@@ -185,7 +189,7 @@ class FundChartConfigView extends React.Component {
                                 aria-label="Patrimônio"
                                 name="networth"
                                 className={classes.group}
-                                value={this.state.config.networthValue}
+                                value={this.state.config.chartConfig.networthValue}
                                 onChange={this.handleValueChange('networthValue')}
                             >
                                 <FormControlLabel value="absolute" control={<Radio />} label="Absoluto" />
@@ -200,7 +204,7 @@ class FundChartConfigView extends React.Component {
                                 aria-label="Cotistas"
                                 name="quotaholders"
                                 className={classes.group}
-                                value={this.state.config.quotaholdersValue}
+                                value={this.state.config.chartConfig.quotaholdersValue}
                                 onChange={this.handleValueChange('quotaholdersValue')}
                             >
                                 <FormControlLabel value="absolute" control={<Radio />} label="Absoluto" />
@@ -215,7 +219,7 @@ class FundChartConfigView extends React.Component {
                                 aria-label="Benchmark"
                                 name="benchmarkValue"
                                 className={classes.group}
-                                value={this.state.config.benchmarkValue}
+                                value={this.state.config.chartConfig.benchmarkValue}
                                 onChange={this.handleValueChange('benchmarkValue')}
                             >
                                 <FormControlLabel value="absolute" control={<Radio />} label="Absoluto" />
@@ -230,7 +234,7 @@ class FundChartConfigView extends React.Component {
                                 aria-label="Referência Benchmark"
                                 name="benchmarkReference"
                                 className={classes.group}
-                                value={this.state.config.benchmarkReference}
+                                value={this.state.config.chartConfig.benchmarkReference}
                                 onChange={this.handleValueChange('benchmarkReference')}
                             >
                                 <FormControlLabel value="cdi" control={<Radio />} label="CDI" />

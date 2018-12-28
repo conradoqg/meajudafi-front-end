@@ -4,65 +4,45 @@ import allKeys from 'promise-results/allKeys';
 const API_URL = process.env.API_URL || 'api.cvmfundexplorer.conradoqg.eti.br';
 
 module.exports = {
-    getFundList: async (options) => {        
+    getFundList: async (options) => {
         const range = `${(options.page * options.rowsPerPage)}-${((options.page * options.rowsPerPage) + options.rowsPerPage - 1)}`;
         const sort = `${options.sort.field}.${options.sort.order}`;
 
-        let classFilter = '';
-        let iry_investment_return_1yFilter = '';
-        let iry_investment_return_2yFilter = '';
-        let iry_investment_return_3yFilter = '';
-        let iry_risk_1yFilter = '';
-        let iry_risk_2yFilter = '';
-        let iry_risk_3yFilter = '';        
-
+        let filterPart = '';
         if (options.filter) {
-            if (options.filter.class.length > 0) {
-                const selectedFilterOptions = options.filter.class.map(selectedFilter => {
-                    if (selectedFilter == null) return 'icf_classe.is.null';
-                    else return `icf_classe.eq."${selectedFilter}"`;
-                });
-                classFilter = `or=(${selectedFilterOptions.join(',')})&`;
-            }
 
-            if (options.filter.iry_investment_return_1y) {
-                iry_investment_return_1yFilter = `and=(iry_investment_return_1y.gte.${options.filter.iry_investment_return_1y.min},iry_investment_return_1y.lte.${options.filter.iry_investment_return_1y.max})&`;
-            }
+            Object.keys(options.filter).map(selectedFilterOptionsKey => {
+                if (Array.isArray(options.filter[selectedFilterOptionsKey])) {
+                    const selectedFilterOptionsText = options.filter[selectedFilterOptionsKey].map(selectedFilter => {
+                        if (selectedFilter == null) return `${selectedFilterOptionsKey}.is.null`;
+                        else return `${selectedFilterOptionsKey}.eq."${selectedFilter}"`;
+                    });
+                    if (selectedFilterOptionsText.length > 0) filterPart += `or=(${selectedFilterOptionsText.join(',')})&`;
+                } else {
 
-            if (options.filter.iry_investment_return_2y) {
-                iry_investment_return_2yFilter = `and=(iry_investment_return_2y.gte.${options.filter.iry_investment_return_2y.min},iry_investment_return_2y.lte.${options.filter.iry_investment_return_2y.max})&`;
-            }
-
-            if (options.filter.iry_investment_return_3y) {
-                iry_investment_return_3yFilter = `and=(iry_investment_return_3y.gte.${options.filter.iry_investment_return_3y.min},iry_investment_return_3y.lte.${options.filter.iry_investment_return_3y.max})&`;
-            }
-
-            if (options.filter.iry_risk_1y) {
-                iry_risk_1yFilter = `and=(iry_risk_1y.gte.${options.filter.iry_risk_1y.min},iry_risk_1y.lte.${options.filter.iry_risk_1y.max})&`;
-            }
-
-            if (options.filter.iry_risk_2y) {
-                iry_risk_2yFilter = `and=(iry_risk_2y.gte.${options.filter.iry_risk_2y.min},iry_risk_2y.lte.${options.filter.iry_risk_2y.max})&`;
-            }
-
-            if (options.filter.iry_risk_3y) {
-                iry_risk_3yFilter = `and=(iry_risk_3y.gte.${options.filter.iry_risk_3y.min},iry_risk_3y.lte.${options.filter.iry_risk_3y.max})&`;
-            }
+                    let minPart = '';
+                    let maxPart = '';
+                    if (options.filter[selectedFilterOptionsKey].min != '') minPart = `${selectedFilterOptionsKey}.gte.${options.filter[selectedFilterOptionsKey].format ? options.filter[selectedFilterOptionsKey].format(options.filter[selectedFilterOptionsKey].min) : options.filter[selectedFilterOptionsKey].min}`;
+                    if (options.filter[selectedFilterOptionsKey].max != '') maxPart = `${selectedFilterOptionsKey}.lte.${options.filter[selectedFilterOptionsKey].format ? options.filter[selectedFilterOptionsKey].format(options.filter[selectedFilterOptionsKey].max) : options.filter[selectedFilterOptionsKey].max}`;
+                    if (minPart && maxPart) filterPart += `and=(${minPart},${maxPart})&`;
+                    else if (minPart || maxPart) filterPart += `and=(${minPart}${maxPart})&`;                    
+                }
+            });
         }
 
         let searchPart = '';
-        if (options.search) {            
+        if (options.search) {
             if (options.search.term != '') {
                 // Identify if it's a CNPJ or a fund name
                 if (/^\d+$/.test(options.search.term)) {
-                    searchPart = `and=(icf_cnpj_fundo.ilike.*${options.search.term}*)`;
+                    searchPart = `and=(icf_cnpj_fundo.ilike.*${options.search.term}*)&`;
                 } else {
-                    searchPart = `and=(icf_denom_social_unaccented.ilike.*${options.search.term.normalize('NFD').replace(/[\u0300-\u036f]/g, '')}*)`;
+                    searchPart = `and=(icf_denom_social_unaccented.ilike.*${options.search.term.normalize('NFD').replace(/[\u0300-\u036f]/g, '')}*)&`;
                 }
             }
         }
 
-        const fundListObject = await fetch(`//${API_URL}/icf_with_xf_and_iry_of_last_year?${classFilter}${iry_investment_return_1yFilter}${iry_investment_return_2yFilter}${iry_investment_return_3yFilter}${iry_risk_1yFilter}${iry_risk_2yFilter}${iry_risk_3yFilter}${searchPart}order=${sort}`, {
+        const fundListObject = await fetch(`//${API_URL}/icf_with_xf_and_iry_of_last_year?${filterPart}${searchPart}order=${sort}`, {
             method: 'GET',
             headers: {
                 'Range-Unit': 'items',
@@ -82,13 +62,13 @@ module.exports = {
             data: await fundListObject.json()
         };
     },
-    getFundDetail: async (cnpj, limit) => {        
+    getFundDetail: async (cnpj, limit) => {
         const range = limit ? `0-${limit}` : '';
-        const dailyReturn = await fetch(`//${API_URL}/investment_return_daily?ird_cnpj_fundo=eq.${cnpj}&order=ird_dt_comptc.desc`,{
+        const dailyReturn = await fetch(`//${API_URL}/investment_return_daily?ird_cnpj_fundo=eq.${cnpj}&order=ird_dt_comptc.desc`, {
             method: 'GET',
             headers: {
                 'Range-Unit': 'items',
-                'Range': range             
+                'Range': range
             }
         });
         const infCadastral = await fetch(`//${API_URL}/inf_cadastral_fi?cnpj_fundo=eq.${cnpj}`);

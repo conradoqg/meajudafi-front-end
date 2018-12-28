@@ -67,7 +67,10 @@ const emptyState = {
     config: {
         page: 0,
         rowsPerPage: 25,
-        sort: sortOptions[0]
+        sort: sortOptions[0],
+        filter: FundFilterView.emptyState.config.filter,
+        chartConfig: FundChartConfigView.emptyState.config.chartConfig,
+        search: FundSearchView.emptyState.config.search
     },
     layout: {
         anchorEl: null,
@@ -520,7 +523,7 @@ class FundListView extends React.Component {
     }
 
     async componentDidMount() {
-        try {
+        try {            
             const result = await this.getFundList(this.state.config);
 
             this.setState(produce(draft => {
