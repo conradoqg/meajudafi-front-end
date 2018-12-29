@@ -5,12 +5,14 @@ import Grid from '@material-ui/core/Grid';
 import ListItemText from '@material-ui/core/ListItemText';
 import Select from '@material-ui/core/Select';
 import Checkbox from '@material-ui/core/Checkbox';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import Input from '@material-ui/core/Input';
 import MenuItem from '@material-ui/core/MenuItem';
 import Button from '@material-ui/core/Button';
 import { produce, setAutoFreeze } from 'immer';
 import filterOptions from './filterOptions';
+import Switch from '@material-ui/core/Switch';
 
 setAutoFreeze(false);
 
@@ -39,7 +41,7 @@ const emptyState = {
             icf_classe: [],
             icf_sit: ['EM FUNCIONAMENTO NORMAL'],
             icf_condom: ['Aberto'],
-            icf_fundo_cotas: ['S'],
+            icf_fundo_cotas: [],
             icf_fundo_exclusivo: ['N'],
             icf_rentab_fundo: [],
             iry_networth: { min: '1', max: '' },
@@ -49,7 +51,8 @@ const emptyState = {
             iry_investment_return_3y: { min: '', max: '', format: value => value / 100 },
             iry_risk_1y: { min: '', max: '', format: value => value / 100 },
             iry_risk_2y: { min: '', max: '', format: value => value / 100 },
-            iry_risk_3y: { min: '', max: '', format: value => value / 100 }
+            iry_risk_3y: { min: '', max: '', format: value => value / 100 },
+            xf_xpi_id: false
         }
     }
 };
@@ -73,6 +76,15 @@ class FundFilterView extends React.Component {
             const value = event.target.value;
             this.setState(produce(draft => {
                 draft.config.filter[field][range] = value;
+            }));
+        };
+    }
+
+    handleSwitchChange = field => {
+        return event => {
+            const value = event.target.value;
+            this.setState(produce(draft => {
+                draft.config.filter[field] = value == 'false' ? true : false;
             }));
         };
     }
@@ -437,7 +449,17 @@ class FundFilterView extends React.Component {
                             </Grid>
                         </Grid>
                     </Grid>
-                    <Grid item xs={3}>
+                    <Grid item xs={3} align="center">
+                        <FormControlLabel
+                            control={
+                                <Switch
+                                    checked={this.state.config.filter.xf_xpi_id}
+                                    onChange={this.handleSwitchChange('xf_xpi_id')}
+                                    value={this.state.config.filter.xf_xpi_id ? 'true' : 'false'}
+                                />
+                            }
+                            label="Somente fundos XP"
+                        />
                     </Grid>
                     <Grid item xs={6} align="center">
                         <Button variant="contained" color="primary" onClick={this.handleFilterApplyClick} >Aplicar</Button>

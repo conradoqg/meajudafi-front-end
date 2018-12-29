@@ -18,14 +18,15 @@ module.exports = {
                         else return `${selectedFilterOptionsKey}.eq."${selectedFilter}"`;
                     });
                     if (selectedFilterOptionsText.length > 0) filterPart += `or=(${selectedFilterOptionsText.join(',')})&`;
-                } else {
-
+                } else if (typeof options.filter[selectedFilterOptionsKey] === 'object') {
                     let minPart = '';
                     let maxPart = '';
                     if (options.filter[selectedFilterOptionsKey].min != '') minPart = `${selectedFilterOptionsKey}.gte.${options.filter[selectedFilterOptionsKey].format ? options.filter[selectedFilterOptionsKey].format(options.filter[selectedFilterOptionsKey].min) : options.filter[selectedFilterOptionsKey].min}`;
                     if (options.filter[selectedFilterOptionsKey].max != '') maxPart = `${selectedFilterOptionsKey}.lte.${options.filter[selectedFilterOptionsKey].format ? options.filter[selectedFilterOptionsKey].format(options.filter[selectedFilterOptionsKey].max) : options.filter[selectedFilterOptionsKey].max}`;
                     if (minPart && maxPart) filterPart += `and=(${minPart},${maxPart})&`;
-                    else if (minPart || maxPart) filterPart += `and=(${minPart}${maxPart})&`;                    
+                    else if (minPart || maxPart) filterPart += `and=(${minPart}${maxPart})&`;
+                } else {
+                    if (options.filter[selectedFilterOptionsKey]) filterPart += `and=(${selectedFilterOptionsKey}.not.is.null)&`;
                 }
             });
         }
