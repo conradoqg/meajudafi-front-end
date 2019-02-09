@@ -275,76 +275,123 @@ class FundListView extends React.Component {
     }
 
     async getFundDetail(cnpj, chartConfig) {
+        if (!chartConfig) chartConfig = FundChartConfigView.emptyState;
+
         let range = null;
-        if (chartConfig) {
-            switch (chartConfig.range) {
-                case '1y':
-                    range = 252;
-                    break;
-                case '2y':
-                    range = 504;
-                    break;
-                case '3y':
-                    range = 756;
-                    break;
-            }
-        }
-        
-        let benchmarkField = 'ird_cdi_accumulated_investment_return';
-        let benchmarkText = 'CDI';
-        if (chartConfig) {
-            switch (chartConfig.benchmarkReference) {
-                case 'cdi':
-                    benchmarkField = 'ird_cdi_accumulated_investment_return';
-                    benchmarkText = 'CDI';
-
-                    break;
-                case 'bovespa':
-                    benchmarkField = 'ird_bovespa_accumulated_investment_return';
-                    benchmarkText = 'Bovespa';
-                    break;
-            }
+        let from = null;
+        switch (chartConfig.range) {
+            case 'mtd':
+                from = new Date((new Date()).getFullYear(), (new Date()).getMonth(), 1);
+                break;
+            case 'ytd':
+                from = new Date((new Date()).getFullYear(), 0, 1);
+                break;
+            case '1m':
+                range = 21;
+                break;
+            case '3m':
+                range = 63;
+                break;
+            case '6m':
+                range = 126;
+                break;
+            case '1y':
+                range = 252;
+                break;
+            case '2y':
+                range = 504;
+                break;
+            case '3y':
+                range = 756;
+                break;
         }
 
-        let sharpeField = 'ird_cdi_sharpe_1y';
-        let sharpeText = 'Sharpe 1A';
-        if (chartConfig) {
-            switch (chartConfig.sharpeRange) {
-                case '1y':                    
-                    sharpeField = benchmarkField == 'CDI' ? 'ird_cdi_sharpe_1y' : 'ird_bovespa_sharpe_1y';
-                    sharpeText = 'Sharpe 1A';
-                    break;
-                case '2y':
-                    sharpeField = benchmarkField == 'CDI' ? 'ird_cdi_sharpe_2y' : 'ird_bovespa_sharpe_2y';
-                    sharpeText = 'Sharpe 2A';
-                    break;
-                case '3y':
-                    sharpeField = benchmarkField == 'CDI' ? 'ird_cdi_sharpe_3y' : 'ird_bovespa_sharpe_3y';
-                    sharpeText = 'Sharpe 3A';
-                    break;
-            }
+        let benchmarkText = null;
+        switch (chartConfig.benchmarkReference) {
+            case 'cdi':
+                benchmarkText = 'CDI';
+                break;
+            case 'bovespa':
+                benchmarkText = 'Bovespa';
+                break;
+            case 'ipca':
+                benchmarkText = 'IPCA';
+                break;
+            case 'igpm':
+                benchmarkText = 'IGPM';
+                break;
+            case 'igpdi':
+                benchmarkText = 'IGPDI';
+                break;
+            case 'euro':
+                benchmarkText = 'Euro';
+                break;
+            case 'dolar':
+                benchmarkText = 'Dólar';
+                break;
+        }
+        const benchmarkField = `ird_${chartConfig.benchmarkReference}_accumulated_investment_return`;
+
+        let sharpeText = null;
+        switch (chartConfig.sharpeRange) {
+            case 'mtd':
+                sharpeText = 'Sharpe nesse mês';
+                break;
+            case 'ytd':
+                sharpeText = 'Sharpe nesse ano';
+                break;
+            case '1m':
+                sharpeText = 'Sharpe 1M';
+                break;
+            case '3m':
+                sharpeText = 'Sharpe 3M';
+                break;
+            case '6m':
+                sharpeText = 'Sharpe 6M';
+                break;
+            case '1y':
+                sharpeText = 'Sharpe 1A';
+                break;
+            case '2y':
+                sharpeText = 'Sharpe 2A';
+                break;
+            case '3y':
+                sharpeText = 'Sharpe 3A';
+                break;
+        }
+        const sharpeField = `ird_${chartConfig.benchmarkReference}_sharpe_${chartConfig.sharpeRange}`;
+
+        let consistencyText = null;
+        switch (chartConfig.sharpeRange) {
+            case 'mtd':
+                consistencyText = 'Consistência nesse mês';
+                break;
+            case 'ytd':
+                consistencyText = 'Consistência nesse ano';
+                break;
+            case '1m':
+                consistencyText = 'Consistência 1M';
+                break;
+            case '3m':
+                consistencyText = 'Consistência 3M';
+                break;
+            case '6m':
+                consistencyText = 'Consistência 6M';
+                break;
+            case '1y':
+                consistencyText = 'Consistência 1A';
+                break;
+            case '2y':
+                consistencyText = 'Consistência 2A';
+                break;
+            case '3y':
+                consistencyText = 'Consistência 3A';
+                break;
         }
 
-        let consistencyField = 'ird_cdi_consistency_1y';
-        let consistencyText = 'Consistência 1A';
-        if (chartConfig) {
-            switch (chartConfig.sharpeRange) {
-                case '1y':
-                    consistencyField = benchmarkField == 'CDI' ? 'ird_cdi_consistency_1y' : 'ird_bovespa_consistency_1y';
-                    consistencyText = 'Consistência 1A';
-                    break;
-                case '2y':
-                    consistencyField = benchmarkField == 'CDI' ? 'ird_cdi_consistency_2y' : 'ird_bovespa_consistency_2y';
-                    consistencyText = 'Consistência 2A';
-                    break;
-                case '3y':
-                    consistencyField = benchmarkField == 'CDI' ? 'ird_cdi_consistency_3y' : 'ird_bovespa_consistency_3y';
-                    consistencyText = 'Consistência 3A';
-                    break;
-            }
-        }        
+        const consistencyField = `ird_${chartConfig.benchmarkReference}_consistency_${chartConfig.sharpeRange}`;
 
-        const { dailyReturn, infCadastral } = await API.getFundDetail(cnpj, range);
+        const { dailyReturn, infCadastral } = await API.getFundDetail(cnpj, range, from);
 
         const initialPerformance = chartConfig && chartConfig.performanceValue == 'relative' ? dailyReturn[dailyReturn.length - 1].ird_accumulated_investment_return : 0;
         const initialRisk = chartConfig && chartConfig.riskValue == 'relative' ? dailyReturn[dailyReturn.length - 1].ird_accumulated_risk : 0;
@@ -523,7 +570,7 @@ class FundListView extends React.Component {
     }
 
     async componentDidMount() {
-        try {            
+        try {
             const result = await this.getFundList(this.state.config);
 
             this.setState(produce(draft => {
@@ -622,7 +669,7 @@ class FundListView extends React.Component {
                                                         </Grid>
                                                         <Grid item xs={6}>
                                                             <Typography><b>Risco</b></Typography>
-                                                        </Grid>                                                        
+                                                        </Grid>
                                                     </Grid>
                                                     <Grid container spacing={8}>
                                                         <Grid item xs={6}>
@@ -642,7 +689,7 @@ class FundListView extends React.Component {
                                                                     3A: {d3Format.format('.2%')(fund.iry_risk_3y)}<br />
                                                                 </small>
                                                             </Typography>
-                                                        </Grid>                                                       
+                                                        </Grid>
                                                     </Grid>
                                                 </Grid>
                                             </Grid>

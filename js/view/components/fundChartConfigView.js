@@ -83,6 +83,11 @@ class FundChartConfigView extends React.Component {
                                 value={this.state.config.chartConfig.range}
                                 onChange={this.handleValueChange('range')}
                             >
+                                <FormControlLabel value="mtd" control={<Radio />} label="Nesse mês" />
+                                <FormControlLabel value="ytd" control={<Radio />} label="Nesse ano" />
+                                <FormControlLabel value="1m" control={<Radio />} label="1 mês" />
+                                <FormControlLabel value="3m" control={<Radio />} label="3 mêses" />
+                                <FormControlLabel value="6m" control={<Radio />} label="6 mêses" />
                                 <FormControlLabel value="1y" control={<Radio />} label="1 ano" />
                                 <FormControlLabel value="2y" control={<Radio />} label="2 anos" />
                                 <FormControlLabel value="3y" control={<Radio />} label="3 anos" />
@@ -100,6 +105,11 @@ class FundChartConfigView extends React.Component {
                                 value={this.state.config.chartConfig.sharpeRange}
                                 onChange={this.handleValueChange('sharpeRange')}
                             >
+                                <FormControlLabel value="mtd" control={<Radio />} label="Nesse mês" />
+                                <FormControlLabel value="ytd" control={<Radio />} label="Nesse ano" />
+                                <FormControlLabel value="1m" control={<Radio />} label="1 mês" />
+                                <FormControlLabel value="3m" control={<Radio />} label="3 mêses" />
+                                <FormControlLabel value="6m" control={<Radio />} label="6 mêses" />
                                 <FormControlLabel value="1y" control={<Radio />} label="1 ano" />
                                 <FormControlLabel value="2y" control={<Radio />} label="2 anos" />
                                 <FormControlLabel value="3y" control={<Radio />} label="3 anos" />
@@ -116,6 +126,11 @@ class FundChartConfigView extends React.Component {
                                 value={this.state.config.chartConfig.consistencyRange}
                                 onChange={this.handleValueChange('consistencyRange')}
                             >
+                                <FormControlLabel value="mtd" control={<Radio />} label="Nesse mês" />
+                                <FormControlLabel value="ytd" control={<Radio />} label="Nesse ano" />
+                                <FormControlLabel value="1m" control={<Radio />} label="1 mês" />
+                                <FormControlLabel value="3m" control={<Radio />} label="3 mêses" />
+                                <FormControlLabel value="6m" control={<Radio />} label="6 mêses" />
                                 <FormControlLabel value="1y" control={<Radio />} label="1 ano" />
                                 <FormControlLabel value="2y" control={<Radio />} label="2 anos" />
                                 <FormControlLabel value="3y" control={<Radio />} label="3 anos" />
@@ -239,6 +254,11 @@ class FundChartConfigView extends React.Component {
                             >
                                 <FormControlLabel value="cdi" control={<Radio />} label="CDI" />
                                 <FormControlLabel value="bovespa" control={<Radio />} label="Bovespa" />
+                                <FormControlLabel value="ipca" control={<Radio />} label="IPCA" />
+                                <FormControlLabel value="igpm" control={<Radio />} label="IGPM" />
+                                <FormControlLabel value="igpdi" control={<Radio />} label="IGPDI" />
+                                <FormControlLabel value="euro" control={<Radio />} label="Euro" />
+                                <FormControlLabel value="dolar" control={<Radio />} label="Dólar" />
                             </RadioGroup>
                         </FormControl>
                     </Grid>

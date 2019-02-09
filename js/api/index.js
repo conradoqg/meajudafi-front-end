@@ -63,9 +63,10 @@ module.exports = {
             data: await fundListObject.json()
         };
     },
-    getFundDetail: async (cnpj, limit) => {
+    getFundDetail: async (cnpj, limit, from) => {
         const range = limit ? `0-${limit}` : '';
-        const dailyReturn = await fetch(`//${API_URL}/investment_return_daily?ird_cnpj_fundo=eq.${cnpj}&order=ird_dt_comptc.desc`, {
+        const fromPart = from ? `&ird_dt_comptc=gte.${from.toJSON().slice(0, 10)}` : '';
+        const dailyReturn = await fetch(`//${API_URL}/investment_return_daily?ird_cnpj_fundo=eq.${cnpj}${fromPart}&order=ird_dt_comptc.desc`, {
             method: 'GET',
             headers: {
                 'Range-Unit': 'items',
