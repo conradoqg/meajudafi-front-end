@@ -22,7 +22,7 @@ import { produce, setAutoFreeze } from 'immer';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import API from '../api';
 import sortOptions from './sortOptions';
-import { chooseState } from '../util';
+import { chooseState, StandardDeviation } from '../util';
 import FundFilterView from './components/fundFilterView';
 import FundSearchView from './components/fundSearchView';
 import FundChartConfigView from './components/fundChartConfigView';
@@ -31,6 +31,9 @@ import createPlotlyComponent from 'react-plotly.js/factory';
 import Plotly from 'plotly';
 
 const Plot = createPlotlyComponent(Plotly);
+
+/* global process */
+const API_URL = process.env.API_URL || 'api.cvmfundexplorer.conradoqg.eti.br';
 
 setAutoFreeze(false);
 
@@ -99,6 +102,7 @@ class FundListView extends React.Component {
                 draft.data.fundList = result.data;
             }));
         } catch (ex) {
+            console.error(ex.message);
             this.setState(produce(nextState, draft => {
                 draft.data.fundList = ex.message;
             }));
@@ -125,6 +129,7 @@ class FundListView extends React.Component {
                 draft.data.fundList = result.data;
             }));
         } catch (ex) {
+            console.error(ex.message);
             this.setState(produce(nextState, draft => {
                 draft.data.fundList = ex.message;
             }));
@@ -150,6 +155,7 @@ class FundListView extends React.Component {
                 draft.data.fundList = result.data;
             }));
         } catch (ex) {
+            console.error(ex.message);
             this.setState(produce(draft => {
                 draft.data.fundList = ex.message;
             }));
@@ -201,6 +207,7 @@ class FundListView extends React.Component {
                 draft.data.fundList = result.data;
             }));
         } catch (ex) {
+            console.error(ex.message);
             this.setState(produce(nextState, draft => {
                 draft.data.fundList = ex.message;
             }));
@@ -233,6 +240,7 @@ class FundListView extends React.Component {
                 draft.data.fundList = result.data;
             }));
         } catch (ex) {
+            console.error(ex.message);
             this.setState(produce(draft => {
                 draft.data.fundList = ex.message;
             }));
@@ -264,6 +272,7 @@ class FundListView extends React.Component {
                 draft.data.fundDetail[fund.icf_cnpj_fundo] = data;
             }));
         } catch (ex) {
+            console.error(ex.message);
             this.setState(produce(draft => {
                 draft.data.fundDetail[fund.icf_cnpj_fundo] = ex.message;
             }));
@@ -274,7 +283,7 @@ class FundListView extends React.Component {
         return API.getFundList(options);
     }
 
-    async getFundDetail(cnpj, chartConfig) {
+    async getFundDetail(cnpj, chartConfig) {        
         if (!chartConfig) chartConfig = FundChartConfigView.emptyState;
 
         let range = null;
@@ -330,158 +339,71 @@ class FundListView extends React.Component {
                 benchmarkText = 'Dólar';
                 break;
         }
-        const benchmarkField = `ird_${chartConfig.benchmarkReference}_accumulated_investment_return`;
 
-        let sharpeText = null;
-        switch (chartConfig.sharpeRange) {
-            case 'mtd':
-                sharpeText = 'Sharpe nesse mês';
-                break;
-            case 'ytd':
-                sharpeText = 'Sharpe nesse ano';
-                break;
-            case '1m':
-                sharpeText = 'Sharpe 1M';
-                break;
-            case '3m':
-                sharpeText = 'Sharpe 3M';
-                break;
-            case '6m':
-                sharpeText = 'Sharpe 6M';
-                break;
-            case '1y':
-                sharpeText = 'Sharpe 1A';
-                break;
-            case '2y':
-                sharpeText = 'Sharpe 2A';
-                break;
-            case '3y':
-                sharpeText = 'Sharpe 3A';
-                break;
-        }
-        const sharpeField = `ird_${chartConfig.benchmarkReference}_sharpe_${chartConfig.sharpeRange}`;
+        const getFundData = async (cnpj) => {
+            const infCadastral = await fetch(`//${API_URL}/inf_cadastral_fi?select=denom_social&cnpj_fundo=eq.${cnpj}`);
+            return infCadastral.json();
+        };
 
-        let consistencyText = null;
-        switch (chartConfig.sharpeRange) {
-            case 'mtd':
-                consistencyText = 'Consistência nesse mês';
-                break;
-            case 'ytd':
-                consistencyText = 'Consistência nesse ano';
-                break;
-            case '1m':
-                consistencyText = 'Consistência 1M';
-                break;
-            case '3m':
-                consistencyText = 'Consistência 3M';
-                break;
-            case '6m':
-                consistencyText = 'Consistência 6M';
-                break;
-            case '1y':
-                consistencyText = 'Consistência 1A';
-                break;
-            case '2y':
-                consistencyText = 'Consistência 2A';
-                break;
-            case '3y':
-                consistencyText = 'Consistência 3A';
-                break;
-        }
+        const statisticsPromise = getFundStatistic(cnpj, chartConfig.benchmarkReference, range == null ? from : range);
+        const fundDataPromise = getFundData(cnpj);
 
-        const consistencyField = `ird_${chartConfig.benchmarkReference}_consistency_${chartConfig.sharpeRange}`;
+        const promiseResults = await Promise.all([statisticsPromise, fundDataPromise]);
 
-        const { dailyReturn, infCadastral } = await API.getFundDetail(cnpj, range, from);
+        const statistics = promiseResults[0];
+        const infCadastral = promiseResults[1][0];        
 
-        const initialPerformance = chartConfig && chartConfig.performanceValue == 'relative' ? dailyReturn[dailyReturn.length - 1].ird_accumulated_investment_return : 0;
-        const initialRisk = chartConfig && chartConfig.riskValue == 'relative' ? dailyReturn[dailyReturn.length - 1].ird_accumulated_risk : 0;
-        const initialSharpe = chartConfig && chartConfig.sharpeValue == 'relative' ? dailyReturn[dailyReturn.length - 1][sharpeField] : 0;
-        const initialConsistency = chartConfig && chartConfig.consistencyValue == 'relative' ? dailyReturn[dailyReturn.length - 1][consistencyField] : 0;
-        const initialNetworth = chartConfig && chartConfig.networthValue == 'relative' ? dailyReturn[dailyReturn.length - 1].ird_networth : 0;
-        const initialQuotaholders = chartConfig && chartConfig.quotaholdersValue == 'relative' ? dailyReturn[dailyReturn.length - 1].ird_quotaholders : 0;
-        const initialBenchmarkPerformance = chartConfig && chartConfig.benchmarkValue == 'relative' ? dailyReturn[dailyReturn.length - 1][benchmarkField] : 0;
+        const name = infCadastral.denom_social;
 
-        const name = infCadastral[0].denom_social;
-        const x = [];
-        const y_performance = [];
-        const y_risk = [];
-        const y_sharpe = [];
-        const y_consistency = [];
-        const y_networth = [];
-        const y_quotaholders = [];
-        const y_benchmark_performance = [];
-        let min_y_performance = null;
-        let max_y_performance = null;
-        let min_y_benchmark_performance = null;
-        let max_y_benchmark_performance = null;
-
-        dailyReturn.forEach(item => {
-            const ird_accumulated_investment_return = item.ird_accumulated_investment_return - initialPerformance;
-            x.push(item.ird_dt_comptc);
-            y_performance.push(ird_accumulated_investment_return);
-            y_risk.push(item.ird_accumulated_risk - initialRisk);
-            y_sharpe.push(item[sharpeField] - initialSharpe);
-            y_consistency.push(item[consistencyField] - initialConsistency);
-            y_networth.push(item.ird_networth - initialNetworth);
-            y_quotaholders.push(item.ird_quotaholders - initialQuotaholders);
-            const benchmark_accumulated_investment_return = item[benchmarkField] - initialBenchmarkPerformance;
-            y_benchmark_performance.push(benchmark_accumulated_investment_return);
-
-            min_y_performance = Math.min(min_y_performance, ird_accumulated_investment_return);
-            max_y_performance = Math.max(max_y_performance, ird_accumulated_investment_return);
-            min_y_benchmark_performance = Math.min(min_y_benchmark_performance, benchmark_accumulated_investment_return);
-            max_y_benchmark_performance = Math.max(max_y_benchmark_performance, benchmark_accumulated_investment_return);
-        });
-
-        let min_y = Math.min(min_y_performance, min_y_benchmark_performance);
-        let max_y = Math.max(max_y_performance, max_y_benchmark_performance);
+        let min_y = Math.min(statistics.min_investment_return, statistics.min_benchmark_investment_return);
+        let max_y = Math.max(statistics.max_investment_return, statistics.max_benchmark_investment_return);
 
         return {
             data: [
                 {
-                    x: x,
-                    y: y_performance,
+                    x: statistics.date,
+                    y: statistics.investment_return,
                     type: 'scatter',
                     name: 'Desempenho'
                 },
                 {
-                    x: x,
-                    y: y_benchmark_performance,
+                    x: statistics.date,
+                    y: statistics.benchmark_investment_return,
                     type: 'scatter',
                     name: `Benchmark (${benchmarkText})`,
                     yaxis: 'y2'
                 },
                 {
-                    x: x,
-                    y: y_risk,
+                    x: statistics.date,
+                    y: statistics.risk,
                     type: 'scatter',
                     name: 'Risco',
                     yaxis: 'y3'
                 },
                 {
-                    x: x,
-                    y: y_sharpe,
+                    x: statistics.date,
+                    y: statistics.sharpe,
                     type: 'scatter',
-                    name: sharpeText,
+                    name: 'Sharpe',
                     yaxis: 'y4'
                 },
                 {
-                    x: x,
-                    y: y_consistency,
+                    x: statistics.date,
+                    y: statistics.benchmark_consistency,
                     type: 'scatter',
-                    name: consistencyText,
+                    name: 'Consistência',
                     yaxis: 'y5'
                 },
                 {
-                    x: x,
-                    y: y_networth,
+                    x: statistics.date,
+                    y: statistics.networth,
                     type: 'scatter',
                     name: 'Patrimônio',
                     yaxis: 'y6'
                 },
                 {
-                    x: x,
-                    y: y_quotaholders,
+                    x: statistics.date,
+                    y: statistics.quotaholders,
                     type: 'scatter',
                     name: 'Cotistas',
                     yaxis: 'y7'
@@ -526,7 +448,7 @@ class FundListView extends React.Component {
                     fixedrange: true
                 },
                 yaxis4: {
-                    title: sharpeText,
+                    title: 'Sharpe',
                     tickformat: ',.2f',
                     hoverformat: ',.2f',
                     anchor: 'free',
@@ -536,7 +458,7 @@ class FundListView extends React.Component {
                     position: 0.78
                 },
                 yaxis5: {
-                    title: consistencyText,
+                    title: 'Consistência',
                     tickformat: ',.0%',
                     hoverformat: ',.2%',
                     anchor: 'free',
@@ -578,6 +500,7 @@ class FundListView extends React.Component {
                 draft.data.fundList = result.data;
             }));
         } catch (ex) {
+            console.error(ex.message);
             this.setState(produce(draft => {
                 draft.data.fundList = ex.message;
             }));
@@ -779,6 +702,115 @@ const FundHistoryChart = (props) => {
         () => (
             <Typography variant="subheading" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>
         ));
+};
+
+const getFundStatistic = async (cnpj, reference, lastDaysOrFromDate) => {
+    let fromDatePart = '';
+    let rangePart = null;
+
+    if (lastDaysOrFromDate instanceof Date) fromDatePart = `&ird_dt_comptc=gte.${lastDaysOrFromDate.toJSON().slice(0, 10)}`;
+    else if (typeof (lastDaysOrFromDate) == 'number') rangePart = {
+        headers: {
+            'Range-Unit': 'items',
+            'Range': `0-${lastDaysOrFromDate - 1}`
+        }
+    };
+
+    const result = await fetch(`//${API_URL}/investment_return_daily?select=ird_dt_comptc,ird_investment_return,${`ird_${reference}_investment_return`},ird_quotaholders,ird_networth&ird_cnpj_fundo=eq.${cnpj}${fromDatePart}&order=ird_dt_comptc.desc`, rangePart);
+
+    const data = await result.json();
+
+    const statistics = {
+        date: [],
+        investment_return: [],
+        benchmark_investment_return: [],
+        risk: [],
+        sharpe: [],
+        benchmark_consistency: [],
+        networth: [],
+        quotaholders: [],
+        min_investment_return: 0,
+        max_investment_return: 0,
+        min_benchmark_investment_return: 0,
+        max_benchmark_investment_return: 0,
+    };
+
+    let date = null;
+    let investment_return = 0;
+    let benchmark_investment_return = 0;
+    let risk = 0;
+    let sharpe = 0;
+    let benchmark_consistency = 0;
+    let networth = 0;
+    let quotaholders = 0;
+
+    let riskCalculator = new StandardDeviation();
+    let benchmarkConsistencyReached = 0;
+    let lastBenchmarkConsistency = [];
+
+    const calcSharpeForPeriod = (risk, investment_return, cdi_investment_return, length) => {
+        if (risk == 0) return 0;
+        const annualizedAccInvestmentReturn = ((investment_return / length) * 252);
+        const annualizedAccCDIInvestmentReturn = ((cdi_investment_return / length) * 252);
+        return (annualizedAccInvestmentReturn - annualizedAccCDIInvestmentReturn) / risk;
+    };
+
+    const calcConsistencyForPeriod = (investment_return, cdi_investment_return, period, consistencyReached, lastConsistency) => {
+        let consistencyPoint = 0;
+        if (investment_return >= cdi_investment_return) consistencyPoint = 1;
+        if (period != 0 && lastConsistency.length >= period) consistencyReached -= lastConsistency.shift();
+        consistencyReached += consistencyPoint;
+        lastConsistency.push(consistencyPoint);
+        return consistencyReached;
+    };
+    const getConsistencyForPeriod = (consistencyReached, lastConsistency) => ((100 * consistencyReached) / lastConsistency.length) / 100;
+
+    for (let index = data.length - 1; index >= 0; index--) {
+        const item = data[index];
+
+        date = item.ird_dt_comptc;
+
+        if (index == data.length - 1) {
+            statistics.date.push(date);
+            statistics.investment_return.push(investment_return);
+            statistics.benchmark_investment_return.push(benchmark_investment_return);
+            statistics.risk.push(risk);
+            statistics.sharpe.push(sharpe);
+            statistics.benchmark_consistency.push(benchmark_consistency);
+            statistics.networth.push(networth);
+            statistics.quotaholders.push(quotaholders);
+            statistics.min_investment_return = Math.min(statistics.min_investment_return, investment_return);
+            statistics.max_investment_return = Math.max(statistics.max_investment_return, investment_return);
+            statistics.min_benchmark_investment_return = Math.min(statistics.min_benchmark_investment_return, benchmark_investment_return);
+            statistics.max_benchmark_investment_return = Math.max(statistics.max_benchmark_investment_return, benchmark_investment_return);
+            continue;
+        }
+
+        investment_return = ((1 + investment_return) * (1 + item.ird_investment_return)) - 1;
+        benchmark_investment_return = ((1 + benchmark_investment_return) * (1 + item[`ird_${reference}_investment_return`])) - 1;
+        riskCalculator.addMeasurement(item.ird_investment_return);
+        risk = riskCalculator.get() * Math.sqrt(252);
+        sharpe = calcSharpeForPeriod(risk, investment_return, benchmark_investment_return, data.length - 1);
+        benchmarkConsistencyReached = calcConsistencyForPeriod(item.ird_investment_return, item[`ird_${reference}_investment_return`], data.length - 1, benchmarkConsistencyReached, lastBenchmarkConsistency);
+        benchmark_consistency = getConsistencyForPeriod(benchmarkConsistencyReached, lastBenchmarkConsistency);
+        networth = item.ird_networth;
+        quotaholders = item.ird_quotaholders;
+
+        statistics.date.push(date);
+        statistics.investment_return.push(investment_return);
+        statistics.benchmark_investment_return.push(benchmark_investment_return);
+        statistics.risk.push(risk);
+        statistics.sharpe.push(sharpe);
+        statistics.benchmark_consistency.push(benchmark_consistency);
+        statistics.networth.push(networth);
+        statistics.quotaholders.push(quotaholders);
+        statistics.min_investment_return = Math.min(statistics.min_investment_return, investment_return);
+        statistics.max_investment_return = Math.max(statistics.max_investment_return, investment_return);
+        statistics.min_benchmark_investment_return = Math.min(statistics.min_benchmark_investment_return, benchmark_investment_return);
+        statistics.max_benchmark_investment_return = Math.max(statistics.max_benchmark_investment_return, benchmark_investment_return);
+    }
+
+    return statistics;
 };
 
 module.exports = withStyles(styles)(FundListView);

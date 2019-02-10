@@ -1,3 +1,5 @@
+const StandardDeviation = require('./standardDeviation');
+
 module.exports = {
     formatters: {
         somethingToPercentage: (value) => value != null && !isNaN(value) ? parseFloat((value * 100)).toFixed(2) : value,
@@ -10,5 +12,6 @@ module.exports = {
         if (typeof (data) == 'string') return isError(data);
         if (Array.isArray(data) && data.length == 0) return isEmpty();
         return hasData();
-    }
+    },
+    StandardDeviation: StandardDeviation
 };

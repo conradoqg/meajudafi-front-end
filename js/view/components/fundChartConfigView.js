@@ -27,16 +27,7 @@ const styles = theme => ({
 const emptyState = {
     config: {
         chartConfig: {
-            range: 'all',
-            sharpeRange: '1y',
-            consistencyRange: '1y',
-            performanceValue: 'absolute',
-            riskValue: 'absolute',
-            sharpeValue: 'absolute',
-            consistencyValue: 'absolute',
-            networthValue: 'absolute',
-            quotaholdersValue: 'absolute',
-            benchmarkValue: 'absolute',
+            range: 'all',            
             benchmarkReference: 'cdi'
         }
     }
@@ -73,7 +64,7 @@ class FundChartConfigView extends React.Component {
             <div className={classes.filterPaperContent}>
                 <Typography variant="title" align="center" gutterBottom>Configurações do Gráfico</Typography>
                 <Grid container spacing={24}>
-                    <Grid item xs={4}>
+                    <Grid item xs={6}>
                         <FormControl component="fieldset" className={classes.formControl}>
                             <FormLabel component="legend">Período</FormLabel>
                             <RadioGroup
@@ -94,155 +85,8 @@ class FundChartConfigView extends React.Component {
                                 <FormControlLabel value="all" control={<Radio />} label="Desde o início" />
                             </RadioGroup>
                         </FormControl>
-                    </Grid>
-                    <Grid item xs={4}>
-                        <FormControl component="fieldset" className={classes.formControl}>
-                            <FormLabel component="legend">Sharpe Período</FormLabel>
-                            <RadioGroup
-                                aria-label="Sharpe Período"
-                                name="sharpeRange"
-                                className={classes.group}
-                                value={this.state.config.chartConfig.sharpeRange}
-                                onChange={this.handleValueChange('sharpeRange')}
-                            >
-                                <FormControlLabel value="mtd" control={<Radio />} label="Nesse mês" />
-                                <FormControlLabel value="ytd" control={<Radio />} label="Nesse ano" />
-                                <FormControlLabel value="1m" control={<Radio />} label="1 mês" />
-                                <FormControlLabel value="3m" control={<Radio />} label="3 mêses" />
-                                <FormControlLabel value="6m" control={<Radio />} label="6 mêses" />
-                                <FormControlLabel value="1y" control={<Radio />} label="1 ano" />
-                                <FormControlLabel value="2y" control={<Radio />} label="2 anos" />
-                                <FormControlLabel value="3y" control={<Radio />} label="3 anos" />
-                            </RadioGroup>
-                        </FormControl>
-                    </Grid>
-                    <Grid item xs={4}>
-                        <FormControl component="fieldset" className={classes.formControl}>
-                            <FormLabel component="legend">Consistência Período</FormLabel>
-                            <RadioGroup
-                                aria-label="Consistência Período"
-                                name="consistencyRange"
-                                className={classes.group}
-                                value={this.state.config.chartConfig.consistencyRange}
-                                onChange={this.handleValueChange('consistencyRange')}
-                            >
-                                <FormControlLabel value="mtd" control={<Radio />} label="Nesse mês" />
-                                <FormControlLabel value="ytd" control={<Radio />} label="Nesse ano" />
-                                <FormControlLabel value="1m" control={<Radio />} label="1 mês" />
-                                <FormControlLabel value="3m" control={<Radio />} label="3 mêses" />
-                                <FormControlLabel value="6m" control={<Radio />} label="6 mêses" />
-                                <FormControlLabel value="1y" control={<Radio />} label="1 ano" />
-                                <FormControlLabel value="2y" control={<Radio />} label="2 anos" />
-                                <FormControlLabel value="3y" control={<Radio />} label="3 anos" />
-                            </RadioGroup>
-                        </FormControl>
-                    </Grid>
-                    <Grid item xs={4}>
-                        <FormControl component="fieldset" className={classes.formControl}>
-                            <FormLabel component="legend">Desempenho</FormLabel>
-                            <RadioGroup
-                                aria-label="Desempenho"
-                                name="performance"
-                                className={classes.group}
-                                value={this.state.config.chartConfig.performanceValue}
-                                onChange={this.handleValueChange('performanceValue')}
-                            >
-                                <FormControlLabel value="absolute" control={<Radio />} label="Absoluto" />
-                                <FormControlLabel value="relative" control={<Radio />} label="Relativo" />
-                            </RadioGroup>
-                        </FormControl>
-                    </Grid>
-                    <Grid item xs={4}>
-                        <FormControl component="fieldset" className={classes.formControl}>
-                            <FormLabel component="legend">Risco</FormLabel>
-                            <RadioGroup
-                                aria-label="Risco"
-                                name="risk"
-                                className={classes.group}
-                                value={this.state.config.chartConfig.riskValue}
-                                onChange={this.handleValueChange('riskValue')}
-                            >
-                                <FormControlLabel value="absolute" control={<Radio />} label="Absoluto" />
-                                <FormControlLabel value="relative" control={<Radio />} label="Relativo" />
-                            </RadioGroup>
-                        </FormControl>
-                    </Grid>
-                    <Grid item xs={4}>
-                        <FormControl component="fieldset" className={classes.formControl}>
-                            <FormLabel component="legend">Sharpe</FormLabel>
-                            <RadioGroup
-                                aria-label="Sharpe"
-                                name="sharpe"
-                                className={classes.group}
-                                value={this.state.config.chartConfig.sharpeValue}
-                                onChange={this.handleValueChange('sharpeValue')}
-                            >
-                                <FormControlLabel value="absolute" control={<Radio />} label="Absoluto" />
-                                <FormControlLabel value="relative" control={<Radio />} label="Relativo" />
-                            </RadioGroup>
-                        </FormControl>
-                    </Grid>
-                    <Grid item xs={4}>
-                        <FormControl component="fieldset" className={classes.formControl}>
-                            <FormLabel component="legend">Consistência</FormLabel>
-                            <RadioGroup
-                                aria-label="Consistência"
-                                name="consistency"
-                                className={classes.group}
-                                value={this.state.config.chartConfig.consistencyValue}
-                                onChange={this.handleValueChange('consistencyValue')}
-                            >
-                                <FormControlLabel value="absolute" control={<Radio />} label="Absoluto" />
-                                <FormControlLabel value="relative" control={<Radio />} label="Relativo" />
-                            </RadioGroup>
-                        </FormControl>
-                    </Grid>
-                    <Grid item xs={4}>
-                        <FormControl component="fieldset" className={classes.formControl}>
-                            <FormLabel component="legend">Patrimônio</FormLabel>
-                            <RadioGroup
-                                aria-label="Patrimônio"
-                                name="networth"
-                                className={classes.group}
-                                value={this.state.config.chartConfig.networthValue}
-                                onChange={this.handleValueChange('networthValue')}
-                            >
-                                <FormControlLabel value="absolute" control={<Radio />} label="Absoluto" />
-                                <FormControlLabel value="relative" control={<Radio />} label="Relativo" />
-                            </RadioGroup>
-                        </FormControl>
-                    </Grid>
-                    <Grid item xs={4}>
-                        <FormControl component="fieldset" className={classes.formControl}>
-                            <FormLabel component="legend">Cotistas</FormLabel>
-                            <RadioGroup
-                                aria-label="Cotistas"
-                                name="quotaholders"
-                                className={classes.group}
-                                value={this.state.config.chartConfig.quotaholdersValue}
-                                onChange={this.handleValueChange('quotaholdersValue')}
-                            >
-                                <FormControlLabel value="absolute" control={<Radio />} label="Absoluto" />
-                                <FormControlLabel value="relative" control={<Radio />} label="Relativo" />
-                            </RadioGroup>
-                        </FormControl>
-                    </Grid>
-                    <Grid item xs={4}>
-                        <FormControl component="fieldset" className={classes.formControl}>
-                            <FormLabel component="legend">Benchmark</FormLabel>
-                            <RadioGroup
-                                aria-label="Benchmark"
-                                name="benchmarkValue"
-                                className={classes.group}
-                                value={this.state.config.chartConfig.benchmarkValue}
-                                onChange={this.handleValueChange('benchmarkValue')}
-                            >
-                                <FormControlLabel value="absolute" control={<Radio />} label="Absoluto" />
-                                <FormControlLabel value="relative" control={<Radio />} label="Relativo" />
-                            </RadioGroup>
-                        </FormControl>
-                    </Grid>
-                    <Grid item xs={4}>
+                    </Grid>                    
+                    <Grid item xs={6}>
                         <FormControl component="fieldset" className={classes.formControl}>
                             <FormLabel component="legend">Referência Benchmark</FormLabel>
                             <RadioGroup
