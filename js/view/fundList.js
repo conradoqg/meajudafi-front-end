@@ -13,19 +13,18 @@ import IconButton from '@material-ui/core/IconButton';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import SortIcon from '@material-ui/icons/Sort';
-import ShowChartIcon from '@material-ui/icons/ShowChart';
 import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import Collapse from '@material-ui/core/Collapse';
 import { produce, setAutoFreeze } from 'immer';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import Select from '@material-ui/core/Select';
 import API from '../api';
 import sortOptions from './sortOptions';
 import { chooseState } from '../util';
 import FundFilterView from './components/fundFilterView';
 import FundSearchView from './components/fundSearchView';
-import FundChartConfigView from './components/fundChartConfigView';
 import * as d3Format from 'd3-format';
 import createPlotlyComponent from 'react-plotly.js/factory';
 import Plotly from 'plotly';
@@ -43,7 +42,10 @@ const styles = theme => ({
         padding: theme.spacing.unit
     },
     progress: {
-        margin: theme.spacing.unit * 2,
+        margin: theme.spacing.unit * 2
+    },
+    chartSelect: {
+        margin: theme.spacing.unit
     }
 });
 
@@ -70,7 +72,10 @@ const emptyState = {
         rowsPerPage: 25,
         sort: sortOptions[0],
         filter: FundFilterView.emptyState.config.filter,
-        chartConfig: FundChartConfigView.emptyState.config.chartConfig,
+        chart: {
+            range: 'all',
+            benchmark: 'cdi'
+        },
         search: FundSearchView.emptyState.config.search
     },
     layout: {
@@ -160,21 +165,14 @@ class FundListView extends React.Component {
         }
     }
 
-    handleChartConfigClick = () => {
+    handleChartConfigChange = event => {
         this.setState(produce(draft => {
-            draft.layout.showingChartConfig = !draft.layout.showingChartConfig;
-            draft.layout.showingFilter = false;
-        }));
-    }
-
-    handleChartConfigChanged = async (chartConfig) => {
-        this.setState(produce(draft => {
-            draft.config.chartConfig = chartConfig;
+            draft.config.chart[event.target.name] = event.target.value;
             draft.data.fundDetail = emptyState.data.fundDetail;
             draft.layout.showingFundDetail = emptyState.layout.showingFundDetail;
             draft.layout.showingChartConfig = false;
         }));
-    }
+    };
 
     handleSortClick = event => {
         const anchorEl = event.currentTarget;
@@ -264,7 +262,7 @@ class FundListView extends React.Component {
         }));
 
         try {
-            const data = (expanded ? await this.getFundDetail(fund.icf_cnpj_fundo, this.state.config.chartConfig) : null);
+            const data = (expanded ? await this.getFundDetail(fund.icf_cnpj_fundo, this.state.config.chart) : null);
 
             this.setState(produce(draft => {
                 draft.data.fundDetail[fund.icf_cnpj_fundo] = data;
@@ -282,8 +280,6 @@ class FundListView extends React.Component {
     }
 
     async getFundDetail(cnpj, chartConfig) {
-        if (!chartConfig) chartConfig = FundChartConfigView.emptyState;
-
         let range = null;
         let from = null;
         switch (chartConfig.range) {
@@ -314,7 +310,7 @@ class FundListView extends React.Component {
         }
 
         let benchmarkText = null;
-        switch (chartConfig.benchmarkReference) {
+        switch (chartConfig.benchmark) {
             case 'cdi':
                 benchmarkText = 'CDI';
                 break;
@@ -336,12 +332,12 @@ class FundListView extends React.Component {
             case 'dolar':
                 benchmarkText = 'Dólar';
                 break;
-        }        
+        }
 
         const { statistics, infCadastral } = await allKeys({
-            statistics: API.getFundStatistic(cnpj, chartConfig.benchmarkReference, range == null ? from : range),
+            statistics: API.getFundStatistic(cnpj, chartConfig.benchmark, range == null ? from : range),
             infCadastral: API.getFundData(cnpj)
-        });        
+        });
 
         const name = infCadastral[0].denom_social;
 
@@ -511,13 +507,44 @@ class FundListView extends React.Component {
                         <Paper elevation={1} square={true} >
                             <Grid container wrap="nowrap" className={classes.optionsBar}>
                                 <FundSearchView onSearchChanged={this.handleSearchChanged} />
-                                <Grid container justify="flex-end">
+                                <Grid container justify="flex-end" spacing={4}>
                                     <Grid item>
-                                        <IconButton
-                                            aria-label="Configurações dos Indicadores"
-                                            onClick={this.handleChartConfigClick}>
-                                            <ShowChartIcon />
-                                        </IconButton>
+                                        <Select
+                                            value={this.state.config.chart.range}
+                                            onChange={this.handleChartConfigChange}
+                                            className={classes.chartSelect}
+                                            inputProps={{
+                                                name: 'range',
+                                                id: 'range',
+                                            }}
+                                        >
+                                            <MenuItem value={'mtd'}>Nesse mês</MenuItem>
+                                            <MenuItem value={'ytd'}>Nesse ano</MenuItem>
+                                            <MenuItem value={'1m'}>1 mês</MenuItem>
+                                            <MenuItem value={'3m'}>3 meses</MenuItem>
+                                            <MenuItem value={'6m'}>6 meses</MenuItem>
+                                            <MenuItem value={'1y'}>1 ano</MenuItem>
+                                            <MenuItem value={'2y'}>2 anos</MenuItem>
+                                            <MenuItem value={'3y'}>3 anos</MenuItem>
+                                            <MenuItem value={'all'}>Desde o início</MenuItem>
+                                        </Select>
+                                        <Select
+                                            value={this.state.config.chart.benchmark}
+                                            onChange={this.handleChartConfigChange}
+                                            className={classes.chartSelect}
+                                            inputProps={{
+                                                name: 'benchmark',
+                                                id: 'benchmark',
+                                            }}
+                                        >
+                                            <MenuItem value={'cdi'}>CDI</MenuItem>
+                                            <MenuItem value={'bovespa'}>Bovespa</MenuItem>
+                                            <MenuItem value={'ipca'}>IPCA</MenuItem>
+                                            <MenuItem value={'igpm'}>IGPM</MenuItem>
+                                            <MenuItem value={'igpdi'}>IGPDI</MenuItem>
+                                            <MenuItem value={'euro'}>Euro</MenuItem>
+                                            <MenuItem value={'dolar'}>Dólar</MenuItem>
+                                        </Select>
                                         <IconButton
                                             aria-label="Ordem"
                                             aria-owns={open ? 'long-menu' : null}
@@ -547,13 +574,6 @@ class FundListView extends React.Component {
                                 </Grid>
                             </Grid>
                         </Paper>
-
-                        <Paper elevation={1} square={true}>
-                            <Collapse in={layout.showingChartConfig}>
-                                <FundChartConfigView onChartConfigChanged={this.handleChartConfigChanged} />
-                            </Collapse>
-                        </Paper>
-
                         <Paper elevation={1} square={true}>
                             <Collapse in={layout.showingFilter}>
                                 <FundFilterView onFilterChanged={this.handleFilterChanged} />
