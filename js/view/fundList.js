@@ -166,12 +166,15 @@ class FundListView extends React.Component {
     }
 
     handleChartConfigChange = event => {
-        this.setState(produce(draft => {
+        const nextState = produce(this.state, draft => {
             draft.config.chart[event.target.name] = event.target.value;
-            draft.data.fundDetail = emptyState.data.fundDetail;
-            draft.layout.showingFundDetail = emptyState.layout.showingFundDetail;
-            draft.layout.showingChartConfig = false;
-        }));
+            draft.data.fundDetail = emptyState.data.fundDetail;            
+        });
+        this.setState(nextState);
+
+        for (const key in this.state.layout.showingFundDetail) {
+            if (this.state.layout.showingFundDetail[key]) this.updateChart(true, nextState.config.chart, key);
+        }
     };
 
     handleSortClick = event => {
@@ -227,7 +230,7 @@ class FundListView extends React.Component {
             draft.data.fundList = emptyState.data.fundList;
             draft.layout.showingFilter = false;
         }));
-
+        
         try {
             const result = await this.getFundList(nextState.config);
 
@@ -261,16 +264,20 @@ class FundListView extends React.Component {
             draft.layout.showingFundDetail[fund.icf_cnpj_fundo] = expanded;
         }));
 
+        this.updateChart(expanded, this.state.config.chart, fund.icf_cnpj_fundo);
+    }
+
+    updateChart = async (expanded, chartConfig, cnpj) => {
         try {
-            const data = (expanded ? await this.getFundDetail(fund.icf_cnpj_fundo, this.state.config.chart) : null);
+            const data = (expanded ? await this.getFundDetail(cnpj, chartConfig) : null);
 
             this.setState(produce(draft => {
-                draft.data.fundDetail[fund.icf_cnpj_fundo] = data;
+                draft.data.fundDetail[cnpj] = data;
             }));
         } catch (ex) {
             console.error(ex.message);
             this.setState(produce(draft => {
-                draft.data.fundDetail[fund.icf_cnpj_fundo] = ex.message;
+                draft.data.fundDetail[cnpj] = ex.message;
             }));
         }
     }
@@ -507,7 +514,7 @@ class FundListView extends React.Component {
                         <Paper elevation={1} square={true} >
                             <Grid container wrap="nowrap" className={classes.optionsBar}>
                                 <FundSearchView onSearchChanged={this.handleSearchChanged} />
-                                <Grid container justify="flex-end" spacing={4}>
+                                <Grid container justify="flex-end" spacing={8}>
                                     <Grid item>
                                         <Select
                                             value={this.state.config.chart.range}
