@@ -20,11 +20,9 @@ import ShowChartIcon from '@material-ui/icons/ShowChart';
 import TableChartIcon from '@material-ui/icons/TableChart';
 import ScatterPlotIcon from '@material-ui/icons/ScatterPlot';
 import GithubCircleIcon from 'mdi-material-ui/GithubCircle';
-import InfoIcon from '@material-ui/icons/Info';
 import IndicatorsView from './indicatorsView';
 import FundListView from './fundList';
 import FundComparisonView from './fundComparison';
-import About from './about';
 
 const drawerWidth = 270;
 
@@ -121,12 +119,6 @@ const routes = [
         name: 'Comparação de Fundos',
         icon: () => (<ScatterPlotIcon />),
         main: (props, classes) => <FundComparisonView {...props} globalClasses={classes} />
-    },
-    {
-        path: '/about',
-        name: 'Sobre',
-        icon: () => (<InfoIcon />),
-        main: (props, classes) => <About {...props} globalClasses={classes} />
     }
 ];
 
@@ -183,7 +175,7 @@ class Dashboard extends React.Component {
                                     <MenuIcon />
                                 </IconButton>
                                 <Typography variant="title" color="inherit" noWrap className={classes.title}>Explorador de Fundos da CVM</Typography>
-                                <IconButton color="inherit" aria-label="Repositório no Github" href="https://github.com/conradoqg/cvm-fund-exploration-front-end" target="_new">
+                                <IconButton color="inherit" aria-label="Repositório no Github" href="https://github.com/conradoqg/cvm-fund-explorer-stack" target="_new">
                                     <GithubCircleIcon fontSize="large" />
                                 </IconButton>
                             </Toolbar>
