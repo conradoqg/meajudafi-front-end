@@ -11,7 +11,6 @@ module.exports = {
 
         let filterPart = '';
         if (options.filter) {
-
             Object.keys(options.filter).map(selectedFilterOptionsKey => {
                 if (Array.isArray(options.filter[selectedFilterOptionsKey])) {
                     const selectedFilterOptionsText = options.filter[selectedFilterOptionsKey].map(selectedFilter => {
@@ -44,7 +43,7 @@ module.exports = {
             }
         }
 
-        const fundListObject = await fetch(`//${API_URL}/icf_with_xf_and_iry_of_last_year?${filterPart}${searchPart}order=${sort}`, {
+        const fundListObject = await fetch(`//${API_URL}/icf_with_xf_and_bf_and_iry_and_f_of_last_year?select=icf_cnpj_fundo,f_short_name,iry_networth,iry_quotaholders,icf_rentab_fundo,iry_investment_return_1y,iry_investment_return_2y,iry_investment_return_3y,iry_risk_1y,iry_risk_2y,iry_risk_3y&${filterPart}${searchPart}order=${sort}`, {
             method: 'GET',
             headers: {
                 'Range-Unit': 'items',
@@ -63,21 +62,7 @@ module.exports = {
             totalRows: parseInt(totalRows),
             data: await fundListObject.json()
         };
-    },
-    getFundDetail: async (cnpj, limit, from) => {
-        const range = limit ? `0-${limit}` : '';
-        const fromPart = from ? `&ird_dt_comptc=gte.${from.toJSON().slice(0, 10)}` : '';
-        const dailyReturn = await fetch(`//${API_URL}/investment_return_daily?ird_cnpj_fundo=eq.${cnpj}${fromPart}&order=ird_dt_comptc.desc`, {
-            method: 'GET',
-            headers: {
-                'Range-Unit': 'items',
-                'Range': range
-            }
-        });
-        const infCadastral = await fetch(`//${API_URL}/inf_cadastral_fi?cnpj_fundo=eq.${cnpj}`);
-
-        return allKeys({ dailyReturn: dailyReturn.json(), infCadastral: infCadastral.json() });
-    },
+    },    
     getFundData: async (cnpj) => {
         const infCadastral = await fetch(`//${API_URL}/inf_cadastral_fi?select=denom_social&cnpj_fundo=eq.${cnpj}`);
         return infCadastral.json();

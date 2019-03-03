@@ -594,7 +594,7 @@ class FundListView extends React.Component {
                                             <Grid container spacing={8}>
                                                 <Grid item xs={8}>
                                                     <Typography>
-                                                        <b>{fund.icf_denom_social}</b><br />
+                                                        <b>{fund.f_short_name}</b><br />
                                                         <small>
                                                             <b>Patrimônio:</b> R$ {d3Format.format(',.2f')(fund.iry_networth)}<br />
                                                             <b>Quotistas:</b> {fund.iry_quotaholders} <br />

@@ -52,7 +52,8 @@ const emptyState = {
             iry_risk_1y: { min: '', max: '', format: value => value / 100 },
             iry_risk_2y: { min: '', max: '', format: value => value / 100 },
             iry_risk_3y: { min: '', max: '', format: value => value / 100 },
-            xf_xpi_id: false
+            xf_id: false,
+            bf_id: false
         }
     }
 };
@@ -450,16 +451,32 @@ class FundFilterView extends React.Component {
                         </Grid>
                     </Grid>
                     <Grid item xs={3} align="center">
-                        <FormControlLabel
-                            control={
-                                <Switch
-                                    checked={this.state.config.filter.xf_xpi_id}
-                                    onChange={this.handleSwitchChange('xf_xpi_id')}
-                                    value={this.state.config.filter.xf_xpi_id ? 'true' : 'false'}
+                        <Grid container spacing={24}>
+                            <Grid item xs={6}>
+                                <FormControlLabel
+                                    control={
+                                        <Switch
+                                            checked={this.state.config.filter.xf_id}
+                                            onChange={this.handleSwitchChange('xf_id')}
+                                            value={this.state.config.filter.xf_id ? 'true' : 'false'}
+                                        />
+                                    }
+                                    label="Somente fundos XP"
                                 />
-                            }
-                            label="Somente fundos XP"
-                        />
+                            </Grid>
+                            <Grid item xs={6}>
+                                <FormControlLabel
+                                    control={
+                                        <Switch
+                                            checked={this.state.config.filter.bf_id}
+                                            onChange={this.handleSwitchChange('bf_id')}
+                                            value={this.state.config.filter.bf_id ? 'true' : 'false'}
+                                        />
+                                    }
+                                    label="Somente fundos BTG Pactual"
+                                />
+                            </Grid>
+                        </Grid>
                     </Grid>
                     <Grid item xs={6} align="center">
                         <Button variant="contained" color="primary" onClick={this.handleFilterApplyClick} >Aplicar</Button>
