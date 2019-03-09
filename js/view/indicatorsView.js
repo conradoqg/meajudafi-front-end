@@ -13,6 +13,9 @@ import blue from '@material-ui/core/colors/blue';
 import red from '@material-ui/core/colors/red';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import IconButton from '@material-ui/core/IconButton';
+import FilterListIcon from '@material-ui/icons/FilterList';
+import Collapse from '@material-ui/core/Collapse';
 import { withStyles } from '@material-ui/core/styles';
 import { produce, setAutoFreeze } from 'immer';
 import allKeys from 'promise-results/allKeys';
@@ -20,6 +23,7 @@ import createPlotlyComponent from 'react-plotly.js/factory';
 import Plotly from 'plotly';
 import * as d3Format from 'd3-format';
 import ptBR from 'd3-format/locale/pt-BR.json';
+import FundFilterView from './components/fundFilterView';
 
 const Plot = createPlotlyComponent(Plotly);
 d3Format.formatDefaultLocale(ptBR);
@@ -67,19 +71,22 @@ const emptyState = {
         economyIndicators: null,
     },
     config: {
-        range: '1y'
+        range: '1y',
+        filter: FundFilterView.emptyState.config.filter
+    },
+    layout: {
+        showingFilter: false
     }
 };
 
 class IndicatorsView extends React.Component {
     state = emptyState;
 
-    handleConfigRangeChange = event => {
+    handleConfigRangeChange = async event => {
         const nextState = produce(this.state, draft => {
             draft.config[event.target.name] = event.target.value;
         });
-        this.setState(nextState);
-        this.updateChart(nextState.config);
+        return this.updateData(nextState);
     }
 
     handleChartInitialized = async (figure) => {
@@ -94,32 +101,38 @@ class IndicatorsView extends React.Component {
         }));
     }
 
-    updateChart = async (config) => {
-        try {
-            const data = await this.getEconomyIndicators(config);
+    handleFilterClick = () => {
+        this.setState(produce(draft => {
+            draft.layout.showingFilter = !draft.layout.showingFilter;
+        }));
+    }
 
-            this.setState(produce(draft => {
-                draft.data.economyIndicators = data;
-            }));
-        } catch (ex) {
-            console.error(ex.message);
-            this.setState(produce(draft => {
-                draft.data.economyIndicators = ex.message;
-            }));
-        }
+    handleFilterChanged = async (filter) => {
+        const nextState = produce(this.state, draft => {
+            draft.config.filter = filter;
+            draft.layout.showingFilter = false;
+        });
+
+        return this.updateData(nextState);
     }
 
     async componentDidMount() {
+        return this.updateData(this.state);
+    }
+
+    updateData = async (nextState) => {
         try {
             const { fundIndicators, economyIndicators } = await allKeys({
-                fundIndicators: this.getFundIndicators(this.state.config),
-                economyIndicators: this.getEconomyIndicators(this.state.config)
+                fundIndicators: this.getFundIndicators(nextState.config),
+                economyIndicators: this.getEconomyIndicators(nextState.config)
             });
 
-            this.setState(produce(draft => {
+            nextState = produce(nextState, draft => {
                 draft.data.fundIndicators = fundIndicators;
                 draft.data.economyIndicators = economyIndicators;
-            }));
+            });
+
+            this.setState(nextState);
         } catch (ex) {
             console.error(ex.message);
             this.setState(produce(draft => {
@@ -166,58 +179,23 @@ class IndicatorsView extends React.Component {
             data: [
                 {
                     x: economyIndicators.date,
-                    y: economyIndicators.cdi,
-                    type: 'scatter',
-                    name: 'CDI'
-                },
-                {
-                    x: economyIndicators.date,
-                    y: economyIndicators.selic,
-                    type: 'scatter',
-                    name: 'Selic',
-                    yaxis: 'y2'
-                },
-                {
-                    x: economyIndicators.date,
                     y: economyIndicators.bovespa,
                     type: 'scatter',
-                    name: 'Bovespa',
-                    yaxis: 'y3'
-                },
-                {
-                    x: economyIndicators.date,
-                    y: economyIndicators.igpm,
-                    type: 'scatter',
-                    name: 'IGPM',
-                    yaxis: 'y4'
-                },
-                {
-                    x: economyIndicators.date,
-                    y: economyIndicators.igpdi,
-                    type: 'scatter',
-                    name: 'IGPDI',
-                    yaxis: 'y5'
-                },
-                {
-                    x: economyIndicators.date,
-                    y: economyIndicators.ipca,
-                    type: 'scatter',
-                    name: 'IPCA',
-                    yaxis: 'y6'
+                    name: 'Bovespa'
                 },
                 {
                     x: economyIndicators.date,
                     y: economyIndicators.dolar,
                     type: 'scatter',
                     name: 'Dólar',
-                    yaxis: 'y7'
+                    yaxis: 'y2'
                 },
                 {
                     x: economyIndicators.date,
                     y: economyIndicators.euro,
                     type: 'scatter',
                     name: 'Euro',
-                    yaxis: 'y8'
+                    yaxis: 'y3'
                 }
             ],
             layout: {
@@ -229,73 +207,26 @@ class IndicatorsView extends React.Component {
                 xaxis: {
                     showspikes: true,
                     spikemode: 'across',
-                    domain: [0.05, 0.80]
+                    domain: [0.00, 0.95]
                 },
                 yaxis: {
-                    title: 'CDI',
-                    tickformat: ',.0%',
-                    hoverformat: ',.2%',
+                    title: 'Bovespa',
+                    tickformat: ',.0',
+                    hoverformat: ',.2',
+                    fixedrange: true                    
                 },
                 yaxis2: {
-                    title: 'Selic',
-                    tickformat: ',.0%',
-                    hoverformat: ',.2%',
-                    anchor: 'free',
-                    overlaying: 'y',
-                    side: 'left',
-                    fixedrange: true,
-                    position: 0
-                },
-                yaxis3: {
-                    title: 'Bovespa',
-                    anchor: 'x',
-                    overlaying: 'y',
-                    side: 'right',
-                    fixedrange: true
-                },
-                yaxis4: {
-                    title: 'IGPM',
-                    tickformat: ',.0%',
-                    hoverformat: ',.2%',
-                    anchor: 'free',
-                    overlaying: 'y',
-                    side: 'right',
-                    fixedrange: true,
-                    position: 0.84
-                },
-                yaxis5: {
-                    title: 'IGPDI',
-                    tickformat: ',.0%',
-                    hoverformat: ',.2%',
-                    anchor: 'free',
-                    overlaying: 'y',
-                    side: 'right',
-                    fixedrange: true,
-                    position: 0.88
-                },
-                yaxis6: {
-                    title: 'IPCA',
-                    type: 'linear',
-                    tickformat: ',.0%',
-                    hoverformat: ',.2%',
-                    anchor: 'free',
-                    overlaying: 'y',
-                    side: 'right',
-                    fixedrange: true,
-                    position: 0.92
-                },
-                yaxis7: {
                     title: 'Dólar',
-                    anchor: 'free',
+                    anchor: 'x',
                     overlaying: 'y',
                     side: 'right',
                     tickprefix: 'R$ ',
                     tickformat: ',.2f',
                     hoverformat: ',.2f',
                     fixedrange: true,
-                    position: 0.96
+                    position: 0.95
                 },
-                yaxis8: {
+                yaxis3: {
                     title: 'Euro',
                     anchor: 'free',
                     overlaying: 'y',
@@ -310,43 +241,8 @@ class IndicatorsView extends React.Component {
         };
     }
 
-    async getFundIndicators() {
-        const result = await API.getFundIndicators();
-
-        const ranges = ['mtd', 'ytd', '1m', '3m', '6m', '1y', '2y', '3y'];
-
-        const fields = [
-            'investment_return',
-            'networth',
-            'quotaholders',
-            'risk'
-        ];
-
-        const fundIndicators = {};
-        const f_short_name = (field, range, side) => `f_short_name_${field}_${range}_${side}`;
-        const irm = (field, range, side) => `irm_${field}_${range}_${side}`;
-
-        ranges.map(range => {
-            result.map(row => {
-                fields.map(field => {
-                    if (typeof (fundIndicators[range]) != 'object') fundIndicators[range] = {};
-                    if (typeof (fundIndicators[range][field]) != 'object') fundIndicators[range][field] = {};
-                    if (!Array.isArray(fundIndicators[range][field]['top'])) fundIndicators[range][field]['top'] = [];
-                    if (!Array.isArray(fundIndicators[range][field]['bottom'])) fundIndicators[range][field]['bottom'] = [];
-
-                    fundIndicators[range][field]['top'].push({
-                        name: row[f_short_name(field, range, 'top')],
-                        value: (row[irm(field, range, 'top')] * 100).toFixed(2)
-                    });
-                    fundIndicators[range][field]['bottom'].unshift({
-                        name: row[f_short_name(field, range, 'bottom')],
-                        value: (row[irm(field, range, 'bottom')] * 100).toFixed(2)
-                    });
-                });
-            });
-        });
-
-        return fundIndicators;
+    async getFundIndicators(config) {
+        return await API.getFundIndicators(config);
     }
 
     render() {
@@ -384,7 +280,7 @@ class IndicatorsView extends React.Component {
                 </Grid>
                 <Grid container wrap="nowrap">
                     <Grid container alignItems="center" justify="flex-start">
-                        <Typography variant="headline" gutterBottom>Econômicos</Typography>
+                        <Typography variant="headline" gutterBottom>Mercado</Typography>
                     </Grid>
                 </Grid>
                 <Grid container spacing={16}>
@@ -402,6 +298,24 @@ class IndicatorsView extends React.Component {
                 <Grid container wrap="nowrap">
                     <Grid container alignItems="center" justify="flex-start">
                         <Typography variant="headline" gutterBottom>Fundos de Investimento</Typography>
+                    </Grid>
+                    <Grid container justify="flex-end">
+                        <Grid item>
+                            <IconButton
+                                aria-label="Filtro"
+                                onClick={this.handleFilterClick}>
+                                <FilterListIcon />
+                            </IconButton>
+                        </Grid>
+                    </Grid>
+                </Grid>
+                <Grid container spacing={16}>
+                    <Grid item xs={12}>
+                        <Paper elevation={1} square={true}>
+                            <Collapse in={this.state.layout.showingFilter}>
+                                <FundFilterView onFilterChanged={this.handleFilterChanged} />
+                            </Collapse>
+                        </Paper>
                     </Grid>
                 </Grid>
                 <Grid container spacing={16}>
@@ -435,6 +349,8 @@ const IndicatorPaper = (props) => {
             return inverted ? classes.indicatorValuePositive : classes.indicatorValueNegative;
     };
 
+    const formatValue = value => (value * 100).toFixed(2);
+
     return (
         <div>
             <Paper elevation={1} square={true}>
@@ -453,7 +369,7 @@ const IndicatorPaper = (props) => {
                                             <Typography component="span" variant="body1" className={classes.cropText}>{indicator.name}</Typography>
                                         </ListItemText>
                                         <ListItemSecondaryAction>
-                                            <Typography component="span" variant="body1" className={getClassForValue(indicator.value)}>{indicator.value}%</Typography>
+                                            <Typography component="span" variant="body1" className={getClassForValue(indicator.value)}>{formatValue(indicator.value)}%</Typography>
                                         </ListItemSecondaryAction>
                                     </ListItem>
                                 </div>
@@ -470,7 +386,7 @@ const IndicatorPaper = (props) => {
                                             <Typography component="span" variant="body1" className={classes.cropText}>{indicator.name}</Typography>
                                         </ListItemText>
                                         <ListItemSecondaryAction>
-                                            <Typography component="span" variant="body1" className={getClassForValue(indicator.value)}>{indicator.value}%</Typography>
+                                            <Typography component="span" variant="body1" className={getClassForValue(indicator.value)}>{formatValue(indicator.value)}%</Typography>
                                         </ListItemSecondaryAction>
                                     </ListItem>
                                 </div>

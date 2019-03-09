@@ -44,16 +44,18 @@ const emptyState = {
             icf_fundo_cotas: [],
             icf_fundo_exclusivo: ['N'],
             icf_rentab_fundo: [],
-            iry_networth: { min: '1', max: '' },
-            iry_quotaholders: { min: '', max: '' },
+            iry_accumulated_networth: { min: '1', max: '' },
+            iry_accumulated_quotaholders: { min: '', max: '' },
             iry_investment_return_1y: { min: '', max: '', format: value => value / 100 },
             iry_investment_return_2y: { min: '', max: '', format: value => value / 100 },
             iry_investment_return_3y: { min: '', max: '', format: value => value / 100 },
             iry_risk_1y: { min: '', max: '', format: value => value / 100 },
             iry_risk_2y: { min: '', max: '', format: value => value / 100 },
             iry_risk_3y: { min: '', max: '', format: value => value / 100 },
-            xf_id: false,
-            bf_id: false
+            switch: {
+                xf_id: true,
+                bf_id: true
+            }
         }
     }
 };
@@ -85,7 +87,7 @@ class FundFilterView extends React.Component {
         return event => {
             const value = event.target.value;
             this.setState(produce(draft => {
-                draft.config.filter[field] = value == 'false' ? true : false;
+                draft.config.filter.switch[field] = value == 'false' ? true : false;
             }));
         };
     }
@@ -223,10 +225,10 @@ class FundFilterView extends React.Component {
                         <Grid container spacing={24}>
                             <Grid item xs={6}>
                                 <Input
-                                    id="iry_networth-from"
-                                    value={this.state.config.filter.iry_networth.min}
+                                    id="iry_accumulated_networth-from"
+                                    value={this.state.config.filter.iry_accumulated_networth.min}
                                     placeholder="De"
-                                    onChange={this.handleFilterTextRangeChange('iry_networth', 'min')}
+                                    onChange={this.handleFilterTextRangeChange('iry_accumulated_networth', 'min')}
                                     startAdornment={<InputAdornment position="start">R$</InputAdornment>}
                                     inputProps={{
                                         'aria-label': 'De',
@@ -235,10 +237,10 @@ class FundFilterView extends React.Component {
                             </Grid>
                             <Grid item xs={6}>
                                 <Input
-                                    id="iry_networth-to"
-                                    value={this.state.config.filter.iry_networth.max}
+                                    id="iry_accumulated_networth-to"
+                                    value={this.state.config.filter.iry_accumulated_networth.max}
                                     placeholder="Até"
-                                    onChange={this.handleFilterTextRangeChange('iry_networth', 'max')}
+                                    onChange={this.handleFilterTextRangeChange('iry_accumulated_networth', 'max')}
                                     startAdornment={<InputAdornment position="start">R$</InputAdornment>}
                                     inputProps={{
                                         'aria-label': 'De',
@@ -252,10 +254,10 @@ class FundFilterView extends React.Component {
                         <Grid container spacing={24}>
                             <Grid item xs={6}>
                                 <Input
-                                    id="iry_quotaholders-from"
-                                    value={this.state.config.filter.iry_quotaholders.min}
+                                    id="iry_accumulated_quotaholders-from"
+                                    value={this.state.config.filter.iry_accumulated_quotaholders.min}
                                     placeholder="De"
-                                    onChange={this.handleFilterTextRangeChange('iry_quotaholders', 'min')}
+                                    onChange={this.handleFilterTextRangeChange('iry_accumulated_quotaholders', 'min')}
                                     startAdornment={<InputAdornment position="start">#</InputAdornment>}
                                     inputProps={{
                                         'aria-label': 'De',
@@ -264,10 +266,10 @@ class FundFilterView extends React.Component {
                             </Grid>
                             <Grid item xs={6}>
                                 <Input
-                                    id="iry_quotaholders-to"
-                                    value={this.state.config.filter.iry_quotaholders.max}
+                                    id="iry_accumulated_quotaholders-to"
+                                    value={this.state.config.filter.iry_accumulated_quotaholders.max}
                                     placeholder="Até"
-                                    onChange={this.handleFilterTextRangeChange('iry_quotaholders', 'max')}
+                                    onChange={this.handleFilterTextRangeChange('iry_accumulated_quotaholders', 'max')}
                                     startAdornment={<InputAdornment position="start">#</InputAdornment>}
                                     inputProps={{
                                         'aria-label': 'De',
@@ -456,9 +458,9 @@ class FundFilterView extends React.Component {
                                 <FormControlLabel
                                     control={
                                         <Switch
-                                            checked={this.state.config.filter.xf_id}
+                                            checked={this.state.config.filter.switch.xf_id}
                                             onChange={this.handleSwitchChange('xf_id')}
-                                            value={this.state.config.filter.xf_id ? 'true' : 'false'}
+                                            value={this.state.config.filter.switch.xf_id ? 'true' : 'false'}
                                         />
                                     }
                                     label="Somente fundos XP"
@@ -468,9 +470,9 @@ class FundFilterView extends React.Component {
                                 <FormControlLabel
                                     control={
                                         <Switch
-                                            checked={this.state.config.filter.bf_id}
+                                            checked={this.state.config.filter.switch.bf_id}
                                             onChange={this.handleSwitchChange('bf_id')}
-                                            value={this.state.config.filter.bf_id ? 'true' : 'false'}
+                                            value={this.state.config.filter.switch.bf_id ? 'true' : 'false'}
                                         />
                                     }
                                     label="Somente fundos BTG Pactual"

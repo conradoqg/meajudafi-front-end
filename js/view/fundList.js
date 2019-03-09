@@ -547,10 +547,7 @@ class FundListView extends React.Component {
                                             }}
                                         >
                                             <MenuItem value={'cdi'}>CDI</MenuItem>
-                                            <MenuItem value={'bovespa'}>Bovespa</MenuItem>
-                                            <MenuItem value={'ipca'}>IPCA</MenuItem>
-                                            <MenuItem value={'igpm'}>IGPM</MenuItem>
-                                            <MenuItem value={'igpdi'}>IGPDI</MenuItem>
+                                            <MenuItem value={'bovespa'}>Bovespa</MenuItem>                                            
                                             <MenuItem value={'euro'}>Euro</MenuItem>
                                             <MenuItem value={'dolar'}>Dólar</MenuItem>
                                         </Select>
@@ -598,8 +595,8 @@ class FundListView extends React.Component {
                                                     <Typography>
                                                         <b>{fund.f_short_name}</b><br />
                                                         <small>
-                                                            <b>Patrimônio:</b> R$ {d3Format.format(',.2f')(fund.iry_networth)}<br />
-                                                            <b>Quotistas:</b> {fund.iry_quotaholders} <br />
+                                                            <b>Patrimônio:</b> R$ {d3Format.format(',.2f')(fund.iry_accumulated_networth)}<br />
+                                                            <b>Quotistas:</b> {fund.iry_accumulated_quotaholders} <br />
                                                             <b>Benchmark:</b> {fund.icf_rentab_fundo ? fund.icf_rentab_fundo : 'Não informado'}
                                                         </small>
                                                     </Typography>
