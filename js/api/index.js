@@ -1,4 +1,3 @@
-import allKeys from 'promise-results/allKeys';
 import { StandardDeviation } from '../util';
 
 /* global process */
@@ -62,7 +61,7 @@ module.exports = {
             totalRows: parseInt(totalRows),
             data: await fundListObject.json()
         };
-    },    
+    },
     getFundData: async (cnpj) => {
         const infCadastral = await fetch(`//${API_URL}/inf_cadastral_fi?select=denom_social&cnpj_fundo=eq.${cnpj}`);
         return infCadastral.json();
@@ -174,5 +173,58 @@ module.exports = {
         }
 
         return statistics;
+    },
+    getFundIndicators: async () => {
+        const fundIndicatorsObject = await fetch(`//${API_URL}/top_bottom_funds_indicators`);
+
+        return fundIndicatorsObject.json();
+    },
+    getEconomyIndicators: async (lastDaysOrFromDate) => {
+        let fromDatePart = '';
+        let rangePart = null;
+
+        if (lastDaysOrFromDate instanceof Date) fromDatePart = `&ird_dt_comptc=gte.${lastDaysOrFromDate.toJSON().slice(0, 10)}`;
+        else if (typeof (lastDaysOrFromDate) == 'number') rangePart = {
+            headers: {
+                'Range-Unit': 'items',
+                'Range': `0-${lastDaysOrFromDate - 1}`
+            }
+        };
+
+        const fundIndicatorsObject = await fetch(`//${API_URL}/running_days_with_indicators?select=dt_comptc,cdi_valor,selic_valor,bovespa_valor,igpm_valor,igpdi_valor,ipca_valor,euro_valor,dolar_valor${fromDatePart}&order=dt_comptc.desc`, rangePart);
+
+        let data = await fundIndicatorsObject.json();
+
+        const fields = [
+            'date',
+            'cdi',
+            'selic',
+            'bovespa',
+            'igpm',
+            'igpdi',
+            'ipca',
+            'euro',
+            'dolar'
+        ];
+
+        const economyIndicators = {};
+        const lastValue = {};
+
+        fields.map(field => economyIndicators[field] = []);
+        fields.map(field => lastValue[field] = 0);
+
+        data = data.reverse();
+
+        data.map(row => {            
+            fields.map(field => {
+                var value = null;
+                if (field == 'date') value = row.dt_comptc;
+                else value = row[`${field}_valor`] == null ? lastValue[field] : row[`${field}_valor`];
+                economyIndicators[field].push(value);
+                lastValue[field] = value;
+            });            
+        });
+
+        return economyIndicators;
     }
 };

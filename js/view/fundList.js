@@ -29,8 +29,10 @@ import * as d3Format from 'd3-format';
 import createPlotlyComponent from 'react-plotly.js/factory';
 import Plotly from 'plotly';
 import allKeys from 'promise-results/allKeys';
+import ptBR from 'd3-format/locale/pt-BR.json';
 
 const Plot = createPlotlyComponent(Plotly);
+d3Format.formatDefaultLocale(ptBR);
 
 setAutoFreeze(false);
 

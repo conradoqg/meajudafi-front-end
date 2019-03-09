@@ -91,6 +91,7 @@ const styles = theme => ({
         padding: theme.spacing.unit * 3,
         height: '100vh',
         overflow: 'auto',
+        backgroundColor: 'ghostwhite'
     },
     chartContainer: {
         marginLeft: -22,
