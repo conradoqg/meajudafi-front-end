@@ -103,15 +103,15 @@ const styles = theme => ({
 
 const routes = [    
     {
-        path: '/indicators',
-        name: 'Indicadores',        
+        path: '/',
+        name: 'Indicadores',    
+        exact: true,    
         icon: () => (<ShowChartIcon />),
         main: (props, classes) => <IndicatorsView {...props} globalClasses={classes} />
     },    
     {
-        path: '/',
-        name: 'Lista de Fundos',
-        exact: true,
+        path: '/fundList',
+        name: 'Lista de Fundos',        
         icon: () => (<TableChartIcon />),
         main: (props, classes) => <FundListView {...props} globalClasses={classes} />
     },
