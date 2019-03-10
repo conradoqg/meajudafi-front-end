@@ -42,9 +42,9 @@ module.exports = {
             if (options.search.term != '') {
                 // Identify if it's a CNPJ or a fund name
                 if (/^\d+$/.test(options.search.term)) {
-                    searchPart = `and=(icf_cnpj_fundo.ilike.*${options.search.term}*)&`;
+                    searchPart = `and=(f_cnpj.ilike.*${options.search.term}*)&`;
                 } else {
-                    searchPart = `and=(icf_denom_social_unaccented.ilike.*${options.search.term.normalize('NFD').replace(/[\u0300-\u036f]/g, '')}*)&`;
+                    searchPart = `or=(f_unaccented_name.ilike.*${options.search.term.normalize('NFD').replace(/[\u0300-\u036f]/g, '')}*,f_unaccented_short_name.ilike.*${options.search.term.normalize('NFD').replace(/[\u0300-\u036f]/g, '')}*)&`;
                 }
             }
         }
