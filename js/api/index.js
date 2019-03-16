@@ -303,7 +303,7 @@ module.exports = {
             fields.map(field => {
                 var value = null;
                 if (field == 'date') value = row.dt_comptc;
-                else value = row[`${field}_valor`] == null ? lastValue[field] : row[`${field}_valor`];                
+                else value = row[`${field}_valor`] == null ? lastValue[field] : row[`${field}_valor`];
 
                 economyIndicators[field].push(value);
                 lastValue[field] = value;
@@ -311,5 +311,13 @@ module.exports = {
         });
 
         return economyIndicators;
+    },
+    getFundsChanged: async (fromDate) => {
+        let fromDatePart = `&or=(row_data->xf_date.gte.${fromDate.toJSON().slice(0, 10)},row_data->bf_date.gte.${fromDate.toJSON().slice(0, 10)})`;
+        const fundsChangedObject = await fetch(`//${API_URL}/changed_funds?order=row_data->xf_date.desc,row_data->bf_date.desc${fromDatePart}`);
+
+        let data = await fundsChangedObject.json();
+
+        return data;
     }
 };

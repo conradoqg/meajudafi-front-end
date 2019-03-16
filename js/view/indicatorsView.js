@@ -1,6 +1,7 @@
 
 import Typography from '@material-ui/core/Typography';
 import React from 'react';
+import dayjs from 'dayjs';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import Select from '@material-ui/core/Select';
@@ -69,9 +70,14 @@ const emptyState = {
     data: {
         fundIndicators: null,
         economyIndicators: null,
+        fundsChanged: {
+            btgpactual: null,
+            xpi: null
+        }
     },
     config: {
         range: '1y',
+        changesRange: '1w',
         filter: FundFilterView.emptyState.config.filter
     },
     layout: {
@@ -122,14 +128,16 @@ class IndicatorsView extends React.Component {
 
     updateData = async (nextState) => {
         try {
-            const { fundIndicators, economyIndicators } = await allKeys({
+            const { fundIndicators, economyIndicators, fundsChanged } = await allKeys({
                 fundIndicators: this.getFundIndicators(nextState.config),
-                economyIndicators: this.getEconomyIndicators(nextState.config)
+                economyIndicators: this.getEconomyIndicators(nextState.config),
+                fundsChanged: this.getFundsChanged(nextState.config)
             });
 
             nextState = produce(nextState, draft => {
                 draft.data.fundIndicators = fundIndicators;
                 draft.data.economyIndicators = economyIndicators;
+                draft.data.fundsChanged = fundsChanged;
             });
 
             this.setState(nextState);
@@ -213,7 +221,7 @@ class IndicatorsView extends React.Component {
                     title: 'Bovespa',
                     tickformat: ',.0',
                     hoverformat: ',.2',
-                    fixedrange: true                    
+                    fixedrange: true
                 },
                 yaxis2: {
                     title: 'Dólar',
@@ -243,6 +251,108 @@ class IndicatorsView extends React.Component {
 
     async getFundIndicators(config) {
         return await API.getFundIndicators(config);
+    }
+
+    async getFundsChanged(config) {
+        let from = null;
+        switch (config.changesRange) {
+            case '1w':
+                from = dayjs().subtract(1, 'week').toDate();
+                break;
+            case '1m':
+                from = dayjs().subtract(1, 'month').toDate();
+                break;
+            case '3m':
+                from = dayjs().subtract(3, 'month').toDate();
+                break;
+            case '6m':
+                from = dayjs().subtract(6, 'month').toDate();
+                break;
+            case '1y':
+                from = dayjs().subtract(1, 'year').toDate();
+                break;
+            case '2y':
+                from = dayjs().subtract(2, 'year').toDate();
+                break;
+            case '3y':
+                from = dayjs().subtract(3, 'year').toDate();
+                break;
+        }
+
+        const fundsChanged = await API.getFundsChanged(from);
+
+        const fundsChanges = {
+            btgpactual: [],
+            xpi: []
+        };
+
+        fundsChanged.map(change => {
+            const key = change.table_name == 'btgpactual_funds' ? 'btgpactual' : 'xpi';
+
+            const relevantChanges = [];
+
+            if (change.action == 'I') relevantChanges.push('Adicionado a lista de fundos');
+            else if (change.action == 'D') relevantChanges.push('Removido da lista de fundos');
+            else {
+                Object.keys(change.changed_fields).map(changedField => {
+                    const capitalized = value => value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+
+                    const relevantFields = {
+                        xf_state: {
+                            title: 'Captação',
+                            text: value => value == '1' ? 'Fechada' : 'Aberta'
+                        },
+                        xf_formal_risk: {
+                            title: 'Risco formal',
+                            text: value => ['Desconhecido', 'Risco baixo', 'Risco médio baixo', 'Risco médio', 'Risco médio alto', 'Risco alto'][value]
+                        },
+                        xf_initial_investment: {
+                            title: 'Investimento inicial',
+                            text: d3Format.format(',.2f')
+                        },
+                        xf_rescue_financial_settlement: {
+                            title: 'Dias para resgate',
+                            text: value => `D+${value}`
+                        },
+                        bf_is_blacklist: {
+                            title: 'Captação',
+                            text: value => value == 't' ? 'Fechada' : 'Aberta'
+                        },
+                        bf_inactive: {
+                            title: 'Captação',
+                            text: value => value ? 'Aberta' : 'Fechada'
+                        },
+                        bf_risk_name: {
+                            title: 'Risco formal',
+                            text: capitalized
+                        },
+                        bf_minimum_initial_investment: {
+                            title: 'Investimento inicial',
+                            text: d3Format.format(',.2f')
+                        },
+                        bf_rescue_financial_settlement: {
+                            title: 'Dias para resgate',
+                            text: value => `D+${value}`
+                        },
+                        bf_investor_type: {
+                            title: 'Tipo de investidor',
+                            text: value => value == 'NAO_QUALIFICADO' ? 'Não qualificado' : 'Qualificado'
+                        }
+                    };
+                    if (relevantFields[changedField]) {
+                        relevantChanges.push(`${relevantFields[changedField].title} mudou de ${relevantFields[changedField].text(change.row_data[changedField])} para ${relevantFields[changedField].text(change.changed_fields[changedField])}`);
+                    }
+                });
+            }
+
+            if (relevantChanges.length > 0)
+                fundsChanges[key].push({
+                    name: change.f_short_name,
+                    changes: relevantChanges
+                });
+        });
+
+        return fundsChanges;
     }
 
     render() {
@@ -332,10 +442,87 @@ class IndicatorsView extends React.Component {
                         <IndicatorPaper title="Risco" field="risk" range={this.state.config.range} data={this.state.data.fundIndicators} classes={classes} inverted />
                     </Grid>
                 </Grid>
+                <br />
+                <Grid container wrap="nowrap">
+                    <Grid container alignItems="center" justify="flex-start">
+                        <Typography variant="headline" gutterBottom>Mudanças nos Fundos</Typography>
+                    </Grid>
+                    <Grid container justify="flex-end">
+                        <Grid item>
+                            <Select
+                                value={this.state.config.changesRange}
+                                onChange={this.handleConfigRangeChange}
+                                className={classes.select}
+                                inputProps={{
+                                    name: 'changesRange',
+                                    id: 'changesRange',
+                                }}
+                            >
+                                <MenuItem value={'1w'}>1 semana</MenuItem>
+                                <MenuItem value={'1m'}>1 mês</MenuItem>
+                                <MenuItem value={'3m'}>3 mês</MenuItem>
+                                <MenuItem value={'6m'}>6 meses</MenuItem>
+                                <MenuItem value={'1y'}>1 ano</MenuItem>
+                                <MenuItem value={'2y'}>2 anos</MenuItem>
+                                <MenuItem value={'3y'}>3 anos</MenuItem>
+                            </Select>
+                        </Grid>
+                    </Grid>
+                </Grid>
+                <Grid container spacing={16}>
+                    <Grid item xs={6}>
+                        <FundsChangedPaper title="BTG Pactual" data={this.state.data.fundsChanged['btgpactual']} classes={classes} />
+                    </Grid>
+                    <Grid item xs={6}>
+                        <FundsChangedPaper title="XP Investimentos" data={this.state.data.fundsChanged['xpi']} classes={classes} />
+                    </Grid>
+                </Grid>
             </div >
         );
     }
 }
+
+const FundsChangedPaper = (props) => {
+    const { classes, title, data } = props;
+
+    return (
+        <div>
+            <Paper elevation={1} square={true}>
+                <Grid container wrap="nowrap" className={classes.optionsBar}>
+                    <Typography component="h2" variant="headline">{title}</Typography>
+                </Grid>
+            </Paper>
+            <Paper className={classes.paper} elevation={1} square={true}>
+                <List>
+                    {
+                        chooseState(data,
+                            () => {
+                                return data.map((change, index) => (
+                                    <div key={index}>
+                                        <ListItem divider>
+                                            <ListItemText disableTypography>
+                                                <Typography component="span" variant="body1" className={classes.cropText}>{change.name}</Typography>
+                                            </ListItemText>
+                                            <ListItemSecondaryAction>
+                                                {
+                                                    change.changes.map((fieldChange, index) => (
+                                                        <Typography key={index} component="span" variant="body1" align="right">{fieldChange}</Typography>
+                                                    ))
+                                                }
+                                            </ListItemSecondaryAction>
+                                        </ListItem>
+                                    </div>
+                                ));
+                            },
+                            () => (<Typography variant="subheading" align="center"><CircularProgress className={classes.progress} /></Typography>),
+                            () => (<Typography variant="subheading" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>),
+                            () => (<Typography variant="subheading" align="center">Sem dados à exibir</Typography>)
+                        )
+                    }
+                </List>
+            </Paper>
+        </div>);
+};
 
 const IndicatorPaper = (props) => {
     const { classes, range, title, field, data, inverted = false } = props;
