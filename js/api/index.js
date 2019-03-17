@@ -1,5 +1,6 @@
 import { StandardDeviation } from '../util';
 import allKeys from 'promise-results/allKeys';
+import packageJson from '../../package.json';
 
 /* global process */
 const API_URL = process.env.API_URL || 'api.cvmfundexplorer.conradoqg.eti.br';
@@ -319,5 +320,21 @@ module.exports = {
         let data = await fundsChangedObject.json();
 
         return data;
+    },
+    isInMaintenanceMode: async () => {
+        console.dir(packageJson);
+        const currentVersionArray = packageJson.version.split('.').map(value => parseInt(value));
+        const minor = currentVersionArray[currentVersionArray.length - 1];
+
+        const lastMigrationObject = await fetch(`//${API_URL}/migrations?order=name.desc&limit=1`);
+        const lastMigrationData = await lastMigrationObject.json();
+        
+        let migrationMinor = 0;
+
+        if (lastMigrationData.length > 0) {
+            migrationMinor = parseInt(lastMigrationData[0].name.substring(0, 8));
+        }
+
+        return minor != migrationMinor;
     }
 };

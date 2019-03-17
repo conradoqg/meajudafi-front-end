@@ -23,6 +23,7 @@ import GithubCircleIcon from 'mdi-material-ui/GithubCircle';
 import IndicatorsView from './indicatorsView';
 import FundListView from './fundList';
 import FundComparisonView from './fundComparison';
+import API from '../api';
 
 const drawerWidth = 270;
 
@@ -99,19 +100,25 @@ const styles = theme => ({
     tableContainer: {
         height: 320,
     },
+    centered: {
+        position: 'fixed',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)'
+    }
 });
 
-const routes = [    
+const routes = [
     {
         path: '/',
-        name: 'Indicadores',    
-        exact: true,    
+        name: 'Indicadores',
+        exact: true,
         icon: () => (<ShowChartIcon />),
         main: (props, classes) => <IndicatorsView {...props} globalClasses={classes} />
-    },    
+    },
     {
         path: '/fundList',
-        name: 'Lista de Fundos',        
+        name: 'Lista de Fundos',
         icon: () => (<TableChartIcon />),
         main: (props, classes) => <FundListView {...props} globalClasses={classes} />
     },
@@ -142,7 +149,8 @@ const MenuLink = ({ label, to, activeOnlyWhenExact, icon }) => (
 
 class Dashboard extends React.Component {
     state = {
-        open: false
+        open: false,
+        maintenanceMode: false
     };
 
     handleDrawerOpen = () => {
@@ -153,10 +161,18 @@ class Dashboard extends React.Component {
         this.setState({ open: false });
     };
 
+    componentDidMount = async () => {
+        this.setState({ maintenanceMode: await API.isInMaintenanceMode() });
+    };
+
     render() {
         const { classes } = this.props;
 
-        return (
+        if (this.state.maintenanceMode)
+            return (<div className={classes.centered}>
+                <Typography variant="title" noWrap>Estamos em manutenção, volte em alguns minutos.</Typography>
+            </div>);
+        else return (
             <Router>
                 <React.Fragment>
                     <CssBaseline />
