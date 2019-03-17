@@ -12,11 +12,14 @@ import ListItemText from '@material-ui/core/ListItemText';
 import lightGreen from '@material-ui/core/colors/lightGreen';
 import blue from '@material-ui/core/colors/blue';
 import red from '@material-ui/core/colors/red';
+import grey from '@material-ui/core/colors/grey';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import IconButton from '@material-ui/core/IconButton';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import Collapse from '@material-ui/core/Collapse';
+import Avatar from '@material-ui/core/Avatar';
+import Tooltip from '@material-ui/core/Tooltip';
 import { withStyles } from '@material-ui/core/styles';
 import { produce, setAutoFreeze } from 'immer';
 import allKeys from 'promise-results/allKeys';
@@ -63,6 +66,14 @@ const styles = theme => ({
         whiteSpace: 'nowrap',
         overflow: 'hidden',
         textOverflow: 'ellipsis'
+    },
+    help: {
+        margin: 10,
+        backgroundColor: grey[600],
+        width: 17,
+        height: 17,
+        fontSize: 10,
+        fontWeight: 'bold'
     }
 });
 
@@ -122,7 +133,7 @@ class IndicatorsView extends React.Component {
         return this.updateData(nextState);
     }
 
-    async componentDidMount() {
+    componentDidMount = async () => {
         return this.updateData(this.state);
     }
 
@@ -364,6 +375,12 @@ class IndicatorsView extends React.Component {
                 <Grid container wrap="nowrap">
                     <Grid container alignItems="center" justify="flex-start">
                         <Typography variant="display1" gutterBottom>Indicadores</Typography>
+                        <Typography gutterBottom><Tooltip title={
+                            <React.Fragment>
+                                <p>Indicadores gerais de mercado e dos fundos de investimento.</p>
+                                <p>No lado direito é possível alterar o intervalor visualizado.</p>
+                            </React.Fragment>
+                        }><Avatar className={classes.help}>?</Avatar></Tooltip></Typography>
                     </Grid>
                     <Grid container justify="flex-end">
                         <Grid item>
@@ -390,7 +407,7 @@ class IndicatorsView extends React.Component {
                 </Grid>
                 <Grid container wrap="nowrap">
                     <Grid container alignItems="center" justify="flex-start">
-                        <Typography variant="headline" gutterBottom>Mercado</Typography>
+                        <Typography variant="headline" gutterBottom>Mercado</Typography>                        
                     </Grid>
                 </Grid>
                 <Grid container spacing={16}>
@@ -408,6 +425,12 @@ class IndicatorsView extends React.Component {
                 <Grid container wrap="nowrap">
                     <Grid container alignItems="center" justify="flex-start">
                         <Typography variant="headline" gutterBottom>Fundos de Investimento</Typography>
+                        <Typography gutterBottom><Tooltip title={
+                            <React.Fragment>
+                                <p>Lista de melhores e piores fundos de investimento. </p>
+                                <p>Por padrão somente fundos listados na BTG Pactual e XP Investimentos são exibidos. No lado direito é possível alterar o filtro.</p>
+                            </React.Fragment>
+                        }><Avatar className={classes.help}>?</Avatar></Tooltip></Typography>
                     </Grid>
                     <Grid container justify="flex-end">
                         <Grid item>
@@ -446,6 +469,13 @@ class IndicatorsView extends React.Component {
                 <Grid container wrap="nowrap">
                     <Grid container alignItems="center" justify="flex-start">
                         <Typography variant="headline" gutterBottom>Mudanças nos Fundos</Typography>
+                        <Typography gutterBottom><Tooltip title={
+                            <React.Fragment>
+                                <p>Lista de mudanças que ocorreram recentemente nos fundos de investimento. </p>
+                                <p>Somente algumas informações são monitoradas. No lado direito é possível filtrar o intervalo de exibição.</p>
+                                <p>Início da coleta em 16/02/2019.</p>
+                            </React.Fragment>
+                        }><Avatar className={classes.help}>?</Avatar></Tooltip></Typography>
                     </Grid>
                     <Grid container justify="flex-end">
                         <Grid item>

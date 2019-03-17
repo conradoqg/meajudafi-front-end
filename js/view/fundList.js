@@ -20,6 +20,9 @@ import Collapse from '@material-ui/core/Collapse';
 import { produce, setAutoFreeze } from 'immer';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Select from '@material-ui/core/Select';
+import Avatar from '@material-ui/core/Avatar';
+import Tooltip from '@material-ui/core/Tooltip';
+import grey from '@material-ui/core/colors/grey';
 import API from '../api';
 import sortOptions from './sortOptions';
 import { chooseState } from '../util';
@@ -48,6 +51,14 @@ const styles = theme => ({
     },
     chartSelect: {
         margin: theme.spacing.unit
+    },
+    help: {
+        margin: 10,
+        backgroundColor: grey[600],
+        width: 17,
+        height: 17,
+        fontSize: 10,
+        fontWeight: 'bold'
     }
 });
 
@@ -170,7 +181,7 @@ class FundListView extends React.Component {
     handleChartConfigChange = event => {
         const nextState = produce(this.state, draft => {
             draft.config.chart[event.target.name] = event.target.value;
-            draft.data.fundDetail = emptyState.data.fundDetail;            
+            draft.data.fundDetail = emptyState.data.fundDetail;
         });
         this.setState(nextState);
 
@@ -232,7 +243,7 @@ class FundListView extends React.Component {
             draft.data.fundList = emptyState.data.fundList;
             draft.layout.showingFilter = false;
         }));
-        
+
         try {
             const result = await this.getFundList(nextState.config);
 
@@ -510,7 +521,18 @@ class FundListView extends React.Component {
         return (
             <div>
                 <div className={globalClasses.appBarSpacer} />
-                <Typography variant="display1" gutterBottom>Lista de Fundos</Typography>
+                <Grid container wrap="nowrap">
+                    <Grid container alignItems="center" justify="flex-start">
+                        <Typography variant="display1" gutterBottom>Lista de Fundos</Typography>
+                        <Typography gutterBottom><Tooltip title={
+                            <React.Fragment>
+                                <p>Lista de fundos de investimento com gráfico diário.</p>
+                                <p>Por padrão somente fundos listados na BTG Pactual e XP Investimentos são exibidos. No lado esquerdo é possível procurar fundos pelo nome e no lado direito é possível alterar o filtro, ordem, intervalo e benchmark.</p>
+                                <p>Clique no fundo para visualizar o gráfico.</p>
+                            </React.Fragment>
+                        }><Avatar className={classes.help}>?</Avatar></Tooltip></Typography>
+                    </Grid>
+                </Grid>
                 <Grid container spacing={16}>
                     <Grid item xs>
                         <Paper elevation={1} square={true} >
@@ -547,7 +569,7 @@ class FundListView extends React.Component {
                                             }}
                                         >
                                             <MenuItem value={'cdi'}>CDI</MenuItem>
-                                            <MenuItem value={'bovespa'}>Bovespa</MenuItem>                                            
+                                            <MenuItem value={'bovespa'}>Bovespa</MenuItem>
                                             <MenuItem value={'euro'}>Euro</MenuItem>
                                             <MenuItem value={'dolar'}>Dólar</MenuItem>
                                         </Select>
