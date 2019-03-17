@@ -375,7 +375,7 @@ class IndicatorsView extends React.Component {
                 <Grid container wrap="nowrap">
                     <Grid container alignItems="center" justify="flex-start">
                         <Typography variant="display1" gutterBottom>Indicadores</Typography>
-                        <Typography gutterBottom><Tooltip title={
+                        <Typography component="span" gutterBottom><Tooltip title={
                             <React.Fragment>
                                 <p>Indicadores gerais de mercado e dos fundos de investimento.</p>
                                 <p>No lado direito é possível alterar o intervalo visualizado.</p>
@@ -425,7 +425,7 @@ class IndicatorsView extends React.Component {
                 <Grid container wrap="nowrap">
                     <Grid container alignItems="center" justify="flex-start">
                         <Typography variant="headline" gutterBottom>Fundos de Investimento</Typography>
-                        <Typography gutterBottom><Tooltip title={
+                        <Typography component="span" gutterBottom><Tooltip title={
                             <React.Fragment>
                                 <p>Lista de melhores e piores fundos de investimento. </p>
                                 <p>Por padrão somente fundos listados na BTG Pactual e XP Investimentos são exibidos. No lado direito é possível alterar o filtro.</p>
@@ -469,7 +469,7 @@ class IndicatorsView extends React.Component {
                 <Grid container wrap="nowrap">
                     <Grid container alignItems="center" justify="flex-start">
                         <Typography variant="headline" gutterBottom>Mudanças nos Fundos</Typography>
-                        <Typography gutterBottom><Tooltip title={
+                        <Typography component="span" gutterBottom><Tooltip title={
                             <React.Fragment>
                                 <p>Lista de mudanças que ocorreram recentemente nos fundos de investimento. </p>
                                 <p>Somente algumas informações são monitoradas. No lado direito é possível filtrar o intervalo de exibição.</p>
@@ -506,7 +506,7 @@ class IndicatorsView extends React.Component {
                     <Grid item xs={6}>
                         <FundsChangedPaper title="XP Investimentos" data={this.state.data.fundsChanged['xpi']} classes={classes} />
                     </Grid>
-                </Grid>                
+                </Grid>
             </div >
         );
     }

@@ -321,8 +321,7 @@ module.exports = {
 
         return data;
     },
-    isInMaintenanceMode: async () => {
-        console.dir(packageJson);
+    isInMaintenanceMode: async () => {        
         const currentVersionArray = packageJson.version.split('.').map(value => parseInt(value));
         const minor = currentVersionArray[currentVersionArray.length - 1];
 
