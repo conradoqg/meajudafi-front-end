@@ -407,7 +407,7 @@ class IndicatorsView extends React.Component {
                 </Grid>
                 <Grid container wrap="nowrap">
                     <Grid container alignItems="center" justify="flex-start">
-                        <Typography variant="headline" gutterBottom>Mercado</Typography>                        
+                        <Typography variant="headline" gutterBottom>Mercado</Typography>
                     </Grid>
                 </Grid>
                 <Grid container spacing={16}>
@@ -506,7 +506,7 @@ class IndicatorsView extends React.Component {
                     <Grid item xs={6}>
                         <FundsChangedPaper title="XP Investimentos" data={this.state.data.fundsChanged['xpi']} classes={classes} />
                     </Grid>
-                </Grid>
+                </Grid>                
             </div >
         );
     }

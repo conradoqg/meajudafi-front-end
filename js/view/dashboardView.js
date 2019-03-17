@@ -20,6 +20,7 @@ import ShowChartIcon from '@material-ui/icons/ShowChart';
 import TableChartIcon from '@material-ui/icons/TableChart';
 import ScatterPlotIcon from '@material-ui/icons/ScatterPlot';
 import GithubCircleIcon from 'mdi-material-ui/GithubCircle';
+import Grid from '@material-ui/core/Grid';
 import IndicatorsView from './indicatorsView';
 import FundListView from './fundList';
 import FundComparisonView from './fundComparison';
@@ -225,6 +226,17 @@ class Dashboard extends React.Component {
                                     render={(props) => route.main(props, classes)}
                                 />
                             ))}
+                            <Grid container spacing={16}>
+                                <Grid item xs={12}>
+                                    <Typography variant="caption" gutterBottom>
+                                        <p>Rentabilidade passada não representa garantia de rentabilidade futura.</p>
+                                        <p>A rentabilidade divulgada não é líquida de impostos.</p>
+                                        <p>Fundos de investimento não contam com garantia do administrador, do gestor, de qualquer mecanismo de seguro ou fundo garantidor de crédito – FGC.</p>
+                                        <p>Alguns fundos tem menos de 12 (doze) meses. Para avaliação da performance de um fundo de investimento, é recomendável a análise de, no mínimo, 12 (doze) meses.</p>
+                                        <p>Os dados são extraídos do site da CVM diariamente e podem conter erros.</p>
+                                    </Typography>
+                                </Grid>
+                            </Grid>
                         </main>
                     </div>
                 </React.Fragment>
