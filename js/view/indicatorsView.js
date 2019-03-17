@@ -378,7 +378,7 @@ class IndicatorsView extends React.Component {
                         <Typography gutterBottom><Tooltip title={
                             <React.Fragment>
                                 <p>Indicadores gerais de mercado e dos fundos de investimento.</p>
-                                <p>No lado direito é possível alterar o intervalor visualizado.</p>
+                                <p>No lado direito é possível alterar o intervalo visualizado.</p>
                             </React.Fragment>
                         }><Avatar className={classes.help}>?</Avatar></Tooltip></Typography>
                     </Grid>

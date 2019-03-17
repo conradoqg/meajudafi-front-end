@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Link, Switch } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
@@ -218,14 +218,25 @@ class Dashboard extends React.Component {
                             <Divider />
                         </Drawer>
                         <main className={classes.content}>
-                            {routes.map((route, index) => (
-                                <Route
-                                    key={index}
-                                    path={route.path}
-                                    exact={route.exact}
-                                    render={(props) => route.main(props, classes)}
-                                />
-                            ))}
+                            <Switch>
+                                {routes.map((route, index) => (
+                                    <Route
+                                        key={index}
+                                        path={route.path}
+                                        exact={route.exact}
+                                        render={(props) => route.main(props, classes)}
+                                    />
+                                ))}
+                                <Route component={() => (
+                                    <div>
+                                        <div className={classes.appBarSpacer} />
+                                        <Grid container spacing={16}>
+                                            <Grid item xs={12}>
+                                                <Typography variant="title" align="center" noWrap>Página não encontrada.</Typography>
+                                            </Grid>
+                                        </Grid>
+                                    </div>)} />
+                            </Switch>
                             <Grid container spacing={16}>
                                 <Grid item xs={12}>
                                     <Typography variant="caption" gutterBottom>
