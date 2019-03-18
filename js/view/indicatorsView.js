@@ -67,6 +67,14 @@ const styles = theme => ({
         overflow: 'hidden',
         textOverflow: 'ellipsis'
     },
+    listItemText: {
+        flex: '1 1 auto',
+        minWidth: 0,
+        padding: '0 50px',
+        '&:first-child': {
+            paddingLeft: 0
+        }
+    },
     help: {
         margin: 10,
         backgroundColor: grey[600],
@@ -530,7 +538,7 @@ const FundsChangedPaper = (props) => {
                                 return data.map((change, index) => (
                                     <div key={index}>
                                         <ListItem divider>
-                                            <ListItemText disableTypography>
+                                            <ListItemText disableTypography classes={{ root: classes.listItemText }}>
                                                 <Typography component="span" variant="body1" className={classes.cropText}>{change.name}</Typography>
                                             </ListItemText>
                                             <ListItemSecondaryAction>
@@ -582,7 +590,7 @@ const IndicatorPaper = (props) => {
                             const positive = data[range][field]['top'].map((indicator, index) => (
                                 <div key={index}>
                                     <ListItem divider>
-                                        <ListItemText disableTypography>
+                                        <ListItemText disableTypography classes={{ root: classes.listItemText }}>
                                             <Typography component="span" variant="body1" className={classes.cropText}>{indicator.name}</Typography>
                                         </ListItemText>
                                         <ListItemSecondaryAction>
@@ -599,7 +607,7 @@ const IndicatorPaper = (props) => {
                             const negative = data[range][field]['bottom'].map((indicator, index) => (
                                 <div key={index}>
                                     <ListItem divider>
-                                        <ListItemText disableTypography>
+                                        <ListItemText disableTypography classes={{ root: classes.listItemText }}>
                                             <Typography component="span" variant="body1" className={classes.cropText}>{indicator.name}</Typography>
                                         </ListItemText>
                                         <ListItemSecondaryAction>
