@@ -19,5 +19,7 @@ module.exports = [
     ...createOptionsFor('Desempenho 3 anos', 'iry_investment_return_3y'),
     ...createOptionsFor('Risco 1 ano', 'iry_risk_1y'),
     ...createOptionsFor('Risco 2 ano', 'iry_risk_2y'),
-    ...createOptionsFor('Risco 3 ano', 'iry_risk_3y')    
+    ...createOptionsFor('Risco 3 ano', 'iry_risk_3y'),
+    ...createOptionsFor('Patrimônio', 'iry_accumulated_networth'),
+    ...createOptionsFor('Quotistas', 'iry_accumulated_quotaholders')
 ];
