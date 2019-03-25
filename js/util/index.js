@@ -10,7 +10,7 @@ module.exports = {
     chooseState: (data, hasData, isNull, isError, isEmpty) => {
         if (data == null) return isNull();
         if (typeof (data) == 'string') return isError(data);
-        if (Array.isArray(data) && data.length == 0) return isEmpty();
+        if (Array.isArray(data) && data.length == 0) return isEmpty ? isEmpty() : null;
         return hasData();
     },
     StandardDeviation: StandardDeviation

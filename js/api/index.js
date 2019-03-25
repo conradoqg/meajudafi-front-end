@@ -74,7 +74,7 @@ module.exports = {
         const infCadastral = await fetch(`//${API_URL}/inf_cadastral_fi?select=denom_social&cnpj_fundo=eq.${cnpj}`);
         return infCadastral.json();
     },
-    getFundStatistic: async (cnpj, reference, lastDaysOrFromDate) => {
+    getFundStatistic: async (cnpj, reference, lastDaysOrFromDate, additionalFields) => {
         let fromDatePart = '';
         let rangePart = null;
 
@@ -86,7 +86,11 @@ module.exports = {
             }
         };
 
-        const result = await fetch(`//${API_URL}/investment_return_daily?select=ird_dt_comptc,ird_investment_return,${`ird_${reference}_investment_return`},ird_accumulated_quotaholders,ird_accumulated_networth&ird_cnpj_fundo=eq.${cnpj}${fromDatePart}&order=ird_dt_comptc.desc`, rangePart);
+        let additionalFieldsPart = '';
+
+        if (Array.isArray(additionalFields) && additionalFields.length > 0) additionalFieldsPart = '&' + additionalFields.join(',');
+
+        const result = await fetch(`//${API_URL}/investment_return_daily?select=${additionalFieldsPart}ird_dt_comptc,ird_investment_return,${`ird_${reference}_investment_return`},ird_accumulated_quotaholders,ird_accumulated_networth&ird_cnpj_fundo=eq.${cnpj}${fromDatePart}&order=ird_dt_comptc.desc`, rangePart);
 
         const data = await result.json();
 
@@ -178,6 +182,80 @@ module.exports = {
             statistics.max_investment_return = Math.max(statistics.max_investment_return, investment_return);
             statistics.min_benchmark_investment_return = Math.min(statistics.min_benchmark_investment_return, benchmark_investment_return);
             statistics.max_benchmark_investment_return = Math.max(statistics.max_benchmark_investment_return, benchmark_investment_return);
+        }
+
+        return statistics;
+    },
+    getBenchmarkStatistic: async (benchmark, lastDaysOrFromDate) => {
+        let fromDatePart = '';
+        let rangePart = null;
+
+        if (lastDaysOrFromDate instanceof Date) fromDatePart = `&data=gte.${lastDaysOrFromDate.toJSON().slice(0, 10)}`;
+        else if (typeof (lastDaysOrFromDate) == 'number') rangePart = {
+            headers: {
+                'Range-Unit': 'items',
+                'Range': `0-${lastDaysOrFromDate - 1}`
+            }
+        };
+
+        let tablePart = null;
+        if (benchmark == 'cdi') {
+            tablePart = 'fbcdata_sgs_12i';
+        } else if (benchmark == 'bovespa') {
+            tablePart = 'fbcdata_sgs_7i';
+        } else if (benchmark == 'dolar') {
+            tablePart = 'fbcdata_sgs_1i';
+        } else if (benchmark == 'euro') {
+            tablePart = 'fbcdata_sgs_21619i';
+        }
+
+        const result = await fetch(`//${API_URL}/${tablePart}?select=data,valor${fromDatePart}&order=data.desc`, rangePart);
+
+        let data = await result.json();
+
+        let fromQuoteToPercentage = null;
+        if (benchmark == 'cdi') {
+            fromQuoteToPercentage = (value, prevValue) => prevValue == null ? 0 : value / 100;
+        } else if (benchmark == 'bovespa') {
+            fromQuoteToPercentage = (value, prevValue) => prevValue == null ? 0 : (value / prevValue) - 1;
+        } else if (benchmark == 'dolar') {
+            fromQuoteToPercentage = (value, prevValue) => prevValue == null ? 0 : (value / prevValue) - 1;
+        } else if (benchmark == 'euro') {
+            fromQuoteToPercentage = (value, prevValue) => prevValue == null ? 0 : (value / prevValue) - 1;
+        }
+
+        const statistics = {
+            date: [],
+            investment_return: [],
+            risk: [],
+            min_investment_return: 0,
+            max_investment_return: 0
+        };
+
+        let date = null;
+        let investment_return = 0;
+        let prevValue = null;
+        let risk = 0;
+
+        let riskCalculator = new StandardDeviation();
+
+        for (let index = data.length - 1; index >= 0; index--) {
+            const item = data[index];
+
+            date = item.data;
+
+            const value = fromQuoteToPercentage(item.valor, prevValue);            
+            prevValue = item.valor;
+
+            investment_return = ((1 + investment_return) * (1 + value)) - 1;            
+            riskCalculator.addMeasurement(value);
+            risk = riskCalculator.get() * Math.sqrt(252);
+
+            statistics.date.push(date);
+            statistics.investment_return.push(investment_return);
+            statistics.risk.push(risk);
+            statistics.min_investment_return = Math.min(statistics.min_investment_return, investment_return);
+            statistics.max_investment_return = Math.max(statistics.max_investment_return, investment_return);
         }
 
         return statistics;
@@ -321,13 +399,13 @@ module.exports = {
 
         return data;
     },
-    isInMaintenanceMode: async () => {        
+    isInMaintenanceMode: async () => {
         const currentVersionArray = packageJson.version.split('.').map(value => parseInt(value));
         const minor = currentVersionArray[currentVersionArray.length - 1];
 
         const lastMigrationObject = await fetch(`//${API_URL}/migrations?order=name.desc&limit=1`);
         const lastMigrationData = await lastMigrationObject.json();
-        
+
         let migrationMinor = 0;
 
         if (lastMigrationData.length > 0) {

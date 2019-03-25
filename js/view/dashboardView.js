@@ -124,10 +124,10 @@ const routes = [
         main: (props, classes) => <FundListView {...props} globalClasses={classes} />
     },
     {
-        path: '/fundComparison',
+        path: ['/fundComparison/:benchmark/:range', '/fundComparison'],
         name: 'Comparação de Fundos',
         icon: () => (<ScatterPlotIcon />),
-        main: (props, classes) => <FundComparisonView {...props} globalClasses={classes} />
+        main: (props, classes) => <FundComparisonView basePath={'/fundComparison'} globalClasses={classes} />
     }
 ];
 
@@ -212,7 +212,7 @@ class Dashboard extends React.Component {
                             <Divider />
                             <List>
                                 {routes.map((route, index) => (
-                                    <MenuLink activeOnlyWhenExact={route.exact} to={route.path} label={route.name} icon={route.icon} key={index} />
+                                    <MenuLink activeOnlyWhenExact={route.exact} to={Array.isArray(route.path) ? route.path[0] : route.path} label={route.name} icon={route.icon} key={index} />
                                 ))}
                             </List>
                             <Divider />

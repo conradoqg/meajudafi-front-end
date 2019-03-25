@@ -19,9 +19,6 @@ const emptyState = {
         search: {
             term: ''
         }
-    },
-    layout: {
-        showingSearch: false
     }
 };
 

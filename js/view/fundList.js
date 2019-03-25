@@ -22,7 +22,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import Select from '@material-ui/core/Select';
 import Avatar from '@material-ui/core/Avatar';
 import Tooltip from '@material-ui/core/Tooltip';
-import grey from '@material-ui/core/colors/grey';
+import Grey from '@material-ui/core/colors/grey';
 import API from '../api';
 import sortOptions from './sortOptions';
 import { chooseState } from '../util';
@@ -54,7 +54,7 @@ const styles = theme => ({
     },
     help: {
         margin: 10,
-        backgroundColor: grey[600],
+        backgroundColor: Grey[600],
         width: 17,
         height: 17,
         fontSize: 10,
