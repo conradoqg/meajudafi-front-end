@@ -307,6 +307,7 @@ class IndicatorsView extends React.Component {
 
         fundsChanged.map(change => {
             const key = change.table_name == 'btgpactual_funds' ? 'btgpactual' : 'xpi';
+            const date_field = change.table_name == 'btgpactual_funds' ? 'bf_date' : 'xpi_date';
 
             const relevantChanges = [];
 
@@ -366,6 +367,7 @@ class IndicatorsView extends React.Component {
 
             if (relevantChanges.length > 0)
                 fundsChanges[key].push({
+                    date: change.row_data[date_field],
                     name: change.f_short_name,
                     changes: relevantChanges
                 });
@@ -539,7 +541,7 @@ const FundsChangedPaper = (props) => {
                                     <div key={index}>
                                         <ListItem divider>
                                             <ListItemText disableTypography classes={{ root: classes.listItemText }}>
-                                                <Typography component="span" variant="body1" className={classes.cropText}>{change.name}</Typography>
+                                                <Typography component="span" variant="body1" className={classes.cropText}>{dayjs(change.date).format('DD/MM/YYYY')} - {change.name}</Typography>                                                
                                             </ListItemText>
                                             <ListItemSecondaryAction>
                                                 {
