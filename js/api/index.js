@@ -403,7 +403,7 @@ module.exports = {
     },
     isInMaintenanceMode: async () => {
         const currentVersionArray = packageJson.version.split('.').map(value => parseInt(value));
-        const minor = currentVersionArray[currentVersionArray.length - 1];
+        const minor = currentVersionArray[currentVersionArray.length - 2];
 
         const lastMigrationObject = await fetch(`//${API_URL}/migrations?order=name.desc&limit=1`);
         const lastMigrationData = await lastMigrationObject.json();
