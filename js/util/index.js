@@ -8,8 +8,9 @@ module.exports = {
         somethingToMoney: (value) => { return value; }
     },
     chooseState: (data, hasData, isNull, isError, isEmpty) => {
+        // TODO: data could support multi data state asserting
         if (data == null) return isNull();
-        if (typeof (data) == 'string') return isError(data);
+        if (typeof (data) == 'string') return isError ? isError(data) : null;
         if (Array.isArray(data) && data.length == 0) return isEmpty ? isEmpty() : null;
         return hasData();
     },

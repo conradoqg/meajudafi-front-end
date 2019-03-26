@@ -71,8 +71,8 @@ module.exports = {
         };
     },
     getFundData: async (cnpj) => {
-        const infCadastral = await fetch(`//${API_URL}/inf_cadastral_fi?select=denom_social&cnpj_fundo=eq.${cnpj}`);
-        return infCadastral.json();
+        const funds = await fetch(`//${API_URL}/funds_enhanced?select=f_name,f_short_name,rentab_fundo&f_cnpj=eq.${cnpj}`);
+        return funds.json();
     },
     getFundStatistic: async (cnpj, reference, lastDaysOrFromDate, additionalFields) => {
         let fromDatePart = '';
@@ -93,6 +93,8 @@ module.exports = {
         const result = await fetch(`//${API_URL}/investment_return_daily?select=${additionalFieldsPart}ird_dt_comptc,ird_investment_return,${`ird_${reference}_investment_return`},ird_accumulated_quotaholders,ird_accumulated_networth&ird_cnpj_fundo=eq.${cnpj}${fromDatePart}&order=ird_dt_comptc.desc`, rangePart);
 
         const data = await result.json();
+
+        if (data.length == 0) throw new Error(`No data found for CNPJ ${cnpj}`);
 
         const statistics = {
             date: [],

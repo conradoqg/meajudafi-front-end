@@ -359,7 +359,7 @@ class FundListView extends React.Component {
             infCadastral: API.getFundData(cnpj)
         });
 
-        const name = infCadastral[0].denom_social;
+        const name = infCadastral[0].f_short_name;
 
         let min_y = Math.min(statistics.min_investment_return, statistics.min_benchmark_investment_return);
         let max_y = Math.max(statistics.max_investment_return, statistics.max_benchmark_investment_return);

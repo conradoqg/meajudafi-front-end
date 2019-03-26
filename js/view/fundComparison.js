@@ -18,6 +18,7 @@ import * as d3Format from 'd3-format';
 import createPlotlyComponent from 'react-plotly.js/factory';
 import Plotly from 'plotly';
 import dayjs from 'dayjs';
+import promisesEach from 'promise-results';
 import { withRouter } from 'react-router-dom';
 
 const colors = Object.values(Colors).map(color => color[500]).filter(color => typeof (color) != 'undefined');
@@ -87,6 +88,7 @@ class FundComparisonView extends React.Component {
 
         this.state.config.benchmark = (typeof (props.match.params.benchmark) != 'undefined') ? props.match.params.benchmark : this.state.config.benchmark;
         this.state.data.benchmark.name = benchmarkNames[this.state.config.benchmark];
+        this.state.data.fundListCompare = props.match.params.cnpjs ? props.match.params.cnpjs.split('/').map(cnpj => { return { cnpj, detail: null, data: null }; }) : emptyState.data.fundListCompare;
         this.state.config.range = (typeof (props.match.params.range) != 'undefined') ? props.match.params.range : this.state.config.range;
 
         this.replaceHistory(this.state);
@@ -104,16 +106,6 @@ class FundComparisonView extends React.Component {
                 this.updateData(nextProps.history.location.state);
             }
         }
-    }
-
-    componentDidUpdate(prevProps) {
-        // const locationChanged = this.props.location !== prevProps.location;
-
-        // if (locationChanged) {
-        //     if (this.props.history.action == 'POP') {
-        //         this.updateData(prevProps.history.location.state);
-        //     }
-        // }
     }
 
     handleConfigRangeChange = async event => {
@@ -175,8 +167,6 @@ class FundComparisonView extends React.Component {
             draft.data.fundListSearch = emptyState.data.fundListSearch;
             draft.data.fundListCompare.push({
                 cnpj: fund.icf_cnpj_fundo,
-                name: fund.f_short_name,
-                benchmark: fund.icf_rentab_fundo,
                 data: null
             });
         });
@@ -206,12 +196,12 @@ class FundComparisonView extends React.Component {
 
 
     replaceHistory(nextState) {
-        const desiredPath = this.props.basePath + '/' + nextState.config.benchmark + '/' + nextState.config.range;        
+        const desiredPath = this.props.basePath + '/' + nextState.config.benchmark + '/' + nextState.config.range + (nextState.data.fundListCompare ? '/' + nextState.data.fundListCompare.map(fund => fund.cnpj).join('/') : '');
         this.props.history.replace(desiredPath, nextState);
     }
 
     pushHistory(nextState) {
-        const desiredPath = this.props.basePath + '/' + nextState.config.benchmark + '/' + nextState.config.range;        
+        const desiredPath = this.props.basePath + '/' + nextState.config.benchmark + '/' + nextState.config.range + (nextState.data.fundListCompare ? '/' + nextState.data.fundListCompare.map(fund => fund.cnpj).join('/') : '');
         this.props.history.push(desiredPath, nextState);
     }
 
@@ -224,44 +214,41 @@ class FundComparisonView extends React.Component {
             draft.data.chart = null;
         }));
 
-        let dataPromises = [];
-        if (benchmarkToUpdate) dataPromises.push(this.getBenchmarkStatistic(nextState.config));
-        dataPromises = dataPromises.concat(fundsToUpdate.map(fund => this.getFundStatistic(fund.cnpj, nextState.config)));
+        let promises = {};
+        fundsToUpdate.map(fund => {
+            promises[fund.cnpj] = promisesEach({ detail: this.getFundData(fund.cnpj), data: this.getFundStatistic(fund.cnpj, nextState.config) });
+        });
+        promises.benchmark = benchmarkToUpdate ? this.getBenchmarkStatistic(nextState.config) : null;
 
-        const dataResult = await Promise.all(dataPromises);
+        let results = await promisesEach(promises);
 
-        try {
-            nextState = produce(nextState, draft => {
-                let baseIndex = 0;
-                if (benchmarkToUpdate) draft.data.benchmark.data = dataResult[baseIndex++];
+        nextState = produce(nextState, draft => {
+            if (results.benchmark) {
+                if (results.benchmark instanceof Error) draft.data.benchmark.data = results.benchmark.message;
+                else draft.data.benchmark.data = results.benchmark;
+            }
 
-                draft.data.fundListCompare = draft.data.fundListCompare.map(fund => {
-                    const updatedFundFoundIndex = fundsToUpdate.findIndex(fundToUpdate => fundToUpdate.cnpj && fundToUpdate.cnpj == fund.cnpj);
+            draft.data.fundListCompare = draft.data.fundListCompare.map(fund => {
+                if (results[fund.cnpj]) {
+                    if (results[fund.cnpj].data instanceof Error) fund.data = results[fund.cnpj].data.message;
+                    else fund.data = results[fund.cnpj].data;
 
-                    if (updatedFundFoundIndex >= 0) fund.data = dataResult[updatedFundFoundIndex + baseIndex];
+                    // TODO: getFundData should return the result or throw error
+                    if (results[fund.cnpj].detail.length == 0) fund.detail = 'Não encontrado';
+                    else {
+                        fund.detail = {
+                            name: results[fund.cnpj].detail[0].f_short_name,
+                            benchmark: results[fund.cnpj].detail[0].rentab_fundo
+                        };
+                    }
+                }
 
-                    return fund;
-                });
-
-                draft.data.chart = this.buildChart(draft.data.benchmark, draft.data.fundListCompare);
+                return fund;
             });
-            this.setState(nextState);
-        } catch (ex) {
-            console.error(ex.message);
 
-            this.setState(produce(nextState, draft => {
-                if (benchmarkToUpdate) draft.data.benchmark.data = ex.message;
-                draft.data.fundListCompare = draft.data.fundListCompare.map(fund => {
-                    const updatedFundFound = dataPromises.findIndex(fundToUpdate => fundToUpdate.cnpj && fundToUpdate.cnpj == fund.cnpj);
-
-                    if (updatedFundFound >= 0) fund.data = ex.message;
-
-                    return fund;
-                });
-
-                draft.data.chart = ex.message;
-            }));
-        }
+            draft.data.chart = this.buildChart(draft.data.benchmark, draft.data.fundListCompare);
+        });
+        this.setState(nextState);
     }
 
     buildChart = (benchmark, fundList) => {
@@ -275,7 +262,7 @@ class FundComparisonView extends React.Component {
                 type: 'scatter',
                 mode: 'lines',
                 name: benchmark.name,
-                line: { color: colorIndex++ }
+                line: { color: colors[colorIndex++] }
             });
         }
 
@@ -287,7 +274,7 @@ class FundComparisonView extends React.Component {
                     type: 'scatter',
                     mode: 'lines',
                     name: fund.name,
-                    line: { color: colorIndex++ }
+                    line: { color: colors[colorIndex++] }
                 };
             }));
         }
@@ -342,6 +329,10 @@ class FundComparisonView extends React.Component {
                 break;
         }
         return API.getBenchmarkStatistic(config.benchmark, from);
+    }
+
+    async getFundData(cnpj) {
+        return API.getFundData(cnpj);
     }
 
     async getFundList(config) {
@@ -591,21 +582,33 @@ class FundComparisonView extends React.Component {
                                             {
                                                 this.state.data.fundListCompare.map((fundObject, index) => (
                                                     <Grid container spacing={8} key={index} alignItems="center" justify="center">
-                                                        <Grid item xs>
-                                                            <Grid container spacing={8}>
-                                                                <Grid item>
-                                                                    <span style={{ backgroundColor: colors[index + 1], minWidth: '10px', height: '100%', display: 'block' }}></span>
-                                                                </Grid>
-                                                                <Grid item xs>
-                                                                    <Typography>
-                                                                        <b>{fundObject.name}</b><br />
-                                                                        <small>
-                                                                            <b>Benchmark:</b> {fundObject.benchmark ? fundObject.benchmark : 'Não informado'}
-                                                                        </small>
-                                                                    </Typography>
-                                                                </Grid>
-                                                            </Grid>
-                                                        </Grid>
+                                                        {
+                                                            chooseState(fundObject.detail,
+                                                                () => (
+                                                                    <Grid item xs>
+                                                                        <Grid container spacing={8}>
+                                                                            <Grid item>
+                                                                                <span style={{ backgroundColor: colors[index + 1], minWidth: '10px', height: '100%', display: 'block' }}></span>
+                                                                            </Grid>
+                                                                            <Grid item xs>
+                                                                                <Typography>
+                                                                                    <b>{fundObject.detail.name}</b><br />
+                                                                                    <small>
+                                                                                        <b>Benchmark:</b> {fundObject.detail.benchmark ? fundObject.detail.benchmark : 'Não informado'}
+                                                                                    </small>
+                                                                                </Typography>
+                                                                            </Grid>
+                                                                        </Grid>
+                                                                    </Grid>
+                                                                ),
+                                                                () => (
+                                                                    <Typography variant="subheading" align="center"><CircularProgress className={classes.progress} /></Typography>
+                                                                ),
+                                                                () => (
+                                                                    <Typography variant="subheading" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>
+                                                                )
+                                                            )
+                                                        }
                                                         {
                                                             chooseState(fundObject.data,
                                                                 () => (
@@ -629,9 +632,6 @@ class FundComparisonView extends React.Component {
                                                                 ),
                                                                 () => (
                                                                     <Typography variant="subheading" align="center"><CircularProgress className={classes.progress} /></Typography>
-                                                                ),
-                                                                () => (
-                                                                    <Typography variant="subheading" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>
                                                                 )
                                                             )
                                                         }
