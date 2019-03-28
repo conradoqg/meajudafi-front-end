@@ -9,7 +9,7 @@ module.exports = {
     },
     chooseState: (data, hasData, isNull, isError, isEmpty) => {
         // TODO: data could support multi data state asserting
-        if (data == null) return isNull();
+        if (data == null) return isNull ? isNull() : null;
         if (typeof (data) == 'string') return isError ? isError(data) : null;
         if (Array.isArray(data) && data.length == 0) return isEmpty ? isEmpty() : null;
         return hasData();

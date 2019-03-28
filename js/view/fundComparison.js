@@ -11,7 +11,6 @@ import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import IconButton from '@material-ui/core/IconButton';
 import Grey from '@material-ui/core/colors/grey';
-import * as Colors from '@material-ui/core/colors';
 import { withStyles } from '@material-ui/core/styles';
 import { produce, setAutoFreeze } from 'immer';
 import * as d3Format from 'd3-format';
@@ -21,7 +20,8 @@ import dayjs from 'dayjs';
 import promisesEach from 'promise-results';
 import { withRouter } from 'react-router-dom';
 
-const colors = Object.values(Colors).map(color => color[500]).filter(color => typeof (color) != 'undefined');
+const colors = ['#e6194B', '#3cb44b', '#ffe119', '#4363d8', '#f58231', '#911eb4', '#42d4f4', '#f032e6', '#bfef45', '#fabebe', '#469990', '#e6beff', '#9A6324', '#fffac8', '#800000', '#aaffc3', '#808000', '#ffd8b1', '#000075', '#a9a9a9', '#ffffff', '#000000'];
+const nextColorIndex = (i) => (i % colors.length + colors.length) % colors.length;
 
 import API from '../api';
 import FundSearchView from './components/fundSearchView';
@@ -47,6 +47,9 @@ const styles = theme => ({
     },
     select: {
         margin: theme.spacing.unit
+    },
+    chart: {
+        padding: theme.spacing.unit * 2
     },
     help: {
         margin: 10,
@@ -165,10 +168,12 @@ class FundComparisonView extends React.Component {
         const nextState = produce(this.state, draft => {
             draft.config.searchRevision = draft.config.searchRevision + 1;
             draft.data.fundListSearch = emptyState.data.fundListSearch;
-            draft.data.fundListCompare.push({
-                cnpj: fund.icf_cnpj_fundo,
-                data: null
-            });
+            if (!draft.data.fundListCompare.find(existingFund => existingFund.cnpj == fund.icf_cnpj_fundo)) {
+                draft.data.fundListCompare.push({
+                    cnpj: fund.icf_cnpj_fundo,
+                    data: null
+                });
+            }
         });
         this.pushHistory(nextState);
         return this.updateData(nextState);
@@ -262,7 +267,7 @@ class FundComparisonView extends React.Component {
                 type: 'scatter',
                 mode: 'lines',
                 name: benchmark.name,
-                line: { color: colors[colorIndex++] }
+                line: { color: colors[nextColorIndex(colorIndex++)] }
             });
         }
 
@@ -273,8 +278,8 @@ class FundComparisonView extends React.Component {
                     y: fund.data.investment_return,
                     type: 'scatter',
                     mode: 'lines',
-                    name: fund.name,
-                    line: { color: colors[colorIndex++] }
+                    name: fund.detail.name,
+                    line: { color: colors[nextColorIndex(colorIndex++)] }
                 };
             }));
         }
@@ -503,7 +508,7 @@ class FundComparisonView extends React.Component {
                 </Grid>
                 <Grid container spacing={16}>
                     <Grid item xs>
-                        <Paper elevation={1} square={true} >
+                        <Paper elevation={1} square={true} className={classes.chart} >
                             <FundHistoryChart
                                 fund={this.state.data.chart}
                                 onInitialized={(figure) => this.handleChartInitialized(figure)}
@@ -522,7 +527,7 @@ class FundComparisonView extends React.Component {
                                             <Grid item xs>
                                                 <Grid container spacing={8}>
                                                     <Grid item>
-                                                        <span style={{ backgroundColor: colors[0], minWidth: '10px', height: '100%', display: 'block' }}></span>
+                                                        <span style={{ backgroundColor: colors[nextColorIndex(0)], minWidth: '10px', height: '100%', display: 'block' }}></span>
                                                     </Grid>
                                                     <Grid item xs>
                                                         <Typography>
@@ -588,7 +593,7 @@ class FundComparisonView extends React.Component {
                                                                     <Grid item xs>
                                                                         <Grid container spacing={8}>
                                                                             <Grid item>
-                                                                                <span style={{ backgroundColor: colors[index + 1], minWidth: '10px', height: '100%', display: 'block' }}></span>
+                                                                                <span style={{ backgroundColor: colors[nextColorIndex(index + 1)], minWidth: '10px', height: '100%', display: 'block' }}></span>
                                                                             </Grid>
                                                                             <Grid item xs>
                                                                                 <Typography>
