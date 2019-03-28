@@ -387,8 +387,9 @@ class FundComparisonView extends React.Component {
                         <Typography variant="display1" gutterBottom>Comparação de Fundos</Typography>
                         <Typography component="span" gutterBottom><Tooltip title={
                             <React.Fragment>
-                                <p>Indicadores gerais de mercado e dos fundos de investimento.</p>
-                                <p>No lado direito é possível alterar o intervalo visualizado.</p>
+                                <p>Comparador de desempenho de fundos.</p>
+                                <p>No lado direito é possível alterar o benchmark e intervalo visualizado.</p>
+                                <p>Procure um fundo e o adicione na lista para inicar a comparação.</p>
                             </React.Fragment>
                         }><Avatar className={classes.help}>?</Avatar></Tooltip></Typography>
                     </Grid>
