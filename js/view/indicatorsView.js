@@ -20,6 +20,7 @@ import FilterListIcon from '@material-ui/icons/FilterList';
 import Collapse from '@material-ui/core/Collapse';
 import Avatar from '@material-ui/core/Avatar';
 import Tooltip from '@material-ui/core/Tooltip';
+import Divider from '@material-ui/core/Divider';
 import { withStyles } from '@material-ui/core/styles';
 import { produce, setAutoFreeze } from 'immer';
 import allKeys from 'promise-results/allKeys';
@@ -60,6 +61,11 @@ const styles = theme => ({
     },
     select: {
         margin: theme.spacing.unit
+    },
+    cropTextNormal: {        
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis'
     },
     cropText: {
         maxWidth: '20em',
@@ -533,25 +539,27 @@ const FundsChangedPaper = (props) => {
                 </Grid>
             </Paper>
             <Paper className={classes.paper} elevation={1} square={true}>
-                <List>
+                <Grid container spacing={8} alignItems="center" justify="center">
                     {
                         chooseState(data,
                             () => {
                                 return data.map((change, index) => (
-                                    <div key={index}>
-                                        <ListItem divider>
-                                            <ListItemText disableTypography classes={{ root: classes.listItemText }}>
-                                                <Typography component="span" variant="body1" className={classes.cropText}>{dayjs(change.date).format('DD/MM/YYYY')} - {change.name}</Typography>                                                
-                                            </ListItemText>
-                                            <ListItemSecondaryAction>
-                                                {
-                                                    change.changes.map((fieldChange, index) => (
-                                                        <Typography key={index} component="span" variant="body1" align="right">{fieldChange}</Typography>
-                                                    ))
-                                                }
-                                            </ListItemSecondaryAction>
-                                        </ListItem>
-                                    </div>
+                                    <React.Fragment key={index}>
+                                        <Grid item xs={12}>
+                                            <Grid container spacing={8}>
+                                                <Grid item xs>
+                                                    <Typography component="span" variant="body1" align="left" className={classes.cropTextNormal}>{dayjs(change.date).format('DD/MM/YYYY')} - {change.name}</Typography>
+                                                </Grid>
+                                                <Grid item xs>
+                                                    {
+                                                        change.changes.map((fieldChange, index) => (
+                                                            <Typography key={index} component="span" variant="body1" align="right">{fieldChange}</Typography>
+                                                        ))
+                                                    }
+                                                </Grid>
+                                            </Grid>
+                                        </Grid>                                        
+                                    </React.Fragment>
                                 ));
                             },
                             () => (<Typography variant="subheading" align="center"><CircularProgress className={classes.progress} /></Typography>),
@@ -559,7 +567,7 @@ const FundsChangedPaper = (props) => {
                             () => (<Typography variant="subheading" align="center">Sem dados à exibir</Typography>)
                         )
                     }
-                </List>
+                </Grid>
             </Paper>
         </div>);
 };
