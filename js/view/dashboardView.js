@@ -22,8 +22,8 @@ import ScatterPlotIcon from '@material-ui/icons/ScatterPlot';
 import GithubCircleIcon from 'mdi-material-ui/GithubCircle';
 import Grid from '@material-ui/core/Grid';
 import IndicatorsView from './indicatorsView';
-import FundListView from './fundList';
-import FundComparisonView from './fundComparison';
+import FundListView from './fundListView';
+import FundComparisonView from './fundComparisonView';
 import API from '../api';
 
 const drawerWidth = 270;

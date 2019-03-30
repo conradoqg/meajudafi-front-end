@@ -60,7 +60,7 @@ const emptyState = {
     }
 };
 
-class FundFilterView extends React.Component {
+class FundFilterComponent extends React.Component {
     state = emptyState;
 
     static emptyState = emptyState;
@@ -493,4 +493,4 @@ class FundFilterView extends React.Component {
 
 }
 
-module.exports = withStyles(styles)(FundFilterView);
+module.exports = withStyles(styles)(FundFilterComponent);

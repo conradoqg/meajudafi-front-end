@@ -22,7 +22,7 @@ const emptyState = {
     }
 };
 
-class FundSearchView extends React.Component {
+class FundSearchComponent extends React.Component {
     state = emptyState;
 
     static emptyState = emptyState;
@@ -81,4 +81,4 @@ class FundSearchView extends React.Component {
 
 }
 
-module.exports = withStyles(styles)(FundSearchView);
+module.exports = withStyles(styles)(FundSearchComponent);

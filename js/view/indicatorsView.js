@@ -20,7 +20,6 @@ import FilterListIcon from '@material-ui/icons/FilterList';
 import Collapse from '@material-ui/core/Collapse';
 import Avatar from '@material-ui/core/Avatar';
 import Tooltip from '@material-ui/core/Tooltip';
-import Divider from '@material-ui/core/Divider';
 import { withStyles } from '@material-ui/core/styles';
 import { produce, setAutoFreeze } from 'immer';
 import allKeys from 'promise-results/allKeys';
@@ -28,13 +27,12 @@ import createPlotlyComponent from 'react-plotly.js/factory';
 import Plotly from 'plotly';
 import * as d3Format from 'd3-format';
 import ptBR from 'd3-format/locale/pt-BR.json';
-import FundFilterView from './components/fundFilterView';
+import FundFilterComponent from './components/fundFilterComponent';
+import ShowStateComponent from './components/showStateComponent';
+import API from '../api';
 
 const Plot = createPlotlyComponent(Plotly);
 d3Format.formatDefaultLocale(ptBR);
-
-import API from '../api';
-import { chooseState } from '../util';
 
 setAutoFreeze(false);
 
@@ -62,7 +60,7 @@ const styles = theme => ({
     select: {
         margin: theme.spacing.unit
     },
-    cropTextNormal: {        
+    cropTextNormal: {
         whiteSpace: 'nowrap',
         overflow: 'hidden',
         textOverflow: 'ellipsis'
@@ -103,7 +101,7 @@ const emptyState = {
     config: {
         range: '1y',
         changesRange: '1w',
-        filter: FundFilterView.emptyState.config.filter
+        filter: FundFilterComponent.emptyState.config.filter
     },
     layout: {
         showingFilter: false
@@ -116,7 +114,22 @@ class IndicatorsView extends React.Component {
     handleConfigRangeChange = async event => {
         const nextState = produce(this.state, draft => {
             draft.config[event.target.name] = event.target.value;
+            draft.data.economyIndicators = emptyState.data.economyIndicators;
         });
+
+        this.setState(nextState);
+
+        return this.updateData(nextState);
+    }
+
+    handleConfigChangesRangeChange = async event => {
+        const nextState = produce(this.state, draft => {
+            draft.config[event.target.name] = event.target.value;
+            draft.data.fundsChanged = emptyState.data.fundsChanged;
+        });
+
+        this.setState(nextState);
+
         return this.updateData(nextState);
     }
 
@@ -142,7 +155,10 @@ class IndicatorsView extends React.Component {
         const nextState = produce(this.state, draft => {
             draft.config.filter = filter;
             draft.layout.showingFilter = false;
+            draft.data.fundIndicators = emptyState.data.fundIndicators;
         });
+
+        this.setState(nextState);
 
         return this.updateData(nextState);
     }
@@ -462,7 +478,7 @@ class IndicatorsView extends React.Component {
                     <Grid item xs={12}>
                         <Paper elevation={1} square={true}>
                             <Collapse in={this.state.layout.showingFilter}>
-                                <FundFilterView onFilterChanged={this.handleFilterChanged} />
+                                <FundFilterComponent onFilterChanged={this.handleFilterChanged} />
                             </Collapse>
                         </Paper>
                     </Grid>
@@ -497,7 +513,7 @@ class IndicatorsView extends React.Component {
                         <Grid item>
                             <Select
                                 value={this.state.config.changesRange}
-                                onChange={this.handleConfigRangeChange}
+                                onChange={this.handleConfigChangesRangeChange}
                                 className={classes.select}
                                 inputProps={{
                                     name: 'changesRange',
@@ -540,33 +556,32 @@ const FundsChangedPaper = (props) => {
             </Paper>
             <Paper className={classes.paper} elevation={1} square={true}>
                 <Grid container spacing={8} alignItems="center" justify="center">
-                    {
-                        chooseState(data,
-                            () => {
-                                return data.map((change, index) => (
-                                    <React.Fragment key={index}>
-                                        <Grid item xs={12}>
-                                            <Grid container spacing={8}>
-                                                <Grid item xs>
-                                                    <Typography component="span" variant="body1" align="left" className={classes.cropTextNormal}>{dayjs(change.date).format('DD/MM/YYYY')} - {change.name}</Typography>
-                                                </Grid>
-                                                <Grid item xs>
-                                                    {
-                                                        change.changes.map((fieldChange, index) => (
-                                                            <Typography key={index} component="span" variant="body1" align="right">{fieldChange}</Typography>
-                                                        ))
-                                                    }
-                                                </Grid>
+                    <ShowStateComponent
+                        data={data}
+                        hasData={() => {
+                            return data.map((change, index) => (
+                                <React.Fragment key={index}>
+                                    <Grid item xs={12}>
+                                        <Grid container spacing={8}>
+                                            <Grid item xs>
+                                                <Typography component="span" variant="body1" align="left" className={classes.cropTextNormal}>{dayjs(change.date).format('DD/MM/YYYY')} - {change.name}</Typography>
                                             </Grid>
-                                        </Grid>                                        
-                                    </React.Fragment>
-                                ));
-                            },
-                            () => (<Typography variant="subheading" align="center"><CircularProgress className={classes.progress} /></Typography>),
-                            () => (<Typography variant="subheading" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>),
-                            () => (<Typography variant="subheading" align="center">Sem dados à exibir</Typography>)
-                        )
-                    }
+                                            <Grid item xs>
+                                                {
+                                                    change.changes.map((fieldChange, index) => (
+                                                        <Typography key={index} component="span" variant="body1" align="right">{fieldChange}</Typography>
+                                                    ))
+                                                }
+                                            </Grid>
+                                        </Grid>
+                                    </Grid>
+                                </React.Fragment>
+                            ));
+                        }}
+                        isNull={() => (<Typography variant="subheading" align="center"><CircularProgress className={classes.progress} /></Typography>)}
+                        isErrored={() => (<Typography variant="subheading" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>)}
+                        isEmpty={() => (<Typography variant="subheading" align="center">Sem dados à exibir</Typography>)}
+                    />
                 </Grid>
             </Paper>
         </div>);
@@ -594,49 +609,48 @@ const IndicatorPaper = (props) => {
                 </Grid>
             </Paper>
             <Paper className={classes.paper} elevation={1} square={true}>
-                {
-                    chooseState(data,
-                        () => {
-                            const positive = data[range][field]['top'].map((indicator, index) => (
-                                <div key={index}>
-                                    <ListItem divider>
-                                        <ListItemText disableTypography classes={{ root: classes.listItemText }}>
-                                            <Typography component="span" variant="body1" className={classes.cropText}>{indicator.name}</Typography>
-                                        </ListItemText>
-                                        <ListItemSecondaryAction>
-                                            <Typography component="span" variant="body1" className={getClassForValue(indicator.value)}>{formatValue(indicator.value)}%</Typography>
-                                        </ListItemSecondaryAction>
-                                    </ListItem>
-                                </div>
-                            ));
-                            const divider = (< ListItem divider >
-                                <ListItemText disableTypography={true}>
-                                    <Typography component="span" variant="body1" align="center">...</Typography>
-                                </ListItemText>
-                            </ListItem>);
-                            const negative = data[range][field]['bottom'].map((indicator, index) => (
-                                <div key={index}>
-                                    <ListItem divider>
-                                        <ListItemText disableTypography classes={{ root: classes.listItemText }}>
-                                            <Typography component="span" variant="body1" className={classes.cropText}>{indicator.name}</Typography>
-                                        </ListItemText>
-                                        <ListItemSecondaryAction>
-                                            <Typography component="span" variant="body1" className={getClassForValue(indicator.value)}>{formatValue(indicator.value)}%</Typography>
-                                        </ListItemSecondaryAction>
-                                    </ListItem>
-                                </div>
-                            ));
-                            return (<List>
-                                {positive}
-                                {divider}
-                                {negative}
-                            </List>);
-                        },
-                        () => (<Typography variant="subheading" align="center"><CircularProgress className={classes.progress} /></Typography>),
-                        () => (<Typography variant="subheading" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>),
-                        () => (<Typography variant="subheading" align="center">Sem dados à exibir</Typography>)
-                    )
-                }
+                <ShowStateComponent
+                    data={data && data[range]}
+                    hasData={() => {
+                        const positive = data[range][field]['top'].map((indicator, index) => (
+                            <div key={index}>
+                                <ListItem divider>
+                                    <ListItemText disableTypography classes={{ root: classes.listItemText }}>
+                                        <Typography component="span" variant="body1" className={classes.cropText}>{indicator.name}</Typography>
+                                    </ListItemText>
+                                    <ListItemSecondaryAction>
+                                        <Typography component="span" variant="body1" className={getClassForValue(indicator.value)}>{formatValue(indicator.value)}%</Typography>
+                                    </ListItemSecondaryAction>
+                                </ListItem>
+                            </div>
+                        ));
+                        const divider = (< ListItem divider >
+                            <ListItemText disableTypography={true}>
+                                <Typography component="span" variant="body1" align="center">...</Typography>
+                            </ListItemText>
+                        </ListItem>);
+                        const negative = data[range][field]['bottom'].map((indicator, index) => (
+                            <div key={index}>
+                                <ListItem divider>
+                                    <ListItemText disableTypography classes={{ root: classes.listItemText }}>
+                                        <Typography component="span" variant="body1" className={classes.cropText}>{indicator.name}</Typography>
+                                    </ListItemText>
+                                    <ListItemSecondaryAction>
+                                        <Typography component="span" variant="body1" className={getClassForValue(indicator.value)}>{formatValue(indicator.value)}%</Typography>
+                                    </ListItemSecondaryAction>
+                                </ListItem>
+                            </div>
+                        ));
+                        return (<List>
+                            {positive}
+                            {divider}
+                            {negative}
+                        </List>);
+                    }}
+                    isNull={() => (<Typography variant="subheading" align="center"><CircularProgress className={classes.progress} /></Typography>)}
+                    isErrored={() => (<Typography variant="subheading" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>)}
+                    isEmpty={() => (<Typography variant="subheading" align="center">Sem dados à exibir</Typography>)}
+                />
             </Paper>
         </div>);
 };
@@ -644,9 +658,9 @@ const IndicatorPaper = (props) => {
 const EconomyHistoryChart = (props) => {
     const { fund, handleChartInitialized, handleChartUpdate } = props;
 
-    return chooseState(
-        fund,
-        () => (
+    return (<ShowStateComponent
+        data={fund}
+        hasData={() => (
             <Plot
                 key={fund.name}
                 data={fund.data}
@@ -662,13 +676,11 @@ const EconomyHistoryChart = (props) => {
                 useResizeHandler={true}
                 style={{ width: '100%', height: '100%' }}
             />
-        ),
-        () => (
-            <Typography variant="subheading" align="center"><CircularProgress /></Typography>
-        ),
-        () => (
-            <Typography variant="subheading" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>
-        ));
+        )}
+        isNull={() => (<Typography variant="subheading" align="center"><CircularProgress /></Typography>)}
+        isErrored={() => (<Typography variant="subheading" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>)}
+        isEmpty={() => (<Typography variant="subheading" align="center">Sem dados à exibir</Typography>)}
+    />);
 };
 
 module.exports = withStyles(styles)(IndicatorsView);

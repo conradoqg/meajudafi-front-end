@@ -25,9 +25,9 @@ import Tooltip from '@material-ui/core/Tooltip';
 import Grey from '@material-ui/core/colors/grey';
 import API from '../api';
 import sortOptions from './sortOptions';
-import { chooseState } from '../util';
-import FundFilterView from './components/fundFilterView';
-import FundSearchView from './components/fundSearchView';
+import FundFilterComponent from './components/fundFilterComponent';
+import FundSearchComponent from './components/fundSearchComponent';
+import ShowStateComponent from './components/showStateComponent';
 import * as d3Format from 'd3-format';
 import createPlotlyComponent from 'react-plotly.js/factory';
 import Plotly from 'plotly';
@@ -84,12 +84,12 @@ const emptyState = {
         page: 0,
         rowsPerPage: 25,
         sort: sortOptions[0],
-        filter: FundFilterView.emptyState.config.filter,
+        filter: FundFilterComponent.emptyState.config.filter,
         chart: {
             range: 'all',
             benchmark: 'cdi'
         },
-        search: FundSearchView.emptyState.config.search
+        search: FundSearchComponent.emptyState.config.search
     },
     layout: {
         anchorEl: null,
@@ -537,7 +537,7 @@ class FundListView extends React.Component {
                     <Grid item xs>
                         <Paper elevation={1} square={true} >
                             <Grid container wrap="nowrap" className={classes.optionsBar}>
-                                <FundSearchView onSearchChanged={this.handleSearchChanged} />
+                                <FundSearchComponent onSearchChanged={this.handleSearchChanged} />
                                 <Grid container justify="flex-end" spacing={8}>
                                     <Grid item>
                                         <Select
@@ -604,88 +604,75 @@ class FundListView extends React.Component {
                         </Paper>
                         <Paper elevation={1} square={true}>
                             <Collapse in={layout.showingFilter}>
-                                <FundFilterView onFilterChanged={this.handleFilterChanged} />
+                                <FundFilterComponent onFilterChanged={this.handleFilterChanged} />
                             </Collapse>
                         </Paper>
-                        {
-                            chooseState(this.state.data.fundList,
-                                () => this.state.data.fundList.map((fund, index) => (
-                                    <ExpansionPanel key={index} expanded={this.state.layout.showingFundDetail[fund.icf_cnpj_fundo] ? true : false} onChange={(e, expanded) => this.handleFundExpansion(expanded, fund)}>
-                                        <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-                                            <Grid container spacing={8}>
-                                                <Grid item xs={8}>
-                                                    <Typography>
-                                                        <b>{fund.f_short_name}</b><br />
-                                                        <small>
-                                                            <b>Patrimônio:</b> R$ {d3Format.format(',.2f')(fund.iry_accumulated_networth)}<br />
-                                                            <b>Quotistas:</b> {fund.iry_accumulated_quotaholders} <br />
-                                                            <b>Benchmark:</b> {fund.icf_rentab_fundo ? fund.icf_rentab_fundo : 'Não informado'}
-                                                        </small>
-                                                    </Typography>
-                                                </Grid>
-                                                <Grid item xs={4}>
-                                                    <Grid container spacing={8}>
-                                                        <Grid item xs={6}>
-                                                            <Typography><b>Desempenho</b></Typography>
-                                                        </Grid>
-                                                        <Grid item xs={6}>
-                                                            <Typography><b>Risco</b></Typography>
-                                                        </Grid>
+                        <ShowStateComponent
+                            data={this.state.data.fundList}
+                            hasData={() => this.state.data.fundList.map((fund, index) => (
+                                <ExpansionPanel key={index} expanded={this.state.layout.showingFundDetail[fund.icf_cnpj_fundo] ? true : false} onChange={(e, expanded) => this.handleFundExpansion(expanded, fund)}>
+                                    <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+                                        <Grid container spacing={8}>
+                                            <Grid item xs={8}>
+                                                <Typography>
+                                                    <b>{fund.f_short_name}</b><br />
+                                                    <small>
+                                                        <b>Patrimônio:</b> R$ {d3Format.format(',.2f')(fund.iry_accumulated_networth)}<br />
+                                                        <b>Quotistas:</b> {fund.iry_accumulated_quotaholders} <br />
+                                                        <b>Benchmark:</b> {fund.icf_rentab_fundo ? fund.icf_rentab_fundo : 'Não informado'}
+                                                    </small>
+                                                </Typography>
+                                            </Grid>
+                                            <Grid item xs={4}>
+                                                <Grid container spacing={8}>
+                                                    <Grid item xs={6}>
+                                                        <Typography><b>Desempenho</b></Typography>
                                                     </Grid>
-                                                    <Grid container spacing={8}>
-                                                        <Grid item xs={6}>
-                                                            <Typography>
-                                                                <small>
-                                                                    1A: {d3Format.format('.2%')(fund.iry_investment_return_1y)}<br />
-                                                                    2A: {d3Format.format('.2%')(fund.iry_investment_return_2y)}<br />
-                                                                    3A: {d3Format.format('.2%')(fund.iry_investment_return_3y)}
-                                                                </small>
-                                                            </Typography>
-                                                        </Grid>
-                                                        <Grid item xs={6}>
-                                                            <Typography>
-                                                                <small>
-                                                                    1A: {d3Format.format('.2%')(fund.iry_risk_1y)}<br />
-                                                                    2A: {d3Format.format('.2%')(fund.iry_risk_2y)}<br />
-                                                                    3A: {d3Format.format('.2%')(fund.iry_risk_3y)}<br />
-                                                                </small>
-                                                            </Typography>
-                                                        </Grid>
+                                                    <Grid item xs={6}>
+                                                        <Typography><b>Risco</b></Typography>
+                                                    </Grid>
+                                                </Grid>
+                                                <Grid container spacing={8}>
+                                                    <Grid item xs={6}>
+                                                        <Typography>
+                                                            <small>
+                                                                1A: {d3Format.format('.2%')(fund.iry_investment_return_1y)}<br />
+                                                                2A: {d3Format.format('.2%')(fund.iry_investment_return_2y)}<br />
+                                                                3A: {d3Format.format('.2%')(fund.iry_investment_return_3y)}
+                                                            </small>
+                                                        </Typography>
+                                                    </Grid>
+                                                    <Grid item xs={6}>
+                                                        <Typography>
+                                                            <small>
+                                                                1A: {d3Format.format('.2%')(fund.iry_risk_1y)}<br />
+                                                                2A: {d3Format.format('.2%')(fund.iry_risk_2y)}<br />
+                                                                3A: {d3Format.format('.2%')(fund.iry_risk_3y)}<br />
+                                                            </small>
+                                                        </Typography>
                                                     </Grid>
                                                 </Grid>
                                             </Grid>
-                                        </ExpansionPanelSummary>
-                                        <Divider />
-                                        <ExpansionPanelDetails>
-                                            <Grid container spacing={8}>
-                                                <Grid item xs>
-                                                    <FundHistoryChart
-                                                        fund={this.state.data.fundDetail[fund.icf_cnpj_fundo]}
-                                                        onInitialized={(figure) => this.handleChartInitialized(fund, figure)}
-                                                        onUpdate={(figure) => this.handleChartUpdate(fund, figure)}
-                                                    />
-                                                </Grid>
+                                        </Grid>
+                                    </ExpansionPanelSummary>
+                                    <Divider />
+                                    <ExpansionPanelDetails>
+                                        <Grid container spacing={8}>
+                                            <Grid item xs>
+                                                <FundHistoryChart
+                                                    fund={this.state.data.fundDetail[fund.icf_cnpj_fundo]}
+                                                    onInitialized={(figure) => this.handleChartInitialized(fund, figure)}
+                                                    onUpdate={(figure) => this.handleChartUpdate(fund, figure)}
+                                                />
                                             </Grid>
-                                        </ExpansionPanelDetails>
-                                    </ExpansionPanel>
-                                )),
-                                () => (
-                                    <Paper elevation={1} square={true} className={classes.filterPaperContent}>
-                                        <Typography variant="subheading" align="center"><CircularProgress className={classes.progress} /></Typography>
-                                    </Paper>
-                                ),
-                                () => (
-                                    <Paper elevation={1} square={true} className={classes.filterPaperContent}>
-                                        <Typography variant="subheading" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>
-                                    </Paper>
-                                ),
-                                () => (
-                                    <Paper elevation={1} square={true} className={classes.filterPaperContent}>
-                                        <Typography variant="subheading" align="center">Sem dados à exibir</Typography>
-                                    </Paper>
-                                )
-                            )
-                        }
+                                        </Grid>
+                                    </ExpansionPanelDetails>
+                                </ExpansionPanel>
+                            ))}
+                            isNull={() => (<Paper elevation={1} square={true} className={classes.filterPaperContent}><Typography variant="subheading" align="center"><CircularProgress className={classes.progress} /></Typography></Paper>)}
+                            isErrored={() => (<Paper elevation={1} square={true} className={classes.filterPaperContent}><Typography variant="subheading" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography></Paper>)}
+                            isEmpty={() => (<Paper elevation={1} square={true} className={classes.filterPaperContent}><Typography variant="subheading" align="center">Sem dados à exibir</Typography></Paper>)}
+                        />
                         {this.state.data.totalRows ?
                             <TablePagination
                                 component="div"
@@ -715,31 +702,33 @@ class FundListView extends React.Component {
 const FundHistoryChart = (props) => {
     const { fund, handleChartInitialized, handleChartUpdate } = props;
 
-    return chooseState(
-        fund,
-        () => (
-            <Plot
-                key={fund.name}
-                data={fund.data}
-                layout={fund.layout}
-                config={
-                    {
-                        locale: 'pt-BR',
-                        displayModeBar: true
+    return (
+        <ShowStateComponent
+            data={fund}
+            hasData={() => (
+                <Plot
+                    key={fund.name}
+                    data={fund.data}
+                    layout={fund.layout}
+                    config={
+                        {
+                            locale: 'pt-BR',
+                            displayModeBar: true
+                        }
                     }
-                }
-                onInitialized={handleChartInitialized}
-                onUpdate={handleChartUpdate}
-                useResizeHandler={true}
-                style={{ width: '100%', height: '100%' }}
-            />
-        ),
-        () => (
-            <Typography variant="subheading" align="center"><CircularProgress /></Typography>
-        ),
-        () => (
-            <Typography variant="subheading" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>
-        ));
+                    onInitialized={handleChartInitialized}
+                    onUpdate={handleChartUpdate}
+                    useResizeHandler={true}
+                    style={{ width: '100%', height: '100%' }}
+                />
+            )}
+            isNull={() => (
+                <Typography variant="subheading" align="center"><CircularProgress /></Typography>
+            )}
+            isErrored={() => (
+                <Typography variant="subheading" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>
+            )}
+        />);
 };
 
 module.exports = withStyles(styles)(FundListView);

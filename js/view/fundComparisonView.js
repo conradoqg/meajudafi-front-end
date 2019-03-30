@@ -19,14 +19,13 @@ import Plotly from 'plotly';
 import dayjs from 'dayjs';
 import promisesEach from 'promise-results';
 import { withRouter } from 'react-router-dom';
+import API from '../api';
+import FundSearchComponent from './components/fundSearchComponent';
+import ShowStateComponent from './components/showStateComponent';
+import sortOptions from './sortOptions';
 
 const colors = ['#e6194B', '#3cb44b', '#ffe119', '#4363d8', '#f58231', '#911eb4', '#42d4f4', '#f032e6', '#bfef45', '#fabebe', '#469990', '#e6beff', '#9A6324', '#fffac8', '#800000', '#aaffc3', '#808000', '#ffd8b1', '#000075', '#a9a9a9', '#ffffff', '#000000'];
 const nextColorIndex = (i) => (i % colors.length + colors.length) % colors.length;
-
-import API from '../api';
-import FundSearchView from './components/fundSearchView';
-import sortOptions from './sortOptions';
-import { chooseState } from '../util';
 
 setAutoFreeze(false);
 const Plot = createPlotlyComponent(Plotly);
@@ -76,7 +75,7 @@ const emptyState = {
         page: 0,
         rowsPerPage: 5,
         sort: sortOptions[0],
-        search: FundSearchView.emptyState.config.search,
+        search: FundSearchComponent.emptyState.config.search,
         searchRevision: 0,
         benchmark: 'bovespa',
         range: '1y'
@@ -432,79 +431,70 @@ class FundComparisonView extends React.Component {
                     <Grid item xs>
                         <Paper elevation={1} square={true} >
                             <Grid container wrap="nowrap" className={classes.optionsBar}>
-                                <FundSearchView key={this.state.config.searchRevision} term={this.state.config.search.term} onSearchChanged={this.handleSearchChanged} />
+                                <FundSearchComponent key={this.state.config.searchRevision} term={this.state.config.search.term} onSearchChanged={this.handleSearchChanged} />
                             </Grid>
                         </Paper>
-                        {
-                            chooseState(this.state.data.fundListSearch,
-                                () => (
-                                    <Paper elevation={1} square={true} className={classes.optionsBar}>
-                                        {
-                                            this.state.data.fundListSearch.map((fund, index) => (
-                                                <Grid container spacing={8} key={index} alignItems="center" justify="center">
-                                                    <Grid item xs={7}>
-                                                        <Typography>
-                                                            <b>{fund.f_short_name}</b><br />
-                                                            <small>
-                                                                <b>Patrimônio:</b> R$ {d3Format.format(',.2f')(fund.iry_accumulated_networth)}<br />
-                                                                <b>Quotistas:</b> {fund.iry_accumulated_quotaholders} <br />
-                                                                <b>Benchmark:</b> {fund.icf_rentab_fundo ? fund.icf_rentab_fundo : 'Não informado'}
-                                                            </small>
-                                                        </Typography>
-                                                    </Grid>
-                                                    <Grid item xs={4}>
-                                                        <Grid container spacing={8}>
-                                                            <Grid item xs={6}>
-                                                                <Typography><b>Desempenho</b></Typography>
-                                                            </Grid>
-                                                            <Grid item xs={6}>
-                                                                <Typography><b>Risco</b></Typography>
-                                                            </Grid>
+                        <ShowStateComponent
+                            data={this.state.data.fundListSearch}
+                            hasData={() => (
+                                <Paper elevation={1} square={true} className={classes.optionsBar}>
+                                    {
+                                        this.state.data.fundListSearch.map((fund, index) => (
+                                            <Grid container spacing={8} key={index} alignItems="center" justify="center">
+                                                <Grid item xs={7}>
+                                                    <Typography>
+                                                        <b>{fund.f_short_name}</b><br />
+                                                        <small>
+                                                            <b>Patrimônio:</b> R$ {d3Format.format(',.2f')(fund.iry_accumulated_networth)}<br />
+                                                            <b>Quotistas:</b> {fund.iry_accumulated_quotaholders} <br />
+                                                            <b>Benchmark:</b> {fund.icf_rentab_fundo ? fund.icf_rentab_fundo : 'Não informado'}
+                                                        </small>
+                                                    </Typography>
+                                                </Grid>
+                                                <Grid item xs={4}>
+                                                    <Grid container spacing={8}>
+                                                        <Grid item xs={6}>
+                                                            <Typography><b>Desempenho</b></Typography>
                                                         </Grid>
-                                                        <Grid container spacing={8}>
-                                                            <Grid item xs={6}>
-                                                                <Typography>
-                                                                    <small>
-                                                                        1A: {d3Format.format('.2%')(fund.iry_investment_return_1y)}<br />
-                                                                        2A: {d3Format.format('.2%')(fund.iry_investment_return_2y)}<br />
-                                                                        3A: {d3Format.format('.2%')(fund.iry_investment_return_3y)}
-                                                                    </small>
-                                                                </Typography>
-                                                            </Grid>
-                                                            <Grid item xs={6}>
-                                                                <Typography>
-                                                                    <small>
-                                                                        1A: {d3Format.format('.2%')(fund.iry_risk_1y)}<br />
-                                                                        2A: {d3Format.format('.2%')(fund.iry_risk_2y)}<br />
-                                                                        3A: {d3Format.format('.2%')(fund.iry_risk_3y)}<br />
-                                                                    </small>
-                                                                </Typography>
-                                                            </Grid>
+                                                        <Grid item xs={6}>
+                                                            <Typography><b>Risco</b></Typography>
                                                         </Grid>
                                                     </Grid>
-                                                    <Grid item xs={1} style={{ textAlign: 'center' }}>
-                                                        <IconButton
-                                                            onClick={() => this.handleAddClick(fund)}>
-                                                            <AddIcon />
-                                                        </IconButton>
+                                                    <Grid container spacing={8}>
+                                                        <Grid item xs={6}>
+                                                            <Typography>
+                                                                <small>
+                                                                    1A: {d3Format.format('.2%')(fund.iry_investment_return_1y)}<br />
+                                                                    2A: {d3Format.format('.2%')(fund.iry_investment_return_2y)}<br />
+                                                                    3A: {d3Format.format('.2%')(fund.iry_investment_return_3y)}
+                                                                </small>
+                                                            </Typography>
+                                                        </Grid>
+                                                        <Grid item xs={6}>
+                                                            <Typography>
+                                                                <small>
+                                                                    1A: {d3Format.format('.2%')(fund.iry_risk_1y)}<br />
+                                                                    2A: {d3Format.format('.2%')(fund.iry_risk_2y)}<br />
+                                                                    3A: {d3Format.format('.2%')(fund.iry_risk_3y)}<br />
+                                                                </small>
+                                                            </Typography>
+                                                        </Grid>
                                                     </Grid>
                                                 </Grid>
-                                            ))
-                                        }
-                                    </Paper>
-                                ),
-                                () => (
-                                    <Paper elevation={1} square={true} className={classes.filterPaperContent}>
-                                        <Typography variant="subheading" align="center"><CircularProgress className={classes.progress} /></Typography>
-                                    </Paper>
-                                ),
-                                () => (
-                                    <Paper elevation={1} square={true} className={classes.filterPaperContent}>
-                                        <Typography variant="subheading" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>
-                                    </Paper>
-                                )
-                            )
-                        }
+                                                <Grid item xs={1} style={{ textAlign: 'center' }}>
+                                                    <IconButton
+                                                        onClick={() => this.handleAddClick(fund)}>
+                                                        <AddIcon />
+                                                    </IconButton>
+                                                </Grid>
+                                            </Grid>
+                                        ))
+                                    }
+                                </Paper>
+                            )}
+                            isNull={() => (<Paper elevation={1} square={true} className={classes.filterPaperContent}><Typography variant="subheading" align="center"><CircularProgress className={classes.progress} /></Typography></Paper>)}
+                            isErrored={() => (<Paper elevation={1} square={true} className={classes.filterPaperContent}><Typography variant="subheading" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography></Paper>)}
+                        />
                     </Grid>
                 </Grid>
                 <Grid container spacing={16}>
@@ -521,149 +511,121 @@ class FundComparisonView extends React.Component {
                 <Grid container spacing={16}>
                     <Grid item xs>
                         <Paper elevation={1} square={true} className={classes.optionsBar}>
-                            {
-                                chooseState(this.state.data.benchmark,
-                                    () => (
-                                        <Grid container spacing={8} key={this.state.config.benchmark} alignItems="center">
-                                            <Grid item xs>
-                                                <Grid container spacing={8}>
-                                                    <Grid item>
-                                                        <span style={{ backgroundColor: colors[nextColorIndex(0)], minWidth: '10px', height: '100%', display: 'block' }}></span>
-                                                    </Grid>
-                                                    <Grid item xs>
-                                                        <Typography>
-                                                            <b>{this.state.data.benchmark.name}</b><br />
-                                                            <small>
-                                                                &nbsp;
-                                                            </small>
-                                                        </Typography>
-                                                    </Grid>
+                            <ShowStateComponent
+                                data={this.state.data.benchmark}
+                                hasData={() => (
+                                    <Grid container spacing={8} key={this.state.config.benchmark} alignItems="center">
+                                        <Grid item xs>
+                                            <Grid container spacing={8}>
+                                                <Grid item>
+                                                    <span style={{ backgroundColor: colors[nextColorIndex(0)], minWidth: '10px', height: '100%', display: 'block' }}></span>
+                                                </Grid>
+                                                <Grid item xs>
+                                                    <Typography>
+                                                        <b>{this.state.data.benchmark.name}</b><br />
+                                                        <small>
+                                                            &nbsp;
+                                                        </small>
+                                                    </Typography>
                                                 </Grid>
                                             </Grid>
-
-                                            {
-                                                chooseState(this.state.data.benchmark.data,
-                                                    () => (
-                                                        <React.Fragment>
-                                                            <Grid item xs={1}>
-                                                                <Typography>
-                                                                    Desempenho: {d3Format.format('.2%')(this.state.data.benchmark.data.investment_return[this.state.data.benchmark.data.investment_return.length - 1])}
-                                                                </Typography>
-                                                            </Grid>
-                                                            <Grid item xs={1}>
-                                                                <Typography>
-                                                                    Risco: {d3Format.format('.2%')(this.state.data.benchmark.data.risk[this.state.data.benchmark.data.risk.length - 1])}
-                                                                </Typography>
-                                                            </Grid>
-                                                            <Grid item xs={1}>
-                                                                <Typography>&nbsp;</Typography>
-                                                            </Grid>
-                                                            <Grid item xs={1}>
-                                                                <Typography>&nbsp;</Typography>
-                                                            </Grid>
-                                                        </React.Fragment>
-                                                    ),
-                                                    () => (
-                                                        <Typography variant="subheading" align="center"><CircularProgress className={classes.progress} /></Typography>
-                                                    ),
-                                                    () => (
-                                                        <Typography variant="subheading" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>
-                                                    )
-                                                )
-                                            }
                                         </Grid>
-                                    ),
-                                    () => (
-                                        <Typography variant="subheading" align="center"><CircularProgress className={classes.progress} /></Typography>
-                                    ),
-                                    () => (
-                                        <Typography variant="subheading" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>
-                                    )
-                                )
-                            }
-                            {
-                                chooseState(this.state.data.fundListCompare,
-                                    () => (
-                                        <React.Fragment>
-                                            {
-                                                this.state.data.fundListCompare.map((fundObject, index) => (
-                                                    <Grid container spacing={8} key={index} alignItems="center" justify="center">
-                                                        {
-                                                            chooseState(fundObject.detail,
-                                                                () => (
-                                                                    <Grid item xs>
-                                                                        <Grid container spacing={8}>
-                                                                            <Grid item>
-                                                                                <span style={{ backgroundColor: colors[nextColorIndex(index + 1)], minWidth: '10px', height: '100%', display: 'block' }}></span>
-                                                                            </Grid>
-                                                                            <Grid item xs>
-                                                                                <Typography>
-                                                                                    <b>{fundObject.detail.name}</b><br />
-                                                                                    <small>
-                                                                                        <b>Benchmark:</b> {fundObject.detail.benchmark ? fundObject.detail.benchmark : 'Não informado'}
-                                                                                    </small>
-                                                                                </Typography>
-                                                                            </Grid>
-                                                                        </Grid>
-                                                                    </Grid>
-                                                                ),
-                                                                () => (
-                                                                    <Typography variant="subheading" align="center"><CircularProgress className={classes.progress} /></Typography>
-                                                                ),
-                                                                () => (
-                                                                    <Typography variant="subheading" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>
-                                                                )
-                                                            )
-                                                        }
-                                                        {
-                                                            chooseState(fundObject.data,
-                                                                () => (
-                                                                    <React.Fragment>
-                                                                        <Grid item xs={1}>
-                                                                            <Typography>
-                                                                                Desempenho: {d3Format.format('.2%')(fundObject.data.investment_return[fundObject.data.investment_return.length - 1])}
-                                                                            </Typography>
-                                                                        </Grid>
-                                                                        <Grid item xs={1}>
-                                                                            <Typography>
-                                                                                Risco: {d3Format.format('.2%')(fundObject.data.risk[fundObject.data.risk.length - 1])}
-                                                                            </Typography>
-                                                                        </Grid>
-                                                                        <Grid item xs={1}>
-                                                                            <Typography>
-                                                                                Sharpe: {d3Format.format('.2')(fundObject.data.sharpe[fundObject.data.sharpe.length - 1])}
-                                                                            </Typography>
-                                                                        </Grid>
-                                                                    </React.Fragment>
-                                                                ),
-                                                                () => (
-                                                                    <Typography variant="subheading" align="center"><CircularProgress className={classes.progress} /></Typography>
-                                                                )
-                                                            )
-                                                        }
-                                                        <Grid item xs={1} style={{ textAlign: 'center' }}>
-                                                            <IconButton
-                                                                onClick={() => this.handleRemoveClick(fundObject)}>
-                                                                <ClearIcon color="error" />
-                                                            </IconButton>
-                                                        </Grid>
+                                        <ShowStateComponent
+                                            data={this.state.data.benchmark.data}
+                                            hasData={() => (
+                                                <React.Fragment>
+                                                    <Grid item xs={1}>
+                                                        <Typography>
+                                                            Desempenho: {d3Format.format('.2%')(this.state.data.benchmark.data.investment_return[this.state.data.benchmark.data.investment_return.length - 1])}
+                                                        </Typography>
                                                     </Grid>
-                                                ))
-                                            }
-                                        </React.Fragment>
-                                    ),
-                                    () => (
-                                        <Paper elevation={1} square={true} className={classes.filterPaperContent}>
-                                            <Typography variant="subheading" align="center"><CircularProgress className={classes.progress} /></Typography>
-                                        </Paper>
-                                    ),
-                                    () => (
-                                        <Paper elevation={1} square={true} className={classes.filterPaperContent}>
-                                            <Typography variant="subheading" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>
-                                        </Paper>
-                                    )
-                                )
-                            }
+                                                    <Grid item xs={1}>
+                                                        <Typography>
+                                                            Risco: {d3Format.format('.2%')(this.state.data.benchmark.data.risk[this.state.data.benchmark.data.risk.length - 1])}
+                                                        </Typography>
+                                                    </Grid>
+                                                    <Grid item xs={1}>
+                                                        <Typography>&nbsp;</Typography>
+                                                    </Grid>
+                                                    <Grid item xs={1}>
+                                                        <Typography>&nbsp;</Typography>
+                                                    </Grid>
+                                                </React.Fragment>
+                                            )}
+                                            isNull={() => (<Typography variant="subheading" align="center"><CircularProgress className={classes.progress} /></Typography>)}
+                                            isErrored={() => (<Typography variant="subheading" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>)}
+                                        />
+                                    </Grid>
+                                )}
+                                isNull={() => (<Typography variant="subheading" align="center"><CircularProgress className={classes.progress} /></Typography>)}
+                                isErrored={() => (<Typography variant="subheading" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>)}
+                            />
+                            <ShowStateComponent
+                                data={this.state.data.fundListCompare}
+                                hasData={() => (
+                                    <React.Fragment>
+                                        {
+                                            this.state.data.fundListCompare.map((fundObject, index) => (
+                                                <Grid container spacing={8} key={index} alignItems="center" justify="center">
+                                                    <ShowStateComponent
+                                                        data={fundObject.detail}
+                                                        hasData={() => (
+                                                            <Grid item xs>
+                                                                <Grid container spacing={8}>
+                                                                    <Grid item>
+                                                                        <span style={{ backgroundColor: colors[nextColorIndex(index + 1)], minWidth: '10px', height: '100%', display: 'block' }}></span>
+                                                                    </Grid>
+                                                                    <Grid item xs>
+                                                                        <Typography>
+                                                                            <b>{fundObject.detail.name}</b><br />
+                                                                            <small>
+                                                                                <b>Benchmark:</b> {fundObject.detail.benchmark ? fundObject.detail.benchmark : 'Não informado'}
+                                                                            </small>
+                                                                        </Typography>
+                                                                    </Grid>
+                                                                </Grid>
+                                                            </Grid>
+                                                        )}
+                                                        isNull={() => (<Typography variant="subheading" align="center"><CircularProgress className={classes.progress} /></Typography>)}
+                                                        isErrored={() => (<Typography variant="subheading" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>)}
+                                                    />
+                                                    <ShowStateComponent
+                                                        data={fundObject.data}
+                                                        hasData={() => (
+                                                            <React.Fragment>
+                                                                <Grid item xs={1}>
+                                                                    <Typography>
+                                                                        Desempenho: {d3Format.format('.2%')(fundObject.data.investment_return[fundObject.data.investment_return.length - 1])}
+                                                                    </Typography>
+                                                                </Grid>
+                                                                <Grid item xs={1}>
+                                                                    <Typography>
+                                                                        Risco: {d3Format.format('.2%')(fundObject.data.risk[fundObject.data.risk.length - 1])}
+                                                                    </Typography>
+                                                                </Grid>
+                                                                <Grid item xs={1}>
+                                                                    <Typography>
+                                                                        Sharpe: {d3Format.format('.2')(fundObject.data.sharpe[fundObject.data.sharpe.length - 1])}
+                                                                    </Typography>
+                                                                </Grid>
+                                                            </React.Fragment>
+                                                        )}
+                                                        isNull={() => (<Typography variant="subheading" align="center"><CircularProgress className={classes.progress} /></Typography>)}
+                                                    />
+                                                    <Grid item xs={1} style={{ textAlign: 'center' }}>
+                                                        <IconButton
+                                                            onClick={() => this.handleRemoveClick(fundObject)}>
+                                                            <ClearIcon color="error" />
+                                                        </IconButton>
+                                                    </Grid>
+                                                </Grid>
+                                            ))
+                                        }
+                                    </React.Fragment>
+                                )}
+                                isNull={() => (<Paper elevation={1} square={true} className={classes.filterPaperContent}><Typography variant="subheading" align="center"><CircularProgress className={classes.progress} /></Typography></Paper>)}
+                                isErrored={() => (<Paper elevation={1} square={true} className={classes.filterPaperContent}><Typography variant="subheading" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography></Paper>)}
+                            />
                         </Paper>
                     </Grid>
                 </Grid>
@@ -675,9 +637,9 @@ class FundComparisonView extends React.Component {
 const FundHistoryChart = (props) => {
     const { fund, handleChartInitialized, handleChartUpdate } = props;
 
-    return chooseState(
-        fund,
-        () => (
+    return (<ShowStateComponent
+        data={fund}
+        hasData={() => (
             <Plot
                 key="FundComparison"
                 data={fund.data}
@@ -693,13 +655,10 @@ const FundHistoryChart = (props) => {
                 useResizeHandler={true}
                 style={{ width: '100%', height: '100%' }}
             />
-        ),
-        () => (
-            <Typography variant="subheading" align="center"><CircularProgress /></Typography>
-        ),
-        () => (
-            <Typography variant="subheading" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>
-        ));
+        )}
+        isNull={() => (<Typography variant="subheading" align="center"><CircularProgress /></Typography>)}
+        isErrored={() => (<Typography variant="subheading" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>)}
+    />);
 };
 
 module.exports = withStyles(styles)(withRouter(FundComparisonView));
