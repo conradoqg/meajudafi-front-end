@@ -48,7 +48,7 @@ module.exports = {
                     searchPart = `or=(f_unaccented_name.ilike.*${options.search.term.normalize('NFD').replace(/[\u0300-\u036f]/g, '')}*,f_unaccented_short_name.ilike.*${options.search.term.normalize('NFD').replace(/[\u0300-\u036f]/g, '')}*)&`;
                 }
             }
-        }        
+        }
 
         const fundListObject = await fetch(`//${API_URL}/icf_with_xf_and_bf_and_iry_and_f_of_last_year?select=icf_cnpj_fundo,f_short_name,iry_accumulated_networth,iry_accumulated_quotaholders,icf_rentab_fundo,iry_investment_return_1y,iry_investment_return_2y,iry_investment_return_3y,iry_risk_1y,iry_risk_2y,iry_risk_3y&${filterPart}${searchPart}iry_dt_comptc=gte.${fromDate.toJSON().slice(0, 10)}&order=${sort}`, {
             method: 'GET',
@@ -57,7 +57,7 @@ module.exports = {
                 'Range': range,
                 'Prefer': 'count=exact'
             }
-        });        
+        });
 
         if (fundListObject.status < 200 || fundListObject.status > 299) throw new Error('Unable to retrieve fund list');
 
@@ -79,7 +79,7 @@ module.exports = {
 
         return funds.json();
     },
-    getFundStatistic: async (cnpj, reference, lastDaysOrFromDate, additionalFields) => {
+    getFundStatistic: async (cnpj, benchmark, lastDaysOrFromDate, additionalFields) => {
         let fromDatePart = '';
         let rangePart = null;
 
@@ -95,7 +95,7 @@ module.exports = {
 
         if (Array.isArray(additionalFields) && additionalFields.length > 0) additionalFieldsPart = '&' + additionalFields.join(',');
 
-        const result = await fetch(`//${API_URL}/investment_return_daily?select=${additionalFieldsPart}ird_dt_comptc,ird_investment_return,${`ird_${reference}_investment_return`},ird_accumulated_quotaholders,ird_accumulated_networth&ird_cnpj_fundo=eq.${cnpj}${fromDatePart}&order=ird_dt_comptc.desc`, rangePart);
+        const result = await fetch(`//${API_URL}/investment_return_daily?select=${additionalFieldsPart}ird_dt_comptc,ird_investment_return,${`ird_${benchmark}_investment_return`},ird_accumulated_quotaholders,ird_accumulated_networth&ird_cnpj_fundo=eq.${cnpj}${fromDatePart}&order=ird_dt_comptc.desc`, rangePart);
 
         if (result.status < 200 || result.status > 299) throw new Error('Unable to retrieve fund statistic');
 
@@ -107,29 +107,38 @@ module.exports = {
             date: [],
             investment_return: [],
             benchmark_investment_return: [],
+            relative_investment_return: [],
             risk: [],
             sharpe: [],
             benchmark_consistency: [],
             networth: [],
             quotaholders: [],
+            correlation: [],
             min_investment_return: 0,
             max_investment_return: 0,
             min_benchmark_investment_return: 0,
-            max_benchmark_investment_return: 0,
+            max_benchmark_investment_return: 0
         };
 
         let date = null;
         let investment_return = 0;
         let benchmark_investment_return = 0;
+        let relative_investment_return = 0;
         let risk = 0;
         let sharpe = 0;
         let benchmark_consistency = 0;
         let networth = 0;
         let quotaholders = 0;
+        let correlation = 0;
 
         let riskCalculator = new StandardDeviation();
         let benchmarkConsistencyReached = 0;
         let lastBenchmarkConsistency = [];
+        let sum1 = 0;
+        let sum2 = 0;
+        let sum1Sq = 0;
+        let sum2Sq = 0;
+        let pSum = 0;
 
         const calcSharpeForPeriod = (risk, investment_return, cdi_investment_return, length) => {
             if (risk == 0) return 0;
@@ -157,11 +166,13 @@ module.exports = {
                 statistics.date.push(date);
                 statistics.investment_return.push(investment_return);
                 statistics.benchmark_investment_return.push(benchmark_investment_return);
+                statistics.relative_investment_return.push(relative_investment_return);
                 statistics.risk.push(risk);
                 statistics.sharpe.push(sharpe);
                 statistics.benchmark_consistency.push(benchmark_consistency);
                 statistics.networth.push(networth);
                 statistics.quotaholders.push(quotaholders);
+                statistics.correlation.push(correlation);
                 statistics.min_investment_return = Math.min(statistics.min_investment_return, investment_return);
                 statistics.max_investment_return = Math.max(statistics.max_investment_return, investment_return);
                 statistics.min_benchmark_investment_return = Math.min(statistics.min_benchmark_investment_return, benchmark_investment_return);
@@ -169,24 +180,53 @@ module.exports = {
                 continue;
             }
 
+            // Return
             investment_return = ((1 + investment_return) * (1 + item.ird_investment_return)) - 1;
-            benchmark_investment_return = ((1 + benchmark_investment_return) * (1 + item[`ird_${reference}_investment_return`])) - 1;
+            benchmark_investment_return = ((1 + benchmark_investment_return) * (1 + item[`ird_${benchmark}_investment_return`])) - 1;
+            relative_investment_return = investment_return / benchmark_investment_return;
+
+            // Risk
             riskCalculator.addMeasurement(item.ird_investment_return);
             risk = riskCalculator.get() * Math.sqrt(252);
+
+            // Sharpe
             sharpe = calcSharpeForPeriod(risk, investment_return, benchmark_investment_return, data.length - 1);
-            benchmarkConsistencyReached = calcConsistencyForPeriod(item.ird_investment_return, item[`ird_${reference}_investment_return`], data.length - 1, benchmarkConsistencyReached, lastBenchmarkConsistency);
+
+            // Consistency
+            benchmarkConsistencyReached = calcConsistencyForPeriod(item.ird_investment_return, item[`ird_${benchmark}_investment_return`], data.length - 1, benchmarkConsistencyReached, lastBenchmarkConsistency);
             benchmark_consistency = getConsistencyForPeriod(benchmarkConsistencyReached, lastBenchmarkConsistency);
+
+            // Networth
             networth = item.ird_accumulated_networth;
+
+            // Quotaholdes
             quotaholders = item.ird_accumulated_quotaholders;
+
+            // Correlation
+            sum1 += investment_return;
+            sum2 += benchmark_investment_return;
+            sum1Sq += Math.pow(investment_return, 2);
+            sum2Sq += Math.pow(benchmark_investment_return, 2);
+            pSum += investment_return * benchmark_investment_return;
+            let n = data.length - index - 1;
+            let num = pSum - (sum1 * sum2 / n);
+            let den = Math.sqrt((sum1Sq - Math.pow(sum1, 2) / n) *
+                (sum2Sq - Math.pow(sum2, 2) / n));
+
+            if (den == 0) correlation = 0;
+            else correlation = num / den;
+
 
             statistics.date.push(date);
             statistics.investment_return.push(investment_return);
             statistics.benchmark_investment_return.push(benchmark_investment_return);
+            statistics.relative_investment_return.push(relative_investment_return);
             statistics.risk.push(risk);
             statistics.sharpe.push(sharpe);
             statistics.benchmark_consistency.push(benchmark_consistency);
             statistics.networth.push(networth);
             statistics.quotaholders.push(quotaholders);
+            statistics.correlation.push(correlation);
             statistics.min_investment_return = Math.min(statistics.min_investment_return, investment_return);
             statistics.max_investment_return = Math.max(statistics.max_investment_return, investment_return);
             statistics.min_benchmark_investment_return = Math.min(statistics.min_benchmark_investment_return, benchmark_investment_return);

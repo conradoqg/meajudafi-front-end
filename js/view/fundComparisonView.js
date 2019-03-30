@@ -534,10 +534,16 @@ class FundComparisonView extends React.Component {
                                             data={this.state.data.benchmark.data}
                                             hasData={() => (
                                                 <React.Fragment>
-                                                    <Grid item xs={1}>
+                                                    <Grid item xs={2}>
                                                         <Typography>
                                                             Desempenho: {d3Format.format('.2%')(this.state.data.benchmark.data.investment_return[this.state.data.benchmark.data.investment_return.length - 1])}
                                                         </Typography>
+                                                    </Grid>
+                                                    <Grid item xs={2}>
+                                                        <Typography>&nbsp;</Typography>
+                                                    </Grid>
+                                                    <Grid item xs={1}>
+                                                        <Typography>&nbsp;</Typography>
                                                     </Grid>
                                                     <Grid item xs={1}>
                                                         <Typography>
@@ -593,9 +599,19 @@ class FundComparisonView extends React.Component {
                                                         data={fundObject.data}
                                                         hasData={() => (
                                                             <React.Fragment>
-                                                                <Grid item xs={1}>
+                                                                <Grid item xs={2}>
                                                                     <Typography>
                                                                         Desempenho: {d3Format.format('.2%')(fundObject.data.investment_return[fundObject.data.investment_return.length - 1])}
+                                                                    </Typography>
+                                                                </Grid>
+                                                                <Grid item xs={2}>
+                                                                    <Typography>
+                                                                        Desempenho Relativo: {d3Format.format('.2%')(fundObject.data.relative_investment_return[fundObject.data.investment_return.length - 1])}
+                                                                    </Typography>
+                                                                </Grid>
+                                                                <Grid item xs={1}>
+                                                                    <Typography>
+                                                                        Correlação: {d3Format.format('.2%')(fundObject.data.correlation[fundObject.data.risk.length - 1])}
                                                                     </Typography>
                                                                 </Grid>
                                                                 <Grid item xs={1}>
