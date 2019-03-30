@@ -57,7 +57,9 @@ module.exports = {
                 'Range': range,
                 'Prefer': 'count=exact'
             }
-        });
+        });        
+
+        if (fundListObject.status < 200 || fundListObject.status > 299) throw new Error('Unable to retrieve fund list');
 
         const CONTENT_RANGE_REGEX = /(\d+)-(\d+)\/(\d+)/gm;
         const contentRange = fundListObject.headers.get('Content-Range');
@@ -72,6 +74,9 @@ module.exports = {
     },
     getFundData: async (cnpj) => {
         const funds = await fetch(`//${API_URL}/funds_enhanced?select=f_name,f_short_name,rentab_fundo&f_cnpj=eq.${cnpj}`);
+
+        if (funds.status < 200 || funds.status > 299) throw new Error('Unable to retrieve fund data');
+
         return funds.json();
     },
     getFundStatistic: async (cnpj, reference, lastDaysOrFromDate, additionalFields) => {
@@ -91,6 +96,8 @@ module.exports = {
         if (Array.isArray(additionalFields) && additionalFields.length > 0) additionalFieldsPart = '&' + additionalFields.join(',');
 
         const result = await fetch(`//${API_URL}/investment_return_daily?select=${additionalFieldsPart}ird_dt_comptc,ird_investment_return,${`ird_${reference}_investment_return`},ird_accumulated_quotaholders,ird_accumulated_networth&ird_cnpj_fundo=eq.${cnpj}${fromDatePart}&order=ird_dt_comptc.desc`, rangePart);
+
+        if (result.status < 200 || result.status > 299) throw new Error('Unable to retrieve fund statistic');
 
         const data = await result.json();
 
@@ -213,6 +220,8 @@ module.exports = {
 
         const result = await fetch(`//${API_URL}/${tablePart}?select=data,valor${fromDatePart}&order=data.desc`, rangePart);
 
+        if (result.status < 200 || result.status > 299) throw new Error('Unable to retrieve benchmark statistic');
+
         let data = await result.json();
 
         let fromQuoteToPercentage = null;
@@ -246,10 +255,10 @@ module.exports = {
 
             date = item.data;
 
-            const value = fromQuoteToPercentage(item.valor, prevValue);            
+            const value = fromQuoteToPercentage(item.valor, prevValue);
             prevValue = item.valor;
 
-            investment_return = ((1 + investment_return) * (1 + value)) - 1;            
+            investment_return = ((1 + investment_return) * (1 + value)) - 1;
             riskCalculator.addMeasurement(value);
             risk = riskCalculator.get() * Math.sqrt(252);
 
@@ -306,6 +315,8 @@ module.exports = {
             risk_bottom: fetch(makeURL(`iry_risk_${range}`, 'asc'))
         });
 
+        if (Object.values(indicatorsObject).some(result => result.status < 200 || result.status > 299)) throw new Error('Unable to retrieve fund indicator');
+
         const indicatorsResult = await allKeys({
             investment_return_top: indicatorsObject.investment_return_top.json(),
             investment_return_bottom: indicatorsObject.investment_return_bottom.json(),
@@ -361,6 +372,8 @@ module.exports = {
 
         const fundIndicatorsObject = await fetch(`//${API_URL}/running_days_with_indicators?select=dt_comptc,cdi_valor,selic_valor,bovespa_valor,euro_valor,dolar_valor${fromDatePart}&order=dt_comptc.desc`, rangePart);
 
+        if (fundIndicatorsObject.status < 200 || fundIndicatorsObject.status > 299) throw new Error('Unable to retrieve economy indicators');
+
         let data = await fundIndicatorsObject.json();
 
         const fields = [
@@ -397,6 +410,8 @@ module.exports = {
         let fromDatePart = `&or=(row_data->xf_date.gte.${fromDate.toJSON().slice(0, 10)},row_data->bf_date.gte.${fromDate.toJSON().slice(0, 10)})`;
         const fundsChangedObject = await fetch(`//${API_URL}/changed_funds?order=row_data->xf_date.desc,row_data->bf_date.desc${fromDatePart}`);
 
+        if (fundsChangedObject.status < 200 || fundsChangedObject.status > 299) throw new Error('Unable to retrieve changed funds');
+
         let data = await fundsChangedObject.json();
 
         return data;
@@ -406,6 +421,9 @@ module.exports = {
         const minor = currentVersionArray[currentVersionArray.length - 2];
 
         const lastMigrationObject = await fetch(`//${API_URL}/migrations?order=name.desc&limit=1`);
+
+        if (lastMigrationObject.status < 200 || lastMigrationObject.status > 299) throw new Error('Unable to retrieve maintenance mode');
+
         const lastMigrationData = await lastMigrationObject.json();
 
         let migrationMinor = 0;
