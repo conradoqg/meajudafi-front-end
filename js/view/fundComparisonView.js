@@ -69,7 +69,7 @@ const emptyState = {
             data: null
         },
         sortOptions: sortOptions,
-        chart: []
+        chart: null
     },
     config: {
         page: 0,

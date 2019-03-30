@@ -1,3 +1,5 @@
+import React from 'react';
+
 const ShowStateComponent = (props) => {
     const { type, data, hasData, isNull, isErrored, isEmpty } = props;
     let analisedData = null;
@@ -9,7 +11,9 @@ const ShowStateComponent = (props) => {
     if (analisedData.some(data => data == null)) content = isNull && isNull();
     else if (analisedData.some(data => typeof (data) == 'string')) content = isErrored && isErrored(data);
     else if (analisedData.some(data => Array.isArray(data) && data.length == 0)) content = isEmpty && isEmpty();
-    if (content == null) content = hasData();
+    else content = hasData();
+
+    if (content == null) content = (<React.Fragment></React.Fragment>);
 
     return content;
 };
