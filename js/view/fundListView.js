@@ -33,6 +33,7 @@ import Plotly from 'plotly';
 import allKeys from 'promise-results/allKeys';
 import ptBR from 'd3-format/locale/pt-BR.json';
 import { sortOptions, benchmarkOptions, rangeOptions } from './options';
+import { nextColorIndex } from '../util';
 
 const Plot = createPlotlyComponent(Plotly);
 d3Format.formatDefaultLocale(ptBR);
@@ -300,6 +301,8 @@ class FundListView extends React.Component {
     }
 
     async getFundDetail(cnpj, chartConfig) {
+        let colorIndex = 0;
+
         const from = rangeOptions.find(range => range.name == chartConfig.range).toDate();
 
         const benchmarkText = benchmarkOptions.find(benchmark => benchmark.name == chartConfig.benchmark).displayName;
@@ -320,49 +323,56 @@ class FundListView extends React.Component {
                     x: statistics.date,
                     y: statistics.investment_return,
                     type: 'scatter',
-                    name: 'Desempenho'
+                    name: 'Desempenho',
+                    line: { color: nextColorIndex(colorIndex++) }
                 },
                 {
                     x: statistics.date,
                     y: statistics.benchmark_investment_return,
                     type: 'scatter',
                     name: `Benchmark (${benchmarkText})`,
-                    yaxis: 'y2'
+                    yaxis: 'y2',
+                    line: { color: nextColorIndex(colorIndex++) }
                 },
                 {
                     x: statistics.date,
                     y: statistics.risk,
                     type: 'scatter',
                     name: 'Risco',
-                    yaxis: 'y3'
+                    yaxis: 'y3',
+                    line: { color: nextColorIndex(colorIndex++) }
                 },
                 {
                     x: statistics.date,
                     y: statistics.sharpe,
                     type: 'scatter',
                     name: 'Sharpe',
-                    yaxis: 'y4'
+                    yaxis: 'y4',
+                    line: { color: nextColorIndex(colorIndex++) }
                 },
                 {
                     x: statistics.date,
                     y: statistics.benchmark_consistency,
                     type: 'scatter',
                     name: 'Consistência',
-                    yaxis: 'y5'
+                    yaxis: 'y5',
+                    line: { color: nextColorIndex(colorIndex++) }
                 },
                 {
                     x: statistics.date,
                     y: statistics.networth,
                     type: 'scatter',
                     name: 'Patrimônio',
-                    yaxis: 'y6'
+                    yaxis: 'y6',
+                    line: { color: nextColorIndex(colorIndex++) }
                 },
                 {
                     x: statistics.date,
                     y: statistics.quotaholders,
                     type: 'scatter',
                     name: 'Cotistas',
-                    yaxis: 'y7'
+                    yaxis: 'y7',
+                    line: { color: nextColorIndex(colorIndex++) }
                 }
             ],
             layout: {

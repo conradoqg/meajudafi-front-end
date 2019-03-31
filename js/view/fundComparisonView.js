@@ -22,9 +22,7 @@ import API from '../api';
 import FundSearchComponent from './components/fundSearchComponent';
 import ShowStateComponent from './components/showStateComponent';
 import { sortOptions, benchmarkOptions, rangeOptions } from './options';
-
-const colors = ['#e6194B', '#3cb44b', '#ffe119', '#4363d8', '#f58231', '#911eb4', '#42d4f4', '#f032e6', '#bfef45', '#fabebe', '#469990', '#e6beff', '#9A6324', '#fffac8', '#800000', '#aaffc3', '#808000', '#ffd8b1', '#000075', '#a9a9a9', '#ffffff', '#000000'];
-const nextColorIndex = (i) => (i % colors.length + colors.length) % colors.length;
+import { nextColorIndex } from '../util';
 
 setAutoFreeze(false);
 const Plot = createPlotlyComponent(Plotly);
@@ -262,7 +260,7 @@ class FundComparisonView extends React.Component {
                 type: 'scatter',
                 mode: 'lines',
                 name: benchmark.name,
-                line: { color: colors[nextColorIndex(colorIndex++)] }
+                line: { color: nextColorIndex(colorIndex++) }
             });
         }
 
@@ -274,7 +272,7 @@ class FundComparisonView extends React.Component {
                     type: 'scatter',
                     mode: 'lines',
                     name: fund.detail.name,
-                    line: { color: colors[nextColorIndex(colorIndex++)] }
+                    line: { color: nextColorIndex(colorIndex++) }
                 };
             }));
         }
@@ -453,7 +451,7 @@ class FundComparisonView extends React.Component {
                                         <Grid item xs>
                                             <Grid container spacing={8}>
                                                 <Grid item>
-                                                    <span style={{ backgroundColor: colors[nextColorIndex(0)], minWidth: '10px', height: '100%', display: 'block' }}></span>
+                                                    <span style={{ backgroundColor: nextColorIndex(0), minWidth: '10px', height: '100%', display: 'block' }}></span>
                                                 </Grid>
                                                 <Grid item xs>
                                                     <Typography>
@@ -514,7 +512,7 @@ class FundComparisonView extends React.Component {
                                                             <Grid item xs>
                                                                 <Grid container spacing={8}>
                                                                     <Grid item>
-                                                                        <span style={{ backgroundColor: colors[nextColorIndex(index + 1)], minWidth: '10px', height: '100%', display: 'block' }}></span>
+                                                                        <span style={{ backgroundColor: nextColorIndex(index + 1), minWidth: '10px', height: '100%', display: 'block' }}></span>
                                                                     </Grid>
                                                                     <Grid item xs>
                                                                         <Typography>

@@ -31,6 +31,7 @@ import FundFilterComponent from './components/fundFilterComponent';
 import ShowStateComponent from './components/showStateComponent';
 import API from '../api';
 import { rangeOptions } from './options';
+import { nextColorIndex } from '../util';
 
 const Plot = createPlotlyComponent(Plotly);
 d3Format.formatDefaultLocale(ptBR);
@@ -192,6 +193,7 @@ class IndicatorsView extends React.Component {
     }
 
     async getEconomyIndicators(config) {
+        let colorIndex = 0;
         const from = rangeOptions.find(range => range.name == config.range).toDate();
 
         const economyIndicators = await API.getEconomyIndicators(from);
@@ -202,21 +204,24 @@ class IndicatorsView extends React.Component {
                     x: economyIndicators.date,
                     y: economyIndicators.bovespa,
                     type: 'scatter',
-                    name: 'Bovespa'
+                    name: 'Bovespa',
+                    line: { color: nextColorIndex(colorIndex++) }
                 },
                 {
                     x: economyIndicators.date,
                     y: economyIndicators.dolar,
                     type: 'scatter',
                     name: 'Dólar',
-                    yaxis: 'y2'
+                    yaxis: 'y2',
+                    line: { color: nextColorIndex(colorIndex++) }
                 },
                 {
                     x: economyIndicators.date,
                     y: economyIndicators.euro,
                     type: 'scatter',
                     name: 'Euro',
-                    yaxis: 'y3'
+                    yaxis: 'y3',
+                    line: { color: nextColorIndex(colorIndex++) }
                 }
             ],
             layout: {
