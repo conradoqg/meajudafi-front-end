@@ -127,6 +127,10 @@ class FundComparisonView extends React.Component {
     handleConfigBenchmarkChange = async event => {
         const nextState = produce(this.state, draft => {
             draft.config[event.target.name] = event.target.value;
+            draft.data.fundListCompare = draft.data.fundListCompare.map(fund => {
+                fund.data = null;
+                return fund;
+            });
             draft.data.benchmark = {
                 name: benchmarkNames[event.target.value],
                 data: null
