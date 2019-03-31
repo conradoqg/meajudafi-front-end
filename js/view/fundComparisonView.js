@@ -16,26 +16,18 @@ import { produce, setAutoFreeze } from 'immer';
 import * as d3Format from 'd3-format';
 import createPlotlyComponent from 'react-plotly.js/factory';
 import Plotly from 'plotly';
-import dayjs from 'dayjs';
 import promisesEach from 'promise-results';
 import { withRouter } from 'react-router-dom';
 import API from '../api';
 import FundSearchComponent from './components/fundSearchComponent';
 import ShowStateComponent from './components/showStateComponent';
-import sortOptions from './sortOptions';
+import { sortOptions, benchmarkOptions, rangeOptions } from './options';
 
 const colors = ['#e6194B', '#3cb44b', '#ffe119', '#4363d8', '#f58231', '#911eb4', '#42d4f4', '#f032e6', '#bfef45', '#fabebe', '#469990', '#e6beff', '#9A6324', '#fffac8', '#800000', '#aaffc3', '#808000', '#ffd8b1', '#000075', '#a9a9a9', '#ffffff', '#000000'];
 const nextColorIndex = (i) => (i % colors.length + colors.length) % colors.length;
 
 setAutoFreeze(false);
 const Plot = createPlotlyComponent(Plotly);
-
-const benchmarkNames = {
-    cdi: 'CDI',
-    bovespa: 'BOVESPA',
-    euro: 'EURO',
-    dolar: 'DÓLAR'
-};
 
 const styles = theme => ({
     optionsBar: {
@@ -65,7 +57,7 @@ const emptyState = {
         fundListSearch: [],
         fundListCompare: [],
         benchmark: {
-            name: benchmarkNames['bovespa'],
+            name: benchmarkOptions.find(benchmark => benchmark.name == 'cdi').displayName,
             data: null
         },
         sortOptions: sortOptions,
@@ -89,7 +81,7 @@ class FundComparisonView extends React.Component {
         super(props);
 
         this.state.config.benchmark = (typeof (props.match.params.benchmark) != 'undefined') ? props.match.params.benchmark : this.state.config.benchmark;
-        this.state.data.benchmark.name = benchmarkNames[this.state.config.benchmark];
+        this.state.data.benchmark.name = benchmarkOptions.find(benchmark => benchmark.name == this.state.config.benchmark).displayName;
         this.state.data.fundListCompare = props.match.params.cnpjs ? props.match.params.cnpjs.split('/').map(cnpj => { return { cnpj, detail: null, data: null }; }) : emptyState.data.fundListCompare;
         this.state.config.range = (typeof (props.match.params.range) != 'undefined') ? props.match.params.range : this.state.config.range;
 
@@ -132,7 +124,7 @@ class FundComparisonView extends React.Component {
                 return fund;
             });
             draft.data.benchmark = {
-                name: benchmarkNames[event.target.value],
+                name: benchmarkOptions.find(benchmark => benchmark.name == event.target.value).displayName,
                 data: null
             };
             draft.data.chart = null;
@@ -309,33 +301,8 @@ class FundComparisonView extends React.Component {
     }
 
     async getBenchmarkStatistic(config) {
-        let from = null;
-        switch (config.range) {
-            case 'mtd':
-                from = new Date((new Date()).getFullYear(), (new Date()).getMonth(), 1);
-                break;
-            case 'ytd':
-                from = new Date((new Date()).getFullYear(), 0, 1);
-                break;
-            case '1m':
-                from = dayjs().subtract(1, 'month').toDate();
-                break;
-            case '3m':
-                from = dayjs().subtract(3, 'month').toDate();
-                break;
-            case '6m':
-                from = dayjs().subtract(6, 'month').toDate();
-                break;
-            case '1y':
-                from = dayjs().subtract(1, 'year').toDate();
-                break;
-            case '2y':
-                from = dayjs().subtract(2, 'year').toDate();
-                break;
-            case '3y':
-                from = dayjs().subtract(3, 'year').toDate();
-                break;
-        }
+        const from = rangeOptions.find(range => range.name == config.range).toDate();
+
         return API.getBenchmarkStatistic(config.benchmark, from);
     }
 
@@ -348,33 +315,7 @@ class FundComparisonView extends React.Component {
     }
 
     async getFundStatistic(cnpj, config) {
-        let from = null;
-        switch (config.range) {
-            case 'mtd':
-                from = new Date((new Date()).getFullYear(), (new Date()).getMonth(), 1);
-                break;
-            case 'ytd':
-                from = new Date((new Date()).getFullYear(), 0, 1);
-                break;
-            case '1m':
-                from = dayjs().subtract(1, 'month').toDate();
-                break;
-            case '3m':
-                from = dayjs().subtract(3, 'month').toDate();
-                break;
-            case '6m':
-                from = dayjs().subtract(6, 'month').toDate();
-                break;
-            case '1y':
-                from = dayjs().subtract(1, 'year').toDate();
-                break;
-            case '2y':
-                from = dayjs().subtract(2, 'year').toDate();
-                break;
-            case '3y':
-                from = dayjs().subtract(3, 'year').toDate();
-                break;
-        }
+        const from = rangeOptions.find(range => range.name == config.range).toDate();
 
         return API.getFundStatistic(cnpj, config.benchmark, from);
     }
@@ -406,10 +347,7 @@ class FundComparisonView extends React.Component {
                                     name: 'benchmark',
                                     id: 'benchmark',
                                 }}>
-                                <MenuItem value={'cdi'}>CDI</MenuItem>
-                                <MenuItem value={'bovespa'}>Bovespa</MenuItem>
-                                <MenuItem value={'euro'}>Euro</MenuItem>
-                                <MenuItem value={'dolar'}>Dólar</MenuItem>
+                                {benchmarkOptions.map(benchmark => (<MenuItem key={benchmark.name} value={benchmark.name}>{benchmark.displayName}</MenuItem>))}
                             </Select>
                             <Select
                                 value={this.state.config.range}
@@ -419,14 +357,7 @@ class FundComparisonView extends React.Component {
                                     name: 'range',
                                     id: 'range',
                                 }}>
-                                <MenuItem value={'mtd'}>Nesse mês</MenuItem>
-                                <MenuItem value={'ytd'}>Nesse ano</MenuItem>
-                                <MenuItem value={'1m'}>1 mês</MenuItem>
-                                <MenuItem value={'3m'}>3 meses</MenuItem>
-                                <MenuItem value={'6m'}>6 meses</MenuItem>
-                                <MenuItem value={'1y'}>1 ano</MenuItem>
-                                <MenuItem value={'2y'}>2 anos</MenuItem>
-                                <MenuItem value={'3y'}>3 anos</MenuItem>
+                                {rangeOptions.filter(range => range.name != 'all').map(range => (<MenuItem key={range.name} value={range.name}>{range.displayName}</MenuItem>))}
                             </Select>
                         </Grid>
                     </Grid>

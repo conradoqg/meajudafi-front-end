@@ -24,7 +24,6 @@ import Avatar from '@material-ui/core/Avatar';
 import Tooltip from '@material-ui/core/Tooltip';
 import Grey from '@material-ui/core/colors/grey';
 import API from '../api';
-import sortOptions from './sortOptions';
 import FundFilterComponent from './components/fundFilterComponent';
 import FundSearchComponent from './components/fundSearchComponent';
 import ShowStateComponent from './components/showStateComponent';
@@ -33,6 +32,7 @@ import createPlotlyComponent from 'react-plotly.js/factory';
 import Plotly from 'plotly';
 import allKeys from 'promise-results/allKeys';
 import ptBR from 'd3-format/locale/pt-BR.json';
+import { sortOptions, benchmarkOptions, rangeOptions } from './options';
 
 const Plot = createPlotlyComponent(Plotly);
 d3Format.formatDefaultLocale(ptBR);
@@ -300,62 +300,12 @@ class FundListView extends React.Component {
     }
 
     async getFundDetail(cnpj, chartConfig) {
-        let range = null;
-        let from = null;
-        switch (chartConfig.range) {
-            case 'mtd':
-                from = new Date((new Date()).getFullYear(), (new Date()).getMonth(), 1);
-                break;
-            case 'ytd':
-                from = new Date((new Date()).getFullYear(), 0, 1);
-                break;
-            case '1m':
-                range = 21;
-                break;
-            case '3m':
-                range = 63;
-                break;
-            case '6m':
-                range = 126;
-                break;
-            case '1y':
-                range = 252;
-                break;
-            case '2y':
-                range = 504;
-                break;
-            case '3y':
-                range = 756;
-                break;
-        }
+        const from = rangeOptions.find(range => range.name == chartConfig.range).toDate();
 
-        let benchmarkText = null;
-        switch (chartConfig.benchmark) {
-            case 'cdi':
-                benchmarkText = 'CDI';
-                break;
-            case 'bovespa':
-                benchmarkText = 'Bovespa';
-                break;
-            case 'ipca':
-                benchmarkText = 'IPCA';
-                break;
-            case 'igpm':
-                benchmarkText = 'IGPM';
-                break;
-            case 'igpdi':
-                benchmarkText = 'IGPDI';
-                break;
-            case 'euro':
-                benchmarkText = 'Euro';
-                break;
-            case 'dolar':
-                benchmarkText = 'Dólar';
-                break;
-        }
+        const benchmarkText = benchmarkOptions.find(benchmark => benchmark.name == chartConfig.benchmark).displayName;
 
         const { statistics, infCadastral } = await allKeys({
-            statistics: API.getFundStatistic(cnpj, chartConfig.benchmark, range == null ? from : range),
+            statistics: API.getFundStatistic(cnpj, chartConfig.benchmark, from),
             infCadastral: API.getFundData(cnpj)
         });
 
@@ -547,17 +497,8 @@ class FundListView extends React.Component {
                                             inputProps={{
                                                 name: 'range',
                                                 id: 'range',
-                                            }}
-                                        >
-                                            <MenuItem value={'mtd'}>Nesse mês</MenuItem>
-                                            <MenuItem value={'ytd'}>Nesse ano</MenuItem>
-                                            <MenuItem value={'1m'}>1 mês</MenuItem>
-                                            <MenuItem value={'3m'}>3 meses</MenuItem>
-                                            <MenuItem value={'6m'}>6 meses</MenuItem>
-                                            <MenuItem value={'1y'}>1 ano</MenuItem>
-                                            <MenuItem value={'2y'}>2 anos</MenuItem>
-                                            <MenuItem value={'3y'}>3 anos</MenuItem>
-                                            <MenuItem value={'all'}>Desde o início</MenuItem>
+                                            }}>
+                                            {rangeOptions.map(range => (<MenuItem key={range.name} value={range.name}>{range.displayName}</MenuItem>))}
                                         </Select>
                                         <Select
                                             value={this.state.config.chart.benchmark}
@@ -566,12 +507,8 @@ class FundListView extends React.Component {
                                             inputProps={{
                                                 name: 'benchmark',
                                                 id: 'benchmark',
-                                            }}
-                                        >
-                                            <MenuItem value={'cdi'}>CDI</MenuItem>
-                                            <MenuItem value={'bovespa'}>Bovespa</MenuItem>
-                                            <MenuItem value={'euro'}>Euro</MenuItem>
-                                            <MenuItem value={'dolar'}>Dólar</MenuItem>
+                                            }}>
+                                            {benchmarkOptions.map(benchmark => (<MenuItem key={benchmark.name} value={benchmark.name}>{benchmark.displayName}</MenuItem>))}
                                         </Select>
                                         <IconButton
                                             aria-label="Ordem"

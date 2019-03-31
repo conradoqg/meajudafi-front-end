@@ -9,10 +9,10 @@ import MenuItem from '@material-ui/core/MenuItem';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
-import lightGreen from '@material-ui/core/colors/lightGreen';
-import blue from '@material-ui/core/colors/blue';
-import red from '@material-ui/core/colors/red';
-import grey from '@material-ui/core/colors/grey';
+import LightGreen from '@material-ui/core/colors/lightGreen';
+import Blue from '@material-ui/core/colors/blue';
+import Red from '@material-ui/core/colors/red';
+import Grey from '@material-ui/core/colors/grey';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import IconButton from '@material-ui/core/IconButton';
@@ -30,6 +30,7 @@ import ptBR from 'd3-format/locale/pt-BR.json';
 import FundFilterComponent from './components/fundFilterComponent';
 import ShowStateComponent from './components/showStateComponent';
 import API from '../api';
+import { rangeOptions } from './options';
 
 const Plot = createPlotlyComponent(Plotly);
 d3Format.formatDefaultLocale(ptBR);
@@ -49,13 +50,13 @@ const styles = theme => ({
         padding: theme.spacing.unit * 2
     },
     indicatorValuePositive: {
-        color: lightGreen[500]
+        color: LightGreen[500]
     },
     indicatorValueBlue: {
-        color: blue[500]
+        color: Blue[500]
     },
     indicatorValueNegative: {
-        color: red[500]
+        color: Red[500]
     },
     select: {
         margin: theme.spacing.unit
@@ -81,7 +82,7 @@ const styles = theme => ({
     },
     help: {
         margin: 10,
-        backgroundColor: grey[600],
+        backgroundColor: Grey[600],
         width: 17,
         height: 17,
         fontSize: 10,
@@ -191,38 +192,9 @@ class IndicatorsView extends React.Component {
     }
 
     async getEconomyIndicators(config) {
+        const from = rangeOptions.find(range => range.name == config.range).toDate();
 
-        let from = null;
-        let range = null;
-
-        switch (config.range) {
-            case 'mtd':
-                from = new Date((new Date()).getFullYear(), (new Date()).getMonth(), 1);
-                break;
-            case 'ytd':
-                from = new Date((new Date()).getFullYear(), 0, 1);
-                break;
-            case '1m':
-                range = 21;
-                break;
-            case '3m':
-                range = 63;
-                break;
-            case '6m':
-                range = 126;
-                break;
-            case '1y':
-                range = 252;
-                break;
-            case '2y':
-                range = 504;
-                break;
-            case '3y':
-                range = 756;
-                break;
-        }
-
-        const economyIndicators = await API.getEconomyIndicators(range == null ? from : range);
+        const economyIndicators = await API.getEconomyIndicators(from);
 
         return {
             data: [
@@ -295,30 +267,7 @@ class IndicatorsView extends React.Component {
     }
 
     async getFundsChanged(config) {
-        let from = null;
-        switch (config.changesRange) {
-            case '1w':
-                from = dayjs().subtract(1, 'week').toDate();
-                break;
-            case '1m':
-                from = dayjs().subtract(1, 'month').toDate();
-                break;
-            case '3m':
-                from = dayjs().subtract(3, 'month').toDate();
-                break;
-            case '6m':
-                from = dayjs().subtract(6, 'month').toDate();
-                break;
-            case '1y':
-                from = dayjs().subtract(1, 'year').toDate();
-                break;
-            case '2y':
-                from = dayjs().subtract(2, 'year').toDate();
-                break;
-            case '3y':
-                from = dayjs().subtract(3, 'year').toDate();
-                break;
-        }
+        const from = rangeOptions.find(range => range.name == config.changesRange).toDate();
 
         const fundsChanged = await API.getFundsChanged(from);
 
@@ -423,16 +372,8 @@ class IndicatorsView extends React.Component {
                                 inputProps={{
                                     name: 'range',
                                     id: 'range',
-                                }}
-                            >
-                                <MenuItem value={'mtd'}>Nesse mês</MenuItem>
-                                <MenuItem value={'ytd'}>Nesse ano</MenuItem>
-                                <MenuItem value={'1m'}>1 mês</MenuItem>
-                                <MenuItem value={'3m'}>3 meses</MenuItem>
-                                <MenuItem value={'6m'}>6 meses</MenuItem>
-                                <MenuItem value={'1y'}>1 ano</MenuItem>
-                                <MenuItem value={'2y'}>2 anos</MenuItem>
-                                <MenuItem value={'3y'}>3 anos</MenuItem>
+                                }}>
+                                {rangeOptions.filter(range => range.name != 'all').map(range => (<MenuItem key={range.name} value={range.name}>{range.displayName}</MenuItem>))}
                             </Select>
                         </Grid>
                     </Grid>
@@ -518,15 +459,8 @@ class IndicatorsView extends React.Component {
                                 inputProps={{
                                     name: 'changesRange',
                                     id: 'changesRange',
-                                }}
-                            >
-                                <MenuItem value={'1w'}>1 semana</MenuItem>
-                                <MenuItem value={'1m'}>1 mês</MenuItem>
-                                <MenuItem value={'3m'}>3 mês</MenuItem>
-                                <MenuItem value={'6m'}>6 meses</MenuItem>
-                                <MenuItem value={'1y'}>1 ano</MenuItem>
-                                <MenuItem value={'2y'}>2 anos</MenuItem>
-                                <MenuItem value={'3y'}>3 anos</MenuItem>
+                                }}>
+                                {rangeOptions.filter(range => range.name != 'all').map(range => (<MenuItem key={range.name} value={range.name}>{range.displayName}</MenuItem>))}
                             </Select>
                         </Grid>
                     </Grid>
@@ -567,11 +501,7 @@ const FundsChangedPaper = (props) => {
                                                 <Typography component="span" variant="body1" align="left" className={classes.cropTextNormal}>{dayjs(change.date).format('DD/MM/YYYY')} - {change.name}</Typography>
                                             </Grid>
                                             <Grid item xs>
-                                                {
-                                                    change.changes.map((fieldChange, index) => (
-                                                        <Typography key={index} component="span" variant="body1" align="right">{fieldChange}</Typography>
-                                                    ))
-                                                }
+                                                {change.changes.map((fieldChange, index) => (<Typography key={index} component="span" variant="body1" align="right">{fieldChange}</Typography>))}
                                             </Grid>
                                         </Grid>
                                     </Grid>
