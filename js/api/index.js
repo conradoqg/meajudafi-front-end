@@ -203,11 +203,11 @@ module.exports = {
             quotaholders = item.ird_accumulated_quotaholders;
 
             // Correlation
-            sum1 += investment_return;
-            sum2 += benchmark_investment_return;
-            sum1Sq += Math.pow(investment_return, 2);
-            sum2Sq += Math.pow(benchmark_investment_return, 2);
-            pSum += investment_return * benchmark_investment_return;
+            sum1 += item.ird_investment_return;
+            sum2 += item[`ird_${benchmark}_investment_return`];
+            sum1Sq += Math.pow(item.ird_investment_return, 2);
+            sum2Sq += Math.pow(item[`ird_${benchmark}_investment_return`], 2);
+            pSum += item.ird_investment_return * item[`ird_${benchmark}_investment_return`];
             let n = data.length - index - 1;
             let num = pSum - (sum1 * sum2 / n);
             let den = Math.sqrt((sum1Sq - Math.pow(sum1, 2) / n) *
@@ -215,7 +215,6 @@ module.exports = {
 
             if (den == 0) correlation = 0;
             else correlation = num / den;
-
 
             statistics.date.push(date);
             statistics.investment_return.push(investment_return);
