@@ -378,7 +378,7 @@ class IndicatorsView extends React.Component {
                                     name: 'range',
                                     id: 'range',
                                 }}>
-                                {rangeOptions.filter(range => range.name != 'all').map(range => (<MenuItem key={range.name} value={range.name}>{range.displayName}</MenuItem>))}
+                                {rangeOptions.filter(range => range.name != 'all' && range.name != '1w').map(range => (<MenuItem key={range.name} value={range.name}>{range.displayName}</MenuItem>))}
                             </Select>
                         </Grid>
                     </Grid>
