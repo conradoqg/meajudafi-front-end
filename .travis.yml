@@ -4,7 +4,7 @@ node_js:
   - "node"
 
 env:
-  - API_URL=api.cvmfundexplorer.conradoqg.eti.br
+  - API_URL=api.meajudafi.com.br
 
 script:  
   - npm install
