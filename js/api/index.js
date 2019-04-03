@@ -213,7 +213,7 @@ module.exports = {
             let den = Math.sqrt((sum1Sq - Math.pow(sum1, 2) / n) *
                 (sum2Sq - Math.pow(sum2, 2) / n));
 
-            if (den == 0) correlation = 0;
+            if (den == 0 || Number.isNaN(den)) correlation = 0;
             else correlation = num / den;
 
             statistics.date.push(date);
