@@ -68,7 +68,8 @@ const emptyState = {
         search: FundSearchComponent.emptyState.config.search,
         searchRevision: 0,
         benchmark: 'bovespa',
-        range: '1y'
+        range: '1y',
+        field: 'investment_return'
     }
 };
 
@@ -77,11 +78,12 @@ class FundComparisonView extends React.Component {
 
     constructor(props) {
         super(props);
-
-        this.state.config.benchmark = (typeof (props.match.params.benchmark) != 'undefined') ? props.match.params.benchmark : this.state.config.benchmark;
+        
         this.state.data.benchmark.name = benchmarkOptions.find(benchmark => benchmark.name == this.state.config.benchmark).displayName;
         this.state.data.fundListCompare = props.match.params.cnpjs ? props.match.params.cnpjs.split('/').map(cnpj => { return { cnpj, detail: null, data: null }; }) : emptyState.data.fundListCompare;
         this.state.config.range = (typeof (props.match.params.range) != 'undefined') ? props.match.params.range : this.state.config.range;
+        this.state.config.benchmark = (typeof (props.match.params.benchmark) != 'undefined') ? props.match.params.benchmark : this.state.config.benchmark;
+        this.state.config.field = (typeof (props.match.params.field) != 'undefined') ? props.match.params.field : this.state.config.field;
 
         this.replaceHistory(this.state);
     }
@@ -98,6 +100,15 @@ class FundComparisonView extends React.Component {
                 this.updateData(nextProps.history.location.state);
             }
         }
+    }
+
+    handleConfigFieldChange = async event => {
+        const nextState = produce(this.state, draft => {
+            draft.config[event.target.name] = event.target.value;
+            draft.data.chart = null;
+        });
+        this.pushHistory(nextState);
+        return this.updateData(nextState);
     }
 
     handleConfigRangeChange = async event => {
@@ -192,15 +203,17 @@ class FundComparisonView extends React.Component {
         return this.updateData(nextState);
     }
 
-
-    replaceHistory(nextState) {
-        const desiredPath = this.props.basePath + '/' + nextState.config.benchmark + '/' + nextState.config.range + (nextState.data.fundListCompare ? '/' + nextState.data.fundListCompare.map(fund => fund.cnpj).join('/') : '');
-        this.props.history.replace(desiredPath, nextState);
+    buildHistoryPath(nextState) {
+        return this.props.basePath + '/' + nextState.config.benchmark + '/' + nextState.config.range + '/' + nextState.config.field + (nextState.data.fundListCompare ? '/' + nextState.data.fundListCompare.map(fund => fund.cnpj).join('/') : '');
     }
 
-    pushHistory(nextState) {
-        const desiredPath = this.props.basePath + '/' + nextState.config.benchmark + '/' + nextState.config.range + (nextState.data.fundListCompare ? '/' + nextState.data.fundListCompare.map(fund => fund.cnpj).join('/') : '');
-        this.props.history.push(desiredPath, nextState);
+
+    replaceHistory(nextState) {        
+        this.props.history.replace(this.buildHistoryPath(nextState), nextState);
+    }
+
+    pushHistory(nextState) {        
+        this.props.history.push(this.buildHistoryPath(nextState), nextState);
     }
 
     async updateData(nextState) {
@@ -244,19 +257,19 @@ class FundComparisonView extends React.Component {
                 return fund;
             });
 
-            draft.data.chart = this.buildChart(draft.data.benchmark, draft.data.fundListCompare);
+            draft.data.chart = this.buildChart(draft.config.field, draft.data.benchmark, draft.data.fundListCompare);
         });
         this.setState(nextState);
     }
 
-    buildChart = (benchmark, fundList) => {
+    buildChart = (field, benchmark, fundList) => {
         let chartData = [];
         let colorIndex = 0;
 
         if (benchmark) {
             chartData.push({
                 x: benchmark.data.date,
-                y: benchmark.data.investment_return,
+                y: (field == 'relative_investment_return' || field == 'correlation' || field == 'sharpe' ? (new Array(benchmark.data.date.length)).fill(field == 'sharpe' ? 0 : 1) : benchmark.data[field]),
                 type: 'scatter',
                 mode: 'lines',
                 name: benchmark.name,
@@ -268,7 +281,7 @@ class FundComparisonView extends React.Component {
             chartData = chartData.concat(fundList.map(fund => {
                 return {
                     x: fund.data.date,
-                    y: fund.data.investment_return,
+                    y: fund.data[field],
                     type: 'scatter',
                     mode: 'lines',
                     name: fund.detail.name,
@@ -337,6 +350,20 @@ class FundComparisonView extends React.Component {
                     </Grid>
                     <Grid container justify="flex-end">
                         <Grid item>
+                            <Select
+                                value={this.state.config.field}
+                                onChange={this.handleConfigFieldChange}
+                                className={classes.select}
+                                inputProps={{
+                                    name: 'field',
+                                    id: 'field',
+                                }}>
+                                <MenuItem value="investment_return">Desempenho</MenuItem>
+                                <MenuItem value="relative_investment_return">Desempenho Relativo</MenuItem>
+                                <MenuItem value="correlation">Correlação</MenuItem>
+                                <MenuItem value="risk">Risco</MenuItem>
+                                <MenuItem value="sharpe">Sharpe</MenuItem>
+                            </Select>
                             <Select
                                 value={this.state.config.benchmark}
                                 onChange={this.handleConfigBenchmarkChange}

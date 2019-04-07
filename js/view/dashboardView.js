@@ -124,8 +124,8 @@ const routes = [
         main: (props, classes) => <FundListView {...props} globalClasses={classes} />
     },
     {
-        path: ['/fundComparison/:benchmark/:range/:cnpjs*', '/fundComparison'],
-        linkTo: '/fundComparison/cdi/1y',
+        path: ['/fundComparison/:benchmark/:range/:field/:cnpjs*', '/fundComparison'],
+        linkTo: '/fundComparison/cdi/1y/investment_return',
         name: 'Comparação de Fundos',
         icon: () => (<ScatterPlotIcon />),
         main: (props, classes) => <FundComparisonView basePath={'/fundComparison'} globalClasses={classes} />
