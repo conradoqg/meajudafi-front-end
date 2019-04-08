@@ -23,6 +23,7 @@ import GithubCircleIcon from 'mdi-material-ui/GithubCircle';
 import Grid from '@material-ui/core/Grid';
 import IndicatorsView from './indicatorsView';
 import FundListView from './fundListView';
+import FundListItemView from './fundListItemView';
 import FundComparisonView from './fundComparisonView';
 import API from '../api';
 
@@ -113,13 +114,22 @@ const routes = [
     {
         path: '/',
         name: 'Indicadores',
+        showInMenu: true,
         exact: true,
         icon: () => (<ShowChartIcon />),
         main: (props, classes) => <IndicatorsView {...props} globalClasses={classes} />
     },
     {
+        path: '/fundList/:cnpj',        
+        name: 'Informações sobre o fundo',
+        showInMenu: false,
+        icon: () => (<TableChartIcon />),
+        main: (props, classes) => <FundListItemView {...props} globalClasses={classes} />
+    },
+    {
         path: '/fundList',
         name: 'Lista de Fundos',
+        showInMenu: true,
         icon: () => (<TableChartIcon />),
         main: (props, classes) => <FundListView {...props} globalClasses={classes} />
     },
@@ -127,6 +137,7 @@ const routes = [
         path: ['/fundComparison/:benchmark/:range/:field/:cnpjs*', '/fundComparison'],
         linkTo: '/fundComparison/cdi/1y/investment_return',
         name: 'Comparação de Fundos',
+        showInMenu: true,
         icon: () => (<ScatterPlotIcon />),
         main: (props, classes) => <FundComparisonView basePath={'/fundComparison'} globalClasses={classes} />
     }
@@ -212,7 +223,7 @@ class Dashboard extends React.Component {
                             </div>
                             <Divider />
                             <List>
-                                {routes.map((route, index) => (
+                                {routes.filter(route => route.showInMenu).map((route, index) => (
                                     <MenuLink activeOnlyWhenExact={route.exact} to={route.linkTo ? route.linkTo : route.path} label={route.name} icon={route.icon} key={index} />
                                 ))}
                             </List>
