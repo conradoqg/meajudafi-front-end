@@ -283,20 +283,26 @@ class IndicatorsView extends React.Component {
 
         fundsChanged.map(change => {
             const key = change.table_name == 'btgpactual_funds' ? 'btgpactual' : 'xpi';
-            const date_field = change.table_name == 'btgpactual_funds' ? 'bf_date' : 'xpi_date';
+            const date_field = change.table_name == 'btgpactual_funds' ? 'bf_date' : 'xf_date';
 
             const relevantChanges = [];
+            let date = null;
 
-            if (change.action == 'I') relevantChanges.push('Adicionado a lista de fundos');
-            else if (change.action == 'D') relevantChanges.push('Removido da lista de fundos');
-            else {
+            if (change.action == 'I') {
+                date = change.row_data[date_field]
+                relevantChanges.push('Adicionado a lista de fundos');
+            } else if (change.action == 'D') {
+                date = change.changed_fields[date_field]
+                relevantChanges.push('Removido da lista de fundos');
+            } else {
+                date = change.changed_fields[date_field]
                 Object.keys(change.changed_fields).map(changedField => {
                     const capitalized = value => value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
 
                     const relevantFields = {
                         xf_state: {
                             title: 'Captação',
-                            text: value => value == '1' ? 'Fechada' : 'Aberta'
+                            text: value => value == '0' ? 'Fechada' : 'Aberta'
                         },
                         xf_formal_risk: {
                             title: 'Risco formal',
@@ -343,7 +349,7 @@ class IndicatorsView extends React.Component {
 
             if (relevantChanges.length > 0)
                 fundsChanges[key].push({
-                    date: change.row_data[date_field],
+                    date: date,
                     name: change.f_short_name,
                     changes: relevantChanges
                 });
