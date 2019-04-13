@@ -347,15 +347,17 @@ class FundListItemView extends React.Component {
                                 </Grid>
                             </Grid>
                             <Grid container spacing={16}>
-                                <Grid item xs={3}><b>CNPJ:</b> adasdadas</Grid>
-                                <Grid item xs={3}><b>CNPJ:</b> adasdadas</Grid>
-                                <Grid item xs={3}><b>CNPJ:</b> adasdadas</Grid>
-                                <Grid item xs={3}><b>CNPJ:</b> adasdadas</Grid>
+                                <Grid item xs={3}><b>CNPJ:</b> 12345678901</Grid>
+                                <Grid item xs={3}><b>Existência:</b> 01/01/2001 até 01/01/2001</Grid>
+                                <Grid item xs={3}><b>Classe:</b> icf_classe</Grid>
+                                <Grid item xs={3}><b>Situação:</b> icf_sit</Grid>
 
-                                <Grid item xs={3}><b>CNPJ:</b> adasdadas</Grid>
-                                <Grid item xs={3}><b>CNPJ:</b> adasdadas</Grid>
-                                <Grid item xs={3}><b>CNPJ:</b> adasdadas</Grid>
-                                <Grid item xs={3}><b>CNPJ:</b> adasdadas</Grid>
+                                <Grid item xs={3}><b>Fundo de condomínio:</b> icf_condom</Grid>
+                                <Grid item xs={3}><b>Fundo de cotas:</b> icf_fundo_cotas</Grid>
+                                <Grid item xs={3}><b>Fundo exclusivo:</b> icf_fundo_exclusivo</Grid>
+                                <Grid item xs={3}><b>Benchmark:</b> icf_rentab_fundo</Grid>
+                                <Grid item xs={3}><b>Patrimônio:</b> iry_accumulated_networth</Grid>
+                                <Grid item xs={3}><b>Cotistas:</b> iry_accumulated_quotaholders</Grid>
                             </Grid>
                             <Grid container spacing={16}>
                                 <Grid item xs={12}>
@@ -366,15 +368,12 @@ class FundListItemView extends React.Component {
                                 </Grid>
                             </Grid>
                             <Grid container spacing={16}>
-                                <Grid item xs={3}><b>CNPJ:</b> adasdadas</Grid>
-                                <Grid item xs={3}><b>CNPJ:</b> adasdadas</Grid>
-                                <Grid item xs={3}><b>CNPJ:</b> adasdadas</Grid>
-                                <Grid item xs={3}><b>CNPJ:</b> adasdadas</Grid>
-
-                                <Grid item xs={3}><b>CNPJ:</b> adasdadas</Grid>
-                                <Grid item xs={3}><b>CNPJ:</b> adasdadas</Grid>
-                                <Grid item xs={3}><b>CNPJ:</b> adasdadas</Grid>
-                                <Grid item xs={3}><b>CNPJ:</b> adasdadas</Grid>
+                                <Grid item xs={3}><b>Nome:</b> xf_name</Grid>
+                                <Grid item xs={3}><b>Risco Formal:</b> xf_formal_risk</Grid>
+                                <Grid item xs={3}><b>Investimento Inicial:</b> xf_initial_investment</Grid>
+                                <Grid item xs={3}><b>Dias para Resgate:</b> xf_rescue_financial_settlement</Grid>
+                                <Grid item xs={3}><b>Benchmark:</b> xf_benchmark</Grid>                                
+                                <Grid item xs={3}><b>Categoria:</b> xf_type</Grid>
                             </Grid>
                             <Grid container spacing={16}>
                                 <Grid item xs={12}>
@@ -385,15 +384,13 @@ class FundListItemView extends React.Component {
                                 </Grid>
                             </Grid>
                             <Grid container spacing={16}>
-                                <Grid item xs={3}><b>CNPJ:</b> adasdadas</Grid>
-                                <Grid item xs={3}><b>CNPJ:</b> adasdadas</Grid>
-                                <Grid item xs={3}><b>CNPJ:</b> adasdadas</Grid>
-                                <Grid item xs={3}><b>CNPJ:</b> adasdadas</Grid>
+                                <Grid item xs={3}><b>Nome:</b> bf_product</Grid>
+                                <Grid item xs={3}><b>Risco Formal:</b> bf_risk_level</Grid>
+                                <Grid item xs={3}><b>Investimento Inicial:</b> bf_minimum_initial_investment</Grid>
+                                <Grid item xs={3}><b>Dias para Resgate:</b> bf_rescue_financial_settlement</Grid>
 
-                                <Grid item xs={3}><b>CNPJ:</b> adasdadas</Grid>
-                                <Grid item xs={3}><b>CNPJ:</b> adasdadas</Grid>
-                                <Grid item xs={3}><b>CNPJ:</b> adasdadas</Grid>
-                                <Grid item xs={3}><b>CNPJ:</b> adasdadas</Grid>
+                                <Grid item xs={3}><b>Categoria:</b> bf_category_description</Grid>
+                                <Grid item xs={3}><b>Classe Anbima:</b> bf_anbima_rating</Grid>                                
                             </Grid>
                         </Paper>
                     </Grid>
