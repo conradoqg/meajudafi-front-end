@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
@@ -403,7 +404,7 @@ class FundComparisonView extends React.Component {
                                             <Grid container spacing={8} key={index} alignItems="center" justify="center">
                                                 <Grid item xs={7}>
                                                     <Typography>
-                                                        <b>{fund.f_short_name}</b><br />
+                                                        <b><Link to={'/fundList/' + fund.f_cnpj} className={globalClasses.link}>{fund.f_short_name}</Link></b><br />
                                                         <small>
                                                             <b>Patrimônio:</b> R$ {d3Format.format(',.2f')(fund.iry_accumulated_networth)}<br />
                                                             <b>Quotistas:</b> {fund.iry_accumulated_quotaholders} <br />
@@ -543,7 +544,7 @@ class FundComparisonView extends React.Component {
                                                                     </Grid>
                                                                     <Grid item xs>
                                                                         <Typography>
-                                                                            <b>{fundObject.detail.name}</b><br />
+                                                                            <b><Link to={'/fundList/' + fundObject.cnpj} className={globalClasses.link}>{fundObject.detail.name}</Link></b><br />
                                                                             <small>
                                                                                 <b>Benchmark:</b> {fundObject.detail.benchmark ? fundObject.detail.benchmark : 'Não informado'}
                                                                             </small>

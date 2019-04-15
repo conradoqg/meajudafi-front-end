@@ -107,6 +107,14 @@ const styles = theme => ({
         top: '50%',
         left: '50%',
         transform: 'translate(-50%, -50%)'
+    },
+    link: {
+        textDecoration: 'none',
+        color: 'black',
+        cursor: 'pointer',
+        '&:hover': {
+            textDecoration: 'underline'
+        }
     }
 });
 
@@ -143,12 +151,12 @@ const routes = [
     }
 ];
 
-const MenuLink = ({ label, to, activeOnlyWhenExact, icon }) => (
+const MenuLink = ({ label, to, activeOnlyWhenExact, icon, classes }) => (
     <Route
         path={to}
         exact={activeOnlyWhenExact}
         children={({ match }) => (
-            <Link to={to} style={{ textDecoration: 'none' }}>
+            <Link to={to} className={classes.link}>
                 <ListItem button selected={match ? true : false}>
                     <ListItemIcon>
                         {icon()}
@@ -224,7 +232,7 @@ class Dashboard extends React.Component {
                             <Divider />
                             <List>
                                 {routes.filter(route => route.showInMenu).map((route, index) => (
-                                    <MenuLink activeOnlyWhenExact={route.exact} to={route.linkTo ? route.linkTo : route.path} label={route.name} icon={route.icon} key={index} />
+                                    <MenuLink activeOnlyWhenExact={route.exact} to={route.linkTo ? route.linkTo : route.path} classes={classes} label={route.name} icon={route.icon} key={index} />
                                 ))}
                             </List>
                             <Divider />

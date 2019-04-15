@@ -50,7 +50,7 @@ module.exports = {
             }
         }
 
-        const fundListObject = await fetch(`//${API_URL}/icf_with_xf_and_bf_and_iry_and_f_of_last_year?select=icf_cnpj_fundo,f_short_name,iry_accumulated_networth,iry_accumulated_quotaholders,icf_rentab_fundo,iry_investment_return_1y,iry_investment_return_2y,iry_investment_return_3y,iry_risk_1y,iry_risk_2y,iry_risk_3y&${filterPart}${searchPart}iry_dt_comptc=gte.${fromDate.toJSON().slice(0, 10)}&order=${sort}`, {
+        const fundListObject = await fetch(`//${API_URL}/icf_with_xf_and_bf_and_iry_and_f_of_last_year?select=icf_cnpj_fundo,f_cnpj,f_short_name,iry_accumulated_networth,iry_accumulated_quotaholders,icf_rentab_fundo,iry_investment_return_1y,iry_investment_return_2y,iry_investment_return_3y,iry_risk_1y,iry_risk_2y,iry_risk_3y&${filterPart}${searchPart}iry_dt_comptc=gte.${fromDate.toJSON().slice(0, 10)}&order=${sort}`, {
             method: 'GET',
             headers: {
                 'Range-Unit': 'items',
@@ -77,7 +77,7 @@ module.exports = {
 
         if (Array.isArray(additionalFields) && additionalFields.length > 0) additionalFieldsPart = ',' + additionalFields.join(',');
 
-        const funds = await fetch(`//${API_URL}/funds_enhanced?select=f_name,f_short_name,rentab_fundo${additionalFieldsPart}&f_cnpj=eq.${cnpj}`);
+        const funds = await fetch(`//${API_URL}/funds_enhanced?select=f_name,f_short_name,f_cnpj,rentab_fundo${additionalFieldsPart}&f_cnpj=eq.${cnpj}`);
 
         if (funds.status < 200 || funds.status > 299) throw new Error('Unable to retrieve fund data');
 
@@ -171,7 +171,7 @@ module.exports = {
             });
         }
 
-        const makeURL = (field, side) => `//${API_URL}/icf_with_xf_and_bf_and_iry_and_f_of_last_year?select=${field},f_short_name&${filterPart}&iry_dt_comptc=gte.${fromDate.toJSON().slice(0, 10)}&order=${field}.${side}&limit=5`;
+        const makeURL = (field, side) => `//${API_URL}/icf_with_xf_and_bf_and_iry_and_f_of_last_year?select=${field},f_short_name,f_cnpj&${filterPart}&iry_dt_comptc=gte.${fromDate.toJSON().slice(0, 10)}&order=${field}.${side}&limit=5`;
 
         const indicatorsObject = await allKeys({
             investment_return_top: fetch(makeURL(`iry_investment_return_${range}`, 'desc')),
@@ -200,6 +200,7 @@ module.exports = {
         const toIndicatorObject = (array, field) => array.map(item => {
             return {
                 name: item.f_short_name,
+                cnpj: item.f_cnpj,
                 value: item[field]
             };
         });

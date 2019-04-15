@@ -1,6 +1,7 @@
 
 import Typography from '@material-ui/core/Typography';
 import React from 'react';
+import { Link } from 'react-router-dom';
 import dayjs from 'dayjs';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
@@ -351,6 +352,7 @@ class IndicatorsView extends React.Component {
                 fundsChanges[key].push({
                     date: date,
                     name: change.f_short_name,
+                    cnpj: change.f_cnpj,
                     changes: relevantChanges
                 });
         });
@@ -437,16 +439,16 @@ class IndicatorsView extends React.Component {
                 </Grid>
                 <Grid container spacing={16}>
                     <Grid item xs={3}>
-                        <IndicatorPaper title="Desempenho" field="investment_return" range={this.state.config.range} data={this.state.data.fundIndicators} classes={classes} />
+                        <IndicatorPaper title="Desempenho" field="investment_return" range={this.state.config.range} data={this.state.data.fundIndicators} classes={classes} globalClasses={globalClasses} />
                     </Grid>
                     <Grid item xs={3}>
-                        <IndicatorPaper title="Patrimônio" field="networth" range={this.state.config.range} data={this.state.data.fundIndicators} classes={classes} />
+                        <IndicatorPaper title="Patrimônio" field="networth" range={this.state.config.range} data={this.state.data.fundIndicators} classes={classes} globalClasses={globalClasses}/>
                     </Grid>
                     <Grid item xs={3}>
-                        <IndicatorPaper title="Cotistas" field="quotaholders" range={this.state.config.range} data={this.state.data.fundIndicators} classes={classes} />
+                        <IndicatorPaper title="Cotistas" field="quotaholders" range={this.state.config.range} data={this.state.data.fundIndicators} classes={classes} globalClasses={globalClasses}/>
                     </Grid>
                     <Grid item xs={3}>
-                        <IndicatorPaper title="Risco" field="risk" range={this.state.config.range} data={this.state.data.fundIndicators} classes={classes} inverted />
+                        <IndicatorPaper title="Risco" field="risk" range={this.state.config.range} data={this.state.data.fundIndicators} classes={classes} globalClasses={globalClasses} inverted />
                     </Grid>
                 </Grid>
                 <br />
@@ -478,10 +480,10 @@ class IndicatorsView extends React.Component {
                 </Grid>
                 <Grid container spacing={16}>
                     <Grid item xs={6}>
-                        <FundsChangedPaper title="BTG Pactual" data={this.state.data.fundsChanged['btgpactual']} classes={classes} />
+                        <FundsChangedPaper title="BTG Pactual" data={this.state.data.fundsChanged['btgpactual']} classes={classes} globalClasses={globalClasses}/>
                     </Grid>
                     <Grid item xs={6}>
-                        <FundsChangedPaper title="XP Investimentos" data={this.state.data.fundsChanged['xpi']} classes={classes} />
+                        <FundsChangedPaper title="XP Investimentos" data={this.state.data.fundsChanged['xpi']} classes={classes} globalClasses={globalClasses}/>
                     </Grid>
                 </Grid>
             </div >
@@ -490,7 +492,7 @@ class IndicatorsView extends React.Component {
 }
 
 const FundsChangedPaper = (props) => {
-    const { classes, title, data } = props;
+    const { globalClasses, classes, title, data } = props;
 
     return (
         <div>
@@ -509,7 +511,7 @@ const FundsChangedPaper = (props) => {
                                     <Grid item xs={12}>
                                         <Grid container spacing={8}>
                                             <Grid item xs>
-                                                <Typography component="span" variant="body1" align="left" className={classes.cropTextNormal}>{dayjs(change.date).format('DD/MM/YYYY')} - {change.name}</Typography>
+                                                <Typography component="span" variant="body1" align="left" className={classes.cropTextNormal}>{dayjs(change.date).format('DD/MM/YYYY')} - <Link to={'/fundList/' + change.cnpj} className={globalClasses.link}>{change.name}</Link></Typography>
                                             </Grid>
                                             <Grid item xs>
                                                 {change.changes.map((fieldChange, index) => (<Typography key={index} component="span" variant="body1" align="right">{fieldChange}</Typography>))}
@@ -529,7 +531,7 @@ const FundsChangedPaper = (props) => {
 };
 
 const IndicatorPaper = (props) => {
-    const { classes, range, title, field, data, inverted = false } = props;
+    const { globalClasses, classes, range, title, field, data, inverted = false } = props;
 
     const getClassForValue = value => {
         if (value == 0)
@@ -557,7 +559,7 @@ const IndicatorPaper = (props) => {
                             <div key={index}>
                                 <ListItem divider>
                                     <ListItemText disableTypography classes={{ root: classes.listItemText }}>
-                                        <Typography component="span" variant="body1" className={classes.cropText}>{indicator.name}</Typography>
+                                        <Typography component="span" variant="body1" className={classes.cropText}><Link to={'/fundList/' + indicator.cnpj} className={globalClasses.link}>{indicator.name}</Link></Typography>
                                     </ListItemText>
                                     <ListItemSecondaryAction>
                                         <Typography component="span" variant="body1" className={getClassForValue(indicator.value)}>{formatValue(indicator.value)}%</Typography>
@@ -574,7 +576,7 @@ const IndicatorPaper = (props) => {
                             <div key={index}>
                                 <ListItem divider>
                                     <ListItemText disableTypography classes={{ root: classes.listItemText }}>
-                                        <Typography component="span" variant="body1" className={classes.cropText}>{indicator.name}</Typography>
+                                        <Typography component="span" variant="body1" className={classes.cropText}><Link to={'/fundList/' + indicator.cnpj} className={globalClasses.link}>{indicator.name}</Link></Typography>
                                     </ListItemText>
                                     <ListItemSecondaryAction>
                                         <Typography component="span" variant="body1" className={getClassForValue(indicator.value)}>{formatValue(indicator.value)}%</Typography>

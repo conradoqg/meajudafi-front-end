@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
@@ -567,7 +568,7 @@ class FundListView extends React.Component {
                                         <Grid container spacing={8}>
                                             <Grid item xs={8}>
                                                 <Typography>
-                                                    <b>{fund.f_short_name}</b><br />
+                                                    <b><Link to={'/fundList/' + fund.f_cnpj} className={globalClasses.link}>{fund.f_short_name}</Link></b><br />
                                                     <small>
                                                         <b>Patrimônio:</b> R$ {d3Format.format(',.2f')(fund.iry_accumulated_networth)}<br />
                                                         <b>Quotistas:</b> {fund.iry_accumulated_quotaholders} <br />
