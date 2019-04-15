@@ -5,11 +5,8 @@ import Grid from '@material-ui/core/Grid';
 import Avatar from '@material-ui/core/Avatar';
 import Tooltip from '@material-ui/core/Tooltip';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import AddIcon from '@material-ui/icons/Add';
-import ClearIcon from '@material-ui/icons/Clear';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
-import IconButton from '@material-ui/core/IconButton';
 import Divider from '@material-ui/core/Divider';
 import Grey from '@material-ui/core/colors/grey';
 import { withStyles } from '@material-ui/core/styles';
@@ -20,9 +17,8 @@ import Plotly from 'plotly';
 import promisesEach from 'promise-results';
 import { withRouter } from 'react-router-dom';
 import API from '../api';
-import FundSearchComponent from './components/fundSearchComponent';
 import ShowStateComponent from './components/showStateComponent';
-import { fieldOptions, sortOptions, benchmarkOptions, rangeOptions } from './options';
+import { fieldOptions, benchmarkOptions, rangeOptions } from './options';
 import { nextColorIndex } from '../util';
 
 setAutoFreeze(false);
@@ -53,22 +49,13 @@ const styles = theme => ({
 
 const emptyState = {
     data: {
-        fundListSearch: [],
-        fundListCompare: [],
-        benchmark: {
-            name: benchmarkOptions.find(benchmark => benchmark.name == 'cdi').displayName,
-            data: null
-        },
-        sortOptions: sortOptions,
+        fund: null,
+        history: null,
         chart: null
     },
     config: {
-        page: 0,
-        rowsPerPage: 5,
-        sort: sortOptions[0],
-        search: FundSearchComponent.emptyState.config.search,
-        searchRevision: 0,
-        benchmark: 'bovespa',
+        cnpj: null,
+        benchmark: 'cdi',
         range: '1y',
         field: 'investment_return'
     }
@@ -80,63 +67,61 @@ class FundListItemView extends React.Component {
     constructor(props) {
         super(props);
 
-        // this.state.data.benchmark.name = benchmarkOptions.find(benchmark => benchmark.name == this.state.config.benchmark).displayName;
-        // this.state.data.fundListCompare = props.match.params.cnpjs ? props.match.params.cnpjs.split('/').map(cnpj => { return { cnpj, detail: null, data: null }; }) : emptyState.data.fundListCompare;
-        // this.state.config.range = (typeof (props.match.params.range) != 'undefined') ? props.match.params.range : this.state.config.range;
-        // this.state.config.benchmark = (typeof (props.match.params.benchmark) != 'undefined') ? props.match.params.benchmark : this.state.config.benchmark;
-        // this.state.config.field = (typeof (props.match.params.field) != 'undefined') ? props.match.params.field : this.state.config.field;
+        this.state.config.cnpj = props.match.params.cnpj;
 
-        // this.replaceHistory(this.state);
+        this.replaceHistory(this.state);
     }
 
     async componentDidMount() {
-        // return this.updateData(this.state);
+        return this.updateData(this.state);
     }
 
     UNSAFE_componentWillReceiveProps(nextProps) {
-        // const locationChanged = this.props.location !== nextProps.location;
+        const locationChanged = this.props.location !== nextProps.location;
 
-        // if (locationChanged) {
-        //     if (this.props.history.action == 'POP') {
-        //         this.updateData(nextProps.history.location.state);
-        //     }
-        // }
+        if (locationChanged) {
+            if (this.props.history.action == 'POP') {
+                this.updateData(nextProps.history.location.state);
+            }
+        }
     }
 
-    handleConfigFieldChange = async event => {
-        const nextState = produce(this.state, draft => {
-            draft.config[event.target.name] = event.target.value;
-            draft.data.chart = null;
-        });
-        this.pushHistory(nextState);
-        return this.updateData(nextState);
+    buildHistoryPath(nextState) {
+        return this.props.basePath + '/' + nextState.config.cnpj;
+    }
+
+    replaceHistory(nextState) {
+        this.props.history.replace(this.buildHistoryPath(nextState), nextState);
+    }
+
+    pushHistory(nextState) {
+        this.props.history.push(this.buildHistoryPath(nextState), nextState);
     }
 
     handleConfigRangeChange = async event => {
         const nextState = produce(this.state, draft => {
             draft.config[event.target.name] = event.target.value;
-            draft.data.fundListCompare = draft.data.fundListCompare.map(fund => {
-                fund.data = null;
-                return fund;
-            });
-            draft.data.benchmark.data = null;
+            draft.data.history = null;
             draft.data.chart = null;
         });
-        this.pushHistory(nextState);
+        //this.pushHistory(nextState);
         return this.updateData(nextState);
     }
 
     handleConfigBenchmarkChange = async event => {
         const nextState = produce(this.state, draft => {
             draft.config[event.target.name] = event.target.value;
-            draft.data.fundListCompare = draft.data.fundListCompare.map(fund => {
-                fund.data = null;
-                return fund;
-            });
-            draft.data.benchmark = {
-                name: benchmarkOptions.find(benchmark => benchmark.name == event.target.value).displayName,
-                data: null
-            };
+            draft.data.history = null;
+            draft.data.chart = null;
+        });
+        //this.pushHistory(nextState);
+        return this.updateData(nextState);
+    }
+
+    // TODO: These names are all wrong
+    handleConfigFieldChange = async event => {
+        const nextState = produce(this.state, draft => {
+            draft.config[event.target.name] = event.target.value;
             draft.data.chart = null;
         });
         this.pushHistory(nextState);
@@ -155,134 +140,185 @@ class FundListItemView extends React.Component {
         }));
     }
 
-    handleRemoveClick = async (fund) => {
-        const nextState = produce(this.state, draft => {
-            draft.data.fundListCompare = draft.data.fundListCompare.filter(fundItem => fundItem.cnpj != fund.cnpj);
-        });
-        this.pushHistory(nextState);
-        return this.updateData(nextState);
-    }
-
-    buildHistoryPath(nextState) {
-        return this.props.basePath + '/' + nextState.config.benchmark + '/' + nextState.config.range + '/' + nextState.config.field + (nextState.data.fundListCompare ? '/' + nextState.data.fundListCompare.map(fund => fund.cnpj).join('/') : '');
-    }
-
-
-    replaceHistory(nextState) {
-        this.props.history.replace(this.buildHistoryPath(nextState), nextState);
-    }
-
-    pushHistory(nextState) {
-        this.props.history.push(this.buildHistoryPath(nextState), nextState);
-    }
-
     async updateData(nextState) {
-
-        const benchmarkToUpdate = nextState.data.benchmark && nextState.data.benchmark.data == null ? nextState.data.benchmark : null;
-        const fundsToUpdate = nextState.data.fundListCompare.filter(fund => fund.data == null);
-
         this.setState(produce(nextState, draft => {
+            draft.data.fund = null;
+            draft.data.history = null;
             draft.data.chart = null;
         }));
 
-        let promises = {};
-        fundsToUpdate.map(fund => {
-            promises[fund.cnpj] = promisesEach({ detail: this.getFundData(fund.cnpj), data: this.getFundStatistic(fund.cnpj, nextState.config) });
+        let { fundData, fundHistory } = await promisesEach({
+            fundData: this.getFundData(nextState.config.cnpj),
+            fundHistory: this.getFundStatistic(nextState.config.cnpj, nextState.config)
         });
-        promises.benchmark = benchmarkToUpdate ? this.getBenchmarkStatistic(nextState.config) : null;
-
-        let results = await promisesEach(promises);
 
         nextState = produce(nextState, draft => {
-            if (results.benchmark) {
-                if (results.benchmark instanceof Error) draft.data.benchmark.data = results.benchmark.message;
-                else draft.data.benchmark.data = results.benchmark;
-            }
+            if (fundData instanceof Error) draft.data.fund = fundData.message;
+            else draft.data.fund = fundData[0];
 
-            draft.data.fundListCompare = draft.data.fundListCompare.map(fund => {
-                if (results[fund.cnpj]) {
-                    if (results[fund.cnpj].data instanceof Error) fund.data = results[fund.cnpj].data.message;
-                    else fund.data = results[fund.cnpj].data;
+            if (fundHistory instanceof Error) draft.data.fund = fundData.message;
+            else draft.data.history = fundHistory;
 
-                    // TODO: getFundData should return the result or throw error
-                    if (results[fund.cnpj].detail.length == 0) fund.detail = 'Não encontrado';
-                    else {
-                        fund.detail = {
-                            name: results[fund.cnpj].detail[0].f_short_name,
-                            benchmark: results[fund.cnpj].detail[0].rentab_fundo
-                        };
-                    }
-                }
-
-                return fund;
-            });
-
-            draft.data.chart = this.buildChart(draft.config.field, draft.data.benchmark, draft.data.fundListCompare);
+            // TODO: Must handle error
+            draft.data.chart = this.buildChart(draft.config, fundData[0].f_short_name, draft.data.history);
         });
         this.setState(nextState);
     }
 
-    buildChart = (field, benchmark, fundList) => {
-        let chartData = [];
+    buildChart(config, name, statistics) {
         let colorIndex = 0;
 
-        if (benchmark) {
-            chartData.push({
-                x: benchmark.data.date,
-                y: (field == 'relative_investment_return' || field == 'correlation' || field == 'sharpe' ? (new Array(benchmark.data.date.length)).fill(field == 'sharpe' ? 0 : 1) : benchmark.data[field]),
-                type: 'scatter',
-                mode: 'lines',
-                name: benchmark.name,
-                line: { color: nextColorIndex(colorIndex++) }
-            });
-        }
+        const benchmarkText = benchmarkOptions.find(benchmark => benchmark.name == config.benchmark).displayName;
+        const min_y = Math.min(statistics.daily.min_investment_return, statistics.daily.min_benchmark_investment_return);
+        const max_y = Math.max(statistics.daily.max_investment_return, statistics.daily.max_benchmark_investment_return);
 
-        if (fundList) {
-            chartData = chartData.concat(fundList.map(fund => {
-                return {
-                    x: fund.data.date,
-                    y: fund.data[field],
+        return {
+            data: [
+                {
+                    x: statistics.daily.date,
+                    y: statistics.daily.investment_return,
                     type: 'scatter',
-                    mode: 'lines',
-                    name: fund.detail.name,
+                    name: 'Desempenho',
                     line: { color: nextColorIndex(colorIndex++) }
-                };
-            }));
-        }
-
-        const chart = {
-            data: chartData,
+                },
+                {
+                    x: statistics.daily.date,
+                    y: statistics.daily.benchmark_investment_return,
+                    type: 'scatter',
+                    name: `Benchmark (${benchmarkText})`,
+                    yaxis: 'y2',
+                    line: { color: nextColorIndex(colorIndex++) }
+                },
+                {
+                    x: statistics.daily.date,
+                    y: statistics.daily.risk,
+                    type: 'scatter',
+                    name: 'Risco',
+                    yaxis: 'y3',
+                    line: { color: nextColorIndex(colorIndex++) },
+                    visible: 'legendonly'
+                },
+                {
+                    x: statistics.daily.date,
+                    y: statistics.daily.sharpe,
+                    type: 'scatter',
+                    name: 'Sharpe',
+                    yaxis: 'y4',
+                    line: { color: nextColorIndex(colorIndex++) },
+                    visible: 'legendonly'
+                },
+                {
+                    x: statistics.daily.date,
+                    y: statistics.daily.benchmark_consistency,
+                    type: 'scatter',
+                    name: 'Consistência',
+                    yaxis: 'y5',
+                    line: { color: nextColorIndex(colorIndex++) },
+                    visible: 'legendonly'
+                },
+                {
+                    x: statistics.daily.date,
+                    y: statistics.daily.networth,
+                    type: 'scatter',
+                    name: 'Patrimônio',
+                    yaxis: 'y6',
+                    line: { color: nextColorIndex(colorIndex++) },
+                    visible: 'legendonly'
+                },
+                {
+                    x: statistics.daily.date,
+                    y: statistics.daily.quotaholders,
+                    type: 'scatter',
+                    name: 'Cotistas',
+                    yaxis: 'y7',
+                    line: { color: nextColorIndex(colorIndex++) },
+                    visible: 'legendonly'
+                }
+            ],
             layout: {
+                title: name,
                 separators: ',.',
                 autosize: true,
                 showlegend: true,
+                legend: { 'orientation': 'h' },
                 xaxis: {
                     showspikes: true,
-                    spikemode: 'across'
+                    spikemode: 'across',
+                    domain: [0.05, 0.74]
                 },
                 yaxis: {
                     title: 'Desempenho',
                     tickformat: ',.0%',
-                    hoverformat: ',.2%'
+                    hoverformat: ',.2%',
+                    fixedrange: true,
+                    range: [min_y, max_y],
+                },
+                yaxis2: {
+                    title: `Benchmark (${benchmarkText})`,
+                    tickformat: ',.0%',
+                    hoverformat: ',.2%',
+                    anchor: 'free',
+                    overlaying: 'y',
+                    side: 'left',
+                    range: [min_y, max_y],
+                    fixedrange: true,
+                    position: 0
+                },
+                yaxis3: {
+                    title: 'Risco',
+                    tickformat: ',.0%',
+                    hoverformat: ',.2%',
+                    anchor: 'x',
+                    overlaying: 'y',
+                    side: 'right',
+                    fixedrange: true
+                },
+                yaxis4: {
+                    title: 'Sharpe',
+                    tickformat: ',.2f',
+                    hoverformat: ',.2f',
+                    anchor: 'free',
+                    overlaying: 'y',
+                    side: 'right',
+                    fixedrange: true,
+                    position: 0.78
+                },
+                yaxis5: {
+                    title: 'Consistência',
+                    tickformat: ',.0%',
+                    hoverformat: ',.2%',
+                    anchor: 'free',
+                    overlaying: 'y',
+                    side: 'right',
+                    fixedrange: true,
+                    position: 0.84
+                },
+                yaxis6: {
+                    title: 'Patrimônio',
+                    type: 'linear',
+                    tickprefix: 'R$ ',
+                    tickformat: ',.2f',
+                    hoverformat: ',.2f',
+                    anchor: 'free',
+                    overlaying: 'y',
+                    side: 'right',
+                    fixedrange: true,
+                    position: 0.89
+                },
+                yaxis7: {
+                    title: 'Cotistas',
+                    anchor: 'free',
+                    overlaying: 'y',
+                    side: 'right',
+                    fixedrange: true,
+                    position: 1
                 }
             }
         };
-
-        return chart;
-    }
-
-    async getBenchmarkStatistic(config) {
-        const from = rangeOptions.find(range => range.name == config.range).toDate();
-
-        return API.getBenchmarkStatistic(config.benchmark, from);
     }
 
     async getFundData(cnpj) {
-        return API.getFundData(cnpj);
-    }
-
-    async getFundList(config) {
-        return API.getFundList(config);
+        return API.getFundData(cnpj, ['f_cnpj', 'dt_ini_exerc', 'dt_fim_exerc', 'classe', 'sit', 'condom', 'fundo_cotas', 'fundo_exclusivo', 'rentab_fundo', 'vl_patrim_liq', 'xf_name', 'xf_id', 'xf_formal_risk', 'xf_initial_investment', 'xf_rescue_quota', 'xf_benchmark', 'xf_type', 'bf_id', 'bf_product', 'bf_risk_level', 'bf_minimum_initial_investment', 'bf_rescue_quota', 'bf_category_description', 'bf_anbima_rating']);
     }
 
     async getFundStatistic(cnpj, config) {
@@ -299,7 +335,9 @@ class FundListItemView extends React.Component {
                 <div className={globalClasses.appBarSpacer} />
                 <Grid container wrap="nowrap">
                     <Grid container alignItems="center" justify="flex-start">
-                        <Typography variant="display1" gutterBottom>Nome do fundo</Typography>
+                        <ShowStateComponent
+                            data={this.state.data.fund}
+                            hasData={() => (<Typography variant="display1" gutterBottom>{this.state.data.fund.f_short_name}</Typography>)} />
                         <Typography component="span" gutterBottom><Tooltip title={
                             <React.Fragment>
                                 <p>Comparador de desempenho de fundos.</p>
@@ -328,7 +366,7 @@ class FundListItemView extends React.Component {
                                     name: 'range',
                                     id: 'range',
                                 }}>
-                                {rangeOptions.filter(range => range.name != 'all').map(range => (<MenuItem key={range.name} value={range.name}>{range.displayName}</MenuItem>))}
+                                {rangeOptions.map(range => (<MenuItem key={range.name} value={range.name}>{range.displayName}</MenuItem>))}
                             </Select>
                         </Grid>
                     </Grid>
@@ -341,57 +379,73 @@ class FundListItemView extends React.Component {
                 <Grid container spacing={16}>
                     <Grid item xs>
                         <Paper elevation={1} square={true} className={classes.chart} >
-                            <Grid container spacing={16}>                                
-                                <Grid item xs={12}>
-                                    <Typography variant="subheading" gutterBottom>CVM</Typography>
-                                </Grid>
-                            </Grid>
-                            <Grid container spacing={16}>
-                                <Grid item xs={3}><b>CNPJ:</b> 12345678901</Grid>
-                                <Grid item xs={3}><b>Existência:</b> 01/01/2001 até 01/01/2001</Grid>
-                                <Grid item xs={3}><b>Classe:</b> icf_classe</Grid>
-                                <Grid item xs={3}><b>Situação:</b> icf_sit</Grid>
+                            <ShowStateComponent
+                                data={this.state.data.fund}
+                                hasData={() => (
+                                    <React.Fragment>
+                                        <Grid container spacing={16}>
+                                            <Grid item xs={12}>
+                                                <Typography variant="subheading" gutterBottom>CVM</Typography>
+                                            </Grid>
+                                        </Grid>
+                                        <Grid container spacing={16}>
+                                            <Grid item xs={3}><b>CNPJ:</b> {this.state.data.fund.f_cnpj}</Grid>
+                                            <Grid item xs={3}><b>Existência:</b> {this.state.data.fund.dt_ini_exerc} até {this.state.data.fund.dt_fim_exerc}</Grid>
+                                            <Grid item xs={3}><b>Classe:</b> {this.state.data.fund.classe}</Grid>
+                                            <Grid item xs={3}><b>Situação:</b> {this.state.data.fund.sit}</Grid>
+                                            <Grid item xs={3}><b>Fundo de condomínio:</b> {this.state.data.fund.condom}</Grid>
+                                            <Grid item xs={3}><b>Fundo de cotas:</b> {this.state.data.fund.fundo_cotas}</Grid>
+                                            <Grid item xs={3}><b>Fundo exclusivo:</b> {this.state.data.fund.fundo_exclusivo}</Grid>
+                                            <Grid item xs={3}><b>Benchmark:</b> {this.state.data.fund.rentab_fundo}</Grid>
+                                            <Grid item xs={3}><b>Patrimônio:</b> {this.state.data.fund.vl_patrim_liq}</Grid>
+                                        </Grid>
+                                        {
+                                            this.state.data.fund.xf_id && (
+                                                <React.Fragment>
+                                                    <Grid container spacing={16}>
+                                                        <Grid item xs={12}>
+                                                            <Divider variant="middle" />
+                                                        </Grid>
+                                                        <Grid item xs={12}>
+                                                            <Typography variant="subheading" gutterBottom>XP Investimentos</Typography>
+                                                        </Grid>
+                                                    </Grid>
+                                                    <Grid container spacing={16}>
+                                                        <Grid item xs={3}><b>Nome:</b> {this.state.data.fund.xf_name}</Grid>
+                                                        <Grid item xs={3}><b>Risco Formal:</b> {this.state.data.fund.xf_formal_risk}</Grid>
+                                                        <Grid item xs={3}><b>Investimento Inicial:</b> {this.state.data.fund.xf_initial_investment}</Grid>
+                                                        <Grid item xs={3}><b>Dias para Resgate:</b> {this.state.data.fund.xf_rescue_quota}</Grid>
+                                                        <Grid item xs={3}><b>Benchmark:</b> {this.state.data.fund.xf_benchmark}</Grid>
+                                                        <Grid item xs={3}><b>Categoria:</b> {this.state.data.fund.xf_type}</Grid>
+                                                    </Grid>
+                                                </React.Fragment>
+                                            )
+                                        }
+                                        {
+                                            this.state.data.fund.bf_id && (
+                                                <React.Fragment>
+                                                    <Grid container spacing={16}>
+                                                        <Grid item xs={12}>
+                                                            <Divider variant="middle" />
+                                                        </Grid>
+                                                        <Grid item xs={12}>
+                                                            <Typography variant="subheading" gutterBottom>BTG Pactual</Typography>
+                                                        </Grid>
+                                                    </Grid>
+                                                    <Grid container spacing={16}>
+                                                        <Grid item xs={3}><b>Nome:</b> {this.state.data.fund.bf_product}</Grid>
+                                                        <Grid item xs={3}><b>Risco Formal:</b> {this.state.data.fund.bf_risk_level}</Grid>
+                                                        <Grid item xs={3}><b>Investimento Inicial:</b> {this.state.data.fund.bf_minimum_initial_investment}</Grid>
+                                                        <Grid item xs={3}><b>Dias para Resgate:</b> {this.state.data.fund.bf_rescue_quota}</Grid>
 
-                                <Grid item xs={3}><b>Fundo de condomínio:</b> icf_condom</Grid>
-                                <Grid item xs={3}><b>Fundo de cotas:</b> icf_fundo_cotas</Grid>
-                                <Grid item xs={3}><b>Fundo exclusivo:</b> icf_fundo_exclusivo</Grid>
-                                <Grid item xs={3}><b>Benchmark:</b> icf_rentab_fundo</Grid>
-                                <Grid item xs={3}><b>Patrimônio:</b> iry_accumulated_networth</Grid>
-                                <Grid item xs={3}><b>Cotistas:</b> iry_accumulated_quotaholders</Grid>
-                            </Grid>
-                            <Grid container spacing={16}>
-                                <Grid item xs={12}>
-                                    <Divider variant="middle" />
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <Typography variant="subheading" gutterBottom>XP Investimentos</Typography>
-                                </Grid>
-                            </Grid>
-                            <Grid container spacing={16}>
-                                <Grid item xs={3}><b>Nome:</b> xf_name</Grid>
-                                <Grid item xs={3}><b>Risco Formal:</b> xf_formal_risk</Grid>
-                                <Grid item xs={3}><b>Investimento Inicial:</b> xf_initial_investment</Grid>
-                                <Grid item xs={3}><b>Dias para Resgate:</b> xf_rescue_financial_settlement</Grid>
-                                <Grid item xs={3}><b>Benchmark:</b> xf_benchmark</Grid>                                
-                                <Grid item xs={3}><b>Categoria:</b> xf_type</Grid>
-                            </Grid>
-                            <Grid container spacing={16}>
-                                <Grid item xs={12}>
-                                    <Divider variant="middle" />
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <Typography variant="subheading" gutterBottom>BTG Pactual</Typography>
-                                </Grid>
-                            </Grid>
-                            <Grid container spacing={16}>
-                                <Grid item xs={3}><b>Nome:</b> bf_product</Grid>
-                                <Grid item xs={3}><b>Risco Formal:</b> bf_risk_level</Grid>
-                                <Grid item xs={3}><b>Investimento Inicial:</b> bf_minimum_initial_investment</Grid>
-                                <Grid item xs={3}><b>Dias para Resgate:</b> bf_rescue_financial_settlement</Grid>
-
-                                <Grid item xs={3}><b>Categoria:</b> bf_category_description</Grid>
-                                <Grid item xs={3}><b>Classe Anbima:</b> bf_anbima_rating</Grid>                                
-                            </Grid>
+                                                        <Grid item xs={3}><b>Categoria:</b> {this.state.data.fund.bf_category_description}</Grid>
+                                                        <Grid item xs={3}><b>Classe Anbima:</b> {this.state.data.fund.bf_anbima_rating}</Grid>
+                                                    </Grid>
+                                                </React.Fragment>
+                                            )
+                                        }
+                                    </React.Fragment>
+                                )} />
                         </Paper>
                     </Grid>
                 </Grid>
@@ -410,7 +464,11 @@ class FundListItemView extends React.Component {
                 <Grid container spacing={16}>
                     <Grid item xs>
                         <Paper elevation={1} square={true} className={classes.chart} >
-                            `Chart`
+                            <FundHistoryChart
+                                fund={this.state.data.chart}
+                                onInitialized={(figure) => this.handleChartInitialized(figure)}
+                                onUpdate={(figure) => this.handleChartUpdate(figure)}
+                            />
                         </Paper>
                     </Grid>
                 </Grid>
@@ -439,63 +497,48 @@ class FundListItemView extends React.Component {
                 <Grid container spacing={16}>
                     <Grid item xs>
                         <Paper elevation={1} square={true} className={classes.chart}>
-                            <table style={{ width: '100%', textAlign: 'center', padding: '5px' }}>
-                                <thead>
-                                    <tr style={{ padding: '5px' }}>
-                                        <th style={{ padding: '5px' }}>ano</th>
-                                        <th>jan</th>
-                                        <th>fev</th>
-                                        <th>mar</th>
-                                        <th>abr</th>
-                                        <th>mai</th>
-                                        <th>jun</th>
-                                        <th>jul</th>
-                                        <th>ago</th>
-                                        <th>set</th>
-                                        <th>out</th>
-                                        <th>nov</th>
-                                        <th>dez</th>
-                                        <th>ano</th>
-                                        <th>accumulado</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr style={{ padding: '5px' }}>
-                                        <th style={{ padding: '5px' }}>2017</th>
-                                        <td>12,24%</td>
-                                        <td>12,24%</td>
-                                        <td>12,24%</td>
-                                        <td>12,24%</td>
-                                        <td>12,24%</td>
-                                        <td>12,24%</td>
-                                        <td>12,24%</td>
-                                        <td>12,24%</td>
-                                        <td>12,24%</td>
-                                        <td>12,24%</td>
-                                        <td>12,24%</td>
-                                        <td>12,24%</td>
-                                        <td>12,24%</td>
-                                        <td>12,24%</td>
-                                    </tr>
-                                    <tr>
-                                        <th>2018</th>
-                                        <td>12,24%</td>
-                                        <td>12,24%</td>
-                                        <td>12,24%</td>
-                                        <td>12,24%</td>
-                                        <td>12,24%</td>
-                                        <td>12,24%</td>
-                                        <td>12,24%</td>
-                                        <td>12,24%</td>
-                                        <td>12,24%</td>
-                                        <td>12,24%</td>
-                                        <td>12,24%</td>
-                                        <td>12,24%</td>
-                                        <td>12,24%</td>
-                                        <td>12,24%</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <ShowStateComponent
+                                data={this.state.data.history}
+                                hasData={() => (
+                                    <React.Fragment>
+                                        <table style={{ width: '100%', textAlign: 'center', padding: '5px' }}>
+                                            <thead>
+                                                <tr style={{ padding: '5px' }}>
+                                                    <th style={{ padding: '5px' }}>ano</th>
+                                                    <th>jan</th>
+                                                    <th>fev</th>
+                                                    <th>mar</th>
+                                                    <th>abr</th>
+                                                    <th>mai</th>
+                                                    <th>jun</th>
+                                                    <th>jul</th>
+                                                    <th>ago</th>
+                                                    <th>set</th>
+                                                    <th>out</th>
+                                                    <th>nov</th>
+                                                    <th>dez</th>
+                                                    <th>ano</th>
+                                                    <th>accumulado</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {
+                                                    Object.keys(this.state.data.history.byYear).map(year => (
+                                                        <tr style={{ padding: '5px' }} key={year}>
+                                                            <th style={{ padding: '5px' }}>{year}</th>
+                                                            {
+                                                                ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'].map(month => (
+                                                                    <td key={year + month}>{this.state.data.history.byMonth[year + month] != null ? d3Format.format('.2%')(this.state.data.history.byMonth[year + month][this.state.config.field]) : ''}</td>
+                                                                ))
+                                                            }
+                                                            <td>{this.state.data.history.byYear[year] != null ? d3Format.format('.2%')(this.state.data.history.byYear[year][this.state.config.field]) : ''}</td>
+                                                            <td>{this.state.data.history.accumulatedByYear[year] != null ? d3Format.format('.2%')(this.state.data.history.accumulatedByYear[year][this.state.config.field]) : ''}</td>
+                                                        </tr>
+                                                    ))
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </React.Fragment>)} />
                         </Paper>
                     </Grid>
                 </Grid>
@@ -503,5 +546,37 @@ class FundListItemView extends React.Component {
         );
     }
 }
+
+const FundHistoryChart = (props) => {
+    const { fund, handleChartInitialized, handleChartUpdate } = props;
+
+    return (
+        <ShowStateComponent
+            data={fund}
+            hasData={() => (
+                <Plot
+                    key={fund.name}
+                    data={fund.data}
+                    layout={fund.layout}
+                    config={
+                        {
+                            locale: 'pt-BR',
+                            displayModeBar: true
+                        }
+                    }
+                    onInitialized={handleChartInitialized}
+                    onUpdate={handleChartUpdate}
+                    useResizeHandler={true}
+                    style={{ width: '100%', height: '100%' }}
+                />
+            )}
+            isNull={() => (
+                <Typography variant="subheading" align="center"><CircularProgress /></Typography>
+            )}
+            isErrored={() => (
+                <Typography variant="subheading" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>
+            )}
+        />);
+};
 
 module.exports = withStyles(styles)(withRouter(FundListItemView));

@@ -124,7 +124,7 @@ const routes = [
         name: 'Informações sobre o fundo',
         showInMenu: false,
         icon: () => (<TableChartIcon />),
-        main: (props, classes) => <FundListItemView {...props} globalClasses={classes} />
+        main: (props, classes) => <FundListItemView {...props} basePath={'/fundList'} globalClasses={classes} />
     },
     {
         path: '/fundList',
