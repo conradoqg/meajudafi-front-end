@@ -314,65 +314,70 @@ class FundListView extends React.Component {
 
         const name = infCadastral[0].f_short_name;
 
-        let min_y = Math.min(statistics.min_investment_return, statistics.min_benchmark_investment_return);
-        let max_y = Math.max(statistics.max_investment_return, statistics.max_benchmark_investment_return);
+        let min_y = Math.min(statistics.daily.min_investment_return, statistics.daily.min_benchmark_investment_return);
+        let max_y = Math.max(statistics.daily.max_investment_return, statistics.daily.max_benchmark_investment_return);
 
         return {
             data: [
                 {
-                    x: statistics.date,
-                    y: statistics.investment_return,
+                    x: statistics.daily.date,
+                    y: statistics.daily.investment_return,
                     type: 'scatter',
                     name: 'Desempenho',
                     line: { color: nextColorIndex(colorIndex++) }
                 },
                 {
-                    x: statistics.date,
-                    y: statistics.benchmark_investment_return,
+                    x: statistics.daily.date,
+                    y: statistics.daily.benchmark_investment_return,
                     type: 'scatter',
                     name: `Benchmark (${benchmarkText})`,
                     yaxis: 'y2',
                     line: { color: nextColorIndex(colorIndex++) }
                 },
                 {
-                    x: statistics.date,
-                    y: statistics.risk,
+                    x: statistics.daily.date,
+                    y: statistics.daily.risk,
                     type: 'scatter',
                     name: 'Risco',
                     yaxis: 'y3',
-                    line: { color: nextColorIndex(colorIndex++) }
+                    line: { color: nextColorIndex(colorIndex++) },
+                    visible: 'legendonly'
                 },
                 {
-                    x: statistics.date,
-                    y: statistics.sharpe,
+                    x: statistics.daily.date,
+                    y: statistics.daily.sharpe,
                     type: 'scatter',
                     name: 'Sharpe',
                     yaxis: 'y4',
-                    line: { color: nextColorIndex(colorIndex++) }
+                    line: { color: nextColorIndex(colorIndex++) },
+                    visible: 'legendonly'
                 },
                 {
-                    x: statistics.date,
-                    y: statistics.benchmark_consistency,
+                    x: statistics.daily.date,
+                    y: statistics.daily.benchmark_consistency,
                     type: 'scatter',
                     name: 'Consistência',
                     yaxis: 'y5',
-                    line: { color: nextColorIndex(colorIndex++) }
+                    line: { color: nextColorIndex(colorIndex++) },
+                    visible: 'legendonly'
                 },
                 {
-                    x: statistics.date,
-                    y: statistics.networth,
+                    x: statistics.daily.date,
+                    y: statistics.daily.networth,
                     type: 'scatter',
                     name: 'Patrimônio',
                     yaxis: 'y6',
-                    line: { color: nextColorIndex(colorIndex++) }
+                    line: { color: nextColorIndex(colorIndex++) },
+                    visible: 'legendonly'
                 },
                 {
-                    x: statistics.date,
-                    y: statistics.quotaholders,
+                    x: statistics.daily.date,
+                    y: statistics.daily.quotaholders,
                     type: 'scatter',
                     name: 'Cotistas',
                     yaxis: 'y7',
-                    line: { color: nextColorIndex(colorIndex++) }
+                    line: { color: nextColorIndex(colorIndex++) },
+                    visible: 'legendonly'
                 }
             ],
             layout: {

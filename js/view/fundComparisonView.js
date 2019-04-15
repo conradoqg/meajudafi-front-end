@@ -268,8 +268,8 @@ class FundComparisonView extends React.Component {
 
         if (benchmark) {
             chartData.push({
-                x: benchmark.data.date,
-                y: (field == 'relative_investment_return' || field == 'correlation' || field == 'sharpe' ? (new Array(benchmark.data.date.length)).fill(field == 'sharpe' ? 0 : 1) : benchmark.data[field]),
+                x: benchmark.data.daily.date,
+                y: (field == 'relative_investment_return' || field == 'correlation' || field == 'sharpe' ? (new Array(benchmark.data.daily.date.length)).fill(field == 'sharpe' ? 0 : 1) : benchmark.data.daily[field]),
                 type: 'scatter',
                 mode: 'lines',
                 name: benchmark.name,
@@ -280,8 +280,8 @@ class FundComparisonView extends React.Component {
         if (fundList) {
             chartData = chartData.concat(fundList.map(fund => {
                 return {
-                    x: fund.data.date,
-                    y: fund.data[field],
+                    x: fund.data.daily.date,
+                    y: fund.data.daily[field],
                     type: 'scatter',
                     mode: 'lines',
                     name: fund.detail.name,
@@ -496,7 +496,7 @@ class FundComparisonView extends React.Component {
                                                 <React.Fragment>
                                                     <Grid item xs={2}>
                                                         <Typography>
-                                                            Desempenho: {d3Format.format('.2%')(this.state.data.benchmark.data.investment_return[this.state.data.benchmark.data.investment_return.length - 1])}
+                                                            Desempenho: {d3Format.format('.2%')(this.state.data.benchmark.data.accumulated.investment_return)}
                                                         </Typography>
                                                     </Grid>
                                                     <Grid item xs={2}>
@@ -507,7 +507,7 @@ class FundComparisonView extends React.Component {
                                                     </Grid>
                                                     <Grid item xs={1}>
                                                         <Typography>
-                                                            Risco: {d3Format.format('.2%')(this.state.data.benchmark.data.risk[this.state.data.benchmark.data.risk.length - 1])}
+                                                            Risco: {d3Format.format('.2%')(this.state.data.benchmark.data.accumulated.risk)}
                                                         </Typography>
                                                     </Grid>
                                                     <Grid item xs={1}>
@@ -561,27 +561,27 @@ class FundComparisonView extends React.Component {
                                                             <React.Fragment>
                                                                 <Grid item xs={2}>
                                                                     <Typography>
-                                                                        Desempenho: {d3Format.format('.2%')(fundObject.data.investment_return[fundObject.data.investment_return.length - 1])}
+                                                                        Desempenho: {d3Format.format('.2%')(fundObject.data.accumulated.investment_return)}
                                                                     </Typography>
                                                                 </Grid>
                                                                 <Grid item xs={2}>
                                                                     <Typography>
-                                                                        Desempenho Relativo: {d3Format.format('.2%')(fundObject.data.relative_investment_return[fundObject.data.investment_return.length - 1])}
+                                                                        Desempenho Relativo: {d3Format.format('.2%')(fundObject.data.accumulated.relative_investment_return)}
                                                                     </Typography>
                                                                 </Grid>
                                                                 <Grid item xs={1}>
                                                                     <Typography>
-                                                                        Correlação: {d3Format.format('.2%')(fundObject.data.correlation[fundObject.data.risk.length - 1])}
+                                                                        Correlação: {d3Format.format('.2%')(fundObject.data.accumulated.correlation)}
                                                                     </Typography>
                                                                 </Grid>
                                                                 <Grid item xs={1}>
                                                                     <Typography>
-                                                                        Risco: {d3Format.format('.2%')(fundObject.data.risk[fundObject.data.risk.length - 1])}
+                                                                        Risco: {d3Format.format('.2%')(fundObject.data.accumulated.risk)}
                                                                     </Typography>
                                                                 </Grid>
                                                                 <Grid item xs={1}>
                                                                     <Typography>
-                                                                        Sharpe: {d3Format.format('.2')(fundObject.data.sharpe[fundObject.data.sharpe.length - 1])}
+                                                                        Sharpe: {d3Format.format('.2')(fundObject.data.accumulated.sharpe)}
                                                                     </Typography>
                                                                 </Grid>
                                                             </React.Fragment>

@@ -72,8 +72,12 @@ module.exports = {
             data: await fundListObject.json()
         };
     },
-    getFundData: async (cnpj) => {
-        const funds = await fetch(`//${API_URL}/funds_enhanced?select=f_name,f_short_name,rentab_fundo&f_cnpj=eq.${cnpj}`);
+    getFundData: async (cnpj, additionalFields) => {
+        let additionalFieldsPart = '';
+
+        if (Array.isArray(additionalFields) && additionalFields.length > 0) additionalFieldsPart = ',' + additionalFields.join(',');
+
+        const funds = await fetch(`//${API_URL}/funds_enhanced?select=f_name,f_short_name,rentab_fundo${additionalFieldsPart}&f_cnpj=eq.${cnpj}`);
 
         if (funds.status < 200 || funds.status > 299) throw new Error('Unable to retrieve fund data');
 
@@ -103,136 +107,7 @@ module.exports = {
 
         if (data.length == 0) throw new Error(`No data found for CNPJ ${cnpj}`);
 
-        const statistics = {
-            date: [],
-            investment_return: [],
-            benchmark_investment_return: [],
-            relative_investment_return: [],
-            risk: [],
-            sharpe: [],
-            benchmark_consistency: [],
-            networth: [],
-            quotaholders: [],
-            correlation: [],
-            min_investment_return: 0,
-            max_investment_return: 0,
-            min_benchmark_investment_return: 0,
-            max_benchmark_investment_return: 0
-        };
-
-        let date = null;
-        let investment_return = 0;
-        let benchmark_investment_return = 0;
-        let relative_investment_return = 0;
-        let risk = 0;
-        let sharpe = 0;
-        let benchmark_consistency = 0;
-        let networth = 0;
-        let quotaholders = 0;
-        let correlation = 0;
-
-        let riskCalculator = new StandardDeviation();
-        let benchmarkConsistencyReached = 0;
-        let lastBenchmarkConsistency = [];
-        let sum1 = 0;
-        let sum2 = 0;
-        let sum1Sq = 0;
-        let sum2Sq = 0;
-        let pSum = 0;
-
-        const calcSharpeForPeriod = (risk, investment_return, cdi_investment_return, length) => {
-            if (risk == 0) return 0;
-            const annualizedAccInvestmentReturn = ((investment_return / length) * 252);
-            const annualizedAccCDIInvestmentReturn = ((cdi_investment_return / length) * 252);
-            return (annualizedAccInvestmentReturn - annualizedAccCDIInvestmentReturn) / risk;
-        };
-
-        const calcConsistencyForPeriod = (investment_return, cdi_investment_return, period, consistencyReached, lastConsistency) => {
-            let consistencyPoint = 0;
-            if (investment_return >= cdi_investment_return) consistencyPoint = 1;
-            if (period != 0 && lastConsistency.length >= period) consistencyReached -= lastConsistency.shift();
-            consistencyReached += consistencyPoint;
-            lastConsistency.push(consistencyPoint);
-            return consistencyReached;
-        };
-        const getConsistencyForPeriod = (consistencyReached, lastConsistency) => ((100 * consistencyReached) / lastConsistency.length) / 100;
-
-        for (let index = data.length - 1; index >= 0; index--) {
-            const item = data[index];
-
-            date = item.ird_dt_comptc;
-
-            if (index == data.length - 1) {
-                statistics.date.push(date);
-                statistics.investment_return.push(investment_return);
-                statistics.benchmark_investment_return.push(benchmark_investment_return);
-                statistics.relative_investment_return.push(relative_investment_return);
-                statistics.risk.push(risk);
-                statistics.sharpe.push(sharpe);
-                statistics.benchmark_consistency.push(benchmark_consistency);
-                statistics.networth.push(networth);
-                statistics.quotaholders.push(quotaholders);
-                statistics.correlation.push(correlation);
-                statistics.min_investment_return = Math.min(statistics.min_investment_return, investment_return);
-                statistics.max_investment_return = Math.max(statistics.max_investment_return, investment_return);
-                statistics.min_benchmark_investment_return = Math.min(statistics.min_benchmark_investment_return, benchmark_investment_return);
-                statistics.max_benchmark_investment_return = Math.max(statistics.max_benchmark_investment_return, benchmark_investment_return);
-                continue;
-            }
-
-            // Return
-            investment_return = ((1 + investment_return) * (1 + item.ird_investment_return)) - 1;
-            benchmark_investment_return = ((1 + benchmark_investment_return) * (1 + item[`ird_${benchmark}_investment_return`])) - 1;
-            relative_investment_return = investment_return / benchmark_investment_return;
-
-            // Risk
-            riskCalculator.addMeasurement(item.ird_investment_return);
-            risk = riskCalculator.get() * Math.sqrt(252);
-
-            // Sharpe
-            sharpe = calcSharpeForPeriod(risk, investment_return, benchmark_investment_return, data.length - 1);
-
-            // Consistency
-            benchmarkConsistencyReached = calcConsistencyForPeriod(item.ird_investment_return, item[`ird_${benchmark}_investment_return`], data.length - 1, benchmarkConsistencyReached, lastBenchmarkConsistency);
-            benchmark_consistency = getConsistencyForPeriod(benchmarkConsistencyReached, lastBenchmarkConsistency);
-
-            // Networth
-            networth = item.ird_accumulated_networth;
-
-            // Quotaholdes
-            quotaholders = item.ird_accumulated_quotaholders;
-
-            // Correlation
-            sum1 += item.ird_investment_return;
-            sum2 += item[`ird_${benchmark}_investment_return`];
-            sum1Sq += Math.pow(item.ird_investment_return, 2);
-            sum2Sq += Math.pow(item[`ird_${benchmark}_investment_return`], 2);
-            pSum += item.ird_investment_return * item[`ird_${benchmark}_investment_return`];
-            let n = data.length - index - 1;
-            let num = pSum - (sum1 * sum2 / n);
-            let den = Math.sqrt((sum1Sq - Math.pow(sum1, 2) / n) *
-                (sum2Sq - Math.pow(sum2, 2) / n));
-
-            if (den == 0 || Number.isNaN(den)) correlation = 0;
-            else correlation = num / den;
-
-            statistics.date.push(date);
-            statistics.investment_return.push(investment_return);
-            statistics.benchmark_investment_return.push(benchmark_investment_return);
-            statistics.relative_investment_return.push(relative_investment_return);
-            statistics.risk.push(risk);
-            statistics.sharpe.push(sharpe);
-            statistics.benchmark_consistency.push(benchmark_consistency);
-            statistics.networth.push(networth);
-            statistics.quotaholders.push(quotaholders);
-            statistics.correlation.push(correlation);
-            statistics.min_investment_return = Math.min(statistics.min_investment_return, investment_return);
-            statistics.max_investment_return = Math.max(statistics.max_investment_return, investment_return);
-            statistics.min_benchmark_investment_return = Math.min(statistics.min_benchmark_investment_return, benchmark_investment_return);
-            statistics.max_benchmark_investment_return = Math.max(statistics.max_benchmark_investment_return, benchmark_investment_return);
-        }
-
-        return statistics;
+        return calculateStatistics(data, benchmark);
     },
     getBenchmarkStatistic: async (benchmark, lastDaysOrFromDate) => {
         let fromDatePart = '';
@@ -263,52 +138,7 @@ module.exports = {
 
         let data = await result.json();
 
-        let fromQuoteToPercentage = null;
-        if (benchmark == 'cdi') {
-            fromQuoteToPercentage = (value, prevValue) => prevValue == null ? 0 : value / 100;
-        } else if (benchmark == 'bovespa') {
-            fromQuoteToPercentage = (value, prevValue) => prevValue == null ? 0 : (value / prevValue) - 1;
-        } else if (benchmark == 'dolar') {
-            fromQuoteToPercentage = (value, prevValue) => prevValue == null ? 0 : (value / prevValue) - 1;
-        } else if (benchmark == 'euro') {
-            fromQuoteToPercentage = (value, prevValue) => prevValue == null ? 0 : (value / prevValue) - 1;
-        }
-
-        const statistics = {
-            date: [],
-            investment_return: [],
-            risk: [],
-            min_investment_return: 0,
-            max_investment_return: 0
-        };
-
-        let date = null;
-        let investment_return = 0;
-        let prevValue = null;
-        let risk = 0;
-
-        let riskCalculator = new StandardDeviation();
-
-        for (let index = data.length - 1; index >= 0; index--) {
-            const item = data[index];
-
-            date = item.data;
-
-            const value = fromQuoteToPercentage(item.valor, prevValue);
-            prevValue = item.valor;
-
-            investment_return = ((1 + investment_return) * (1 + value)) - 1;
-            riskCalculator.addMeasurement(value);
-            risk = riskCalculator.get() * Math.sqrt(252);
-
-            statistics.date.push(date);
-            statistics.investment_return.push(investment_return);
-            statistics.risk.push(risk);
-            statistics.min_investment_return = Math.min(statistics.min_investment_return, investment_return);
-            statistics.max_investment_return = Math.max(statistics.max_investment_return, investment_return);
-        }
-
-        return statistics;
+        return calculateBenchmarkStatistics(data, benchmark);
     },
     getFundIndicators: async (options, fromDate = new Date((new Date()).getFullYear(), 0, 1)) => {
         const range = options.range;
@@ -474,3 +304,345 @@ module.exports = {
         return minor != migrationMinor;
     }
 };
+
+const calculateBenchmarkStatistics = (data, benchmark) => {
+    let fromQuoteToPercentage = null;
+    if (benchmark == 'cdi') {
+        fromQuoteToPercentage = (value, prevValue) => prevValue == null ? 0 : value / 100;
+    } else if (benchmark == 'bovespa') {
+        fromQuoteToPercentage = (value, prevValue) => prevValue == null ? 0 : (value / prevValue) - 1;
+    } else if (benchmark == 'dolar') {
+        fromQuoteToPercentage = (value, prevValue) => prevValue == null ? 0 : (value / prevValue) - 1;
+    } else if (benchmark == 'euro') {
+        fromQuoteToPercentage = (value, prevValue) => prevValue == null ? 0 : (value / prevValue) - 1;
+    }
+
+    const statistics = {
+        daily: {
+            date: [],
+            investment_return: [],
+            risk: [],
+            min_investment_return: 0,
+            max_investment_return: 0
+        },
+        accumulated: {}
+    };
+
+    let prevValue = null;
+    let investment_return = 0;
+    let riskCalculator = new StandardDeviation();
+
+    for (let index = data.length - 1; index >= 0; index--) {
+        const item = data[index];
+
+        const date = item.data;
+
+        const value = fromQuoteToPercentage(item.valor, prevValue);
+        prevValue = item.valor;
+
+        investment_return = ((1 + investment_return) * (1 + value)) - 1;
+        riskCalculator.addMeasurement(value);
+        const risk = riskCalculator.get() * Math.sqrt(252);
+        const min_investment_return = Math.min(statistics.daily.min_investment_return, investment_return);
+        const max_investment_return = Math.max(statistics.daily.max_investment_return, investment_return);
+
+        statistics.daily.date.push(date);
+        statistics.daily.investment_return.push(investment_return);
+        statistics.daily.risk.push(risk);
+        statistics.daily.min_investment_return = min_investment_return;
+        statistics.daily.max_investment_return = max_investment_return;
+
+        statistics.accumulated = {
+            investment_return,
+            risk,
+            min_investment_return,
+            max_investment_return
+        };
+    }
+
+    return statistics;
+};
+
+const calculateStatistics = (data, benchmark) => {
+    const statistics = {
+        daily: {
+            date: [],
+            investment_return: [],
+            benchmark_investment_return: [],
+            relative_investment_return: [],
+            risk: [],
+            sharpe: [],
+            benchmark_consistency: [],
+            networth: [],
+            quotaholders: [],
+            correlation: [],
+            min_investment_return: 0,
+            max_investment_return: 0,
+            min_benchmark_investment_return: 0,
+            max_benchmark_investment_return: 0,
+        },
+        accumulated: {},
+        accumulatedByYear: {},
+        byMonth: {},
+        byYear: {}
+    };
+
+    const createCalculators = () => {
+        return {
+            entries: 1,
+            investmentReturnCalculator: new InvestmentReturnCalculator(),
+            benchmarkInvestmentReturnCalculator: new InvestmentReturnCalculator(),
+            riskCalculator: new RiskCalculator(),
+            consistencyCalculator: new ConsistencyCalculator(),
+            networthCalculator: new NetworthCalculator(),
+            quotaholdersCalculator: new QuotaholdersCalculator(),
+            correlationCalculator: new CorrelationCalculator()
+        };
+    };
+
+    const calculatorAccumulated = createCalculators();
+    const calculatorByMonth = {};
+    const calculatorByYear = {};
+
+    for (let index = data.length - 1; index >= 0; index--) {
+        const item = data[index];
+        const date = item.ird_dt_comptc;
+        const year = date.substring(0, 4);
+        const month = date.substring(5, 7);
+
+        if (index == data.length - 1) {
+            statistics.daily.date.push(date);
+            statistics.daily.investment_return.push(0);
+            statistics.daily.benchmark_investment_return.push(0);
+            statistics.daily.relative_investment_return.push(0);
+            statistics.daily.risk.push(0);
+            statistics.daily.sharpe.push(0);
+            statistics.daily.benchmark_consistency.push(0);
+            statistics.daily.networth.push(0);
+            statistics.daily.quotaholders.push(0);
+            statistics.daily.correlation.push(0);
+            statistics.daily.min_investment_return = 0;
+            statistics.daily.max_investment_return = 0;
+            statistics.daily.min_benchmark_investment_return = 0;
+            statistics.daily.max_benchmark_investment_return = 0;
+            continue;
+        }
+
+        calculatorAccumulated.entries += 1;
+
+        if (!calculatorByMonth[year + month]) calculatorByMonth[year + month] = createCalculators();
+        else calculatorByMonth[year + month].entries += 1;
+
+        if (!calculatorByYear[year]) calculatorByYear[year] = createCalculators();
+        else calculatorByYear[year].entries += 1;
+
+        const investment_return = calculatorAccumulated.investmentReturnCalculator.add(item.ird_investment_return);
+        const month_investment_return = calculatorByMonth[year + month].investmentReturnCalculator.add(item.ird_investment_return);
+        const year_investment_return = calculatorByYear[year].investmentReturnCalculator.add(item.ird_investment_return);
+
+        const benchmark_investment_return = calculatorAccumulated.benchmarkInvestmentReturnCalculator.add(item[`ird_${benchmark}_investment_return`]);
+        const month_benchmark_investment_return = calculatorByMonth[year + month].benchmarkInvestmentReturnCalculator.add(item[`ird_${benchmark}_investment_return`]);
+        const year_benchmark_investment_return = calculatorByYear[year].benchmarkInvestmentReturnCalculator.add(item[`ird_${benchmark}_investment_return`]);
+
+        const relative_investment_return = calcRelativeInvestmentReturn(investment_return, benchmark_investment_return);
+        const month_relative_investment_return = calcRelativeInvestmentReturn(month_investment_return, month_benchmark_investment_return);
+        const year_relative_investment_return = calcRelativeInvestmentReturn(year_investment_return, year_benchmark_investment_return);
+
+        const risk = calculatorAccumulated.riskCalculator.add(item.ird_investment_return);
+        const month_risk = calculatorByMonth[year + month].riskCalculator.add(item.ird_investment_return);
+        const year_risk = calculatorByYear[year].riskCalculator.add(item.ird_investment_return);
+
+        const sharpe = calcSharpeForPeriod(risk, investment_return, benchmark_investment_return, calculatorAccumulated.entries);
+        const month_sharpe = calcSharpeForPeriod(month_risk, month_investment_return, month_benchmark_investment_return, calculatorByMonth[year + month].entries);
+        const year_sharpe = calcSharpeForPeriod(year_risk, year_investment_return, year_benchmark_investment_return, calculatorByYear[year].entries);
+
+        const benchmark_consistency = calculatorAccumulated.consistencyCalculator.add(item.ird_investment_return, item[`ird_${benchmark}_investment_return`], calculatorAccumulated.entries);
+        const month_consistency = calculatorByMonth[year + month].consistencyCalculator.add(item.ird_investment_return, item[`ird_${benchmark}_investment_return`], calculatorByMonth[year + month].entries);
+        const year_consistency = calculatorByYear[year].consistencyCalculator.add(item.ird_investment_return, item[`ird_${benchmark}_investment_return`], calculatorByYear[year].entries);
+
+        const networth = calculatorAccumulated.networthCalculator.add(item.ird_accumulated_networth);
+        const month_networth = calculatorByMonth[year + month].networthCalculator.add(item.ird_accumulated_networth);
+        const year_networth = calculatorByYear[year].networthCalculator.add(item.ird_accumulated_networth);
+
+        const quotaholders = calculatorAccumulated.quotaholdersCalculator.add(item.ird_accumulated_quotaholders);
+        const month_quotaholders = calculatorByMonth[year + month].quotaholdersCalculator.add(item.ird_accumulated_quotaholders);
+        const year_quotaholders = calculatorByYear[year].quotaholdersCalculator.add(item.ird_accumulated_quotaholders);
+
+        const correlation = calculatorAccumulated.correlationCalculator.add(item.ird_investment_return, item[`ird_${benchmark}_investment_return`], calculatorAccumulated.entries);
+        const month_correlation = calculatorByMonth[year + month].correlationCalculator.add(item.ird_investment_return, item[`ird_${benchmark}_investment_return`], calculatorByMonth[year + month].entries);
+        const year_correlation = calculatorByYear[year].correlationCalculator.add(item.ird_investment_return, item[`ird_${benchmark}_investment_return`], calculatorByYear[year].entries);
+
+        const min_investment_return = Math.min(statistics.daily.min_investment_return, investment_return);
+        const max_investment_return = Math.max(statistics.daily.max_investment_return, investment_return);
+        const min_benchmark_investment_return = Math.min(statistics.daily.min_benchmark_investment_return, benchmark_investment_return);
+        const max_benchmark_investment_return = Math.max(statistics.daily.max_benchmark_investment_return, benchmark_investment_return);
+
+        statistics.daily.date.push(date);
+        statistics.daily.investment_return.push(investment_return);
+        statistics.daily.benchmark_investment_return.push(benchmark_investment_return);
+        statistics.daily.relative_investment_return.push(relative_investment_return);
+        statistics.daily.risk.push(risk);
+        statistics.daily.sharpe.push(sharpe);
+        statistics.daily.benchmark_consistency.push(benchmark_consistency);
+        statistics.daily.networth.push(networth);
+        statistics.daily.quotaholders.push(quotaholders);
+        statistics.daily.correlation.push(correlation);
+        statistics.daily.min_investment_return = min_investment_return;
+        statistics.daily.max_investment_return = max_investment_return;
+        statistics.daily.min_benchmark_investment_return = min_benchmark_investment_return;
+        statistics.daily.max_benchmark_investment_return = max_benchmark_investment_return;
+        statistics.accumulated = {
+            investment_return,
+            benchmark_investment_return,
+            relative_investment_return,
+            risk,
+            sharpe,
+            benchmark_consistency,
+            networth,
+            quotaholders,
+            correlation,
+            min_investment_return,
+            max_investment_return,
+            min_benchmark_investment_return,
+            max_benchmark_investment_return
+        };
+        statistics.accumulatedByYear[year] = {
+            year,
+            investment_return,
+            benchmark_investment_return,
+            relative_investment_return,
+            risk,
+            sharpe,
+            benchmark_consistency,
+            networth,
+            quotaholders,
+            correlation,
+            min_investment_return,
+            max_investment_return,
+            min_benchmark_investment_return,
+            max_benchmark_investment_return
+        };
+        statistics.byMonth[year + month] = {
+            year,
+            month,
+            investment_return: month_investment_return,
+            benchmark_investment_return: month_benchmark_investment_return,
+            relative_investment_return: month_relative_investment_return,
+            risk: month_risk,
+            sharpe: month_sharpe,
+            consistency: month_consistency,
+            networth: month_networth,
+            quotaholders: month_quotaholders,
+            correlation: month_correlation
+        };
+        statistics.byYear[year] = {
+            year,
+            investment_return: year_investment_return,
+            benchmark_investment_return: year_benchmark_investment_return,
+            relative_investment_return: year_relative_investment_return,
+            risk: year_risk,
+            sharpe: year_sharpe,
+            consistency: year_consistency,
+            networth: year_networth,
+            quotaholders: year_quotaholders,
+            correlation: year_correlation
+        };
+    }
+
+    return statistics;
+};
+
+class InvestmentReturnCalculator {
+    constructor() {
+        this.investmentReturn = 0;
+    }
+
+    add(investmentReturn) {
+        this.investmentReturn = ((1 + this.investmentReturn) * (1 + investmentReturn)) - 1;
+        return this.investmentReturn;
+    }
+}
+
+class CorrelationCalculator {
+    constructor() {
+        this.sum1 = 0;
+        this.sum2 = 0;
+        this.sum1Sq = 0;
+        this.sum2Sq = 0;
+        this.pSum = 0;
+    }
+
+    add(investment_return, benchmark_investment_return, n) {
+        this.sum1 += investment_return;
+        this.sum2 += benchmark_investment_return;
+        this.sum1Sq += Math.pow(investment_return, 2);
+        this.sum2Sq += Math.pow(benchmark_investment_return, 2);
+        this.pSum += investment_return * benchmark_investment_return;
+        let num = this.pSum - (this.sum1 * this.sum2 / n);
+        let den = Math.sqrt((this.sum1Sq - Math.pow(this.sum1, 2) / n) *
+            (this.sum2Sq - Math.pow(this.sum2, 2) / n));
+
+        if (den == 0 || Number.isNaN(den)) return 0;
+        else return num / den;
+    }
+}
+
+const calcRelativeInvestmentReturn = (investment_return, benchmark_investment_return) => investment_return / benchmark_investment_return;
+
+const calcSharpeForPeriod = (risk, investment_return, cdi_investment_return, length) => {
+    if (risk == 0) return 0;
+    const annualizedAccInvestmentReturn = ((investment_return / length) * 252);
+    const annualizedAccCDIInvestmentReturn = ((cdi_investment_return / length) * 252);
+    return (annualizedAccInvestmentReturn - annualizedAccCDIInvestmentReturn) / risk;
+};
+
+class ConsistencyCalculator {
+    constructor() {
+        this.consistencyReached = 0;
+        this.lastConsistency = [];
+
+    }
+    add(investment_return, cdi_investment_return, period) {
+        let consistencyPoint = 0;
+        if (investment_return >= cdi_investment_return) consistencyPoint = 1;
+        if (period != 0 && this.lastConsistency.length >= period) this.consistencyReached -= this.lastConsistency.shift();
+        this.consistencyReached += consistencyPoint;
+        this.lastConsistency.push(consistencyPoint);
+        return ((100 * this.consistencyReached) / this.lastConsistency.length) / 100;
+    }
+}
+
+class NetworthCalculator {
+    constructor() {
+        this.lastNetworth = null;
+    }
+
+    add(networth) {
+        if (this.lastNetworth == null) this.lastNetworth = networth;
+
+        return networth - this.lastNetworth;
+    }
+}
+
+class QuotaholdersCalculator {
+    constructor() {
+        this.lastQuotaholders = null;
+    }
+
+    add(quotaholders) {
+        if (this.lastQuotaholders == null) this.lastQuotaholders = quotaholders;
+
+        return quotaholders - this.lastQuotaholders;
+    }
+}
+
+class RiskCalculator {
+    constructor() {
+        this.standardDeviation = new StandardDeviation();
+    }
+
+    add(investment_return) {
+        this.standardDeviation.addMeasurement(investment_return);
+        return this.standardDeviation.get() * Math.sqrt(252);
+    }
+}
