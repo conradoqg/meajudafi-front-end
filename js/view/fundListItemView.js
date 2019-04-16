@@ -385,8 +385,7 @@ class FundListItemView extends React.Component {
                                             </Grid>
                                         </Grid>
                                         <Grid container spacing={16}>
-                                            <Grid item xs={3}><b>CNPJ:</b> {formatters.field['f_cnpj'](this.state.data.fund.f_cnpj)}</Grid>
-                                            <Grid item xs={3}><b>Existência:</b> {formatters.field['icf_dt_ini_exerc'](this.state.data.fund.icf_dt_ini_exerc)} até {formatters.field['icf_dt_ini_exerc'](this.state.data.fund.icf_dt_fim_exerc)}</Grid>
+                                            <Grid item xs={3}><b>CNPJ:</b> {formatters.field['f_cnpj'](this.state.data.fund.f_cnpj)}</Grid>                                            
                                             <Grid item xs={3}><b>Classe:</b> {formatters.field['icf_classe'](this.state.data.fund.icf_classe)}</Grid>
                                             <Grid item xs={3}><b>Situação:</b> {formatters.field['icf_sit'](this.state.data.fund.icf_sit)}</Grid>
                                             <Grid item xs={3}><b>Fundo de condomínio:</b> {formatters.field['icf_condom'](this.state.data.fund.icf_condom)}</Grid>
