@@ -290,13 +290,13 @@ class IndicatorsView extends React.Component {
             let date = null;
 
             if (change.action == 'I') {
-                date = change.row_data[date_field]
+                date = change.row_data[date_field];
                 relevantChanges.push('Adicionado a lista de fundos');
             } else if (change.action == 'D') {
-                date = change.changed_fields[date_field]
+                date = change.changed_fields[date_field];
                 relevantChanges.push('Removido da lista de fundos');
             } else {
-                date = change.changed_fields[date_field]
+                date = change.changed_fields[date_field];
                 Object.keys(change.changed_fields).map(changedField => {
                     const capitalized = value => value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
 
@@ -442,10 +442,10 @@ class IndicatorsView extends React.Component {
                         <IndicatorPaper title="Desempenho" field="investment_return" range={this.state.config.range} data={this.state.data.fundIndicators} classes={classes} globalClasses={globalClasses} />
                     </Grid>
                     <Grid item xs={3}>
-                        <IndicatorPaper title="Patrimônio" field="networth" range={this.state.config.range} data={this.state.data.fundIndicators} classes={classes} globalClasses={globalClasses}/>
+                        <IndicatorPaper title="Patrimônio" field="networth" range={this.state.config.range} data={this.state.data.fundIndicators} classes={classes} globalClasses={globalClasses} />
                     </Grid>
                     <Grid item xs={3}>
-                        <IndicatorPaper title="Cotistas" field="quotaholders" range={this.state.config.range} data={this.state.data.fundIndicators} classes={classes} globalClasses={globalClasses}/>
+                        <IndicatorPaper title="Cotistas" field="quotaholders" range={this.state.config.range} data={this.state.data.fundIndicators} classes={classes} globalClasses={globalClasses} />
                     </Grid>
                     <Grid item xs={3}>
                         <IndicatorPaper title="Risco" field="risk" range={this.state.config.range} data={this.state.data.fundIndicators} classes={classes} globalClasses={globalClasses} inverted />
@@ -480,10 +480,10 @@ class IndicatorsView extends React.Component {
                 </Grid>
                 <Grid container spacing={16}>
                     <Grid item xs={6}>
-                        <FundsChangedPaper title="BTG Pactual" data={this.state.data.fundsChanged['btgpactual']} classes={classes} globalClasses={globalClasses}/>
+                        <FundsChangedPaper title="BTG Pactual" data={this.state.data.fundsChanged['btgpactual']} classes={classes} globalClasses={globalClasses} />
                     </Grid>
                     <Grid item xs={6}>
-                        <FundsChangedPaper title="XP Investimentos" data={this.state.data.fundsChanged['xpi']} classes={classes} globalClasses={globalClasses}/>
+                        <FundsChangedPaper title="XP Investimentos" data={this.state.data.fundsChanged['xpi']} classes={classes} globalClasses={globalClasses} />
                     </Grid>
                 </Grid>
             </div >

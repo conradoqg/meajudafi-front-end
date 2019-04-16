@@ -277,8 +277,7 @@ module.exports = {
         return economyIndicators;
     },
     getFundsChanged: async (fromDate) => {
-        let fromDatePart = `&or=(row_data->xf_date.gte.${fromDate.toJSON().slice(0, 10)},row_data->bf_date.gte.${fromDate.toJSON().slice(0, 10)})`;
-        const fundsChangedObject = await fetch(`//${API_URL}/changed_funds?order=row_data->xf_date.desc,row_data->bf_date.desc${fromDatePart}`);
+        const fundsChangedObject = await fetch(`//${API_URL}/changed_funds?action_tstamp_stm=gte.${fromDate.toISOString()}&order=action_tstamp_stm.desc`);
 
         if (fundsChangedObject.status < 200 || fundsChangedObject.status > 299) throw new Error('Unable to retrieve changed funds');
 
