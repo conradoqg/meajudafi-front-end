@@ -3,9 +3,6 @@ language: node_js
 node_js:
   - "node"
 
-env:
-  - API_URL=api.meajudafi.com.br
-
 script:  
   - npm install
   - npm run build

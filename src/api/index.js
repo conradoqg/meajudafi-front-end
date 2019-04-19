@@ -3,7 +3,7 @@ import allKeys from 'promise-results/allKeys';
 import packageJson from '../../package.json';
 
 /* global process */
-const API_URL = process.env.API_URL || `api.${window.location.host}`;
+const API_URL = `api.${window.location.host}`;
 
 export default {
     getFundList: async (options, fromDate = new Date((new Date()).getFullYear(), 0, 1)) => {
