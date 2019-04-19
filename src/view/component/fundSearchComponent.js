@@ -53,7 +53,7 @@ class FundSearchComponent extends React.Component {
         }
     }
 
-    render = () => {
+    render() {
         const { classes } = this.props;
 
         return (

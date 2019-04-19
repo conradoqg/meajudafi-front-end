@@ -79,6 +79,22 @@ const emptyState = {
 class FundListView extends React.Component {
     state = emptyState;
 
+    async componentDidMount() {
+        try {
+            const result = await this.getFundList(this.state.config);
+
+            this.setState(produce(draft => {
+                draft.data.totalRows = result.totalRows;
+                draft.data.fundList = result.data;
+            }));
+        } catch (ex) {
+            console.error(ex.message);
+            this.setState(produce(draft => {
+                draft.data.fundList = ex.message;
+            }));
+        }
+    }
+
     handleChangePage = async (object, page) => {
         this.setState(produce(draft => {
             draft.data.totalRows = emptyState.data.totalRows;
@@ -131,7 +147,7 @@ class FundListView extends React.Component {
         }
     }
 
-    handleSearchChanged = async (search) => {
+    handleSearchChange = async (search) => {
         const nextState = produce(this.state, draft => {
             draft.config.search = search;
             draft.config.page = 0;
@@ -212,7 +228,7 @@ class FundListView extends React.Component {
         }));
     }
 
-    handleFilterChanged = async (filter) => {
+    handleFilterChange = async (filter) => {
         const nextState = produce(this.state, draft => {
             draft.config.filter = filter;
         });
@@ -238,7 +254,7 @@ class FundListView extends React.Component {
         }
     }
 
-    handleChartInitialized = async (fund, figure) => {
+    handleChartInitialize = async (fund, figure) => {
         this.setState(produce(draft => {
             draft.data.fundDetail[fund.icf_cnpj_fundo] = figure;
         }));
@@ -274,12 +290,11 @@ class FundListView extends React.Component {
         }
     }
 
-    async getFundList(options) {
+    getFundList = async (options) => {
         return API.getFundList(options);
     }
 
-    // TODO: Move to a component
-    async getFundDetail(cnpj, chartConfig) {
+    getFundDetail = async (cnpj, chartConfig) => {
         let colorIndex = 0;
 
         const from = rangeOptions.find(range => range.name === chartConfig.range).toDate();
@@ -441,22 +456,6 @@ class FundListView extends React.Component {
         };
     }
 
-    async componentDidMount() {
-        try {
-            const result = await this.getFundList(this.state.config);
-
-            this.setState(produce(draft => {
-                draft.data.totalRows = result.totalRows;
-                draft.data.fundList = result.data;
-            }));
-        } catch (ex) {
-            console.error(ex.message);
-            this.setState(produce(draft => {
-                draft.data.fundList = ex.message;
-            }));
-        }
-    }
-
     render() {
         const { classes, globalClasses } = this.props;
         const { layout } = this.state;
@@ -481,7 +480,7 @@ class FundListView extends React.Component {
                     <Grid item xs>
                         <Paper elevation={1} square={true} >
                             <Grid container wrap="nowrap" className={classes.optionsBar}>
-                                <FundSearchComponent onSearchChanged={this.handleSearchChanged} />
+                                <FundSearchComponent onSearchChanged={this.handleSearchChange} />
                                 <Grid container justify="flex-end" spacing={8}>
                                     <Grid item>
                                         <Select
@@ -534,7 +533,7 @@ class FundListView extends React.Component {
                         </Paper>
                         <Paper elevation={1} square={true}>
                             <Collapse in={layout.showingFilter}>
-                                <FundFilterComponent onFilterChanged={this.handleFilterChanged} globalClasses={globalClasses} />
+                                <FundFilterComponent onFilterChanged={this.handleFilterChange} globalClasses={globalClasses} />
                             </Collapse>
                         </Paper>
                         <ShowStateComponent
@@ -591,7 +590,7 @@ class FundListView extends React.Component {
                                             <Grid item xs>
                                                 <DataHistoryChartComponent
                                                     fund={this.state.data.fundDetail[fund.icf_cnpj_fundo]}
-                                                    onInitialized={(figure) => this.handleChartInitialized(fund, figure)}
+                                                    onInitialized={(figure) => this.handleChartInitialize(fund, figure)}
                                                     onUpdate={(figure) => this.handleChartUpdate(fund, figure)}
                                                 />
                                             </Grid>

@@ -94,7 +94,7 @@ class FundFilterComponent extends React.Component {
         return this.props.onFilterChanged(emptyState.config.filter);
     }
 
-    render = () => {
+    render() {
         const { classes } = this.props;
 
         return (

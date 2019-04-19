@@ -17,8 +17,7 @@ export default {
     getFundList: async (options, fromDate = new Date((new Date()).getFullYear(), 0, 1)) => {
         const range = `${(options.page * options.rowsPerPage)}-${((options.page * options.rowsPerPage) + options.rowsPerPage - 1)}`;
         const sort = `${options.sort.field}.${options.sort.order}`;
-
-        // TODO: Duplicated code
+        
         let filterPart = '';
         if (options.filter) {
             Object.keys(options.filter).forEach(selectedFilterOptionsKey => {
@@ -151,8 +150,7 @@ export default {
     },
     getFundIndicators: async (options, fromDate = new Date((new Date()).getFullYear(), 0, 1)) => {
         const range = options.range;
-
-        // TODO: Duplicated code
+        
         let filterPart = '';
         if (options.filter) {
             Object.keys(options.filter).forEach(selectedFilterOptionsKey => {

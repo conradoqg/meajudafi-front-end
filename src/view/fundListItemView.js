@@ -19,7 +19,7 @@ import { nextColorIndex, formatters } from '../util';
 
 setAutoFreeze(false);
 
-const styles = theme => ({        
+const styles = theme => ({
     select: {
         margin: theme.spacing.unit
     },
@@ -57,7 +57,6 @@ class FundListItemView extends React.Component {
         return this.updateData(this.state);
     }
 
-    // TODO: Componentize history state
     UNSAFE_componentWillReceiveProps(nextProps) {
         const locationChanged = this.props.location !== nextProps.location;
 
@@ -68,15 +67,15 @@ class FundListItemView extends React.Component {
         }
     }
 
-    buildHistoryPath(nextState) {
+    buildHistoryPath = (nextState) => {
         return this.props.basePath + '/' + nextState.config.cnpj;
     }
 
-    replaceHistory(nextState) {
+    replaceHistory = (nextState) => {
         this.props.history.replace(this.buildHistoryPath(nextState), nextState);
     }
 
-    pushHistory(nextState) {
+    pushHistory = (nextState) => {
         this.props.history.push(this.buildHistoryPath(nextState), nextState);
     }
 
@@ -98,7 +97,6 @@ class FundListItemView extends React.Component {
         return this.updateData(nextState);
     }
 
-    // TODO: These names are all wrong
     handleConfigFieldChange = async event => {
         const nextState = produce(this.state, draft => {
             draft.config[event.target.name] = event.target.value;
@@ -108,7 +106,7 @@ class FundListItemView extends React.Component {
         return this.updateData(nextState);
     }
 
-    handleChartInitialized = async (figure) => {
+    handleChartInitialize = async (figure) => {
         this.setState(produce(draft => {
             draft.data.chart = figure;
         }));
@@ -120,7 +118,7 @@ class FundListItemView extends React.Component {
         }));
     }
 
-    async updateData(nextState) {
+    updateData = async (nextState) => {
         this.setState(produce(nextState, draft => {
             draft.data.fund = null;
             draft.data.history = null;
@@ -145,8 +143,7 @@ class FundListItemView extends React.Component {
         this.setState(nextState);
     }
 
-    // TODO: Move to a component
-    buildChart(config, name, statistics) {
+    buildChart = (config, name, statistics) => {
         let colorIndex = 0;
 
         const benchmarkText = benchmarkOptions.find(benchmark => benchmark.name === config.benchmark).displayName;
@@ -298,11 +295,11 @@ class FundListItemView extends React.Component {
         };
     }
 
-    async getFundData(cnpj) {
+    getFundData = async (cnpj) => {
         return API.getFundData(cnpj, ['f_cnpj', 'icf_dt_ini_exerc', 'icf_dt_fim_exerc', 'icf_classe', 'icf_sit', 'icf_condom', 'icf_fundo_cotas', 'icf_fundo_exclusivo', 'icf_rentab_fundo', 'icf_vl_patrim_liq', 'xf_name', 'xf_id', 'xf_formal_risk', 'xf_initial_investment', 'xf_rescue_quota', 'xf_benchmark', 'xf_type', 'bf_id', 'bf_product', 'bf_risk_level', 'bf_minimum_initial_investment', 'bf_rescue_quota', 'bf_category_description', 'bf_anbima_rating']);
     }
 
-    async getFundStatistic(cnpj, config) {
+    getFundStatistic = async (cnpj, config) => {
         const from = rangeOptions.find(range => range.name === config.range).toDate();
 
         return API.getFundStatistic(cnpj, config.benchmark, from);
@@ -442,9 +439,9 @@ class FundListItemView extends React.Component {
                 <Grid container spacing={16}>
                     <Grid item xs>
                         <Paper elevation={1} square={true} className={classes.chart} >
-                            <DataHistoryChartComponent                                
+                            <DataHistoryChartComponent
                                 fund={this.state.data.chart}
-                                onInitialized={(figure) => this.handleChartInitialized(figure)}
+                                onInitialized={(figure) => this.handleChartInitialize(figure)}
                                 onUpdate={(figure) => this.handleChartUpdate(figure)}
                             />
                         </Paper>

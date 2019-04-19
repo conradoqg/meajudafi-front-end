@@ -125,7 +125,7 @@ class IndicatorsView extends React.Component {
         return this.updateData(nextState);
     }
 
-    handleChartInitialized = async (figure) => {
+    handleChartInitialize = async (figure) => {
         this.setState(produce(draft => {
             draft.data.economyIndicators = figure;
         }));
@@ -143,7 +143,7 @@ class IndicatorsView extends React.Component {
         }));
     }
 
-    handleFilterChanged = async (filter) => {
+    handleFilterChange = async (filter) => {
         const nextState = produce(this.state, draft => {
             draft.config.filter = filter;
             draft.layout.showingFilter = false;
@@ -182,7 +182,7 @@ class IndicatorsView extends React.Component {
         }
     }
 
-    async getEconomyIndicators(config) {
+    getEconomyIndicators = async (config) => {
         let colorIndex = 0;
         const from = rangeOptions.find(range => range.name === config.range).toDate();
 
@@ -256,11 +256,11 @@ class IndicatorsView extends React.Component {
         };
     }
 
-    async getFundIndicators(config) {
+    getFundIndicators = async (config) => {
         return await API.getFundIndicators(config);
     }
 
-    async getFundsChanged(config) {
+    getFundsChanged = async (config) => {
         const from = rangeOptions.find(range => range.name === config.changesRange).toDate();
 
         const fundsChanged = await API.getFundsChanged(from);
@@ -389,7 +389,7 @@ class IndicatorsView extends React.Component {
                         <Paper className={classes.paper} elevation={1} square={true}>
                             <DataHistoryChartComponent
                                 fund={this.state.data.economyIndicators}
-                                onInitialized={(figure) => this.handleChartInitialized(figure)}
+                                onInitialized={(figure) => this.handleChartInitialize(figure)}
                                 onUpdate={(figure) => this.handleChartUpdate(figure)}
                             />
                         </Paper>
@@ -420,7 +420,7 @@ class IndicatorsView extends React.Component {
                     <Grid item xs={12}>
                         <Paper elevation={1} square={true}>
                             <Collapse in={this.state.layout.showingFilter}>
-                                <FundFilterComponent onFilterChanged={this.handleFilterChanged} globalClasses={globalClasses} />
+                                <FundFilterComponent onFilterChanged={this.handleFilterChange} globalClasses={globalClasses} />
                             </Collapse>
                         </Paper>
                     </Grid>

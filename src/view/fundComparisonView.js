@@ -82,7 +82,6 @@ class FundComparisonView extends React.Component {
         return this.updateData(this.state);
     }
 
-    // TODO: Componentize history state
     UNSAFE_componentWillReceiveProps(nextProps) {
         const locationChanged = this.props.location !== nextProps.location;
 
@@ -133,8 +132,7 @@ class FundComparisonView extends React.Component {
         return this.updateData(nextState);
     }
 
-
-    handleSearchChanged = async (search) => {
+    handleSearchChange = async (search) => {
         const nextState = produce(this.state, draft => {
             draft.config.search = search;
         });
@@ -174,7 +172,7 @@ class FundComparisonView extends React.Component {
         return this.updateData(nextState);
     }
 
-    handleChartInitialized = async (figure) => {
+    handleChartInitialize = async (figure) => {
         this.setState(produce(draft => {
             draft.data.chart = figure;
         }));
@@ -194,20 +192,20 @@ class FundComparisonView extends React.Component {
         return this.updateData(nextState);
     }
 
-    buildHistoryPath(nextState) {
+    buildHistoryPath = (nextState) => {
         return this.props.basePath + '/' + nextState.config.benchmark + '/' + nextState.config.range + '/' + nextState.config.field + (nextState.data.fundListCompare ? '/' + nextState.data.fundListCompare.map(fund => fund.cnpj).join('/') : '');
     }
 
 
-    replaceHistory(nextState) {
+    replaceHistory = (nextState) => {
         this.props.history.replace(this.buildHistoryPath(nextState), nextState);
     }
 
-    pushHistory(nextState) {
+    pushHistory = (nextState) => {
         this.props.history.push(this.buildHistoryPath(nextState), nextState);
     }
 
-    async updateData(nextState) {
+    updateData = async (nextState) => {
 
         const benchmarkToUpdate = nextState.data.benchmark && nextState.data.benchmark.data == null ? nextState.data.benchmark : null;
         const fundsToUpdate = nextState.data.fundListCompare.filter(fund => fund.data == null);
@@ -302,21 +300,21 @@ class FundComparisonView extends React.Component {
         return chart;
     }
 
-    async getBenchmarkStatistic(config) {
+    getBenchmarkStatistic = async (config) => {
         const from = rangeOptions.find(range => range.name === config.range).toDate();
 
         return API.getBenchmarkStatistic(config.benchmark, from);
     }
 
-    async getFundData(cnpj) {
+    getFundData = async (cnpj) => {
         return API.getFundData(cnpj);
     }
 
-    async getFundList(config) {
+    getFundList = async (config) => {
         return API.getFundList(config);
     }
 
-    async getFundStatistic(cnpj, config) {
+    getFundStatistic = async (cnpj, config) => {
         const from = rangeOptions.find(range => range.name === config.range).toDate();
 
         return API.getFundStatistic(cnpj, config.benchmark, from);
@@ -382,7 +380,7 @@ class FundComparisonView extends React.Component {
                     <Grid item xs>
                         <Paper elevation={1} square={true} >
                             <Grid container wrap="nowrap" className={classes.optionsBar}>
-                                <FundSearchComponent key={this.state.config.searchRevision} term={this.state.config.search.term} onSearchChanged={this.handleSearchChanged} />
+                                <FundSearchComponent key={this.state.config.searchRevision} term={this.state.config.search.term} onSearchChanged={this.handleSearchChange} />
                             </Grid>
                         </Paper>
                         <ShowStateComponent
@@ -453,8 +451,8 @@ class FundComparisonView extends React.Component {
                         <Paper elevation={1} square={true} className={classes.chart} >
                             <DataHistoryChartComponent
                                 fund={this.state.data.chart}
-                                onInitialized={(figure) => this.handleChartInitialized(figure)}
-                                onUpdate={(figure) => this.handleChartUpdate(figure)}                                
+                                onInitialized={(figure) => this.handleChartInitialize(figure)}
+                                onUpdate={(figure) => this.handleChartUpdate(figure)}
                             />
                         </Paper>
                     </Grid>
