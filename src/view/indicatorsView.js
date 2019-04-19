@@ -13,7 +13,6 @@ import ListItemText from '@material-ui/core/ListItemText';
 import LightGreen from '@material-ui/core/colors/lightGreen';
 import Blue from '@material-ui/core/colors/blue';
 import Red from '@material-ui/core/colors/red';
-import Grey from '@material-ui/core/colors/grey';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import IconButton from '@material-ui/core/IconButton';
@@ -79,15 +78,6 @@ const styles = theme => ({
         '&:first-child': {
             paddingLeft: 0
         }
-    },
-    // TODO: Help should be a global class
-    help: {
-        margin: 10,
-        backgroundColor: Grey[600],
-        width: 17,
-        height: 17,
-        fontSize: 10,
-        fontWeight: 'bold'
     }
 });
 
@@ -372,7 +362,7 @@ class IndicatorsView extends React.Component {
                                 <p>Indicadores gerais de mercado e dos fundos de investimento.</p>
                                 <p>No lado direito é possível alterar o intervalo visualizado.</p>
                             </React.Fragment>
-                        }><Avatar className={classes.help}>?</Avatar></Tooltip></Typography>
+                        }><Avatar className={globalClasses.help}>?</Avatar></Tooltip></Typography>
                     </Grid>
                     <Grid container justify="flex-end">
                         <Grid item>
@@ -414,7 +404,7 @@ class IndicatorsView extends React.Component {
                                 <p>Lista de melhores e piores fundos de investimento. </p>
                                 <p>Por padrão somente fundos listados na BTG Pactual e XP Investimentos são exibidos. No lado direito é possível alterar o filtro.</p>
                             </React.Fragment>
-                        }><Avatar className={classes.help}>?</Avatar></Tooltip></Typography>
+                        }><Avatar className={globalClasses.help}>?</Avatar></Tooltip></Typography>
                     </Grid>
                     <Grid container justify="flex-end">
                         <Grid item>
@@ -430,7 +420,7 @@ class IndicatorsView extends React.Component {
                     <Grid item xs={12}>
                         <Paper elevation={1} square={true}>
                             <Collapse in={this.state.layout.showingFilter}>
-                                <FundFilterComponent onFilterChanged={this.handleFilterChanged} />
+                                <FundFilterComponent onFilterChanged={this.handleFilterChanged} globalClasses={globalClasses} />
                             </Collapse>
                         </Paper>
                     </Grid>
@@ -459,7 +449,7 @@ class IndicatorsView extends React.Component {
                                 <p>Somente algumas informações são monitoradas. No lado direito é possível filtrar o intervalo de exibição.</p>
                                 <p>Início da coleta em 16/02/2019.</p>
                             </React.Fragment>
-                        }><Avatar className={classes.help}>?</Avatar></Tooltip></Typography>
+                        }><Avatar className={globalClasses.help}>?</Avatar></Tooltip></Typography>
                     </Grid>
                     <Grid container justify="flex-end">
                         <Grid item>

@@ -21,13 +21,14 @@ import TableChartIcon from '@material-ui/icons/TableChart';
 import ScatterPlotIcon from '@material-ui/icons/ScatterPlot';
 import GithubCircleIcon from 'mdi-material-ui/GithubCircle';
 import Grid from '@material-ui/core/Grid';
+import Grey from '@material-ui/core/colors/grey';
 import IndicatorsView from './indicatorsView';
 import FundListView from './fundListView';
 import FundListItemView from './fundListItemView';
 import FundComparisonView from './fundComparisonView';
 import API from '../api';
 
-const drawerWidth = 270;
+const DRAWERWIDTH = 270;
 
 const styles = theme => ({
     root: {
@@ -51,8 +52,8 @@ const styles = theme => ({
         }),
     },
     appBarShift: {
-        marginLeft: drawerWidth,
-        width: `calc(100% - ${drawerWidth}px)`,
+        marginLeft: DRAWERWIDTH,
+        width: `calc(100% - ${DRAWERWIDTH}px)`,
         transition: theme.transitions.create(['width', 'margin'], {
             easing: theme.transitions.easing.sharp,
             duration: theme.transitions.duration.enteringScreen,
@@ -71,7 +72,7 @@ const styles = theme => ({
     drawerPaper: {
         position: 'relative',
         whiteSpace: 'nowrap',
-        width: drawerWidth,
+        width: DRAWERWIDTH,
         transition: theme.transitions.create('width', {
             easing: theme.transitions.easing.sharp,
             duration: theme.transitions.duration.enteringScreen,
@@ -115,6 +116,14 @@ const styles = theme => ({
         '&:hover': {
             textDecoration: 'underline'
         }
+    },
+    help: {
+        margin: 10,
+        backgroundColor: Grey[600],
+        width: 17,
+        height: 17,
+        fontSize: 10,
+        fontWeight: 'bold'
     }
 });
 
@@ -128,7 +137,7 @@ const routes = [
         main: (props, classes) => <IndicatorsView {...props} globalClasses={classes} />
     },
     {
-        path: '/fundList/:cnpj',        
+        path: '/fundList/:cnpj',
         name: 'Informações sobre o fundo',
         showInMenu: false,
         icon: () => (<TableChartIcon />),

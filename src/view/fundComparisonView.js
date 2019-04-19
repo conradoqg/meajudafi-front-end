@@ -11,7 +11,6 @@ import ClearIcon from '@material-ui/icons/Clear';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import IconButton from '@material-ui/core/IconButton';
-import Grey from '@material-ui/core/colors/grey';
 import { withStyles } from '@material-ui/core/styles';
 import { produce, setAutoFreeze } from 'immer';
 import * as d3Format from 'd3-format';
@@ -38,15 +37,6 @@ const styles = theme => ({
     },
     chart: {
         padding: theme.spacing.unit * 2
-    },
-    // TODO: Help should be a global class
-    help: {
-        margin: 10,
-        backgroundColor: Grey[600],
-        width: 17,
-        height: 17,
-        fontSize: 10,
-        fontWeight: 'bold'
     }
 });
 
@@ -347,7 +337,7 @@ class FundComparisonView extends React.Component {
                                 <p>No lado direito é possível alterar o benchmark e intervalo visualizado.</p>
                                 <p>Procure um fundo e o adicione na lista para inicar a comparação.</p>
                             </React.Fragment>
-                        }><Avatar className={classes.help}>?</Avatar></Tooltip></Typography>
+                        }><Avatar className={globalClasses.help}>?</Avatar></Tooltip></Typography>
                     </Grid>
                     <Grid container justify="flex-end">
                         <Grid item>

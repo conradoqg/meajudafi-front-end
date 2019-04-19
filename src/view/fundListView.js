@@ -23,7 +23,6 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import Select from '@material-ui/core/Select';
 import Avatar from '@material-ui/core/Avatar';
 import Tooltip from '@material-ui/core/Tooltip';
-import Grey from '@material-ui/core/colors/grey';
 import API from '../api';
 import FundFilterComponent from './component/fundFilterComponent';
 import FundSearchComponent from './component/fundSearchComponent';
@@ -50,28 +49,8 @@ const styles = theme => ({
     },
     chartSelect: {
         margin: theme.spacing.unit
-    },
-    // TODO: Help should be a global class
-    help: {
-        margin: 10,
-        backgroundColor: Grey[600],
-        width: 17,
-        height: 17,
-        fontSize: 10,
-        fontWeight: 'bold'
     }
 });
-
-// TODO: This should be moved to styles, but I need to understand how to do it
-const ITEM_HEIGHT = 48;
-const ITEM_PADDING_TOP = 8;
-const MenuProps = {
-    PaperProps: {
-        style: {
-            maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP
-        },
-    },
-};
 
 const emptyState = {
     data: {
@@ -495,7 +474,7 @@ class FundListView extends React.Component {
                                 <p>Por padrão somente fundos listados na BTG Pactual e XP Investimentos são exibidos. No lado esquerdo é possível procurar fundos pelo nome e no lado direito é possível alterar o filtro, ordem, intervalo e benchmark.</p>
                                 <p>Clique no fundo para visualizar o gráfico.</p>
                             </React.Fragment>
-                        }><Avatar className={classes.help}>?</Avatar></Tooltip></Typography>
+                        }><Avatar className={globalClasses.help}>?</Avatar></Tooltip></Typography>
                     </Grid>
                 </Grid>
                 <Grid container spacing={16}>
@@ -536,8 +515,7 @@ class FundListView extends React.Component {
                                             id="long-menu"
                                             anchorEl={layout.anchorEl}
                                             open={open}
-                                            onClose={this.handleSortClose}
-                                            PaperProps={MenuProps.PaperProps}>
+                                            onClose={this.handleSortClose}>
                                             {this.state.data.sortOptions.map((option, index) => (
                                                 <MenuItem key={option.displayName + option.order} selected={option.displayName === this.state.config.sort.displayName && option.order === this.state.config.sort.order} onClick={event => this.handleSortMenuItemClick(event, index)}>
                                                     {option.displayName}&nbsp;
@@ -556,7 +534,7 @@ class FundListView extends React.Component {
                         </Paper>
                         <Paper elevation={1} square={true}>
                             <Collapse in={layout.showingFilter}>
-                                <FundFilterComponent onFilterChanged={this.handleFilterChanged} />
+                                <FundFilterComponent onFilterChanged={this.handleFilterChanged} globalClasses={globalClasses} />
                             </Collapse>
                         </Paper>
                         <ShowStateComponent

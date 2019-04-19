@@ -7,7 +7,6 @@ import Tooltip from '@material-ui/core/Tooltip';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import Divider from '@material-ui/core/Divider';
-import Grey from '@material-ui/core/colors/grey';
 import { withStyles } from '@material-ui/core/styles';
 import { produce, setAutoFreeze } from 'immer';
 import promisesEach from 'promise-results';
@@ -20,28 +19,12 @@ import { nextColorIndex, formatters } from '../util';
 
 setAutoFreeze(false);
 
-// TODO: Check if all classes below are necessary
-const styles = theme => ({
-    optionsBar: {
-        padding: theme.spacing.unit
-    },
-    progress: {
-        margin: theme.spacing.unit * 2
-    },
+const styles = theme => ({        
     select: {
         margin: theme.spacing.unit
     },
     chart: {
         padding: theme.spacing.unit * 2
-    },
-    // TODO: Help should be a global class
-    help: {
-        margin: 10,
-        backgroundColor: Grey[600],
-        width: 17,
-        height: 17,
-        fontSize: 10,
-        fontWeight: 'bold'
     }
 });
 
@@ -341,7 +324,7 @@ class FundListItemView extends React.Component {
                                 <p>Detalhes do fundo.</p>
                                 <p>No lado direito é possível alterar o benchmark e intervalo visualizado.</p>
                             </React.Fragment>
-                        }><Avatar className={classes.help}>?</Avatar></Tooltip></Typography>
+                        }><Avatar className={globalClasses.help}>?</Avatar></Tooltip></Typography>
                     </Grid>
                     <Grid container justify="flex-end">
                         <Grid item>
@@ -453,7 +436,7 @@ class FundListItemView extends React.Component {
                                 <p>Gráfico histórico para visualização das características do fundo no tempo.</p>
                                 <p>É possível visualizar as outras séries clicando nelas.</p>
                             </React.Fragment>
-                        }><Avatar className={classes.help}>?</Avatar></Tooltip></Typography>
+                        }><Avatar className={globalClasses.help}>?</Avatar></Tooltip></Typography>
                     </Grid>
                 </Grid>
                 <Grid container spacing={16}>
@@ -476,7 +459,7 @@ class FundListItemView extends React.Component {
                                 <p>Histórico mensal, anual e acumulado do fundo.</p>
                                 <p>No lado direito é possível alterar a informação visualizada.</p>
                             </React.Fragment>
-                        }><Avatar className={classes.help}>?</Avatar></Tooltip></Typography>
+                        }><Avatar className={globalClasses.help}>?</Avatar></Tooltip></Typography>
                     </Grid>
                     <Select
                         value={this.state.config.field}
