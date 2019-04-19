@@ -48,5 +48,4 @@ export const formatters = {
     field: fieldFormatters
 };
 export const nextColorIndex = (i) => colors[(i % colors.length + colors.length) % colors.length];
-export { default as StandardDeviation } from './standardDeviation';
 export { default as Plotly } from './plotly';

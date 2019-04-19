@@ -1,6 +1,14 @@
-import { StandardDeviation } from '../util';
 import allKeys from 'promise-results/allKeys';
 import packageJson from '../../package.json';
+import StandardDeviation from '../math/investmentReturnCalculator';
+import InvestmentReturnCalculator from '../math/investmentReturnCalculator';
+import ConsistencyCalculator from '../math/consistencyCalculator';
+import NetworthCalculator from '../math/networthCalculator';
+import QuotaholdersCalculator from '../math/quotaholdersCalculator';
+import RiskCalculator from '../math/riskCalculator';
+import calcSharpeForPeriod from '../math/calcSharpeForPeriod';
+import calcRelativeInvestmentReturn from '../math/calcRelativeInvestmentReturn';
+import CorrelationCalculator from '../math/correlationCalculator';
 
 /* global process */
 const API_URL = `api.${window.location.host}`;
@@ -553,99 +561,3 @@ const calculateStatistics = (data, benchmark) => {
 
     return statistics;
 };
-
-// TODO: Move these to its own file
-class InvestmentReturnCalculator {
-    constructor() {
-        this.investmentReturn = 0;
-    }
-
-    add(investmentReturn) {
-        this.investmentReturn = ((1 + this.investmentReturn) * (1 + investmentReturn)) - 1;
-        return this.investmentReturn;
-    }
-}
-
-class CorrelationCalculator {
-    constructor() {
-        this.sum1 = 0;
-        this.sum2 = 0;
-        this.sum1Sq = 0;
-        this.sum2Sq = 0;
-        this.pSum = 0;
-    }
-
-    add(investment_return, benchmark_investment_return, n) {
-        this.sum1 += investment_return;
-        this.sum2 += benchmark_investment_return;
-        this.sum1Sq += Math.pow(investment_return, 2);
-        this.sum2Sq += Math.pow(benchmark_investment_return, 2);
-        this.pSum += investment_return * benchmark_investment_return;
-        let num = this.pSum - (this.sum1 * this.sum2 / n);
-        let den = Math.sqrt((this.sum1Sq - Math.pow(this.sum1, 2) / n) *
-            (this.sum2Sq - Math.pow(this.sum2, 2) / n));
-
-        if (den === 0 || Number.isNaN(den)) return 0;
-        else return num / den;
-    }
-}
-
-const calcRelativeInvestmentReturn = (investment_return, benchmark_investment_return) => investment_return / benchmark_investment_return;
-
-const calcSharpeForPeriod = (risk, investment_return, cdi_investment_return, length) => {
-    if (risk === 0) return 0;
-    const annualizedAccInvestmentReturn = ((investment_return / length) * 252);
-    const annualizedAccCDIInvestmentReturn = ((cdi_investment_return / length) * 252);
-    return (annualizedAccInvestmentReturn - annualizedAccCDIInvestmentReturn) / risk;
-};
-
-class ConsistencyCalculator {
-    constructor() {
-        this.consistencyReached = 0;
-        this.lastConsistency = [];
-
-    }
-    add(investment_return, cdi_investment_return, period) {
-        let consistencyPoint = 0;
-        if (investment_return >= cdi_investment_return) consistencyPoint = 1;
-        if (period !== 0 && this.lastConsistency.length >= period) this.consistencyReached -= this.lastConsistency.shift();
-        this.consistencyReached += consistencyPoint;
-        this.lastConsistency.push(consistencyPoint);
-        return ((100 * this.consistencyReached) / this.lastConsistency.length) / 100;
-    }
-}
-
-class NetworthCalculator {
-    constructor() {
-        this.lastNetworth = null;
-    }
-
-    add(networth) {
-        if (this.lastNetworth == null) this.lastNetworth = networth;
-
-        return networth - this.lastNetworth;
-    }
-}
-
-class QuotaholdersCalculator {
-    constructor() {
-        this.lastQuotaholders = null;
-    }
-
-    add(quotaholders) {
-        if (this.lastQuotaholders == null) this.lastQuotaholders = quotaholders;
-
-        return quotaholders - this.lastQuotaholders;
-    }
-}
-
-class RiskCalculator {
-    constructor() {
-        this.standardDeviation = new StandardDeviation();
-    }
-
-    add(investment_return) {
-        this.standardDeviation.addMeasurement(investment_return);
-        return this.standardDeviation.get() * Math.sqrt(252);
-    }
-}
