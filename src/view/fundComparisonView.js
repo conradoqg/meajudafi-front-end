@@ -13,15 +13,14 @@ import MenuItem from '@material-ui/core/MenuItem';
 import IconButton from '@material-ui/core/IconButton';
 import { withStyles } from '@material-ui/core/styles';
 import { produce, setAutoFreeze } from 'immer';
-import * as d3Format from 'd3-format';
 import promisesEach from 'promise-results';
 import { withRouter } from 'react-router-dom';
 import API from '../api';
 import FundSearchComponent from './component/fundSearchComponent';
 import ShowStateComponent from './component/showStateComponent';
 import DataHistoryChartComponent from './component/dataHistoryChartComponent';
-import { sortOptions, benchmarkOptions, rangeOptions } from './option';
-import { nextColorIndex } from '../util';
+import { fieldOptions, sortOptions, benchmarkOptions, rangeOptions } from './option';
+import { formatters, nextColorIndex, chartFormatters } from '../util';
 
 setAutoFreeze(false);
 
@@ -290,9 +289,9 @@ class FundComparisonView extends React.Component {
                     spikemode: 'across'
                 },
                 yaxis: {
-                    title: 'Desempenho',
-                    tickformat: ',.0%',
-                    hoverformat: ',.2%'
+                    title: fieldOptions.find(fieldItem => fieldItem.name === field).displayName,
+                    tickformat: chartFormatters[field].tickformat,
+                    hoverformat: chartFormatters[field].hoverformat
                 }
             }
         };
@@ -347,11 +346,7 @@ class FundComparisonView extends React.Component {
                                     name: 'field',
                                     id: 'field',
                                 }}>
-                                <MenuItem value="investment_return">Desempenho</MenuItem>
-                                <MenuItem value="relative_investment_return">Desempenho Relativo</MenuItem>
-                                <MenuItem value="correlation">Correlação</MenuItem>
-                                <MenuItem value="risk">Risco</MenuItem>
-                                <MenuItem value="sharpe">Sharpe</MenuItem>
+                                {fieldOptions.map(field => (<MenuItem key={field.name} value={field.name}>{field.displayName}</MenuItem>))}
                             </Select>
                             <Select
                                 value={this.state.config.benchmark}
@@ -394,9 +389,9 @@ class FundComparisonView extends React.Component {
                                                     <Typography>
                                                         <b><Link to={'/fundList/' + fund.f_cnpj} className={globalClasses.link}>{fund.f_short_name}</Link></b><br />
                                                         <small>
-                                                            <b>Patrimônio:</b> R$ {d3Format.format(',.2f')(fund.iry_accumulated_networth)}<br />
+                                                            <b>Patrimônio:</b> {formatters.field['iry_accumulated_networth'](fund.iry_accumulated_networth)}<br />
                                                             <b>Quotistas:</b> {fund.iry_accumulated_quotaholders} <br />
-                                                            <b>Benchmark:</b> {fund.icf_rentab_fundo ? fund.icf_rentab_fundo : 'Não informado'}
+                                                            <b>Benchmark:</b> {formatters.field['icf_rentab_fundo'](fund.icf_rentab_fundo)}
                                                         </small>
                                                     </Typography>
                                                 </Grid>
@@ -413,18 +408,18 @@ class FundComparisonView extends React.Component {
                                                         <Grid item xs={6}>
                                                             <Typography>
                                                                 <small>
-                                                                    1A: {d3Format.format('.2%')(fund.iry_investment_return_1y)}<br />
-                                                                    2A: {d3Format.format('.2%')(fund.iry_investment_return_2y)}<br />
-                                                                    3A: {d3Format.format('.2%')(fund.iry_investment_return_3y)}
+                                                                    1A: {formatters.field['iry_investment_return_1y'](fund.iry_investment_return_1y)}<br />
+                                                                    2A: {formatters.field['iry_investment_return_2y'](fund.iry_investment_return_2y)}<br />
+                                                                    3A: {formatters.field['iry_investment_return_3y'](fund.iry_investment_return_3y)}
                                                                 </small>
                                                             </Typography>
                                                         </Grid>
                                                         <Grid item xs={6}>
                                                             <Typography>
                                                                 <small>
-                                                                    1A: {d3Format.format('.2%')(fund.iry_risk_1y)}<br />
-                                                                    2A: {d3Format.format('.2%')(fund.iry_risk_2y)}<br />
-                                                                    3A: {d3Format.format('.2%')(fund.iry_risk_3y)}<br />
+                                                                    1A: {formatters.field['iry_risk_1y'](fund.iry_risk_1y)}<br />
+                                                                    2A: {formatters.field['iry_risk_2y'](fund.iry_risk_2y)}<br />
+                                                                    3A: {formatters.field['iry_risk_3y'](fund.iry_risk_3y)}<br />
                                                                 </small>
                                                             </Typography>
                                                         </Grid>
@@ -485,7 +480,7 @@ class FundComparisonView extends React.Component {
                                                 <React.Fragment>
                                                     <Grid item xs={2}>
                                                         <Typography>
-                                                            Desempenho: {d3Format.format('.2%')(this.state.data.benchmark.data.accumulated.investment_return)}
+                                                            Desempenho: {formatters.field['investment_return'](this.state.data.benchmark.data.accumulated.investment_return)}
                                                         </Typography>
                                                     </Grid>
                                                     <Grid item xs={2}>
@@ -496,7 +491,7 @@ class FundComparisonView extends React.Component {
                                                     </Grid>
                                                     <Grid item xs={1}>
                                                         <Typography>
-                                                            Risco: {d3Format.format('.2%')(this.state.data.benchmark.data.accumulated.risk)}
+                                                            Risco: {formatters.field['risk'](this.state.data.benchmark.data.accumulated.risk)}
                                                         </Typography>
                                                     </Grid>
                                                     <Grid item xs={1}>
@@ -550,27 +545,27 @@ class FundComparisonView extends React.Component {
                                                             <React.Fragment>
                                                                 <Grid item xs={2}>
                                                                     <Typography>
-                                                                        Desempenho: {d3Format.format('.2%')(fundObject.data.accumulated.investment_return)}
+                                                                        Desempenho: {formatters.field['investment_return'](fundObject.data.accumulated.investment_return)}
                                                                     </Typography>
                                                                 </Grid>
                                                                 <Grid item xs={2}>
                                                                     <Typography>
-                                                                        Desempenho Relativo: {d3Format.format('.2%')(fundObject.data.accumulated.relative_investment_return)}
+                                                                        Desempenho Relativo: {formatters.field['relative_investment_return'](fundObject.data.accumulated.relative_investment_return)}
                                                                     </Typography>
                                                                 </Grid>
                                                                 <Grid item xs={1}>
                                                                     <Typography>
-                                                                        Correlação: {d3Format.format('.2%')(fundObject.data.accumulated.correlation)}
+                                                                        Correlação: {formatters.field['correlation'](fundObject.data.accumulated.correlation)}
                                                                     </Typography>
                                                                 </Grid>
                                                                 <Grid item xs={1}>
                                                                     <Typography>
-                                                                        Risco: {d3Format.format('.2%')(fundObject.data.accumulated.risk)}
+                                                                        Risco: {formatters.field['risk'](fundObject.data.accumulated.risk)}
                                                                     </Typography>
                                                                 </Grid>
                                                                 <Grid item xs={1}>
                                                                     <Typography>
-                                                                        Sharpe: {d3Format.format('.2')(fundObject.data.accumulated.sharpe)}
+                                                                        Sharpe: {formatters.field['sharpe'](fundObject.data.accumulated.sharpe)}
                                                                     </Typography>
                                                                 </Grid>
                                                             </React.Fragment>

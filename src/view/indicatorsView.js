@@ -2,7 +2,6 @@
 import Typography from '@material-ui/core/Typography';
 import React from 'react';
 import { Link } from 'react-router-dom';
-import dayjs from 'dayjs';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import Select from '@material-ui/core/Select';
@@ -23,16 +22,12 @@ import Tooltip from '@material-ui/core/Tooltip';
 import { withStyles } from '@material-ui/core/styles';
 import { produce, setAutoFreeze } from 'immer';
 import allKeys from 'promise-results/allKeys';
-import * as d3Format from 'd3-format';
-import ptBR from 'd3-format/locale/pt-BR.json';
 import FundFilterComponent from './component/fundFilterComponent';
 import ShowStateComponent from './component/showStateComponent';
 import DataHistoryChartComponent from './component/dataHistoryChartComponent';
 import API from '../api';
 import { rangeOptions } from './option';
-import { nextColorIndex } from '../util';
-
-d3Format.formatDefaultLocale(ptBR);
+import { formatters, nextColorIndex, chartFormatters } from '../util';
 
 setAutoFreeze(false);
 
@@ -226,8 +221,8 @@ class IndicatorsView extends React.Component {
                 },
                 yaxis: {
                     title: 'Bovespa',
-                    tickformat: ',.0',
-                    hoverformat: ',.2',
+                    tickformat: chartFormatters.int.tickformat,
+                    hoverformat: chartFormatters.int.hoverformat,
                     fixedrange: true
                 },
                 yaxis2: {
@@ -235,9 +230,9 @@ class IndicatorsView extends React.Component {
                     anchor: 'x',
                     overlaying: 'y',
                     side: 'right',
-                    tickprefix: 'R$ ',
-                    tickformat: ',.2f',
-                    hoverformat: ',.2f',
+                    tickprefix: chartFormatters.money.tickprefix,
+                    tickformat: chartFormatters.money.tickformat,
+                    hoverformat: chartFormatters.money.hoverformat,
                     fixedrange: true,
                     position: 0.95
                 },
@@ -246,9 +241,9 @@ class IndicatorsView extends React.Component {
                     anchor: 'free',
                     overlaying: 'y',
                     side: 'right',
-                    tickprefix: 'R$ ',
-                    tickformat: ',.2f',
-                    hoverformat: ',.2f',
+                    tickprefix: chartFormatters.money.tickprefix,
+                    tickformat: chartFormatters.money.tickformat,
+                    hoverformat: chartFormatters.money.hoverformat,
                     fixedrange: true,
                     position: 1
                 }
@@ -286,48 +281,46 @@ class IndicatorsView extends React.Component {
             } else {
                 date = change.changed_fields[date_field];
                 Object.keys(change.changed_fields).forEach(changedField => {
-                    const capitalized = value => value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
-
                     const relevantFields = {
                         xf_state: {
                             title: 'Captação',
-                            text: value => value === '0' ? 'Fechada' : 'Aberta'
+                            text: formatters.field['xf_state']
                         },
                         xf_formal_risk: {
                             title: 'Risco formal',
-                            text: value => ['Desconhecido', 'Risco baixo', 'Risco médio baixo', 'Risco médio', 'Risco médio alto', 'Risco alto'][value]
+                            text: formatters.field['xf_formal_risk']
                         },
                         xf_initial_investment: {
                             title: 'Investimento inicial',
-                            text: d3Format.format(',.2f')
+                            text: formatters.field['xf_initial_investment']
                         },
                         xf_rescue_financial_settlement: {
                             title: 'Dias para resgate',
-                            text: value => `D+${value}`
+                            text: formatters.field['xf_rescue_financial_settlement']
                         },
                         bf_is_blacklist: {
                             title: 'Captação',
-                            text: value => value === 't' ? 'Fechada' : 'Aberta'
+                            text: formatters.field['bf_is_blacklist']
                         },
                         bf_inactive: {
                             title: 'Captação',
-                            text: value => value ? 'Aberta' : 'Fechada'
+                            text: formatters.field['bf_inactive']
                         },
                         bf_risk_name: {
                             title: 'Risco formal',
-                            text: capitalized
+                            text: formatters.field['bf_risk_name']
                         },
                         bf_minimum_initial_investment: {
                             title: 'Investimento inicial',
-                            text: d3Format.format(',.2f')
+                            text: formatters.field['bf_minimum_initial_investment']
                         },
                         bf_rescue_financial_settlement: {
                             title: 'Dias para resgate',
-                            text: value => `D+${value}`
+                            text: formatters.field['bf_rescue_financial_settlement']
                         },
                         bf_investor_type: {
                             title: 'Tipo de investidor',
-                            text: value => value === 'NAO_QUALIFICADO' ? 'Não qualificado' : 'Qualificado'
+                            text: formatters.field['bf_investor_type']
                         }
                     };
                     if (relevantFields[changedField]) {
@@ -499,7 +492,7 @@ const FundsChangedPaper = (props) => {
                                     <Grid item xs={12}>
                                         <Grid container spacing={8}>
                                             <Grid item xs>
-                                                <Typography component="span" variant="body1" align="left" className={classes.cropTextNormal}>{dayjs(change.date).format('DD/MM/YYYY')} - <Link to={'/fundList/' + change.cnpj} className={globalClasses.link}>{change.name}</Link></Typography>
+                                                <Typography component="span" variant="body1" align="left" className={classes.cropTextNormal}>{formatters.date(change.date)} - <Link to={'/fundList/' + change.cnpj} className={globalClasses.link}>{change.name}</Link></Typography>
                                             </Grid>
                                             <Grid item xs>
                                                 {change.changes.map((fieldChange, index) => (<Typography key={index} component="span" variant="body1" align="right">{fieldChange}</Typography>))}
@@ -530,8 +523,6 @@ const IndicatorPaper = (props) => {
             return inverted ? classes.indicatorValuePositive : classes.indicatorValueNegative;
     };
 
-    const formatValue = value => (value * 100).toFixed(2);
-
     return (
         <div>
             <Paper elevation={1} square={true}>
@@ -550,7 +541,7 @@ const IndicatorPaper = (props) => {
                                         <Typography component="span" variant="body1" className={classes.cropText}><Link to={'/fundList/' + indicator.cnpj} className={globalClasses.link}>{indicator.name}</Link></Typography>
                                     </ListItemText>
                                     <ListItemSecondaryAction>
-                                        <Typography component="span" variant="body1" className={getClassForValue(indicator.value)}>{formatValue(indicator.value)}%</Typography>
+                                        <Typography component="span" variant="body1" className={getClassForValue(indicator.value)}>{formatters.percentage(indicator.value)}</Typography>
                                     </ListItemSecondaryAction>
                                 </ListItem>
                             </div>
@@ -567,7 +558,7 @@ const IndicatorPaper = (props) => {
                                         <Typography component="span" variant="body1" className={classes.cropText}><Link to={'/fundList/' + indicator.cnpj} className={globalClasses.link}>{indicator.name}</Link></Typography>
                                     </ListItemText>
                                     <ListItemSecondaryAction>
-                                        <Typography component="span" variant="body1" className={getClassForValue(indicator.value)}>{formatValue(indicator.value)}%</Typography>
+                                        <Typography component="span" variant="body1" className={getClassForValue(indicator.value)}>{formatters.percentage(indicator.value)}</Typography>
                                     </ListItemSecondaryAction>
                                 </ListItem>
                             </div>

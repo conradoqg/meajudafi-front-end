@@ -15,7 +15,7 @@ import API from '../api';
 import ShowStateComponent from './component/showStateComponent';
 import DataHistoryChartComponent from './component/dataHistoryChartComponent';
 import { fieldOptions, benchmarkOptions, rangeOptions } from './option';
-import { nextColorIndex, formatters } from '../util';
+import { nextColorIndex, formatters, chartFormatters } from '../util';
 
 setAutoFreeze(false);
 
@@ -226,15 +226,15 @@ class FundListItemView extends React.Component {
                 },
                 yaxis: {
                     title: 'Desempenho',
-                    tickformat: ',.0%',
-                    hoverformat: ',.2%',
+                    tickformat: chartFormatters.investment_return.tickformat,
+                    hoverformat: chartFormatters.investment_return.hoverformat,
                     fixedrange: true,
                     range: [min_y, max_y],
                 },
                 yaxis2: {
                     title: `Benchmark (${benchmarkText})`,
-                    tickformat: ',.0%',
-                    hoverformat: ',.2%',
+                    tickformat: chartFormatters.investment_return.tickformat,
+                    hoverformat: chartFormatters.investment_return.hoverformat,
                     anchor: 'free',
                     overlaying: 'y',
                     side: 'left',
@@ -244,8 +244,8 @@ class FundListItemView extends React.Component {
                 },
                 yaxis3: {
                     title: 'Risco',
-                    tickformat: ',.0%',
-                    hoverformat: ',.2%',
+                    tickformat: chartFormatters.risk.tickformat,
+                    hoverformat: chartFormatters.risk.hoverformat,
                     anchor: 'x',
                     overlaying: 'y',
                     side: 'right',
@@ -253,8 +253,8 @@ class FundListItemView extends React.Component {
                 },
                 yaxis4: {
                     title: 'Sharpe',
-                    tickformat: ',.2f',
-                    hoverformat: ',.2f',
+                    tickformat: chartFormatters.sharpe.tickformat,
+                    hoverformat: chartFormatters.sharpe.hoverformat,
                     anchor: 'free',
                     overlaying: 'y',
                     side: 'right',
@@ -263,8 +263,8 @@ class FundListItemView extends React.Component {
                 },
                 yaxis5: {
                     title: 'Consistência',
-                    tickformat: ',.0%',
-                    hoverformat: ',.2%',
+                    tickformat: chartFormatters.consistency.tickformat,
+                    hoverformat: chartFormatters.consistency.hoverformat,
                     anchor: 'free',
                     overlaying: 'y',
                     side: 'right',
@@ -274,9 +274,9 @@ class FundListItemView extends React.Component {
                 yaxis6: {
                     title: 'Patrimônio',
                     type: 'linear',
-                    tickprefix: 'R$ ',
-                    tickformat: ',.2f',
-                    hoverformat: ',.2f',
+                    tickprefix: chartFormatters.networth.tickprefix,
+                    tickformat: chartFormatters.networth.tickformat,
+                    hoverformat: chartFormatters.networth.hoverformat,
                     anchor: 'free',
                     overlaying: 'y',
                     side: 'right',

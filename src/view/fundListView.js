@@ -28,13 +28,10 @@ import FundFilterComponent from './component/fundFilterComponent';
 import FundSearchComponent from './component/fundSearchComponent';
 import ShowStateComponent from './component/showStateComponent';
 import DataHistoryChartComponent from './component/dataHistoryChartComponent';
-import * as d3Format from 'd3-format';
 import allKeys from 'promise-results/allKeys';
-import ptBR from 'd3-format/locale/pt-BR.json';
 import { sortOptions, benchmarkOptions, rangeOptions } from './option';
-import { nextColorIndex } from '../util';
+import { formatters, nextColorIndex, chartFormatters } from '../util';
 
-d3Format.formatDefaultLocale(ptBR);
 setAutoFreeze(false);
 
 const styles = theme => ({
@@ -387,15 +384,15 @@ class FundListView extends React.Component {
                 },
                 yaxis: {
                     title: 'Desempenho',
-                    tickformat: ',.0%',
-                    hoverformat: ',.2%',
+                    tickformat: chartFormatters.investment_return.tickformat,
+                    hoverformat: chartFormatters.investment_return.hoverformat,
                     fixedrange: true,
                     range: [min_y, max_y],
                 },
                 yaxis2: {
                     title: `Benchmark (${benchmarkText})`,
-                    tickformat: ',.0%',
-                    hoverformat: ',.2%',
+                    tickformat: chartFormatters.investment_return.tickformat,
+                    hoverformat: chartFormatters.investment_return.hoverformat,
                     anchor: 'free',
                     overlaying: 'y',
                     side: 'left',
@@ -405,8 +402,8 @@ class FundListView extends React.Component {
                 },
                 yaxis3: {
                     title: 'Risco',
-                    tickformat: ',.0%',
-                    hoverformat: ',.2%',
+                    tickformat: chartFormatters.risk.tickformat,
+                    hoverformat: chartFormatters.risk.hoverformat,
                     anchor: 'x',
                     overlaying: 'y',
                     side: 'right',
@@ -414,8 +411,8 @@ class FundListView extends React.Component {
                 },
                 yaxis4: {
                     title: 'Sharpe',
-                    tickformat: ',.2f',
-                    hoverformat: ',.2f',
+                    tickformat: chartFormatters.sharpe.tickformat,
+                    hoverformat: chartFormatters.sharpe.hoverformat,
                     anchor: 'free',
                     overlaying: 'y',
                     side: 'right',
@@ -424,8 +421,8 @@ class FundListView extends React.Component {
                 },
                 yaxis5: {
                     title: 'Consistência',
-                    tickformat: ',.0%',
-                    hoverformat: ',.2%',
+                    tickformat: chartFormatters.consistency.tickformat,
+                    hoverformat: chartFormatters.consistency.hoverformat,
                     anchor: 'free',
                     overlaying: 'y',
                     side: 'right',
@@ -435,9 +432,9 @@ class FundListView extends React.Component {
                 yaxis6: {
                     title: 'Patrimônio',
                     type: 'linear',
-                    tickprefix: 'R$ ',
-                    tickformat: ',.2f',
-                    hoverformat: ',.2f',
+                    tickprefix: chartFormatters.networth.tickprefix,
+                    tickformat: chartFormatters.networth.tickformat,
+                    hoverformat: chartFormatters.networth.hoverformat,
                     anchor: 'free',
                     overlaying: 'y',
                     side: 'right',
@@ -546,9 +543,9 @@ class FundListView extends React.Component {
                                                 <Typography>
                                                     <b><Link to={'/fundList/' + fund.f_cnpj} className={globalClasses.link}>{fund.f_short_name}</Link></b><br />
                                                     <small>
-                                                        <b>Patrimônio:</b> R$ {d3Format.format(',.2f')(fund.iry_accumulated_networth)}<br />
+                                                        <b>Patrimônio:</b> {formatters.field['iry_accumulated_networth'](fund.iry_accumulated_networth)}<br />
                                                         <b>Quotistas:</b> {fund.iry_accumulated_quotaholders} <br />
-                                                        <b>Benchmark:</b> {fund.icf_rentab_fundo ? fund.icf_rentab_fundo : 'Não informado'}
+                                                        <b>Benchmark:</b> {formatters.field['icf_rentab_fundo'](fund.icf_rentab_fundo)}
                                                     </small>
                                                 </Typography>
                                             </Grid>
@@ -565,18 +562,18 @@ class FundListView extends React.Component {
                                                     <Grid item xs={6}>
                                                         <Typography>
                                                             <small>
-                                                                1A: {d3Format.format('.2%')(fund.iry_investment_return_1y)}<br />
-                                                                2A: {d3Format.format('.2%')(fund.iry_investment_return_2y)}<br />
-                                                                3A: {d3Format.format('.2%')(fund.iry_investment_return_3y)}
+                                                                1A: {formatters.field['iry_investment_return_1y'](fund.iry_investment_return_1y)}<br />
+                                                                2A: {formatters.field['iry_investment_return_2y'](fund.iry_investment_return_2y)}<br />
+                                                                3A: {formatters.field['iry_investment_return_3y'](fund.iry_investment_return_3y)}
                                                             </small>
                                                         </Typography>
                                                     </Grid>
                                                     <Grid item xs={6}>
                                                         <Typography>
                                                             <small>
-                                                                1A: {d3Format.format('.2%')(fund.iry_risk_1y)}<br />
-                                                                2A: {d3Format.format('.2%')(fund.iry_risk_2y)}<br />
-                                                                3A: {d3Format.format('.2%')(fund.iry_risk_3y)}<br />
+                                                                1A: {formatters.field['iry_risk_1y'](fund.iry_risk_1y)}<br />
+                                                                2A: {formatters.field['iry_risk_2y'](fund.iry_risk_2y)}<br />
+                                                                3A: {formatters.field['iry_risk_3y'](fund.iry_risk_3y)}<br />
                                                             </small>
                                                         </Typography>
                                                     </Grid>
