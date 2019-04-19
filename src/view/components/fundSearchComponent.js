@@ -81,4 +81,4 @@ class FundSearchComponent extends React.Component {
 
 }
 
-module.exports = withStyles(styles)(FundSearchComponent);
+export default withStyles(styles)(FundSearchComponent);

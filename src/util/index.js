@@ -1,6 +1,5 @@
 import { filterOptions } from '../view/options';
 import * as d3Format from 'd3-format';
-import StandardDeviation from './standardDeviation';
 import ptBR from 'd3-format/locale/pt-BR.json';
 import LocalizedFormat from 'dayjs/plugin/localizedFormat';
 import dayjs from 'dayjs';
@@ -11,20 +10,10 @@ dayjs.locale('pt-br');
 d3Format.formatDefaultLocale(ptBR);
 
 const colors = ['#e6194B', '#3cb44b', '#ffe119', '#4363d8', '#f58231', '#911eb4', '#42d4f4', '#f032e6', '#bfef45', '#fabebe', '#469990', '#e6beff', '#9A6324', '#fffac8', '#800000', '#aaffc3', '#808000', '#ffd8b1', '#000075', '#a9a9a9', '#ffffff', '#000000'];
-const util = {
-    formatters: {
-        somethingToPercentage: (value) => value != null && !isNaN(value) ? parseFloat((value * 100)).toFixed(2) : value,
-        somethingToValue: (value) => value != null && !isNaN(value) ? parseFloat(value).toFixed(2) : null,
-        aValueOrTrace: (value) => value == null ? '-' : value.toLocaleString(),
-        somethingToMoney: (value) => { return value; }
-    },
-    nextColorIndex: (i) => colors[(i % colors.length + colors.length) % colors.length],
-    StandardDeviation: StandardDeviation,
-};
 
 const fieldFormatters = {};
 Object.keys(filterOptions).map(key => {
-    fieldFormatters[key] = (value) => filterOptions[key].options.find(item => item.value == value).displayName;
+    return fieldFormatters[key] = (value) => filterOptions[key].options.find(item => item.value === value).displayName;
 });
 
 fieldFormatters['icf_vl_patrim_liq'] = d3Format.format('$,.2f');
@@ -51,6 +40,13 @@ fieldFormatters['correlation'] = d3Format.format('.2%');
 fieldFormatters['risk'] = d3Format.format('.2%');
 fieldFormatters['sharpe'] = d3Format.format(',.2f');
 
-util.formatters.field = fieldFormatters;
-
-module.exports = util;
+export const formatters = {
+    somethingToPercentage: (value) => value != null && !isNaN(value) ? parseFloat((value * 100)).toFixed(2) : value,
+    somethingToValue: (value) => value != null && !isNaN(value) ? parseFloat(value).toFixed(2) : null,
+    aValueOrTrace: (value) => value == null ? '-' : value.toLocaleString(),
+    somethingToMoney: (value) => { return value; },
+    field: fieldFormatters
+};
+export const nextColorIndex = (i) => colors[(i % colors.length + colors.length) % colors.length];
+export { default as StandardDeviation } from './standardDeviation';
+export { default as Plotly } from './plotly';

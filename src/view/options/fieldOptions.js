@@ -1,4 +1,4 @@
-module.exports = [
+export default [
     {
         name: 'investment_return',
         displayName: 'Desempenho'

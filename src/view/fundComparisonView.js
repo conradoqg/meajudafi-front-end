@@ -16,18 +16,18 @@ import { withStyles } from '@material-ui/core/styles';
 import { produce, setAutoFreeze } from 'immer';
 import * as d3Format from 'd3-format';
 import createPlotlyComponent from 'react-plotly.js/factory';
-import Plotly from 'plotly';
 import promisesEach from 'promise-results';
 import { withRouter } from 'react-router-dom';
 import API from '../api';
 import FundSearchComponent from './components/fundSearchComponent';
 import ShowStateComponent from './components/showStateComponent';
 import { sortOptions, benchmarkOptions, rangeOptions } from './options';
-import { nextColorIndex } from '../util';
+import { Plotly, nextColorIndex } from '../util';
 
 setAutoFreeze(false);
 const Plot = createPlotlyComponent(Plotly);
 
+// TODO: Check if all classes below are necessary
 const styles = theme => ({
     optionsBar: {
         padding: theme.spacing.unit
@@ -41,6 +41,7 @@ const styles = theme => ({
     chart: {
         padding: theme.spacing.unit * 2
     },
+    // TODO: Help should be a global class
     help: {
         margin: 10,
         backgroundColor: Grey[600],
@@ -56,7 +57,7 @@ const emptyState = {
         fundListSearch: [],
         fundListCompare: [],
         benchmark: {
-            name: benchmarkOptions.find(benchmark => benchmark.name == 'cdi').displayName,
+            name: benchmarkOptions.find(benchmark => benchmark.name === 'cdi').displayName,
             data: null
         },
         sortOptions: sortOptions,
@@ -79,8 +80,8 @@ class FundComparisonView extends React.Component {
 
     constructor(props) {
         super(props);
-        
-        this.state.data.benchmark.name = benchmarkOptions.find(benchmark => benchmark.name == this.state.config.benchmark).displayName;
+
+        this.state.data.benchmark.name = benchmarkOptions.find(benchmark => benchmark.name === this.state.config.benchmark).displayName;
         this.state.data.fundListCompare = props.match.params.cnpjs ? props.match.params.cnpjs.split('/').map(cnpj => { return { cnpj, detail: null, data: null }; }) : emptyState.data.fundListCompare;
         this.state.config.range = (typeof (props.match.params.range) != 'undefined') ? props.match.params.range : this.state.config.range;
         this.state.config.benchmark = (typeof (props.match.params.benchmark) != 'undefined') ? props.match.params.benchmark : this.state.config.benchmark;
@@ -93,11 +94,12 @@ class FundComparisonView extends React.Component {
         return this.updateData(this.state);
     }
 
+    // TODO: Componentize history state
     UNSAFE_componentWillReceiveProps(nextProps) {
         const locationChanged = this.props.location !== nextProps.location;
 
         if (locationChanged) {
-            if (this.props.history.action == 'POP') {
+            if (this.props.history.action === 'POP') {
                 this.updateData(nextProps.history.location.state);
             }
         }
@@ -134,7 +136,7 @@ class FundComparisonView extends React.Component {
                 return fund;
             });
             draft.data.benchmark = {
-                name: benchmarkOptions.find(benchmark => benchmark.name == event.target.value).displayName,
+                name: benchmarkOptions.find(benchmark => benchmark.name === event.target.value).displayName,
                 data: null
             };
             draft.data.chart = null;
@@ -154,7 +156,7 @@ class FundComparisonView extends React.Component {
         }));
 
         try {
-            if (search.term != '') {
+            if (search.term !== '') {
                 const result = await this.getFundList(nextState.config);
 
                 this.setState(produce(nextState, draft => {
@@ -173,7 +175,7 @@ class FundComparisonView extends React.Component {
         const nextState = produce(this.state, draft => {
             draft.config.searchRevision = draft.config.searchRevision + 1;
             draft.data.fundListSearch = emptyState.data.fundListSearch;
-            if (!draft.data.fundListCompare.find(existingFund => existingFund.cnpj == fund.icf_cnpj_fundo)) {
+            if (!draft.data.fundListCompare.find(existingFund => existingFund.cnpj === fund.icf_cnpj_fundo)) {
                 draft.data.fundListCompare.push({
                     cnpj: fund.icf_cnpj_fundo,
                     data: null
@@ -198,7 +200,7 @@ class FundComparisonView extends React.Component {
 
     handleRemoveClick = async (fund) => {
         const nextState = produce(this.state, draft => {
-            draft.data.fundListCompare = draft.data.fundListCompare.filter(fundItem => fundItem.cnpj != fund.cnpj);
+            draft.data.fundListCompare = draft.data.fundListCompare.filter(fundItem => fundItem.cnpj !== fund.cnpj);
         });
         this.pushHistory(nextState);
         return this.updateData(nextState);
@@ -209,11 +211,11 @@ class FundComparisonView extends React.Component {
     }
 
 
-    replaceHistory(nextState) {        
+    replaceHistory(nextState) {
         this.props.history.replace(this.buildHistoryPath(nextState), nextState);
     }
 
-    pushHistory(nextState) {        
+    pushHistory(nextState) {
         this.props.history.push(this.buildHistoryPath(nextState), nextState);
     }
 
@@ -227,7 +229,7 @@ class FundComparisonView extends React.Component {
         }));
 
         let promises = {};
-        fundsToUpdate.map(fund => {
+        fundsToUpdate.forEach(fund => {
             promises[fund.cnpj] = promisesEach({ detail: this.getFundData(fund.cnpj), data: this.getFundStatistic(fund.cnpj, nextState.config) });
         });
         promises.benchmark = benchmarkToUpdate ? this.getBenchmarkStatistic(nextState.config) : null;
@@ -246,7 +248,7 @@ class FundComparisonView extends React.Component {
                     else fund.data = results[fund.cnpj].data;
 
                     // TODO: getFundData should return the result or throw error
-                    if (results[fund.cnpj].detail.length == 0) fund.detail = 'Não encontrado';
+                    if (results[fund.cnpj].detail.length === 0) fund.detail = 'Não encontrado';
                     else {
                         fund.detail = {
                             name: results[fund.cnpj].detail[0].f_short_name,
@@ -270,7 +272,7 @@ class FundComparisonView extends React.Component {
         if (benchmark) {
             chartData.push({
                 x: benchmark.data.daily.date,
-                y: (field == 'relative_investment_return' || field == 'correlation' || field == 'sharpe' ? (new Array(benchmark.data.daily.date.length)).fill(field == 'sharpe' ? 0 : 1) : benchmark.data.daily[field]),
+                y: (field === 'relative_investment_return' || field === 'correlation' || field === 'sharpe' ? (new Array(benchmark.data.daily.date.length)).fill(field === 'sharpe' ? 0 : 1) : benchmark.data.daily[field]),
                 type: 'scatter',
                 mode: 'lines',
                 name: benchmark.name,
@@ -313,7 +315,7 @@ class FundComparisonView extends React.Component {
     }
 
     async getBenchmarkStatistic(config) {
-        const from = rangeOptions.find(range => range.name == config.range).toDate();
+        const from = rangeOptions.find(range => range.name === config.range).toDate();
 
         return API.getBenchmarkStatistic(config.benchmark, from);
     }
@@ -327,7 +329,7 @@ class FundComparisonView extends React.Component {
     }
 
     async getFundStatistic(cnpj, config) {
-        const from = rangeOptions.find(range => range.name == config.range).toDate();
+        const from = rangeOptions.find(range => range.name === config.range).toDate();
 
         return API.getFundStatistic(cnpj, config.benchmark, from);
     }
@@ -383,7 +385,7 @@ class FundComparisonView extends React.Component {
                                     name: 'range',
                                     id: 'range',
                                 }}>
-                                {rangeOptions.filter(range => range.name != 'all').map(range => (<MenuItem key={range.name} value={range.name}>{range.displayName}</MenuItem>))}
+                                {rangeOptions.filter(range => range.name !== 'all').map(range => (<MenuItem key={range.name} value={range.name}>{range.displayName}</MenuItem>))}
                             </Select>
                         </Grid>
                     </Grid>
@@ -611,6 +613,7 @@ class FundComparisonView extends React.Component {
     }
 }
 
+// TODO: Move to a component
 const FundHistoryChart = (props) => {
     const { fund, handleChartInitialized, handleChartUpdate } = props;
 
@@ -638,4 +641,4 @@ const FundHistoryChart = (props) => {
     />);
 };
 
-module.exports = withStyles(styles)(withRouter(FundComparisonView));
+export default withStyles(styles)(withRouter(FundComparisonView));

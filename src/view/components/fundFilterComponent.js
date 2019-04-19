@@ -11,7 +11,7 @@ import Input from '@material-ui/core/Input';
 import MenuItem from '@material-ui/core/MenuItem';
 import Button from '@material-ui/core/Button';
 import { produce, setAutoFreeze } from 'immer';
-import filterOptions from '../options/filterOptions';
+import { filterOptions } from '../options';
 import Switch from '@material-ui/core/Switch';
 
 setAutoFreeze(false);
@@ -22,6 +22,7 @@ const styles = theme => ({
     }
 });
 
+// TODO: This should be moved to styles, but I need to understand how to do it
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
 const MenuProps = {
@@ -87,7 +88,7 @@ class FundFilterComponent extends React.Component {
         return event => {
             const value = event.target.value;
             this.setState(produce(draft => {
-                draft.config.filter.switch[field] = value == 'false' ? true : false;
+                draft.config.filter.switch[field] = value === 'false' ? true : false;
             }));
         };
     }
@@ -119,7 +120,7 @@ class FundFilterComponent extends React.Component {
                             value={this.state.config.filter.icf_classe}
                             onChange={this.handleFilterOptionsChange('icf_classe')}
                             input={<Input id="select-multiple-placeholder" />}
-                            renderValue={selected => selected.length === 0 ? <em>Todos</em> : selected.map(item => this.state.data.filterOptions.icf_classe.options.find(clazz => clazz.value == item).displayName).join(', ')}
+                            renderValue={selected => selected.length === 0 ? <em>Todos</em> : selected.map(item => this.state.data.filterOptions.icf_classe.options.find(clazz => clazz.value === item).displayName).join(', ')}
                             MenuProps={MenuProps}
                             fullWidth>
                             {this.state.data.filterOptions.icf_classe.options.map(option => (
@@ -137,7 +138,7 @@ class FundFilterComponent extends React.Component {
                             value={this.state.config.filter.icf_sit}
                             onChange={this.handleFilterOptionsChange('icf_sit')}
                             input={<Input id="select-multiple-checkbox" />}
-                            renderValue={selected => selected.map(item => this.state.data.filterOptions.icf_sit.options.find(clazz => clazz.value == item).displayName).join(', ')}
+                            renderValue={selected => selected.map(item => this.state.data.filterOptions.icf_sit.options.find(clazz => clazz.value === item).displayName).join(', ')}
                             MenuProps={MenuProps}
                             fullWidth>
                             {this.state.data.filterOptions.icf_sit.options.map(classOption => (
@@ -155,7 +156,7 @@ class FundFilterComponent extends React.Component {
                             value={this.state.config.filter.icf_condom}
                             onChange={this.handleFilterOptionsChange('icf_condom')}
                             input={<Input id="select-multiple-checkbox" />}
-                            renderValue={selected => selected.map(item => this.state.data.filterOptions.icf_condom.options.find(clazz => clazz.value == item).displayName).join(', ')}
+                            renderValue={selected => selected.map(item => this.state.data.filterOptions.icf_condom.options.find(clazz => clazz.value === item).displayName).join(', ')}
                             MenuProps={MenuProps}
                             fullWidth>
                             {this.state.data.filterOptions.icf_condom.options.map(classOption => (
@@ -173,7 +174,7 @@ class FundFilterComponent extends React.Component {
                             value={this.state.config.filter.icf_fundo_cotas}
                             onChange={this.handleFilterOptionsChange('icf_fundo_cotas')}
                             input={<Input id="select-multiple-checkbox" />}
-                            renderValue={selected => selected.map(item => this.state.data.filterOptions.icf_fundo_cotas.options.find(clazz => clazz.value == item).displayName).join(', ')}
+                            renderValue={selected => selected.map(item => this.state.data.filterOptions.icf_fundo_cotas.options.find(clazz => clazz.value === item).displayName).join(', ')}
                             MenuProps={MenuProps}
                             fullWidth>
                             {this.state.data.filterOptions.icf_fundo_cotas.options.map(classOption => (
@@ -191,7 +192,7 @@ class FundFilterComponent extends React.Component {
                             value={this.state.config.filter.icf_fundo_exclusivo}
                             onChange={this.handleFilterOptionsChange('icf_fundo_exclusivo')}
                             input={<Input id="select-multiple-checkbox" />}
-                            renderValue={selected => selected.map(item => this.state.data.filterOptions.icf_fundo_exclusivo.options.find(clazz => clazz.value == item).displayName).join(', ')}
+                            renderValue={selected => selected.map(item => this.state.data.filterOptions.icf_fundo_exclusivo.options.find(clazz => clazz.value === item).displayName).join(', ')}
                             MenuProps={MenuProps}
                             fullWidth>
                             {this.state.data.filterOptions.icf_fundo_exclusivo.options.map(classOption => (
@@ -209,7 +210,7 @@ class FundFilterComponent extends React.Component {
                             value={this.state.config.filter.icf_rentab_fundo}
                             onChange={this.handleFilterOptionsChange('icf_rentab_fundo')}
                             input={<Input id="select-multiple-checkbox" />}
-                            renderValue={selected => selected.map(item => this.state.data.filterOptions.icf_rentab_fundo.options.find(clazz => clazz.value == item).displayName).join(', ')}
+                            renderValue={selected => selected.map(item => this.state.data.filterOptions.icf_rentab_fundo.options.find(clazz => clazz.value === item).displayName).join(', ')}
                             MenuProps={MenuProps}
                             fullWidth>
                             {this.state.data.filterOptions.icf_rentab_fundo.options.map(classOption => (
@@ -493,4 +494,4 @@ class FundFilterComponent extends React.Component {
 
 }
 
-module.exports = withStyles(styles)(FundFilterComponent);
+export default withStyles(styles)(FundFilterComponent);

@@ -1,4 +1,4 @@
-module.exports = {
+export default {
     icf_classe: {
         field: 'icf_classe',
         options: [

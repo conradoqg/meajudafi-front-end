@@ -9,12 +9,10 @@ env:
 script:  
   - npm install
   - npm run build
-  - ls build/ -lh
-  - npm run dist
-  - ls dist/ -lh
+  - ls build/ -lh  
 
 before_deploy:
-  - cd dist
+  - cd build
 
 deploy:
   provider: s3

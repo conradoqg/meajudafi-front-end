@@ -25,14 +25,13 @@ import { withStyles } from '@material-ui/core/styles';
 import { produce, setAutoFreeze } from 'immer';
 import allKeys from 'promise-results/allKeys';
 import createPlotlyComponent from 'react-plotly.js/factory';
-import Plotly from 'plotly';
 import * as d3Format from 'd3-format';
 import ptBR from 'd3-format/locale/pt-BR.json';
 import FundFilterComponent from './components/fundFilterComponent';
 import ShowStateComponent from './components/showStateComponent';
 import API from '../api';
 import { rangeOptions } from './options';
-import { nextColorIndex } from '../util';
+import { Plotly, nextColorIndex } from '../util';
 
 const Plot = createPlotlyComponent(Plotly);
 d3Format.formatDefaultLocale(ptBR);
@@ -82,6 +81,7 @@ const styles = theme => ({
             paddingLeft: 0
         }
     },
+    // TODO: Help should be a global class
     help: {
         margin: 10,
         backgroundColor: Grey[600],
@@ -195,7 +195,7 @@ class IndicatorsView extends React.Component {
 
     async getEconomyIndicators(config) {
         let colorIndex = 0;
-        const from = rangeOptions.find(range => range.name == config.range).toDate();
+        const from = rangeOptions.find(range => range.name === config.range).toDate();
 
         const economyIndicators = await API.getEconomyIndicators(from);
 
@@ -225,8 +225,7 @@ class IndicatorsView extends React.Component {
                     line: { color: nextColorIndex(colorIndex++) }
                 }
             ],
-            layout: {
-                title: name,
+            layout: {                
                 separators: ',.',
                 autosize: true,
                 showlegend: true,
@@ -273,7 +272,7 @@ class IndicatorsView extends React.Component {
     }
 
     async getFundsChanged(config) {
-        const from = rangeOptions.find(range => range.name == config.changesRange).toDate();
+        const from = rangeOptions.find(range => range.name === config.changesRange).toDate();
 
         const fundsChanged = await API.getFundsChanged(from);
 
@@ -282,28 +281,28 @@ class IndicatorsView extends React.Component {
             xpi: []
         };
 
-        fundsChanged.map(change => {
-            const key = change.table_name == 'btgpactual_funds' ? 'btgpactual' : 'xpi';
-            const date_field = change.table_name == 'btgpactual_funds' ? 'bf_date' : 'xf_date';
+        fundsChanged.forEach(change => {
+            const key = change.table_name === 'btgpactual_funds' ? 'btgpactual' : 'xpi';
+            const date_field = change.table_name === 'btgpactual_funds' ? 'bf_date' : 'xf_date';
 
             const relevantChanges = [];
             let date = null;
 
-            if (change.action == 'I') {
+            if (change.action === 'I') {
                 date = change.row_data[date_field];
                 relevantChanges.push('Adicionado a lista de fundos');
-            } else if (change.action == 'D') {
+            } else if (change.action === 'D') {
                 date = change.changed_fields[date_field];
                 relevantChanges.push('Removido da lista de fundos');
             } else {
                 date = change.changed_fields[date_field];
-                Object.keys(change.changed_fields).map(changedField => {
+                Object.keys(change.changed_fields).forEach(changedField => {
                     const capitalized = value => value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
 
                     const relevantFields = {
                         xf_state: {
                             title: 'Captação',
-                            text: value => value == '0' ? 'Fechada' : 'Aberta'
+                            text: value => value === '0' ? 'Fechada' : 'Aberta'
                         },
                         xf_formal_risk: {
                             title: 'Risco formal',
@@ -319,7 +318,7 @@ class IndicatorsView extends React.Component {
                         },
                         bf_is_blacklist: {
                             title: 'Captação',
-                            text: value => value == 't' ? 'Fechada' : 'Aberta'
+                            text: value => value === 't' ? 'Fechada' : 'Aberta'
                         },
                         bf_inactive: {
                             title: 'Captação',
@@ -339,12 +338,12 @@ class IndicatorsView extends React.Component {
                         },
                         bf_investor_type: {
                             title: 'Tipo de investidor',
-                            text: value => value == 'NAO_QUALIFICADO' ? 'Não qualificado' : 'Qualificado'
+                            text: value => value === 'NAO_QUALIFICADO' ? 'Não qualificado' : 'Qualificado'
                         }
                     };
                     if (relevantFields[changedField]) {
                         relevantChanges.push(`${relevantFields[changedField].title} mudou de ${relevantFields[changedField].text(change.row_data[changedField])} para ${relevantFields[changedField].text(change.changed_fields[changedField])}`);
-                    }
+                    }                    
                 });
             }
 
@@ -354,7 +353,7 @@ class IndicatorsView extends React.Component {
                     name: change.f_short_name,
                     cnpj: change.f_cnpj,
                     changes: relevantChanges
-                });
+                });            
         });
 
         return fundsChanges;
@@ -386,7 +385,7 @@ class IndicatorsView extends React.Component {
                                     name: 'range',
                                     id: 'range',
                                 }}>
-                                {rangeOptions.filter(range => range.name != 'all' && range.name != '1w').map(range => (<MenuItem key={range.name} value={range.name}>{range.displayName}</MenuItem>))}
+                                {rangeOptions.filter(range => range.name !== 'all' && range.name !== '1w').map(range => (<MenuItem key={range.name} value={range.name}>{range.displayName}</MenuItem>))}
                             </Select>
                         </Grid>
                     </Grid>
@@ -473,7 +472,7 @@ class IndicatorsView extends React.Component {
                                     name: 'changesRange',
                                     id: 'changesRange',
                                 }}>
-                                {rangeOptions.filter(range => range.name != 'all').map(range => (<MenuItem key={range.name} value={range.name}>{range.displayName}</MenuItem>))}
+                                {rangeOptions.filter(range => range.name !== 'all').map(range => (<MenuItem key={range.name} value={range.name}>{range.displayName}</MenuItem>))}
                             </Select>
                         </Grid>
                     </Grid>
@@ -534,7 +533,7 @@ const IndicatorPaper = (props) => {
     const { globalClasses, classes, range, title, field, data, inverted = false } = props;
 
     const getClassForValue = value => {
-        if (value == 0)
+        if (value === 0)
             return classes.indicatorValueBlue;
         else if (value > 0)
             return inverted ? classes.indicatorValueNegative : classes.indicatorValuePositive;
@@ -598,6 +597,7 @@ const IndicatorPaper = (props) => {
         </div>);
 };
 
+// TODO: Move to a component
 const EconomyHistoryChart = (props) => {
     const { fund, handleChartInitialized, handleChartUpdate } = props;
 
@@ -626,4 +626,4 @@ const EconomyHistoryChart = (props) => {
     />);
 };
 
-module.exports = withStyles(styles)(IndicatorsView);
+export default withStyles(styles)(IndicatorsView);

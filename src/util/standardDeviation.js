@@ -18,7 +18,7 @@ StandardDeviation.prototype.addMeasurement = function (measurement) {
 
 // Performs the final step needed to get the standard deviation and returns it.
 StandardDeviation.prototype.get = function () {
-    if (this.count == 0) {
+    if (this.count === 0) {
         throw new Error('Empty');
     }
     return Math.sqrt(this.S / (this.count));
@@ -29,7 +29,7 @@ StandardDeviation.prototype.get = function () {
 // drops out and y is the new value entering the window. The sample
 // count remains constant with this operation.
 StandardDeviation.prototype.replace = function (x, y) {
-    if (this.count == 0) {
+    if (this.count === 0) {
         throw new Error('Empty');
     }
     const deltaYX = y - x;
@@ -44,9 +44,9 @@ StandardDeviation.prototype.replace = function (x, y) {
 // Remove a measurement. Also calculates updates to stepwise parameters which are later used
 // to determine sigma.
 StandardDeviation.prototype.removeMeasurement = function (x) {
-    if (this.count == 0) {
+    if (this.count === 0) {
         throw new Error('Empty');
-    } else if (this.count == 1) {
+    } else if (this.count === 1) {
         this.workData = null;
         this.lastWorkData = null;
         this.S = 0;
@@ -58,4 +58,4 @@ StandardDeviation.prototype.removeMeasurement = function (x) {
     this.count -= 1;
 };
 
-module.exports = StandardDeviation;
+export default StandardDeviation;

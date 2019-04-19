@@ -11,7 +11,7 @@ const createOptionsFor = (displayName, field) => {
     }];
 };
 
-module.exports = [
+export default [
     ...createOptionsFor('CNPJ', 'icf_cnpj_fundo'),
     ...createOptionsFor('Denominação social', 'icf_denom_social'),
     ...createOptionsFor('Desempenho 1 ano', 'iry_investment_return_1y'),

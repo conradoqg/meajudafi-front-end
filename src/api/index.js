@@ -5,18 +5,19 @@ import packageJson from '../../package.json';
 /* global process */
 const API_URL = process.env.API_URL || `api.${window.location.host}`;
 
-module.exports = {
+export default {
     getFundList: async (options, fromDate = new Date((new Date()).getFullYear(), 0, 1)) => {
         const range = `${(options.page * options.rowsPerPage)}-${((options.page * options.rowsPerPage) + options.rowsPerPage - 1)}`;
         const sort = `${options.sort.field}.${options.sort.order}`;
 
+        // TODO: Duplicated code
         let filterPart = '';
         if (options.filter) {
-            Object.keys(options.filter).map(selectedFilterOptionsKey => {
-                if (selectedFilterOptionsKey == 'switch') {
+            Object.keys(options.filter).forEach(selectedFilterOptionsKey => {
+                if (selectedFilterOptionsKey === 'switch') {
                     let switchItems = [];
                     Object.keys(options.filter.switch).map(switchItem => {
-                        options.filter.switch[switchItem] ? switchItems.push(`${switchItem}.not.is.null`) : null;
+                        return options.filter.switch[switchItem] ? switchItems.push(`${switchItem}.not.is.null`) : null;
                     });
                     if (switchItems.length > 0) filterPart += `or=(${switchItems.join(',')})&`;
                 } else if (Array.isArray(options.filter[selectedFilterOptionsKey])) {
@@ -29,8 +30,8 @@ module.exports = {
                     if (options.filter[selectedFilterOptionsKey].min != null && options.filter[selectedFilterOptionsKey].min != null) {
                         let minPart = '';
                         let maxPart = '';
-                        if (options.filter[selectedFilterOptionsKey].min != '') minPart = `${selectedFilterOptionsKey}.gte.${options.filter[selectedFilterOptionsKey].format ? options.filter[selectedFilterOptionsKey].format(options.filter[selectedFilterOptionsKey].min) : options.filter[selectedFilterOptionsKey].min}`;
-                        if (options.filter[selectedFilterOptionsKey].max != '') maxPart = `${selectedFilterOptionsKey}.lte.${options.filter[selectedFilterOptionsKey].format ? options.filter[selectedFilterOptionsKey].format(options.filter[selectedFilterOptionsKey].max) : options.filter[selectedFilterOptionsKey].max}`;
+                        if (options.filter[selectedFilterOptionsKey].min !== '') minPart = `${selectedFilterOptionsKey}.gte.${options.filter[selectedFilterOptionsKey].format ? options.filter[selectedFilterOptionsKey].format(options.filter[selectedFilterOptionsKey].min) : options.filter[selectedFilterOptionsKey].min}`;
+                        if (options.filter[selectedFilterOptionsKey].max !== '') maxPart = `${selectedFilterOptionsKey}.lte.${options.filter[selectedFilterOptionsKey].format ? options.filter[selectedFilterOptionsKey].format(options.filter[selectedFilterOptionsKey].max) : options.filter[selectedFilterOptionsKey].max}`;
                         if (minPart && maxPart) filterPart += `and=(${minPart},${maxPart})&`;
                         else if (minPart || maxPart) filterPart += `and=(${minPart}${maxPart})&`;
                     }
@@ -40,7 +41,7 @@ module.exports = {
 
         let searchPart = '';
         if (options.search) {
-            if (options.search.term != '') {
+            if (options.search.term !== '') {
                 // Identify if it's a CNPJ or a fund name
                 if (/^\d+$/.test(options.search.term)) {
                     searchPart = `and=(f_cnpj.ilike.*${options.search.term}*)&`;
@@ -105,7 +106,7 @@ module.exports = {
 
         const data = await result.json();
 
-        if (data.length == 0) throw new Error(`No data found for CNPJ ${cnpj}`);
+        if (data.length === 0) throw new Error(`No data found for CNPJ ${cnpj}`);
 
         return calculateStatistics(data, benchmark);
     },
@@ -122,13 +123,13 @@ module.exports = {
         };
 
         let tablePart = null;
-        if (benchmark == 'cdi') {
+        if (benchmark === 'cdi') {
             tablePart = 'fbcdata_sgs_12i';
-        } else if (benchmark == 'bovespa') {
+        } else if (benchmark === 'bovespa') {
             tablePart = 'fbcdata_sgs_7i';
-        } else if (benchmark == 'dolar') {
+        } else if (benchmark === 'dolar') {
             tablePart = 'fbcdata_sgs_1i';
-        } else if (benchmark == 'euro') {
+        } else if (benchmark === 'euro') {
             tablePart = 'fbcdata_sgs_21619i';
         }
 
@@ -143,13 +144,14 @@ module.exports = {
     getFundIndicators: async (options, fromDate = new Date((new Date()).getFullYear(), 0, 1)) => {
         const range = options.range;
 
+        // TODO: Duplicated code
         let filterPart = '';
         if (options.filter) {
-            Object.keys(options.filter).map(selectedFilterOptionsKey => {
-                if (selectedFilterOptionsKey == 'switch') {
+            Object.keys(options.filter).forEach(selectedFilterOptionsKey => {
+                if (selectedFilterOptionsKey === 'switch') {
                     let switchItems = [];
                     Object.keys(options.filter.switch).map(switchItem => {
-                        options.filter.switch[switchItem] ? switchItems.push(`${switchItem}.not.is.null`) : null;
+                        return options.filter.switch[switchItem] ? switchItems.push(`${switchItem}.not.is.null`) : null;
                     });
                     if (switchItems.length > 0) filterPart += `or=(${switchItems.join(',')})&`;
                 } else if (Array.isArray(options.filter[selectedFilterOptionsKey])) {
@@ -162,8 +164,8 @@ module.exports = {
                     if (options.filter[selectedFilterOptionsKey].min != null && options.filter[selectedFilterOptionsKey].min != null) {
                         let minPart = '';
                         let maxPart = '';
-                        if (options.filter[selectedFilterOptionsKey].min != '') minPart = `${selectedFilterOptionsKey}.gte.${options.filter[selectedFilterOptionsKey].format ? options.filter[selectedFilterOptionsKey].format(options.filter[selectedFilterOptionsKey].min) : options.filter[selectedFilterOptionsKey].min}`;
-                        if (options.filter[selectedFilterOptionsKey].max != '') maxPart = `${selectedFilterOptionsKey}.lte.${options.filter[selectedFilterOptionsKey].format ? options.filter[selectedFilterOptionsKey].format(options.filter[selectedFilterOptionsKey].max) : options.filter[selectedFilterOptionsKey].max}`;
+                        if (options.filter[selectedFilterOptionsKey].min !== '') minPart = `${selectedFilterOptionsKey}.gte.${options.filter[selectedFilterOptionsKey].format ? options.filter[selectedFilterOptionsKey].format(options.filter[selectedFilterOptionsKey].min) : options.filter[selectedFilterOptionsKey].min}`;
+                        if (options.filter[selectedFilterOptionsKey].max !== '') maxPart = `${selectedFilterOptionsKey}.lte.${options.filter[selectedFilterOptionsKey].format ? options.filter[selectedFilterOptionsKey].format(options.filter[selectedFilterOptionsKey].max) : options.filter[selectedFilterOptionsKey].max}`;
                         if (minPart && maxPart) filterPart += `and=(${minPart},${maxPart})&`;
                         else if (minPart || maxPart) filterPart += `and=(${minPart}${maxPart})&`;
                     }
@@ -263,10 +265,10 @@ module.exports = {
 
         data = data.reverse();
 
-        data.map(row => {
-            fields.map(field => {
+        data.forEach(row => {
+            fields.forEach(field => {
                 var value = null;
-                if (field == 'date') value = row.dt_comptc;
+                if (field === 'date') value = row.dt_comptc;
                 else value = row[`${field}_valor`] == null ? lastValue[field] : row[`${field}_valor`];
 
                 economyIndicators[field].push(value);
@@ -301,19 +303,19 @@ module.exports = {
             migrationMinor = parseInt(lastMigrationData[0].name.substring(0, 8));
         }
 
-        return minor != migrationMinor;
+        return minor !== migrationMinor;
     }
 };
 
 const calculateBenchmarkStatistics = (data, benchmark) => {
     let fromQuoteToPercentage = null;
-    if (benchmark == 'cdi') {
+    if (benchmark === 'cdi') {
         fromQuoteToPercentage = (value, prevValue) => prevValue == null ? 0 : value / 100;
-    } else if (benchmark == 'bovespa') {
+    } else if (benchmark === 'bovespa') {
         fromQuoteToPercentage = (value, prevValue) => prevValue == null ? 0 : (value / prevValue) - 1;
-    } else if (benchmark == 'dolar') {
+    } else if (benchmark === 'dolar') {
         fromQuoteToPercentage = (value, prevValue) => prevValue == null ? 0 : (value / prevValue) - 1;
-    } else if (benchmark == 'euro') {
+    } else if (benchmark === 'euro') {
         fromQuoteToPercentage = (value, prevValue) => prevValue == null ? 0 : (value / prevValue) - 1;
     }
 
@@ -410,7 +412,7 @@ const calculateStatistics = (data, benchmark) => {
         const year = date.substring(0, 4);
         const month = date.substring(5, 7);
 
-        if (index == data.length - 1) {
+        if (index === data.length - 1) {
             statistics.daily.date.push(date);
             statistics.daily.investment_return.push(0);
             statistics.daily.benchmark_investment_return.push(0);
@@ -552,6 +554,7 @@ const calculateStatistics = (data, benchmark) => {
     return statistics;
 };
 
+// TODO: Move these to its own file
 class InvestmentReturnCalculator {
     constructor() {
         this.investmentReturn = 0;
@@ -582,7 +585,7 @@ class CorrelationCalculator {
         let den = Math.sqrt((this.sum1Sq - Math.pow(this.sum1, 2) / n) *
             (this.sum2Sq - Math.pow(this.sum2, 2) / n));
 
-        if (den == 0 || Number.isNaN(den)) return 0;
+        if (den === 0 || Number.isNaN(den)) return 0;
         else return num / den;
     }
 }
@@ -590,7 +593,7 @@ class CorrelationCalculator {
 const calcRelativeInvestmentReturn = (investment_return, benchmark_investment_return) => investment_return / benchmark_investment_return;
 
 const calcSharpeForPeriod = (risk, investment_return, cdi_investment_return, length) => {
-    if (risk == 0) return 0;
+    if (risk === 0) return 0;
     const annualizedAccInvestmentReturn = ((investment_return / length) * 252);
     const annualizedAccCDIInvestmentReturn = ((cdi_investment_return / length) * 252);
     return (annualizedAccInvestmentReturn - annualizedAccCDIInvestmentReturn) / risk;
@@ -605,7 +608,7 @@ class ConsistencyCalculator {
     add(investment_return, cdi_investment_return, period) {
         let consistencyPoint = 0;
         if (investment_return >= cdi_investment_return) consistencyPoint = 1;
-        if (period != 0 && this.lastConsistency.length >= period) this.consistencyReached -= this.lastConsistency.shift();
+        if (period !== 0 && this.lastConsistency.length >= period) this.consistencyReached -= this.lastConsistency.shift();
         this.consistencyReached += consistencyPoint;
         this.lastConsistency.push(consistencyPoint);
         return ((100 * this.consistencyReached) / this.lastConsistency.length) / 100;

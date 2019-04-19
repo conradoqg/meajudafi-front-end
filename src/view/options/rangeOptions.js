@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 
-module.exports = [
+export default [
     {
         name: 'all',
         displayName: 'Desde o início',

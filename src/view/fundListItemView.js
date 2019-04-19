@@ -12,17 +12,17 @@ import Grey from '@material-ui/core/colors/grey';
 import { withStyles } from '@material-ui/core/styles';
 import { produce, setAutoFreeze } from 'immer';
 import createPlotlyComponent from 'react-plotly.js/factory';
-import Plotly from 'plotly';
 import promisesEach from 'promise-results';
 import { withRouter } from 'react-router-dom';
 import API from '../api';
 import ShowStateComponent from './components/showStateComponent';
 import { fieldOptions, benchmarkOptions, rangeOptions } from './options';
-import { nextColorIndex, formatters } from '../util';
+import { Plotly, nextColorIndex, formatters } from '../util';
 
 setAutoFreeze(false);
 const Plot = createPlotlyComponent(Plotly);
 
+// TODO: Check if all classes below are necessary
 const styles = theme => ({
     optionsBar: {
         padding: theme.spacing.unit
@@ -36,6 +36,7 @@ const styles = theme => ({
     chart: {
         padding: theme.spacing.unit * 2
     },
+    // TODO: Help should be a global class
     help: {
         margin: 10,
         backgroundColor: Grey[600],
@@ -75,11 +76,12 @@ class FundListItemView extends React.Component {
         return this.updateData(this.state);
     }
 
+    // TODO: Componentize history state
     UNSAFE_componentWillReceiveProps(nextProps) {
         const locationChanged = this.props.location !== nextProps.location;
 
         if (locationChanged) {
-            if (this.props.history.action == 'POP') {
+            if (this.props.history.action === 'POP') {
                 this.updateData(nextProps.history.location.state);
             }
         }
@@ -162,10 +164,11 @@ class FundListItemView extends React.Component {
         this.setState(nextState);
     }
 
+    // TODO: Move to a component
     buildChart(config, name, statistics) {
         let colorIndex = 0;
 
-        const benchmarkText = benchmarkOptions.find(benchmark => benchmark.name == config.benchmark).displayName;
+        const benchmarkText = benchmarkOptions.find(benchmark => benchmark.name === config.benchmark).displayName;
         const min_y = Math.min(statistics.daily.min_investment_return, statistics.daily.min_benchmark_investment_return);
         const max_y = Math.max(statistics.daily.max_investment_return, statistics.daily.max_benchmark_investment_return);
 
@@ -319,7 +322,7 @@ class FundListItemView extends React.Component {
     }
 
     async getFundStatistic(cnpj, config) {
-        const from = rangeOptions.find(range => range.name == config.range).toDate();
+        const from = rangeOptions.find(range => range.name === config.range).toDate();
 
         return API.getFundStatistic(cnpj, config.benchmark, from);
     }
@@ -385,7 +388,7 @@ class FundListItemView extends React.Component {
                                             </Grid>
                                         </Grid>
                                         <Grid container spacing={16}>
-                                            <Grid item xs={3}><b>CNPJ:</b> {formatters.field['f_cnpj'](this.state.data.fund.f_cnpj)}</Grid>                                            
+                                            <Grid item xs={3}><b>CNPJ:</b> {formatters.field['f_cnpj'](this.state.data.fund.f_cnpj)}</Grid>
                                             <Grid item xs={3}><b>Classe:</b> {formatters.field['icf_classe'](this.state.data.fund.icf_classe)}</Grid>
                                             <Grid item xs={3}><b>Situação:</b> {formatters.field['icf_sit'](this.state.data.fund.icf_sit)}</Grid>
                                             <Grid item xs={3}><b>Fundo de condomínio:</b> {formatters.field['icf_condom'](this.state.data.fund.icf_condom)}</Grid>
@@ -541,6 +544,7 @@ class FundListItemView extends React.Component {
     }
 }
 
+// TODO: Move to a component
 const FundHistoryChart = (props) => {
     const { fund, handleChartInitialized, handleChartUpdate } = props;
 
@@ -573,4 +577,4 @@ const FundHistoryChart = (props) => {
         />);
 };
 
-module.exports = withStyles(styles)(withRouter(FundListItemView));
+export default withStyles(styles)(withRouter(FundListItemView));

@@ -30,11 +30,10 @@ import FundSearchComponent from './components/fundSearchComponent';
 import ShowStateComponent from './components/showStateComponent';
 import * as d3Format from 'd3-format';
 import createPlotlyComponent from 'react-plotly.js/factory';
-import Plotly from 'plotly';
 import allKeys from 'promise-results/allKeys';
 import ptBR from 'd3-format/locale/pt-BR.json';
 import { sortOptions, benchmarkOptions, rangeOptions } from './options';
-import { nextColorIndex } from '../util';
+import { Plotly, nextColorIndex } from '../util';
 
 const Plot = createPlotlyComponent(Plotly);
 d3Format.formatDefaultLocale(ptBR);
@@ -54,6 +53,7 @@ const styles = theme => ({
     chartSelect: {
         margin: theme.spacing.unit
     },
+    // TODO: Help should be a global class
     help: {
         margin: 10,
         backgroundColor: Grey[600],
@@ -301,12 +301,13 @@ class FundListView extends React.Component {
         return API.getFundList(options);
     }
 
+    // TODO: Move to a component
     async getFundDetail(cnpj, chartConfig) {
         let colorIndex = 0;
 
-        const from = rangeOptions.find(range => range.name == chartConfig.range).toDate();
+        const from = rangeOptions.find(range => range.name === chartConfig.range).toDate();
 
-        const benchmarkText = benchmarkOptions.find(benchmark => benchmark.name == chartConfig.benchmark).displayName;
+        const benchmarkText = benchmarkOptions.find(benchmark => benchmark.name === chartConfig.benchmark).displayName;
 
         const { statistics, infCadastral } = await allKeys({
             statistics: API.getFundStatistic(cnpj, chartConfig.benchmark, from),
@@ -542,7 +543,7 @@ class FundListView extends React.Component {
                                             {this.state.data.sortOptions.map((option, index) => (
                                                 <MenuItem key={option.displayName + option.order} selected={option.displayName === this.state.config.sort.displayName && option.order === this.state.config.sort.order} onClick={event => this.handleSortMenuItemClick(event, index)}>
                                                     {option.displayName}&nbsp;
-                                                    {option.order == 'asc' ? <ArrowDownwardIcon /> : <ArrowUpwardIcon />}
+                                                    {option.order === 'asc' ? <ArrowDownwardIcon /> : <ArrowUpwardIcon />}
                                                 </MenuItem>
                                             ))}
                                         </Menu>
@@ -652,6 +653,7 @@ class FundListView extends React.Component {
     }
 }
 
+// TODO: Move to a component
 const FundHistoryChart = (props) => {
     const { fund, handleChartInitialized, handleChartUpdate } = props;
 
@@ -684,4 +686,4 @@ const FundHistoryChart = (props) => {
         />);
 };
 
-module.exports = withStyles(styles)(FundListView);
+export default withStyles(styles)(FundListView);

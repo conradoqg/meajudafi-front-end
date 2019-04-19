@@ -280,4 +280,4 @@ Dashboard.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-module.exports = withStyles(styles)(Dashboard);
+export default withStyles(styles)(Dashboard);
