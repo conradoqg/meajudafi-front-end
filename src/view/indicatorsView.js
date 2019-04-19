@@ -24,16 +24,15 @@ import Tooltip from '@material-ui/core/Tooltip';
 import { withStyles } from '@material-ui/core/styles';
 import { produce, setAutoFreeze } from 'immer';
 import allKeys from 'promise-results/allKeys';
-import createPlotlyComponent from 'react-plotly.js/factory';
 import * as d3Format from 'd3-format';
 import ptBR from 'd3-format/locale/pt-BR.json';
-import FundFilterComponent from './components/fundFilterComponent';
-import ShowStateComponent from './components/showStateComponent';
+import FundFilterComponent from './component/fundFilterComponent';
+import ShowStateComponent from './component/showStateComponent';
+import DataHistoryChartComponent from './component/dataHistoryChartComponent';
 import API from '../api';
-import { rangeOptions } from './options';
-import { Plotly, nextColorIndex } from '../util';
+import { rangeOptions } from './option';
+import { nextColorIndex } from '../util';
 
-const Plot = createPlotlyComponent(Plotly);
 d3Format.formatDefaultLocale(ptBR);
 
 setAutoFreeze(false);
@@ -225,7 +224,7 @@ class IndicatorsView extends React.Component {
                     line: { color: nextColorIndex(colorIndex++) }
                 }
             ],
-            layout: {                
+            layout: {
                 separators: ',.',
                 autosize: true,
                 showlegend: true,
@@ -343,7 +342,7 @@ class IndicatorsView extends React.Component {
                     };
                     if (relevantFields[changedField]) {
                         relevantChanges.push(`${relevantFields[changedField].title} mudou de ${relevantFields[changedField].text(change.row_data[changedField])} para ${relevantFields[changedField].text(change.changed_fields[changedField])}`);
-                    }                    
+                    }
                 });
             }
 
@@ -353,7 +352,7 @@ class IndicatorsView extends React.Component {
                     name: change.f_short_name,
                     cnpj: change.f_cnpj,
                     changes: relevantChanges
-                });            
+                });
         });
 
         return fundsChanges;
@@ -398,7 +397,7 @@ class IndicatorsView extends React.Component {
                 <Grid container spacing={16}>
                     <Grid item xs={12}>
                         <Paper className={classes.paper} elevation={1} square={true}>
-                            <EconomyHistoryChart
+                            <DataHistoryChartComponent
                                 fund={this.state.data.economyIndicators}
                                 onInitialized={(figure) => this.handleChartInitialized(figure)}
                                 onUpdate={(figure) => this.handleChartUpdate(figure)}
@@ -595,35 +594,6 @@ const IndicatorPaper = (props) => {
                 />
             </Paper>
         </div>);
-};
-
-// TODO: Move to a component
-const EconomyHistoryChart = (props) => {
-    const { fund, handleChartInitialized, handleChartUpdate } = props;
-
-    return (<ShowStateComponent
-        data={fund}
-        hasData={() => (
-            <Plot
-                key={fund.name}
-                data={fund.data}
-                layout={fund.layout}
-                config={
-                    {
-                        locale: 'pt-BR',
-                        displayModeBar: true
-                    }
-                }
-                onInitialized={handleChartInitialized}
-                onUpdate={handleChartUpdate}
-                useResizeHandler={true}
-                style={{ width: '100%', height: '100%' }}
-            />
-        )}
-        isNull={() => (<Typography variant="subheading" align="center"><CircularProgress /></Typography>)}
-        isErrored={() => (<Typography variant="subheading" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>)}
-        isEmpty={() => (<Typography variant="subheading" align="center">Sem dados à exibir</Typography>)}
-    />);
 };
 
 export default withStyles(styles)(IndicatorsView);

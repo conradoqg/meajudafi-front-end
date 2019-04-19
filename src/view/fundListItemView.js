@@ -4,23 +4,21 @@ import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import Avatar from '@material-ui/core/Avatar';
 import Tooltip from '@material-ui/core/Tooltip';
-import CircularProgress from '@material-ui/core/CircularProgress';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import Divider from '@material-ui/core/Divider';
 import Grey from '@material-ui/core/colors/grey';
 import { withStyles } from '@material-ui/core/styles';
 import { produce, setAutoFreeze } from 'immer';
-import createPlotlyComponent from 'react-plotly.js/factory';
 import promisesEach from 'promise-results';
 import { withRouter } from 'react-router-dom';
 import API from '../api';
-import ShowStateComponent from './components/showStateComponent';
-import { fieldOptions, benchmarkOptions, rangeOptions } from './options';
-import { Plotly, nextColorIndex, formatters } from '../util';
+import ShowStateComponent from './component/showStateComponent';
+import DataHistoryChartComponent from './component/dataHistoryChartComponent';
+import { fieldOptions, benchmarkOptions, rangeOptions } from './option';
+import { nextColorIndex, formatters } from '../util';
 
 setAutoFreeze(false);
-const Plot = createPlotlyComponent(Plotly);
 
 // TODO: Check if all classes below are necessary
 const styles = theme => ({
@@ -461,7 +459,7 @@ class FundListItemView extends React.Component {
                 <Grid container spacing={16}>
                     <Grid item xs>
                         <Paper elevation={1} square={true} className={classes.chart} >
-                            <FundHistoryChart
+                            <DataHistoryChartComponent                                
                                 fund={this.state.data.chart}
                                 onInitialized={(figure) => this.handleChartInitialized(figure)}
                                 onUpdate={(figure) => this.handleChartUpdate(figure)}
@@ -543,38 +541,5 @@ class FundListItemView extends React.Component {
         );
     }
 }
-
-// TODO: Move to a component
-const FundHistoryChart = (props) => {
-    const { fund, handleChartInitialized, handleChartUpdate } = props;
-
-    return (
-        <ShowStateComponent
-            data={fund}
-            hasData={() => (
-                <Plot
-                    key={fund.name}
-                    data={fund.data}
-                    layout={fund.layout}
-                    config={
-                        {
-                            locale: 'pt-BR',
-                            displayModeBar: true
-                        }
-                    }
-                    onInitialized={handleChartInitialized}
-                    onUpdate={handleChartUpdate}
-                    useResizeHandler={true}
-                    style={{ width: '100%', height: '100%' }}
-                />
-            )}
-            isNull={() => (
-                <Typography variant="subheading" align="center"><CircularProgress /></Typography>
-            )}
-            isErrored={() => (
-                <Typography variant="subheading" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>
-            )}
-        />);
-};
 
 export default withStyles(styles)(withRouter(FundListItemView));

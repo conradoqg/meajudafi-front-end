@@ -1,9 +1,9 @@
-import { filterOptions } from '../view/options';
 import * as d3Format from 'd3-format';
 import ptBR from 'd3-format/locale/pt-BR.json';
 import LocalizedFormat from 'dayjs/plugin/localizedFormat';
 import dayjs from 'dayjs';
 import 'dayjs/locale/pt-br';
+import { filterOptions } from '../view/option';
 
 dayjs.extend(LocalizedFormat);
 dayjs.locale('pt-br');

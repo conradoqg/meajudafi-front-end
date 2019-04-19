@@ -25,19 +25,17 @@ import Avatar from '@material-ui/core/Avatar';
 import Tooltip from '@material-ui/core/Tooltip';
 import Grey from '@material-ui/core/colors/grey';
 import API from '../api';
-import FundFilterComponent from './components/fundFilterComponent';
-import FundSearchComponent from './components/fundSearchComponent';
-import ShowStateComponent from './components/showStateComponent';
+import FundFilterComponent from './component/fundFilterComponent';
+import FundSearchComponent from './component/fundSearchComponent';
+import ShowStateComponent from './component/showStateComponent';
+import DataHistoryChartComponent from './component/dataHistoryChartComponent';
 import * as d3Format from 'd3-format';
-import createPlotlyComponent from 'react-plotly.js/factory';
 import allKeys from 'promise-results/allKeys';
 import ptBR from 'd3-format/locale/pt-BR.json';
-import { sortOptions, benchmarkOptions, rangeOptions } from './options';
-import { Plotly, nextColorIndex } from '../util';
+import { sortOptions, benchmarkOptions, rangeOptions } from './option';
+import { nextColorIndex } from '../util';
 
-const Plot = createPlotlyComponent(Plotly);
 d3Format.formatDefaultLocale(ptBR);
-
 setAutoFreeze(false);
 
 const styles = theme => ({
@@ -613,7 +611,7 @@ class FundListView extends React.Component {
                                     <ExpansionPanelDetails>
                                         <Grid container spacing={8}>
                                             <Grid item xs>
-                                                <FundHistoryChart
+                                                <DataHistoryChartComponent
                                                     fund={this.state.data.fundDetail[fund.icf_cnpj_fundo]}
                                                     onInitialized={(figure) => this.handleChartInitialized(fund, figure)}
                                                     onUpdate={(figure) => this.handleChartUpdate(fund, figure)}
@@ -652,38 +650,5 @@ class FundListView extends React.Component {
         );
     }
 }
-
-// TODO: Move to a component
-const FundHistoryChart = (props) => {
-    const { fund, handleChartInitialized, handleChartUpdate } = props;
-
-    return (
-        <ShowStateComponent
-            data={fund}
-            hasData={() => (
-                <Plot
-                    key={fund.name}
-                    data={fund.data}
-                    layout={fund.layout}
-                    config={
-                        {
-                            locale: 'pt-BR',
-                            displayModeBar: true
-                        }
-                    }
-                    onInitialized={handleChartInitialized}
-                    onUpdate={handleChartUpdate}
-                    useResizeHandler={true}
-                    style={{ width: '100%', height: '100%' }}
-                />
-            )}
-            isNull={() => (
-                <Typography variant="subheading" align="center"><CircularProgress /></Typography>
-            )}
-            isErrored={() => (
-                <Typography variant="subheading" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>
-            )}
-        />);
-};
 
 export default withStyles(styles)(FundListView);

@@ -1,6 +1,6 @@
 import allKeys from 'promise-results/allKeys';
 import packageJson from '../../package.json';
-import StandardDeviation from '../math/investmentReturnCalculator';
+import StandardDeviation from '../math/standardDeviation';
 import InvestmentReturnCalculator from '../math/investmentReturnCalculator';
 import ConsistencyCalculator from '../math/consistencyCalculator';
 import NetworthCalculator from '../math/networthCalculator';

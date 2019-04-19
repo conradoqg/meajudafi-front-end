@@ -15,17 +15,16 @@ import Grey from '@material-ui/core/colors/grey';
 import { withStyles } from '@material-ui/core/styles';
 import { produce, setAutoFreeze } from 'immer';
 import * as d3Format from 'd3-format';
-import createPlotlyComponent from 'react-plotly.js/factory';
 import promisesEach from 'promise-results';
 import { withRouter } from 'react-router-dom';
 import API from '../api';
-import FundSearchComponent from './components/fundSearchComponent';
-import ShowStateComponent from './components/showStateComponent';
-import { sortOptions, benchmarkOptions, rangeOptions } from './options';
-import { Plotly, nextColorIndex } from '../util';
+import FundSearchComponent from './component/fundSearchComponent';
+import ShowStateComponent from './component/showStateComponent';
+import DataHistoryChartComponent from './component/dataHistoryChartComponent';
+import { sortOptions, benchmarkOptions, rangeOptions } from './option';
+import { nextColorIndex } from '../util';
 
 setAutoFreeze(false);
-const Plot = createPlotlyComponent(Plotly);
 
 const styles = theme => ({
     optionsBar: {
@@ -462,10 +461,10 @@ class FundComparisonView extends React.Component {
                 <Grid container spacing={16}>
                     <Grid item xs>
                         <Paper elevation={1} square={true} className={classes.chart} >
-                            <FundHistoryChart
+                            <DataHistoryChartComponent
                                 fund={this.state.data.chart}
                                 onInitialized={(figure) => this.handleChartInitialized(figure)}
-                                onUpdate={(figure) => this.handleChartUpdate(figure)}
+                                onUpdate={(figure) => this.handleChartUpdate(figure)}                                
                             />
                         </Paper>
                     </Grid>
@@ -611,33 +610,5 @@ class FundComparisonView extends React.Component {
         );
     }
 }
-
-// TODO: Move to a component
-const FundHistoryChart = (props) => {
-    const { fund, handleChartInitialized, handleChartUpdate } = props;
-
-    return (<ShowStateComponent
-        data={fund}
-        hasData={() => (
-            <Plot
-                key="FundComparison"
-                data={fund.data}
-                layout={fund.layout}
-                config={
-                    {
-                        locale: 'pt-BR',
-                        displayModeBar: true
-                    }
-                }
-                onInitialized={handleChartInitialized}
-                onUpdate={handleChartUpdate}
-                useResizeHandler={true}
-                style={{ width: '100%', height: '100%' }}
-            />
-        )}
-        isNull={() => (<Typography variant="subheading" align="center"><CircularProgress /></Typography>)}
-        isErrored={() => (<Typography variant="subheading" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>)}
-    />);
-};
 
 export default withStyles(styles)(withRouter(FundComparisonView));

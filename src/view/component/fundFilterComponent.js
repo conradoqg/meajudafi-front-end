@@ -11,7 +11,7 @@ import Input from '@material-ui/core/Input';
 import MenuItem from '@material-ui/core/MenuItem';
 import Button from '@material-ui/core/Button';
 import { produce, setAutoFreeze } from 'immer';
-import { filterOptions } from '../options';
+import { filterOptions } from '../option';
 import Switch from '@material-ui/core/Switch';
 
 setAutoFreeze(false);
