@@ -27,7 +27,6 @@ import { Plotly, nextColorIndex } from '../util';
 setAutoFreeze(false);
 const Plot = createPlotlyComponent(Plotly);
 
-// TODO: Check if all classes below are necessary
 const styles = theme => ({
     optionsBar: {
         padding: theme.spacing.unit
