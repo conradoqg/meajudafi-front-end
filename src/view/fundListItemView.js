@@ -137,8 +137,8 @@ class FundListItemView extends React.Component {
             if (fundHistory instanceof Error) draft.data.fund = fundData.message;
             else draft.data.history = fundHistory;
 
-            // TODO: Must handle error
-            draft.data.chart = this.buildChart(draft.config, fundData[0].f_short_name, draft.data.history);
+            if (fundHistory instanceof Error) draft.data.chart = fundHistory.message;
+            else draft.data.chart = this.buildChart(draft.config, fundData[0].f_short_name, draft.data.history);
         });
         this.setState(nextState);
     }

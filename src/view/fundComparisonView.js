@@ -231,8 +231,7 @@ class FundComparisonView extends React.Component {
                 if (results[fund.cnpj]) {
                     if (results[fund.cnpj].data instanceof Error) fund.data = results[fund.cnpj].data.message;
                     else fund.data = results[fund.cnpj].data;
-
-                    // TODO: getFundData should return the result or throw error
+                    
                     if (results[fund.cnpj].detail.length === 0) fund.detail = 'Não encontrado';
                     else {
                         fund.detail = {
