@@ -267,19 +267,14 @@ class IndicatorsView extends React.Component {
 
         fundsChanged.forEach(change => {
             const key = change.table_name === 'btgpactual_funds' ? 'btgpactual' : 'xpi';
-            const date_field = change.table_name === 'btgpactual_funds' ? 'bf_date' : 'xf_date';
 
-            const relevantChanges = [];
-            let date = null;
+            const relevantChanges = [];            
 
-            if (change.action === 'I') {
-                date = change.row_data[date_field];
+            if (change.action === 'I') {                
                 relevantChanges.push('Adicionado a lista de fundos');
-            } else if (change.action === 'D') {
-                date = change.changed_fields[date_field];
+            } else if (change.action === 'D') {                
                 relevantChanges.push('Removido da lista de fundos');
-            } else {
-                date = change.changed_fields[date_field];
+            } else {                
                 Object.keys(change.changed_fields).forEach(changedField => {
                     const relevantFields = {
                         xf_state: {
@@ -331,7 +326,7 @@ class IndicatorsView extends React.Component {
 
             if (relevantChanges.length > 0)
                 fundsChanges[key].push({
-                    date: date,
+                    date: change.action_tstamp_stm,
                     name: change.f_short_name,
                     cnpj: change.f_cnpj,
                     changes: relevantChanges
