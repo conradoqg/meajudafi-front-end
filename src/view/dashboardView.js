@@ -1,21 +1,13 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Link, Switch } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import Drawer from '@material-ui/core/Drawer';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
-import List from '@material-ui/core/List';
 import Typography from '@material-ui/core/Typography';
-import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
-import MenuIcon from '@material-ui/icons/Menu';
-import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
+import Button from '@material-ui/core/Button';
 import ShowChartIcon from '@material-ui/icons/ShowChart';
 import TableChartIcon from '@material-ui/icons/TableChart';
 import ScatterPlotIcon from '@material-ui/icons/ScatterPlot';
@@ -28,66 +20,12 @@ import FundListItemView from './fundListItemView';
 import FundComparisonView from './fundComparisonView';
 import API from '../api';
 
-const DRAWERWIDTH = 270;
-
 const styles = theme => ({
     root: {
         display: 'flex',
     },
-    toolbar: {
-        paddingRight: 24, // keep right padding when drawer closed
-    },
-    toolbarIcon: {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'flex-end',
-        padding: '0 8px',
-        ...theme.mixins.toolbar,
-    },
-    appBar: {
-        zIndex: theme.zIndex.drawer + 1,
-        transition: theme.transitions.create(['width', 'margin'], {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.leavingScreen,
-        }),
-    },
-    appBarShift: {
-        marginLeft: DRAWERWIDTH,
-        width: `calc(100% - ${DRAWERWIDTH}px)`,
-        transition: theme.transitions.create(['width', 'margin'], {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.enteringScreen,
-        }),
-    },
-    menuButton: {
-        marginLeft: 12,
-        marginRight: 36,
-    },
-    menuButtonHidden: {
-        display: 'none',
-    },
-    title: {
-        flexGrow: 1,
-    },
-    drawerPaper: {
-        position: 'relative',
-        whiteSpace: 'nowrap',
-        width: DRAWERWIDTH,
-        transition: theme.transitions.create('width', {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.enteringScreen,
-        }),
-    },
-    drawerPaperClose: {
-        overflowX: 'hidden',
-        transition: theme.transitions.create('width', {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.leavingScreen,
-        }),
-        width: theme.spacing.unit * 7,
-        [theme.breakpoints.up('sm')]: {
-            width: theme.spacing.unit * 9,
-        },
+    toolbarTitle: {
+        flex: 1,
     },
     appBarSpacer: theme.mixins.toolbar,
     content: {
@@ -116,6 +54,15 @@ const styles = theme => ({
         '&:hover': {
             textDecoration: 'underline'
         }
+    },
+    menuLink: {
+        textDecoration: 'none',
+        color: 'white'
+    },
+    menuLinkSelected: {
+        textDecoration: 'none',
+        color: 'white',
+        borderBottom: '2px solid'
     },
     help: {
         margin: 10,
@@ -165,13 +112,8 @@ const MenuLink = ({ label, to, activeOnlyWhenExact, icon, classes }) => (
         path={to}
         exact={activeOnlyWhenExact}
         children={({ match }) => (
-            <Link to={to} className={classes.link}>
-                <ListItem button selected={match ? true : false}>
-                    <ListItemIcon>
-                        {icon()}
-                    </ListItemIcon>
-                    <ListItemText primary={label} />
-                </ListItem>
+            <Link to={to} className={match ? classes.menuLinkSelected : classes.menuLink}>
+                <Button color="inherit" >{label}</Button>
             </Link>
         )}
     />
@@ -179,16 +121,7 @@ const MenuLink = ({ label, to, activeOnlyWhenExact, icon, classes }) => (
 
 class Dashboard extends React.Component {
     state = {
-        open: false,
         maintenanceMode: false
-    };
-
-    handleDrawerOpen = () => {
-        this.setState({ open: true });
-    };
-
-    handleDrawerClose = () => {
-        this.setState({ open: false });
     };
 
     componentDidMount = async () => {
@@ -208,44 +141,19 @@ class Dashboard extends React.Component {
                     <CssBaseline />
                     <div className={classes.root}>
                         <AppBar
-                            position="absolute"
-                            className={classNames(classes.appBar, this.state.open && classes.appBarShift)}>
-                            <Toolbar disableGutters={!this.state.open} className={classes.toolbar}>
-                                <IconButton
-                                    color="inherit"
-                                    aria-label="Open drawer"
-                                    onClick={this.handleDrawerOpen}
-                                    className={classNames(
-                                        classes.menuButton,
-                                        this.state.open && classes.menuButtonHidden,
-                                    )}>
-                                    <MenuIcon />
-                                </IconButton>
-                                <Typography variant="title" color="inherit" noWrap className={classes.title}>Me Ajuda FI</Typography>
-                                <IconButton color="inherit" aria-label="Repositório no Github" href="https://github.com/conradoqg/cvm-fund-explorer-stack" target="_new">
-                                    <GithubCircleIcon fontSize="large" />
-                                </IconButton>
-                            </Toolbar>
-                        </AppBar>
-                        <Drawer
-                            variant="permanent"
-                            classes={{
-                                paper: classNames(classes.drawerPaper, !this.state.open && classes.drawerPaperClose),
-                            }}
-                            open={this.state.open}>
-                            <div className={classes.toolbarIcon}>
-                                <IconButton onClick={this.handleDrawerClose}>
-                                    <ChevronLeftIcon />
-                                </IconButton>
-                            </div>
-                            <Divider />
-                            <List>
+                            position="absolute">
+                            <Toolbar>
+                                <Typography variant="title" color="inherit" noWrap className={classes.toolbarTitle}>
+                                    Me Ajuda FI
+                                </Typography>
                                 {routes.filter(route => route.showInMenu).map((route, index) => (
                                     <MenuLink activeOnlyWhenExact={route.exact} to={route.linkTo ? route.linkTo : route.path} classes={classes} label={route.name} icon={route.icon} key={index} />
                                 ))}
-                            </List>
-                            <Divider />
-                        </Drawer>
+                                <IconButton color="inherit" aria-label="Repositório no Github" href="https://github.com/conradoqg/cvm-fund-explorer-stack" target="_new">
+                                    <GithubCircleIcon fontSize="default" />
+                                </IconButton>
+                            </Toolbar>
+                        </AppBar>
                         <main className={classes.content}>
                             <Switch>
                                 {routes.map((route, index) => (
