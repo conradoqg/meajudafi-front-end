@@ -236,7 +236,7 @@ class FundComparisonView extends React.Component {
                     else {
                         fund.detail = {
                             name: results[fund.cnpj].detail[0].f_short_name,
-                            benchmark: results[fund.cnpj].detail[0].rentab_fundo
+                            benchmark: results[fund.cnpj].detail[0].icf_rentab_fundo
                         };
                     }
                 }
@@ -528,7 +528,8 @@ class FundComparisonView extends React.Component {
                                                                         <Typography>
                                                                             <b><Link to={'/fundList/' + fundObject.cnpj} className={globalClasses.link}>{fundObject.detail.name}</Link></b><br />
                                                                             <small>
-                                                                                <b>Benchmark:</b> {fundObject.detail.benchmark ? fundObject.detail.benchmark : 'Não informado'}
+                                                                                
+                                                                                <b>Benchmark:</b> {formatters.field['icf_rentab_fundo'](fundObject.detail.benchmark)}
                                                                             </small>
                                                                         </Typography>
                                                                     </Grid>
