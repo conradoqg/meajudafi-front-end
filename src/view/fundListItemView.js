@@ -115,7 +115,6 @@ class FundListItemView extends React.Component {
     }
 
     handleChartUpdate = async (figure) => {
-        console.log(`this.props.width: ${this.props.width}`);
         this.setState(produce(draft => {
             if (figure.layout.forSize !== this.props.width) {
                 draft.data.chart = this.buildChart(draft.config, draft.data.fund.f_short_name, draft.data.history)
@@ -350,26 +349,13 @@ class FundListItemView extends React.Component {
                             data={this.state.data.fund}
                             hasData={() => (
                                 <React.Fragment>
-                                    <Hidden mdDown>
-                                        <Typography variant="display1" gutterBottom>
-                                            {formatters.field['f_short_name'](this.state.data.fund.f_short_name)}
-                                        </Typography>
-                                        <Typography variant="display1" component="span" gutterBottom><Tooltip title={
-                                            <React.Fragment>
-                                                <p>Detalhes do fundo.</p>
-                                                <p>No lado direito é possível alterar o benchmark e intervalo visualizado.</p>
-                                            </React.Fragment>
-                                        }><Avatar className={globalClasses.help}>?</Avatar></Tooltip></Typography>
-                                    </Hidden>
-                                    <Hidden lgUp>
-                                        <Typography variant="headline" gutterBottom>{formatters.field['f_short_name'](this.state.data.fund.f_short_name)}</Typography>
-                                        <Typography variant="headline" component="span" gutterBottom><Tooltip title={
-                                            <React.Fragment>
-                                                <p>Detalhes do fundo.</p>
-                                                <p>No lado direito é possível alterar o benchmark e intervalo visualizado.</p>
-                                            </React.Fragment>
-                                        }><Avatar className={globalClasses.help}>?</Avatar></Tooltip></Typography>
-                                    </Hidden>
+                                    <Typography variant={isWidthUp('md', this.props.width) ? 'display1' : 'headline'} gutterBottom>{formatters.field['f_short_name'](this.state.data.fund.f_short_name)}</Typography>
+                                    <Typography variant={isWidthUp('md', this.props.width) ? 'display1' : 'headline'} component="span" gutterBottom><Tooltip title={
+                                        <React.Fragment>
+                                            <p>Detalhes do fundo.</p>
+                                            <p>No lado direito é possível alterar o benchmark e intervalo visualizado.</p>
+                                        </React.Fragment>
+                                    }><Avatar className={globalClasses.help}>?</Avatar></Tooltip></Typography>
                                 </React.Fragment>
                             )} />
                     </Grid>

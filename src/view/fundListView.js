@@ -18,17 +18,19 @@ import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import Collapse from '@material-ui/core/Collapse';
-import { produce, setAutoFreeze } from 'immer';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Select from '@material-ui/core/Select';
 import Avatar from '@material-ui/core/Avatar';
 import Tooltip from '@material-ui/core/Tooltip';
+import Hidden from '@material-ui/core/Hidden';
+import withWidth, { isWidthUp } from '@material-ui/core/withWidth';
+import { produce, setAutoFreeze } from 'immer';
+import allKeys from 'promise-results/allKeys';
 import API from '../api';
 import FundFilterComponent from './component/fundFilterComponent';
 import FundSearchComponent from './component/fundSearchComponent';
 import ShowStateComponent from './component/showStateComponent';
 import DataHistoryChartComponent from './component/dataHistoryChartComponent';
-import allKeys from 'promise-results/allKeys';
 import { sortOptions, benchmarkOptions, rangeOptions } from './option';
 import { formatters, nextColorIndex, chartFormatters } from '../util';
 
@@ -377,6 +379,7 @@ class FundListView extends React.Component {
                 autosize: true,
                 showlegend: true,
                 legend: { 'orientation': 'h' },
+                forSize: this.props.width,
                 xaxis: {
                     showspikes: true,
                     spikemode: 'across',
@@ -461,15 +464,15 @@ class FundListView extends React.Component {
     render() {
         const { classes, globalClasses } = this.props;
         const { layout } = this.state;
-        const open = Boolean(layout.anchorEl);
+        const open = Boolean(layout.anchorEl);        
 
         return (
             <div>
                 <div className={globalClasses.appBarSpacer} />
                 <Grid container wrap="nowrap">
                     <Grid container alignItems="center" justify="flex-start">
-                        <Typography variant="display1" gutterBottom>Lista de Fundos</Typography>
-                        <Typography component="span" gutterBottom><Tooltip title={
+                        <Typography variant={isWidthUp('md', this.props.width) ? 'display1' : 'headline'} gutterBottom>Lista de Fundos</Typography>
+                        <Typography variant={isWidthUp('md', this.props.width) ? 'display1' : 'headline'} component="span" gutterBottom><Tooltip title={
                             <React.Fragment>
                                 <p>Lista de fundos de investimento com gráfico diário.</p>
                                 <p>Por padrão somente fundos listados na BTG Pactual e XP Investimentos são exibidos. No lado esquerdo é possível procurar fundos pelo nome e no lado direito é possível alterar o filtro, ordem, intervalo e benchmark.</p>
@@ -485,26 +488,28 @@ class FundListView extends React.Component {
                                 <FundSearchComponent onSearchChanged={this.handleSearchChange} />
                                 <Grid container justify="flex-end" spacing={8}>
                                     <Grid item>
-                                        <Select
-                                            value={this.state.config.chart.range}
-                                            onChange={this.handleChartConfigChange}
-                                            className={classes.chartSelect}
-                                            inputProps={{
-                                                name: 'range',
-                                                id: 'range',
-                                            }}>
-                                            {rangeOptions.map(range => (<MenuItem key={range.name} value={range.name}>{range.displayName}</MenuItem>))}
-                                        </Select>
-                                        <Select
-                                            value={this.state.config.chart.benchmark}
-                                            onChange={this.handleChartConfigChange}
-                                            className={classes.chartSelect}
-                                            inputProps={{
-                                                name: 'benchmark',
-                                                id: 'benchmark',
-                                            }}>
-                                            {benchmarkOptions.map(benchmark => (<MenuItem key={benchmark.name} value={benchmark.name}>{benchmark.displayName}</MenuItem>))}
-                                        </Select>
+                                        <Hidden smDown>
+                                            <Select
+                                                value={this.state.config.chart.range}
+                                                onChange={this.handleChartConfigChange}
+                                                className={classes.chartSelect}
+                                                inputProps={{
+                                                    name: 'range',
+                                                    id: 'range',
+                                                }}>
+                                                {rangeOptions.map(range => (<MenuItem key={range.name} value={range.name}>{range.displayName}</MenuItem>))}
+                                            </Select>
+                                            <Select
+                                                value={this.state.config.chart.benchmark}
+                                                onChange={this.handleChartConfigChange}
+                                                className={classes.chartSelect}
+                                                inputProps={{
+                                                    name: 'benchmark',
+                                                    id: 'benchmark',
+                                                }}>
+                                                {benchmarkOptions.map(benchmark => (<MenuItem key={benchmark.name} value={benchmark.name}>{benchmark.displayName}</MenuItem>))}
+                                            </Select>
+                                        </Hidden>
                                         <IconButton
                                             aria-label="Ordem"
                                             aria-owns={open ? 'long-menu' : null}
@@ -540,39 +545,41 @@ class FundListView extends React.Component {
                         </Paper>
                         <ShowStateComponent
                             data={this.state.data.fundList}
-                            hasData={() => this.state.data.fundList.map((fund, index) => (
-                                <ExpansionPanel key={index} expanded={this.state.layout.showingFundDetail[fund.icf_cnpj_fundo] ? true : false} onChange={(e, expanded) => this.handleFundExpansion(expanded, fund)}>
-                                    <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-                                        <Grid container spacing={8}>
-                                            <Grid item xs={8}>
-                                                <Typography>
-                                                    <b><Link to={'/fundList/' + fund.f_cnpj} className={globalClasses.link}>{fund.f_short_name}</Link></b><br />
-                                                    <small>
-                                                        <b>Patrimônio:</b> {formatters.field['iry_accumulated_networth'](fund.iry_accumulated_networth)}<br />
-                                                        <b>Quotistas:</b> {fund.iry_accumulated_quotaholders} <br />
-                                                        <b>Benchmark:</b> {formatters.field['icf_rentab_fundo'](fund.icf_rentab_fundo)}
-                                                    </small>
-                                                </Typography>
-                                            </Grid>
-                                            <Grid item xs={4}>
-                                                <Grid container spacing={8}>
-                                                    <Grid item xs={6}>
-                                                        <Typography><b>Desempenho</b></Typography>
-                                                    </Grid>
+                            hasData={() => this.state.data.fundList.map((fund, index) => {
+                                const content = (
+                                    <Grid container spacing={8}>
+                                        <Grid item xs={8}>
+                                            <Typography>
+                                                <b><Link to={'/fundList/' + fund.f_cnpj} className={globalClasses.link}>{fund.f_short_name}</Link></b><br />
+                                                <small>
+                                                    <b>Patrimônio:</b> {formatters.field['iry_accumulated_networth'](fund.iry_accumulated_networth)}<br />
+                                                    <b>Quotistas:</b> {fund.iry_accumulated_quotaholders} <br />
+                                                    <b>Benchmark:</b> {formatters.field['icf_rentab_fundo'](fund.icf_rentab_fundo)}
+                                                </small>
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item xs={4}>
+                                            <Grid container spacing={8}>
+                                                <Grid item xs={6}>
+                                                    <Typography><b>Desempenho</b></Typography>
+                                                </Grid>
+                                                <Hidden smDown>
                                                     <Grid item xs={6}>
                                                         <Typography><b>Risco</b></Typography>
                                                     </Grid>
+                                                </Hidden>
+                                            </Grid>
+                                            <Grid container spacing={8}>
+                                                <Grid item sm={6} xs={12}>
+                                                    <Typography>
+                                                        <small>
+                                                            1A: {formatters.field['iry_investment_return_1y'](fund.iry_investment_return_1y)}<br />
+                                                            2A: {formatters.field['iry_investment_return_2y'](fund.iry_investment_return_2y)}<br />
+                                                            3A: {formatters.field['iry_investment_return_3y'](fund.iry_investment_return_3y)}
+                                                        </small>
+                                                    </Typography>
                                                 </Grid>
-                                                <Grid container spacing={8}>
-                                                    <Grid item xs={6}>
-                                                        <Typography>
-                                                            <small>
-                                                                1A: {formatters.field['iry_investment_return_1y'](fund.iry_investment_return_1y)}<br />
-                                                                2A: {formatters.field['iry_investment_return_2y'](fund.iry_investment_return_2y)}<br />
-                                                                3A: {formatters.field['iry_investment_return_3y'](fund.iry_investment_return_3y)}
-                                                            </small>
-                                                        </Typography>
-                                                    </Grid>
+                                                <Hidden smDown>
                                                     <Grid item xs={6}>
                                                         <Typography>
                                                             <small>
@@ -582,24 +589,40 @@ class FundListView extends React.Component {
                                                             </small>
                                                         </Typography>
                                                     </Grid>
-                                                </Grid>
+                                                </Hidden>
                                             </Grid>
                                         </Grid>
-                                    </ExpansionPanelSummary>
-                                    <Divider />
-                                    <ExpansionPanelDetails>
-                                        <Grid container spacing={8}>
-                                            <Grid item xs>
-                                                <DataHistoryChartComponent
-                                                    fund={this.state.data.fundDetail[fund.icf_cnpj_fundo]}
-                                                    onInitialized={(figure) => this.handleChartInitialized(fund, figure)}
-                                                    onUpdate={(figure) => this.handleChartUpdate(fund, figure)}
-                                                />
-                                            </Grid>
-                                        </Grid>
-                                    </ExpansionPanelDetails>
-                                </ExpansionPanel>
-                            ))}
+                                    </Grid>
+                                )
+                                return (
+                                    <React.Fragment key={index}>
+                                        <Hidden xsDown>
+                                            <ExpansionPanel expanded={this.state.layout.showingFundDetail[fund.icf_cnpj_fundo] ? true : false} onChange={(e, expanded) => this.handleFundExpansion(expanded, fund)}>
+                                                <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+                                                    {content}
+                                                </ExpansionPanelSummary>
+                                                <Divider />
+                                                <ExpansionPanelDetails>
+                                                    <Grid container spacing={8}>
+                                                        <Grid item xs>
+                                                            <DataHistoryChartComponent
+                                                                fund={this.state.data.fundDetail[fund.icf_cnpj_fundo]}
+                                                                onInitialized={(figure) => this.handleChartInitialized(fund, figure)}
+                                                                onUpdate={(figure) => this.handleChartUpdate(fund, figure)}
+                                                            />
+                                                        </Grid>
+                                                    </Grid>
+                                                </ExpansionPanelDetails>
+                                            </ExpansionPanel>
+                                        </Hidden>
+                                        <Hidden smUp>
+                                            <Paper elevation={1} square={true} className={classes.filterPaperContent}>
+                                                {content}
+                                            </Paper>
+                                        </Hidden>
+                                    </React.Fragment>
+                                );
+                            })}
                             isNull={() => (<Paper elevation={1} square={true} className={classes.filterPaperContent}><Typography variant="subheading" align="center"><CircularProgress className={classes.progress} /></Typography></Paper>)}
                             isErrored={() => (<Paper elevation={1} square={true} className={classes.filterPaperContent}><Typography variant="subheading" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography></Paper>)}
                             isEmpty={() => (<Paper elevation={1} square={true} className={classes.filterPaperContent}><Typography variant="subheading" align="center">Sem dados à exibir</Typography></Paper>)}
@@ -630,4 +653,4 @@ class FundListView extends React.Component {
     }
 }
 
-export default withStyles(styles)(FundListView);
+export default withWidth()(withStyles(styles)(FundListView));
