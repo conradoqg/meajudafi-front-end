@@ -120,7 +120,7 @@ class IndicatorsView extends React.Component {
         return this.updateData(nextState);
     }
 
-    handleChartInitialize = async (figure) => {
+    handleChartInitialized = async (figure) => {
         this.setState(produce(draft => {
             draft.data.economyIndicators = figure;
         }));
@@ -247,6 +247,11 @@ class IndicatorsView extends React.Component {
                     fixedrange: true,
                     position: 1
                 }
+            },
+            frames: [],
+            config: {
+                locale: 'pt-BR',
+                displayModeBar: true
             }
         };
     }
@@ -268,13 +273,13 @@ class IndicatorsView extends React.Component {
         fundsChanged.forEach(change => {
             const key = change.table_name === 'btgpactual_funds' ? 'btgpactual' : 'xpi';
 
-            const relevantChanges = [];            
+            const relevantChanges = [];
 
-            if (change.action === 'I') {                
+            if (change.action === 'I') {
                 relevantChanges.push('Adicionado a lista de fundos');
-            } else if (change.action === 'D') {                
+            } else if (change.action === 'D') {
                 relevantChanges.push('Removido da lista de fundos');
-            } else {                
+            } else {
                 Object.keys(change.changed_fields).forEach(changedField => {
                     const relevantFields = {
                         xf_state: {
@@ -377,7 +382,7 @@ class IndicatorsView extends React.Component {
                         <Paper className={classes.paper} elevation={1} square={true}>
                             <DataHistoryChartComponent
                                 fund={this.state.data.economyIndicators}
-                                onInitialized={(figure) => this.handleChartInitialize(figure)}
+                                onInitialized={(figure) => this.handleChartInitialized(figure)}
                                 onUpdate={(figure) => this.handleChartUpdate(figure)}
                             />
                         </Paper>

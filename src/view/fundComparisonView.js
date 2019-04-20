@@ -171,13 +171,13 @@ class FundComparisonView extends React.Component {
         return this.updateData(nextState);
     }
 
-    handleChartInitialize = async (figure) => {
+    handleChartInitialized = async (figure) => {
         this.setState(produce(draft => {
             draft.data.chart = figure;
         }));
     }
 
-    handleChartUpdate = async (fund, figure) => {
+    handleChartUpdate = async (figure) => {
         this.setState(produce(draft => {
             draft.data.chart = figure;
         }));
@@ -231,7 +231,7 @@ class FundComparisonView extends React.Component {
                 if (results[fund.cnpj]) {
                     if (results[fund.cnpj].data instanceof Error) fund.data = results[fund.cnpj].data.message;
                     else fund.data = results[fund.cnpj].data;
-                    
+
                     if (results[fund.cnpj].detail.length === 0) fund.detail = 'Não encontrado';
                     else {
                         fund.detail = {
@@ -292,6 +292,11 @@ class FundComparisonView extends React.Component {
                     tickformat: chartFormatters[field].tickformat,
                     hoverformat: chartFormatters[field].hoverformat
                 }
+            },
+            frames: [],
+            config: {
+                locale: 'pt-BR',
+                displayModeBar: true
             }
         };
 
@@ -445,7 +450,7 @@ class FundComparisonView extends React.Component {
                         <Paper elevation={1} square={true} className={classes.chart} >
                             <DataHistoryChartComponent
                                 fund={this.state.data.chart}
-                                onInitialized={(figure) => this.handleChartInitialize(figure)}
+                                onInitialized={(figure) => this.handleChartInitialized(figure)}
                                 onUpdate={(figure) => this.handleChartUpdate(figure)}
                             />
                         </Paper>
@@ -528,7 +533,7 @@ class FundComparisonView extends React.Component {
                                                                         <Typography>
                                                                             <b><Link to={'/fundList/' + fundObject.cnpj} className={globalClasses.link}>{fundObject.detail.name}</Link></b><br />
                                                                             <small>
-                                                                                
+
                                                                                 <b>Benchmark:</b> {formatters.field['icf_rentab_fundo'](fundObject.detail.benchmark)}
                                                                             </small>
                                                                         </Typography>

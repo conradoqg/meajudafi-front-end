@@ -8,6 +8,8 @@ import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import Divider from '@material-ui/core/Divider';
 import { withStyles } from '@material-ui/core/styles';
+import withWidth, { isWidthUp } from '@material-ui/core/withWidth';
+import Hidden from '@material-ui/core/Hidden';
 import { produce, setAutoFreeze } from 'immer';
 import promisesEach from 'promise-results';
 import { withRouter } from 'react-router-dom';
@@ -106,15 +108,20 @@ class FundListItemView extends React.Component {
         return this.updateData(nextState);
     }
 
-    handleChartInitialize = async (figure) => {
+    handleChartInitialized = async (figure) => {
         this.setState(produce(draft => {
             draft.data.chart = figure;
         }));
     }
 
-    handleChartUpdate = async (fund, figure) => {
+    handleChartUpdate = async (figure) => {
+        console.log(`this.props.width: ${this.props.width}`);
         this.setState(produce(draft => {
-            draft.data.chart = figure;
+            if (figure.layout.forSize !== this.props.width) {
+                draft.data.chart = this.buildChart(draft.config, draft.data.fund.f_short_name, draft.data.history)
+            } else {
+                draft.data.chart = figure;
+            }
         }));
     }
 
@@ -149,6 +156,18 @@ class FundListItemView extends React.Component {
         const benchmarkText = benchmarkOptions.find(benchmark => benchmark.name === config.benchmark).displayName;
         const min_y = Math.min(statistics.daily.min_investment_return, statistics.daily.min_benchmark_investment_return);
         const max_y = Math.max(statistics.daily.max_investment_return, statistics.daily.max_benchmark_investment_return);
+
+        let domain = null;
+
+        if (isWidthUp('md', this.props.width)) domain = [0.08, 0.75];
+        else if (isWidthUp('sm', this.props.width)) domain = [0.10, 1];
+        else domain = [0, 1];
+
+        let margin = null;
+        if (isWidthUp('sm', this.props.width)) margin = { l: 0, r: 0, t: 50, b: 0 };
+        else margin = { l: 15, r: 15, t: 80, b: 10 };
+
+        console.log(`domain = ${domain}`);
 
         return {
             data: [
@@ -219,10 +238,12 @@ class FundListItemView extends React.Component {
                 autosize: true,
                 showlegend: true,
                 legend: { 'orientation': 'h' },
+                forSize: this.props.width,
+                margin,
                 xaxis: {
                     showspikes: true,
                     spikemode: 'across',
-                    domain: [0.05, 0.74]
+                    domain
                 },
                 yaxis: {
                     title: 'Desempenho',
@@ -230,6 +251,7 @@ class FundListItemView extends React.Component {
                     hoverformat: chartFormatters.investment_return.hoverformat,
                     fixedrange: true,
                     range: [min_y, max_y],
+                    visible: isWidthUp('sm', this.props.width)
                 },
                 yaxis2: {
                     title: `Benchmark (${benchmarkText})`,
@@ -240,7 +262,8 @@ class FundListItemView extends React.Component {
                     side: 'left',
                     range: [min_y, max_y],
                     fixedrange: true,
-                    position: 0
+                    position: 0,
+                    visible: isWidthUp('sm', this.props.width)
                 },
                 yaxis3: {
                     title: 'Risco',
@@ -249,7 +272,8 @@ class FundListItemView extends React.Component {
                     anchor: 'x',
                     overlaying: 'y',
                     side: 'right',
-                    fixedrange: true
+                    fixedrange: true,
+                    visible: isWidthUp('md', this.props.width)
                 },
                 yaxis4: {
                     title: 'Sharpe',
@@ -259,7 +283,8 @@ class FundListItemView extends React.Component {
                     overlaying: 'y',
                     side: 'right',
                     fixedrange: true,
-                    position: 0.78
+                    position: 0.78,
+                    visible: isWidthUp('md', this.props.width)
                 },
                 yaxis5: {
                     title: 'Consistência',
@@ -269,7 +294,8 @@ class FundListItemView extends React.Component {
                     overlaying: 'y',
                     side: 'right',
                     fixedrange: true,
-                    position: 0.84
+                    position: 0.84,
+                    visible: isWidthUp('md', this.props.width)
                 },
                 yaxis6: {
                     title: 'Patrimônio',
@@ -281,7 +307,8 @@ class FundListItemView extends React.Component {
                     overlaying: 'y',
                     side: 'right',
                     fixedrange: true,
-                    position: 0.89
+                    position: 0.89,
+                    visible: isWidthUp('md', this.props.width)
                 },
                 yaxis7: {
                     title: 'Cotistas',
@@ -289,8 +316,14 @@ class FundListItemView extends React.Component {
                     overlaying: 'y',
                     side: 'right',
                     fixedrange: true,
-                    position: 1
+                    position: 0.95,
+                    visible: isWidthUp('md', this.props.width)
                 }
+            },
+            frames: [],
+            config: {
+                locale: 'pt-BR',
+                displayModeBar: true
             }
         };
     }
@@ -315,13 +348,30 @@ class FundListItemView extends React.Component {
                     <Grid container alignItems="center" justify="flex-start">
                         <ShowStateComponent
                             data={this.state.data.fund}
-                            hasData={() => (<Typography variant="display1" gutterBottom>{formatters.field['f_short_name'](this.state.data.fund.f_short_name)}</Typography>)} />
-                        <Typography component="span" gutterBottom><Tooltip title={
-                            <React.Fragment>
-                                <p>Detalhes do fundo.</p>
-                                <p>No lado direito é possível alterar o benchmark e intervalo visualizado.</p>
-                            </React.Fragment>
-                        }><Avatar className={globalClasses.help}>?</Avatar></Tooltip></Typography>
+                            hasData={() => (
+                                <React.Fragment>
+                                    <Hidden mdDown>
+                                        <Typography variant="display1" gutterBottom>
+                                            {formatters.field['f_short_name'](this.state.data.fund.f_short_name)}
+                                        </Typography>
+                                        <Typography variant="display1" component="span" gutterBottom><Tooltip title={
+                                            <React.Fragment>
+                                                <p>Detalhes do fundo.</p>
+                                                <p>No lado direito é possível alterar o benchmark e intervalo visualizado.</p>
+                                            </React.Fragment>
+                                        }><Avatar className={globalClasses.help}>?</Avatar></Tooltip></Typography>
+                                    </Hidden>
+                                    <Hidden lgUp>
+                                        <Typography variant="headline" gutterBottom>{formatters.field['f_short_name'](this.state.data.fund.f_short_name)}</Typography>
+                                        <Typography variant="headline" component="span" gutterBottom><Tooltip title={
+                                            <React.Fragment>
+                                                <p>Detalhes do fundo.</p>
+                                                <p>No lado direito é possível alterar o benchmark e intervalo visualizado.</p>
+                                            </React.Fragment>
+                                        }><Avatar className={globalClasses.help}>?</Avatar></Tooltip></Typography>
+                                    </Hidden>
+                                </React.Fragment>
+                            )} />
                     </Grid>
                     <Grid container justify="flex-end">
                         <Grid item>
@@ -366,14 +416,14 @@ class FundListItemView extends React.Component {
                                             </Grid>
                                         </Grid>
                                         <Grid container spacing={16}>
-                                            <Grid item xs={3}><b>CNPJ:</b> {formatters.field['f_cnpj'](this.state.data.fund.f_cnpj)}</Grid>
-                                            <Grid item xs={3}><b>Classe:</b> {formatters.field['icf_classe'](this.state.data.fund.icf_classe)}</Grid>
-                                            <Grid item xs={3}><b>Situação:</b> {formatters.field['icf_sit'](this.state.data.fund.icf_sit)}</Grid>
-                                            <Grid item xs={3}><b>Fundo de condomínio:</b> {formatters.field['icf_condom'](this.state.data.fund.icf_condom)}</Grid>
-                                            <Grid item xs={3}><b>Fundo de cotas:</b> {formatters.field['icf_fundo_cotas'](this.state.data.fund.icf_fundo_cotas)}</Grid>
-                                            <Grid item xs={3}><b>Fundo exclusivo:</b> {formatters.field['icf_fundo_exclusivo'](this.state.data.fund.icf_fundo_exclusivo)}</Grid>
-                                            <Grid item xs={3}><b>Benchmark:</b> {formatters.field['icf_rentab_fundo'](this.state.data.fund.icf_rentab_fundo)}</Grid>
-                                            <Grid item xs={3}><b>Patrimônio:</b> {formatters.field['icf_vl_patrim_liq'](this.state.data.fund.icf_vl_patrim_liq)}</Grid>
+                                            <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><b>CNPJ:</b> {formatters.field['f_cnpj'](this.state.data.fund.f_cnpj)}</Grid>
+                                            <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><b>Classe:</b> {formatters.field['icf_classe'](this.state.data.fund.icf_classe)}</Grid>
+                                            <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><b>Situação:</b> {formatters.field['icf_sit'](this.state.data.fund.icf_sit)}</Grid>
+                                            <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><b>Fundo de condomínio:</b> {formatters.field['icf_condom'](this.state.data.fund.icf_condom)}</Grid>
+                                            <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><b>Fundo de cotas:</b> {formatters.field['icf_fundo_cotas'](this.state.data.fund.icf_fundo_cotas)}</Grid>
+                                            <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><b>Fundo exclusivo:</b> {formatters.field['icf_fundo_exclusivo'](this.state.data.fund.icf_fundo_exclusivo)}</Grid>
+                                            <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><b>Benchmark:</b> {formatters.field['icf_rentab_fundo'](this.state.data.fund.icf_rentab_fundo)}</Grid>
+                                            <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><b>Patrimônio:</b> {formatters.field['icf_vl_patrim_liq'](this.state.data.fund.icf_vl_patrim_liq)}</Grid>
                                         </Grid>
                                         {
                                             this.state.data.fund.xf_id && (
@@ -387,12 +437,12 @@ class FundListItemView extends React.Component {
                                                         </Grid>
                                                     </Grid>
                                                     <Grid container spacing={16}>
-                                                        <Grid item xs={3}><b>Nome:</b> {formatters.field['xf_name'](this.state.data.fund.xf_name)}</Grid>
-                                                        <Grid item xs={3}><b>Risco Formal:</b> {formatters.field['xf_formal_risk'](this.state.data.fund.xf_formal_risk)}</Grid>
-                                                        <Grid item xs={3}><b>Investimento Inicial:</b> {formatters.field['xf_initial_investment'](this.state.data.fund.xf_initial_investment)}</Grid>
-                                                        <Grid item xs={3}><b>Dias para Resgate:</b> {formatters.field['xf_rescue_quota'](this.state.data.fund.xf_rescue_quota)}</Grid>
-                                                        <Grid item xs={3}><b>Benchmark:</b> {formatters.field['xf_benchmark'](this.state.data.fund.xf_benchmark)}</Grid>
-                                                        <Grid item xs={3}><b>Categoria:</b> {formatters.field['xf_type'](this.state.data.fund.xf_type)}</Grid>
+                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><b>Nome:</b> {formatters.field['xf_name'](this.state.data.fund.xf_name)}</Grid>
+                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><b>Risco Formal:</b> {formatters.field['xf_formal_risk'](this.state.data.fund.xf_formal_risk)}</Grid>
+                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><b>Investimento Inicial:</b> {formatters.field['xf_initial_investment'](this.state.data.fund.xf_initial_investment)}</Grid>
+                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><b>Dias para Resgate:</b> {formatters.field['xf_rescue_quota'](this.state.data.fund.xf_rescue_quota)}</Grid>
+                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><b>Benchmark:</b> {formatters.field['xf_benchmark'](this.state.data.fund.xf_benchmark)}</Grid>
+                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><b>Categoria:</b> {formatters.field['xf_type'](this.state.data.fund.xf_type)}</Grid>
                                                     </Grid>
                                                 </React.Fragment>
                                             )
@@ -409,12 +459,12 @@ class FundListItemView extends React.Component {
                                                         </Grid>
                                                     </Grid>
                                                     <Grid container spacing={16}>
-                                                        <Grid item xs={3}><b>Nome:</b> {formatters.field['bf_product'](this.state.data.fund.bf_product)}</Grid>
-                                                        <Grid item xs={3}><b>Risco Formal:</b> {formatters.field['bf_risk_level'](this.state.data.fund.bf_risk_level)}</Grid>
-                                                        <Grid item xs={3}><b>Investimento Inicial:</b> {formatters.field['bf_minimum_initial_investment'](this.state.data.fund.bf_minimum_initial_investment)}</Grid>
-                                                        <Grid item xs={3}><b>Dias para Resgate:</b> {formatters.field['bf_rescue_quota'](this.state.data.fund.bf_rescue_quota)}</Grid>
-                                                        <Grid item xs={3}><b>Categoria:</b> {formatters.field['bf_category_description'](this.state.data.fund.bf_category_description)}</Grid>
-                                                        <Grid item xs={3}><b>Classe Anbima:</b> {formatters.field['bf_anbima_rating'](this.state.data.fund.bf_anbima_rating)}</Grid>
+                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><b>Nome:</b> {formatters.field['bf_product'](this.state.data.fund.bf_product)}</Grid>
+                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><b>Risco Formal:</b> {formatters.field['bf_risk_level'](this.state.data.fund.bf_risk_level)}</Grid>
+                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><b>Investimento Inicial:</b> {formatters.field['bf_minimum_initial_investment'](this.state.data.fund.bf_minimum_initial_investment)}</Grid>
+                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><b>Dias para Resgate:</b> {formatters.field['bf_rescue_quota'](this.state.data.fund.bf_rescue_quota)}</Grid>
+                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><b>Categoria:</b> {formatters.field['bf_category_description'](this.state.data.fund.bf_category_description)}</Grid>
+                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><b>Classe Anbima:</b> {formatters.field['bf_anbima_rating'](this.state.data.fund.bf_anbima_rating)}</Grid>
                                                     </Grid>
                                                 </React.Fragment>
                                             )
@@ -425,6 +475,7 @@ class FundListItemView extends React.Component {
                     </Grid>
                 </Grid>
                 <br />
+                {/* <Hidden smDown> */}
                 <Grid container wrap="nowrap">
                     <Grid container alignItems="center" justify="flex-start">
                         <Typography variant="headline" gutterBottom>Gráfico Histórico</Typography>
@@ -441,12 +492,12 @@ class FundListItemView extends React.Component {
                         <Paper elevation={1} square={true} className={classes.chart} >
                             <DataHistoryChartComponent
                                 fund={this.state.data.chart}
-                                onInitialized={(figure) => this.handleChartInitialize(figure)}
-                                onUpdate={(figure) => this.handleChartUpdate(figure)}
-                            />
+                                onInitialized={(figure) => this.handleChartInitialized(figure)}
+                                onUpdate={(figure) => this.handleChartUpdate(figure)} />
                         </Paper>
                     </Grid>
                 </Grid>
+                {/* </Hidden> */}
                 <br />
                 <Grid container wrap="nowrap">
                     <Grid container alignItems="center" justify="flex-start">
@@ -480,18 +531,20 @@ class FundListItemView extends React.Component {
                                             <thead>
                                                 <tr style={{ padding: '5px' }}>
                                                     <th style={{ padding: '5px' }}>Ano</th>
-                                                    <th>Jan</th>
-                                                    <th>Fev</th>
-                                                    <th>Mar</th>
-                                                    <th>Abr</th>
-                                                    <th>Mai</th>
-                                                    <th>Jun</th>
-                                                    <th>Jul</th>
-                                                    <th>Ago</th>
-                                                    <th>Set</th>
-                                                    <th>Out</th>
-                                                    <th>Nov</th>
-                                                    <th>Dez</th>
+                                                    <Hidden mdDown>
+                                                        <th>Jan</th>
+                                                        <th>Fev</th>
+                                                        <th>Mar</th>
+                                                        <th>Abr</th>
+                                                        <th>Mai</th>
+                                                        <th>Jun</th>
+                                                        <th>Jul</th>
+                                                        <th>Ago</th>
+                                                        <th>Set</th>
+                                                        <th>Out</th>
+                                                        <th>Nov</th>
+                                                        <th>Dez</th>
+                                                    </Hidden>
                                                     <th>Ano</th>
                                                     <th>Accumulado</th>
                                                 </tr>
@@ -501,11 +554,13 @@ class FundListItemView extends React.Component {
                                                     Object.keys(this.state.data.history.byYear).map(year => (
                                                         <tr style={{ padding: '5px' }} key={year}>
                                                             <th style={{ padding: '5px' }}>{year}</th>
-                                                            {
-                                                                ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'].map(month => (
-                                                                    <td key={year + month}>{this.state.data.history.byMonth[year + month] != null ? formatters.field[this.state.config.field](this.state.data.history.byMonth[year + month][this.state.config.field]) : ''}</td>
-                                                                ))
-                                                            }
+                                                            <Hidden mdDown>
+                                                                {
+                                                                    ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'].map(month => (
+                                                                        <td key={year + month}>{this.state.data.history.byMonth[year + month] != null ? formatters.field[this.state.config.field](this.state.data.history.byMonth[year + month][this.state.config.field]) : ''}</td>
+                                                                    ))
+                                                                }
+                                                            </Hidden>
                                                             <td>{this.state.data.history.byYear[year] != null ? formatters.field[this.state.config.field](this.state.data.history.byYear[year][this.state.config.field]) : ''}</td>
                                                             <td>{this.state.data.history.accumulatedByYear[year] != null ? formatters.field[this.state.config.field](this.state.data.history.accumulatedByYear[year][this.state.config.field]) : ''}</td>
                                                         </tr>
@@ -522,4 +577,4 @@ class FundListItemView extends React.Component {
     }
 }
 
-export default withStyles(styles)(withRouter(FundListItemView));
+export default withWidth()(withStyles(styles)(withRouter(FundListItemView)));

@@ -251,7 +251,7 @@ class FundListView extends React.Component {
         }
     }
 
-    handleChartInitialize = async (fund, figure) => {
+    handleChartInitialized = async (fund, figure) => {
         this.setState(produce(draft => {
             draft.data.fundDetail[fund.icf_cnpj_fundo] = figure;
         }));
@@ -449,6 +449,11 @@ class FundListView extends React.Component {
                     fixedrange: true,
                     position: 1
                 }
+            },
+            frames: [],
+            config: {
+                locale: 'pt-BR',
+                displayModeBar: true
             }
         };
     }
@@ -587,7 +592,7 @@ class FundListView extends React.Component {
                                             <Grid item xs>
                                                 <DataHistoryChartComponent
                                                     fund={this.state.data.fundDetail[fund.icf_cnpj_fundo]}
-                                                    onInitialized={(figure) => this.handleChartInitialize(fund, figure)}
+                                                    onInitialized={(figure) => this.handleChartInitialized(fund, figure)}
                                                     onUpdate={(figure) => this.handleChartUpdate(fund, figure)}
                                                 />
                                             </Grid>

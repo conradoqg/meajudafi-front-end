@@ -7,30 +7,29 @@ import createPlotlyComponent from 'react-plotly.js/factory';
 
 const Plot = createPlotlyComponent(Plotly);
 
-export default (props) => {
-    const { fund: data, handleChartInitialized, handleChartUpdate } = props;
+export default class DataHistoryChartComponent extends React.Component {
 
-    return (
-        <ShowStateComponent
-            data={data}
-            hasData={() => (
-                <Plot
-                    key={data.name || null}
-                    data={data.data}
-                    layout={data.layout}
-                    config={
-                        {
-                            locale: 'pt-BR',
-                            displayModeBar: true
-                        }
-                    }
-                    onInitialized={handleChartInitialized}
-                    onUpdate={handleChartUpdate}
-                    useResizeHandler={true}
-                    style={{ width: '100%', height: '100%' }}
-                />
-            )}
-            isNull={() => (<Typography variant="subheading" align="center"><CircularProgress /></Typography>)}
-            isErrored={() => (<Typography variant="subheading" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>)}            
-        />);
-};
+    render() {
+        const { fund: data, onInitialized, onUpdate } = this.props;
+
+        return (
+            <ShowStateComponent
+                data={data}
+                hasData={() => (
+                    <Plot
+                        data={data.data}
+                        layout={data.layout}
+                        frames={data.frames}
+                        config={data.config}
+                        onInitialized={onInitialized}
+                        onUpdate={onUpdate}
+                        useResizeHandler={true}
+                        style={{ width: '100%', height: '100%' }}
+                    />
+                )}
+                isNull={() => (<Typography variant="subheading" align="center"><CircularProgress /></Typography>)}
+                isErrored={() => (<Typography variant="subheading" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>)}
+            />
+        );
+    }
+}
