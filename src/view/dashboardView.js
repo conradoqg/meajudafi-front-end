@@ -13,6 +13,7 @@ import TableChartIcon from '@material-ui/icons/TableChart';
 import ScatterPlotIcon from '@material-ui/icons/ScatterPlot';
 import GithubCircleIcon from 'mdi-material-ui/GithubCircle';
 import Grid from '@material-ui/core/Grid';
+import Hidden from '@material-ui/core/Hidden';
 import IndicatorsView from './indicatorsView';
 import FundListView from './fundListView';
 import FundListItemView from './fundListItemView';
@@ -140,9 +141,11 @@ class Dashboard extends React.Component {
                                 {routes.filter(route => route.showInMenu).map((route, index) => (
                                     <MenuLink activeOnlyWhenExact={route.exact} to={route.linkTo ? route.linkTo : route.path} classes={classes} label={route.name} icon={route.icon} key={index} />
                                 ))}
-                                <IconButton color="inherit" aria-label="Repositório no Github" href="https://github.com/conradoqg/cvm-fund-explorer-stack" target="_new">
-                                    <GithubCircleIcon fontSize="default" />
-                                </IconButton>
+                                <Hidden smDown>
+                                    <IconButton color="inherit" aria-label="Repositório no Github" href="https://github.com/conradoqg/cvm-fund-explorer-stack" target="_new">
+                                        <GithubCircleIcon fontSize="default" />
+                                    </IconButton>
+                                </Hidden>
                             </Toolbar>
                         </AppBar>
                         <main className={classes.content}>
