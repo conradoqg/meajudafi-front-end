@@ -13,7 +13,6 @@ import TableChartIcon from '@material-ui/icons/TableChart';
 import ScatterPlotIcon from '@material-ui/icons/ScatterPlot';
 import GithubCircleIcon from 'mdi-material-ui/GithubCircle';
 import Grid from '@material-ui/core/Grid';
-import Grey from '@material-ui/core/colors/grey';
 import IndicatorsView from './indicatorsView';
 import FundListView from './fundListView';
 import FundListItemView from './fundListItemView';
@@ -63,14 +62,6 @@ const styles = theme => ({
         textDecoration: 'none',
         color: 'white',
         borderBottom: '2px solid'
-    },
-    help: {
-        margin: 10,
-        backgroundColor: Grey[600],
-        width: 17,
-        height: 17,
-        fontSize: 10,
-        fontWeight: 'bold'
     }
 });
 

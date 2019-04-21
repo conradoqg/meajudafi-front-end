@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
-import Avatar from '@material-ui/core/Avatar';
+import HelpCircle from 'mdi-material-ui/HelpCircle'
 import Tooltip from '@material-ui/core/Tooltip';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import AddIcon from '@material-ui/icons/Add';
@@ -353,14 +353,15 @@ class FundComparisonView extends React.Component {
                 <div className={globalClasses.appBarSpacer} />
                 <Grid container wrap="nowrap">
                     <Grid container alignItems="center" justify="flex-start">
-                        <Typography variant={isWidthUp('md', this.props.width) ? 'display1' : 'headline'} gutterBottom>Comparação de Fundos</Typography>
-                        <Typography variant={isWidthUp('md', this.props.width) ? 'display1' : 'headline'} component="span" gutterBottom><Tooltip title={
+                        <Typography variant={isWidthUp('md', this.props.width) ? 'display1' : (isWidthUp('sm', this.props.width) ? 'headline' : 'title')} gutterBottom inline>
+                            Comparação de Fundos <Tooltip title={
                             <React.Fragment>
                                 <p>Comparador de desempenho de fundos.</p>
                                 <p>No lado direito é possível alterar o benchmark e intervalo visualizado.</p>
                                 <p>Procure um fundo e o adicione na lista para inicar a comparação.</p>
                             </React.Fragment>
-                        }><Avatar className={globalClasses.help}>?</Avatar></Tooltip></Typography>
+                        }><HelpCircle fontSize={isWidthUp('md', this.props.width) ? 'default' : (isWidthUp('sm', this.props.width) ? 'small' : 'small')} /></Tooltip>
+                        </Typography>                        
                     </Grid>
                     <Grid container justify="flex-end">
                         <Grid item>

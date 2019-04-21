@@ -20,7 +20,7 @@ import FilterListIcon from '@material-ui/icons/FilterList';
 import Collapse from '@material-ui/core/Collapse';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Select from '@material-ui/core/Select';
-import Avatar from '@material-ui/core/Avatar';
+import HelpCircle from 'mdi-material-ui/HelpCircle'
 import Tooltip from '@material-ui/core/Tooltip';
 import Hidden from '@material-ui/core/Hidden';
 import withWidth, { isWidthUp } from '@material-ui/core/withWidth';
@@ -469,14 +469,15 @@ class FundListView extends React.Component {
                 <div className={globalClasses.appBarSpacer} />
                 <Grid container wrap="nowrap">
                     <Grid container alignItems="center" justify="flex-start">
-                        <Typography variant={isWidthUp('md', this.props.width) ? 'display1' : 'headline'} gutterBottom>Lista de Fundos</Typography>
-                        <Typography variant={isWidthUp('md', this.props.width) ? 'display1' : 'headline'} component="span" gutterBottom><Tooltip title={
+                        <Typography variant={isWidthUp('md', this.props.width) ? 'display1' : (isWidthUp('sm', this.props.width) ? 'headline' : 'title')} gutterBottom inline>
+                            Lista de Fundos <Tooltip title={
                             <React.Fragment>
                                 <p>Lista de fundos de investimento com gráfico diário.</p>
                                 <p>Por padrão somente fundos listados na BTG Pactual e XP Investimentos são exibidos. No lado esquerdo é possível procurar fundos pelo nome e no lado direito é possível alterar o filtro, ordem, intervalo e benchmark.</p>
                                 <p>Clique no fundo para visualizar o gráfico.</p>
                             </React.Fragment>
-                        }><Avatar className={globalClasses.help}>?</Avatar></Tooltip></Typography>
+                        }><HelpCircle fontSize={isWidthUp('md', this.props.width) ? 'default' : (isWidthUp('sm', this.props.width) ? 'small' : 'small')} /></Tooltip>
+                        </Typography>                        
                     </Grid>
                 </Grid>
                 <Grid container spacing={16}>

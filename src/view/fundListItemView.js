@@ -2,7 +2,7 @@ import React from 'react';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
-import Avatar from '@material-ui/core/Avatar';
+import HelpCircle from 'mdi-material-ui/HelpCircle'
 import Tooltip from '@material-ui/core/Tooltip';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -349,13 +349,14 @@ class FundListItemView extends React.Component {
                             data={this.state.data.fund}
                             hasData={() => (
                                 <React.Fragment>
-                                    <Typography variant={isWidthUp('md', this.props.width) ? 'display1' : 'headline'} gutterBottom>{formatters.field['f_short_name'](this.state.data.fund.f_short_name)}</Typography>
-                                    <Typography variant={isWidthUp('md', this.props.width) ? 'display1' : 'headline'} component="span" gutterBottom><Tooltip title={
-                                        <React.Fragment>
-                                            <p>Detalhes do fundo.</p>
-                                            <p>No lado direito é possível alterar o benchmark e intervalo visualizado.</p>
-                                        </React.Fragment>
-                                    }><Avatar className={globalClasses.help}>?</Avatar></Tooltip></Typography>
+                                    <Typography variant={isWidthUp('md', this.props.width) ? 'display1' : (isWidthUp('sm', this.props.width) ? 'headline' : 'title')} gutterBottom inline>
+                                        {formatters.field['f_short_name'](this.state.data.fund.f_short_name)} <Tooltip title={
+                                            <React.Fragment>
+                                                <p>Detalhes do fundo.</p>
+                                                <p>No lado direito é possível alterar o benchmark e intervalo visualizado.</p>
+                                            </React.Fragment>
+                                        }><HelpCircle fontSize={isWidthUp('md', this.props.width) ? 'default' : (isWidthUp('sm', this.props.width) ? 'small' : 'small')} /></Tooltip>
+                                    </Typography>
                                 </React.Fragment>
                             )} />
                     </Grid>
@@ -386,7 +387,7 @@ class FundListItemView extends React.Component {
                 </Grid>
                 <Grid container wrap="nowrap">
                     <Grid container alignItems="center" justify="flex-start">
-                        <Typography variant="headline" gutterBottom>Informações Gerais</Typography>
+                        <Typography variant={isWidthUp('md', this.props.width) ? 'headline' : (isWidthUp('sm', this.props.width) ? 'title' : 'subheading')} gutterBottom>Informações Gerais</Typography>
                     </Grid>
                 </Grid>
                 <Grid container spacing={16}>
@@ -460,16 +461,17 @@ class FundListItemView extends React.Component {
                         </Paper>
                     </Grid>
                 </Grid>
-                <br />                
+                <br />
                 <Grid container wrap="nowrap">
                     <Grid container alignItems="center" justify="flex-start">
-                        <Typography variant="headline" gutterBottom>Gráfico Histórico</Typography>
-                        <Typography component="span" gutterBottom><Tooltip title={
-                            <React.Fragment>
-                                <p>Gráfico histórico para visualização das características do fundo no tempo.</p>
-                                <p>É possível visualizar as outras séries clicando nelas.</p>
-                            </React.Fragment>
-                        }><Avatar className={globalClasses.help}>?</Avatar></Tooltip></Typography>
+                        <Typography variant={isWidthUp('md', this.props.width) ? 'headline' : (isWidthUp('sm', this.props.width) ? 'title' : 'subheading')} gutterBottom inline>
+                            Gráfico Histórico <Tooltip title={
+                                <React.Fragment>
+                                    <p>Gráfico histórico para visualização das características do fundo no tempo.</p>
+                                    <p>É possível visualizar as outras séries clicando nelas.</p>
+                                </React.Fragment>
+                            }><HelpCircle fontSize={isWidthUp('md', this.props.width) ? 'default' : (isWidthUp('sm', this.props.width) ? 'small' : 'small')} /></Tooltip>
+                        </Typography>
                     </Grid>
                 </Grid>
                 <Grid container spacing={16}>
@@ -489,17 +491,18 @@ class FundListItemView extends React.Component {
                             </Hidden>
                         </Paper>
                     </Grid>
-                </Grid>                
+                </Grid>
                 <br />
                 <Grid container wrap="nowrap">
                     <Grid container alignItems="center" justify="flex-start">
-                        <Typography variant="headline" gutterBottom>Tabela Histórica</Typography>
-                        <Typography component="span" gutterBottom><Tooltip title={
-                            <React.Fragment>
-                                <p>Histórico mensal, anual e acumulado do fundo.</p>
-                                <p>No lado direito é possível alterar a informação visualizada.</p>
-                            </React.Fragment>
-                        }><Avatar className={globalClasses.help}>?</Avatar></Tooltip></Typography>
+                        <Typography variant={isWidthUp('md', this.props.width) ? 'headline' : (isWidthUp('sm', this.props.width) ? 'title' : 'subheading')} gutterBottom inline>
+                            Tabela Histórica <Tooltip title={
+                                <React.Fragment>
+                                    <p>Histórico mensal, anual e acumulado do fundo.</p>
+                                    <p>No lado direito é possível alterar a informação visualizada.</p>
+                                </React.Fragment>
+                            }><HelpCircle fontSize={isWidthUp('md', this.props.width) ? 'default' : (isWidthUp('sm', this.props.width) ? 'small' : 'small')} /></Tooltip>
+                        </Typography>
                     </Grid>
                     <Select
                         value={this.state.config.field}

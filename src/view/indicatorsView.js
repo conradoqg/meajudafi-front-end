@@ -17,10 +17,10 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import IconButton from '@material-ui/core/IconButton';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import Collapse from '@material-ui/core/Collapse';
-import Avatar from '@material-ui/core/Avatar';
 import Tooltip from '@material-ui/core/Tooltip';
 import { withStyles } from '@material-ui/core/styles';
 import withWidth, { isWidthUp } from '@material-ui/core/withWidth';
+import HelpCircle from 'mdi-material-ui/HelpCircle'
 import Hidden from '@material-ui/core/Hidden';
 import { produce } from 'immer';
 import allKeys from 'promise-results/allKeys';
@@ -373,13 +373,14 @@ class IndicatorsView extends React.Component {
                 <div className={globalClasses.appBarSpacer} />
                 <Grid container wrap="nowrap">
                     <Grid container alignItems="center" justify="flex-start">
-                        <Typography variant={isWidthUp('md', this.props.width) ? 'display1' : 'headline'} gutterBottom>Indicadores</Typography>
-                        <Typography variant={isWidthUp('md', this.props.width) ? 'display1' : 'headline'} component="span" gutterBottom><Tooltip title={
-                            <React.Fragment>
-                                <p>Indicadores gerais de mercado e dos fundos de investimento.</p>
-                                <p>No lado direito é possível alterar o intervalo visualizado.</p>
-                            </React.Fragment>
-                        }><Avatar className={globalClasses.help}>?</Avatar></Tooltip></Typography>
+                        <Typography variant={isWidthUp('md', this.props.width) ? 'display1' : (isWidthUp('sm', this.props.width) ? 'headline' : 'title')} gutterBottom inline>
+                            Indicadores <Tooltip title={
+                                <React.Fragment>
+                                    <p>Indicadores gerais de mercado e dos fundos de investimento.</p>
+                                    <p>No lado direito é possível alterar o intervalo visualizado.</p>
+                                </React.Fragment>
+                            }><HelpCircle fontSize={isWidthUp('md', this.props.width) ? 'default' : (isWidthUp('sm', this.props.width) ? 'small' : 'small')} /></Tooltip>
+                        </Typography>
                     </Grid>
                     <Grid container justify="flex-end">
                         <Grid item>
@@ -398,7 +399,7 @@ class IndicatorsView extends React.Component {
                 </Grid>
                 <Grid container wrap="nowrap">
                     <Grid container alignItems="center" justify="flex-start">
-                        <Typography variant="headline" gutterBottom>Mercado</Typography>
+                        <Typography variant={isWidthUp('md', this.props.width) ? 'headline' : (isWidthUp('sm', this.props.width) ? 'title' : 'subheading')} gutterBottom>Mercado</Typography>
                     </Grid>
                 </Grid>
                 <Grid container spacing={16}>
@@ -422,13 +423,14 @@ class IndicatorsView extends React.Component {
                 <br />
                 <Grid container wrap="nowrap">
                     <Grid container alignItems="center" justify="flex-start">
-                        <Typography variant="headline" gutterBottom>Fundos de Investimento</Typography>
-                        <Typography component="span" gutterBottom><Tooltip title={
-                            <React.Fragment>
-                                <p>Lista de melhores e piores fundos de investimento. </p>
-                                <p>Por padrão somente fundos listados na BTG Pactual e XP Investimentos são exibidos. No lado direito é possível alterar o filtro.</p>
-                            </React.Fragment>
-                        }><Avatar className={globalClasses.help}>?</Avatar></Tooltip></Typography>
+                        <Typography variant={isWidthUp('md', this.props.width) ? 'headline' : (isWidthUp('sm', this.props.width) ? 'title' : 'subheading')} gutterBottom inline>
+                            Fundos de Investimento <Tooltip title={
+                                <React.Fragment>
+                                    <p>Lista de melhores e piores fundos de investimento. </p>
+                                    <p>Por padrão somente fundos listados na BTG Pactual e XP Investimentos são exibidos. No lado direito é possível alterar o filtro.</p>
+                                </React.Fragment>
+                            }><HelpCircle fontSize={isWidthUp('md', this.props.width) ? 'default' : (isWidthUp('sm', this.props.width) ? 'small' : 'small')} /></Tooltip>
+                        </Typography>
                     </Grid>
                     <Grid container justify="flex-end">
                         <Grid item>
@@ -466,14 +468,15 @@ class IndicatorsView extends React.Component {
                 <br />
                 <Grid container wrap="nowrap">
                     <Grid container alignItems="center" justify="flex-start">
-                        <Typography variant="headline" gutterBottom>Mudanças nos Fundos</Typography>
-                        <Typography component="span" gutterBottom><Tooltip title={
-                            <React.Fragment>
-                                <p>Lista de mudanças que ocorreram recentemente nos fundos de investimento. </p>
-                                <p>Somente algumas informações são monitoradas. No lado direito é possível filtrar o intervalo de exibição.</p>
-                                <p>Início da coleta em 16/02/2019.</p>
-                            </React.Fragment>
-                        }><Avatar className={globalClasses.help}>?</Avatar></Tooltip></Typography>
+                        <Typography variant={isWidthUp('md', this.props.width) ? 'headline' : (isWidthUp('sm', this.props.width) ? 'title' : 'subheading')} gutterBottom inline>
+                            Mudanças nos Fundos <Tooltip title={
+                                <React.Fragment>
+                                    <p>Lista de mudanças que ocorreram recentemente nos fundos de investimento. </p>
+                                    <p>Somente algumas informações são monitoradas. No lado direito é possível filtrar o intervalo de exibição.</p>
+                                    <p>Início da coleta em 16/02/2019.</p>
+                                </React.Fragment>
+                            }><HelpCircle fontSize={isWidthUp('md', this.props.width) ? 'default' : (isWidthUp('sm', this.props.width) ? 'small' : 'small')} /></Tooltip>
+                        </Typography>
                     </Grid>
                     <Grid container justify="flex-end">
                         <Grid item>
