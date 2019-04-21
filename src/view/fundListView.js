@@ -23,7 +23,7 @@ import Select from '@material-ui/core/Select';
 import HelpCircle from 'mdi-material-ui/HelpCircle'
 import Tooltip from '@material-ui/core/Tooltip';
 import Hidden from '@material-ui/core/Hidden';
-import withWidth, { isWidthUp } from '@material-ui/core/withWidth';
+import withWidth from '@material-ui/core/withWidth';
 import { produce } from 'immer';
 import allKeys from 'promise-results/allKeys';
 import API from '../api';
@@ -462,22 +462,26 @@ class FundListView extends React.Component {
     render() {
         const { classes, globalClasses } = this.props;
         const { layout } = this.state;
-        const open = Boolean(layout.anchorEl);        
+        const open = Boolean(layout.anchorEl);
 
         return (
             <div>
                 <div className={globalClasses.appBarSpacer} />
-                <Grid container wrap="nowrap">
-                    <Grid container alignItems="center" justify="flex-start">
-                        <Typography variant={isWidthUp('md', this.props.width) ? 'display1' : (isWidthUp('sm', this.props.width) ? 'headline' : 'title')} gutterBottom inline>
-                            Lista de Fundos <Tooltip title={
-                            <React.Fragment>
-                                <p>Lista de fundos de investimento com gráfico diário.</p>
-                                <p>Por padrão somente fundos listados na BTG Pactual e XP Investimentos são exibidos. No lado esquerdo é possível procurar fundos pelo nome e no lado direito é possível alterar o filtro, ordem, intervalo e benchmark.</p>
-                                <p>Clique no fundo para visualizar o gráfico.</p>
-                            </React.Fragment>
-                        }><HelpCircle fontSize={isWidthUp('md', this.props.width) ? 'default' : (isWidthUp('sm', this.props.width) ? 'small' : 'small')} /></Tooltip>
-                        </Typography>                        
+                <Grid container spacing={16} alignItems="center">
+                    <Grid item xs>
+                        <Grid container alignItems="center" spacing="8">
+                            <Grid item>
+                                <Typography variant="display1" inline>
+                                    Lista de Fundos <Tooltip title={
+                                        <React.Fragment>
+                                            <p>Lista de fundos de investimento com gráfico diário.</p>
+                                            <p>Por padrão somente fundos listados na BTG Pactual e XP Investimentos são exibidos. No lado esquerdo é possível procurar fundos pelo nome e no lado direito é possível alterar o filtro, ordem, intervalo e benchmark.</p>
+                                            <p>Clique no fundo para visualizar o gráfico.</p>
+                                        </React.Fragment>
+                                    }><HelpCircle /></Tooltip>
+                                </Typography>
+                            </Grid>
+                        </Grid>
                     </Grid>
                 </Grid>
                 <Grid container spacing={16}>

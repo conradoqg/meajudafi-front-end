@@ -8,7 +8,7 @@ import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import Divider from '@material-ui/core/Divider';
 import { withStyles } from '@material-ui/core/styles';
-import withWidth, { isWidthUp } from '@material-ui/core/withWidth';
+import withWidth from '@material-ui/core/withWidth';
 import Hidden from '@material-ui/core/Hidden';
 import { produce } from 'immer';
 import promisesEach from 'promise-results';
@@ -343,51 +343,54 @@ class FundListItemView extends React.Component {
         return (
             <div>
                 <div className={globalClasses.appBarSpacer} />
-                <Grid container wrap="nowrap">
-                    <Grid container alignItems="center" justify="flex-start">
-                        <ShowStateComponent
-                            data={this.state.data.fund}
-                            hasData={() => (
-                                <React.Fragment>
-                                    <Typography variant={isWidthUp('md', this.props.width) ? 'display1' : (isWidthUp('sm', this.props.width) ? 'headline' : 'title')} gutterBottom inline>
-                                        {formatters.field['f_short_name'](this.state.data.fund.f_short_name)} <Tooltip title={
-                                            <React.Fragment>
-                                                <p>Detalhes do fundo.</p>
-                                                <p>No lado direito é possível alterar o benchmark e intervalo visualizado.</p>
-                                            </React.Fragment>
-                                        }><HelpCircle fontSize={isWidthUp('md', this.props.width) ? 'default' : (isWidthUp('sm', this.props.width) ? 'small' : 'small')} /></Tooltip>
-                                    </Typography>
-                                </React.Fragment>
-                            )} />
+                <Grid container spacing={16} alignItems="center">
+                    <Grid item xs>
+                        <Grid container alignItems="center" spacing="8">
+                            <Grid item>
+
+                                <Typography variant="display1" inline>
+                                    {this.state.data.fund && formatters.field['f_short_name'](this.state.data.fund.f_short_name)} <Tooltip title={
+                                        <React.Fragment>
+                                            <p>Detalhes do fundo.</p>
+                                            <p>No lado direito é possível alterar o benchmark e intervalo visualizado.</p>
+                                        </React.Fragment>
+                                    }><HelpCircle fontSize="inherit" /></Tooltip>
+                                </Typography>
+                            </Grid>
+                        </Grid>
                     </Grid>
-                    <Grid container justify="flex-end">
-                        <Grid item>
-                            <Select
-                                value={this.state.config.benchmark}
-                                onChange={this.handleConfigBenchmarkChange}
-                                className={classes.select}
-                                inputProps={{
-                                    name: 'benchmark',
-                                    id: 'benchmark',
-                                }}>
-                                {benchmarkOptions.map(benchmark => (<MenuItem key={benchmark.name} value={benchmark.name}>{benchmark.displayName}</MenuItem>))}
-                            </Select>
-                            <Select
-                                value={this.state.config.range}
-                                onChange={this.handleConfigRangeChange}
-                                className={classes.select}
-                                inputProps={{
-                                    name: 'range',
-                                    id: 'range',
-                                }}>
-                                {rangeOptions.map(range => (<MenuItem key={range.name} value={range.name}>{range.displayName}</MenuItem>))}
-                            </Select>
+                    <Grid item>
+                        <Grid container alignItems="center" spacing="8">
+                            <Grid item>
+                                <Select
+                                    value={this.state.config.benchmark}
+                                    onChange={this.handleConfigBenchmarkChange}
+                                    className={classes.select}
+                                    inputProps={{
+                                        name: 'benchmark',
+                                        id: 'benchmark',
+                                    }}>
+                                    {benchmarkOptions.map(benchmark => (<MenuItem key={benchmark.name} value={benchmark.name}>{benchmark.displayName}</MenuItem>))}
+                                </Select>
+                            </Grid>
+                            <Grid item>
+                                <Select
+                                    value={this.state.config.range}
+                                    onChange={this.handleConfigRangeChange}
+                                    className={classes.select}
+                                    inputProps={{
+                                        name: 'range',
+                                        id: 'range',
+                                    }}>
+                                    {rangeOptions.map(range => (<MenuItem key={range.name} value={range.name}>{range.displayName}</MenuItem>))}
+                                </Select>
+                            </Grid>
                         </Grid>
                     </Grid>
                 </Grid>
-                <Grid container wrap="nowrap">
-                    <Grid container alignItems="center" justify="flex-start">
-                        <Typography variant={isWidthUp('md', this.props.width) ? 'headline' : (isWidthUp('sm', this.props.width) ? 'title' : 'subheading')} gutterBottom>Informações Gerais</Typography>
+                <Grid container spacing={16} alignItems="center">
+                    <Grid item xs>
+                        <Typography variant="headline">Informações Gerais</Typography>
                     </Grid>
                 </Grid>
                 <Grid container spacing={16}>
@@ -461,17 +464,20 @@ class FundListItemView extends React.Component {
                         </Paper>
                     </Grid>
                 </Grid>
-                <br />
-                <Grid container wrap="nowrap">
-                    <Grid container alignItems="center" justify="flex-start">
-                        <Typography variant={isWidthUp('md', this.props.width) ? 'headline' : (isWidthUp('sm', this.props.width) ? 'title' : 'subheading')} gutterBottom inline>
-                            Gráfico Histórico <Tooltip title={
-                                <React.Fragment>
-                                    <p>Gráfico histórico para visualização das características do fundo no tempo.</p>
-                                    <p>É possível visualizar as outras séries clicando nelas.</p>
-                                </React.Fragment>
-                            }><HelpCircle fontSize={isWidthUp('md', this.props.width) ? 'default' : (isWidthUp('sm', this.props.width) ? 'small' : 'small')} /></Tooltip>
-                        </Typography>
+                <Grid container spacing={16} alignItems="center">
+                    <Grid item xs>
+                        <Grid container alignItems="center" spacing="8">
+                            <Grid item>
+                                <Typography variant="headline" inline>
+                                    Gráfico Histórico <Tooltip title={
+                                        <React.Fragment>
+                                            <p>Gráfico histórico para visualização das características do fundo no tempo.</p>
+                                            <p>É possível visualizar as outras séries clicando nelas.</p>
+                                        </React.Fragment>
+                                    }><HelpCircle fontSize="inherit" /></Tooltip>
+                                </Typography>
+                            </Grid>
+                        </Grid>
                     </Grid>
                 </Grid>
                 <Grid container spacing={16}>
@@ -492,28 +498,33 @@ class FundListItemView extends React.Component {
                         </Paper>
                     </Grid>
                 </Grid>
-                <br />
-                <Grid container wrap="nowrap">
-                    <Grid container alignItems="center" justify="flex-start">
-                        <Typography variant={isWidthUp('md', this.props.width) ? 'headline' : (isWidthUp('sm', this.props.width) ? 'title' : 'subheading')} gutterBottom inline>
+                <Grid container spacing={16} alignItems="center">
+                    <Grid item xs>
+                        <Typography variant="headline" inline>
                             Tabela Histórica <Tooltip title={
                                 <React.Fragment>
                                     <p>Histórico mensal, anual e acumulado do fundo.</p>
                                     <p>No lado direito é possível alterar a informação visualizada.</p>
                                 </React.Fragment>
-                            }><HelpCircle fontSize={isWidthUp('md', this.props.width) ? 'default' : (isWidthUp('sm', this.props.width) ? 'small' : 'small')} /></Tooltip>
+                            }><HelpCircle fontSize="inherit" /></Tooltip>
                         </Typography>
                     </Grid>
-                    <Select
-                        value={this.state.config.field}
-                        onChange={this.handleConfigFieldChange}
-                        className={classes.select}
-                        inputProps={{
-                            name: 'field',
-                            id: 'field',
-                        }}>
-                        {fieldOptions.map(field => (<MenuItem key={field.name} value={field.name}>{field.displayName}</MenuItem>))}
-                    </Select>
+                    <Grid item>
+                        <Grid container alignItems="center" spacing="8">
+                            <Grid item>
+                                <Select
+                                    value={this.state.config.field}
+                                    onChange={this.handleConfigFieldChange}
+                                    className={classes.select}
+                                    inputProps={{
+                                        name: 'field',
+                                        id: 'field',
+                                    }}>
+                                    {fieldOptions.map(field => (<MenuItem key={field.name} value={field.name}>{field.displayName}</MenuItem>))}
+                                </Select>
+                            </Grid>
+                        </Grid>
+                    </Grid>
                 </Grid>
                 <Grid container spacing={16}>
                     <Grid item xs>

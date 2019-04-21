@@ -19,7 +19,7 @@ import FilterListIcon from '@material-ui/icons/FilterList';
 import Collapse from '@material-ui/core/Collapse';
 import Tooltip from '@material-ui/core/Tooltip';
 import { withStyles } from '@material-ui/core/styles';
-import withWidth, { isWidthUp } from '@material-ui/core/withWidth';
+import withWidth from '@material-ui/core/withWidth';
 import HelpCircle from 'mdi-material-ui/HelpCircle'
 import Hidden from '@material-ui/core/Hidden';
 import { produce } from 'immer';
@@ -73,6 +73,10 @@ const styles = theme => ({
         '&:first-child': {
             paddingLeft: 0
         }
+    },
+    help: {
+        position: "relative",
+        //top: theme.spacing.unit / 2        
     }
 });
 
@@ -371,35 +375,41 @@ class IndicatorsView extends React.Component {
         return (
             <div>
                 <div className={globalClasses.appBarSpacer} />
-                <Grid container wrap="nowrap">
-                    <Grid container alignItems="center" justify="flex-start">
-                        <Typography variant={isWidthUp('md', this.props.width) ? 'display1' : (isWidthUp('sm', this.props.width) ? 'headline' : 'title')} gutterBottom inline>
-                            Indicadores <Tooltip title={
-                                <React.Fragment>
-                                    <p>Indicadores gerais de mercado e dos fundos de investimento.</p>
-                                    <p>No lado direito é possível alterar o intervalo visualizado.</p>
-                                </React.Fragment>
-                            }><HelpCircle fontSize={isWidthUp('md', this.props.width) ? 'default' : (isWidthUp('sm', this.props.width) ? 'small' : 'small')} /></Tooltip>
-                        </Typography>
+                <Grid container spacing={16} alignItems="center">
+                    <Grid item xs>
+                        <Grid container alignItems="center" spacing="8">
+                            <Grid item>
+                                <Typography variant="display1" inline>
+                                    Indicadores <Tooltip title={
+                                        <React.Fragment>
+                                            <p>Indicadores gerais de mercado e dos fundos de investimento.</p>
+                                            <p>No lado direito é possível alterar o intervalo visualizado.</p>
+                                        </React.Fragment>
+                                    }><HelpCircle /></Tooltip>
+                                </Typography>
+                            </Grid>
+                        </Grid>
                     </Grid>
-                    <Grid container justify="flex-end">
-                        <Grid item>
-                            <Select
-                                value={this.state.config.range}
-                                onChange={this.handleConfigRangeChange}
-                                className={classes.select}
-                                inputProps={{
-                                    name: 'range',
-                                    id: 'range',
-                                }}>
-                                {rangeOptions.filter(range => range.name !== 'all' && range.name !== '1w').map(range => (<MenuItem key={range.name} value={range.name}>{range.displayName}</MenuItem>))}
-                            </Select>
+                    <Grid item>
+                        <Grid container alignItems="center" spacing="8">
+                            <Grid item>
+                                <Select
+                                    value={this.state.config.range}
+                                    onChange={this.handleConfigRangeChange}
+                                    className={classes.select}
+                                    inputProps={{
+                                        name: 'range',
+                                        id: 'range',
+                                    }}>
+                                    {rangeOptions.filter(range => range.name !== 'all' && range.name !== '1w').map(range => (<MenuItem key={range.name} value={range.name}>{range.displayName}</MenuItem>))}
+                                </Select>
+                            </Grid>
                         </Grid>
                     </Grid>
                 </Grid>
-                <Grid container wrap="nowrap">
-                    <Grid container alignItems="center" justify="flex-start">
-                        <Typography variant={isWidthUp('md', this.props.width) ? 'headline' : (isWidthUp('sm', this.props.width) ? 'title' : 'subheading')} gutterBottom>Mercado</Typography>
+                <Grid container spacing={16} alignItems="center">
+                    <Grid item xs>
+                        <Typography variant="headline">Mercado</Typography>
                     </Grid>
                 </Grid>
                 <Grid container spacing={16}>
@@ -420,38 +430,43 @@ class IndicatorsView extends React.Component {
                         </Paper>
                     </Grid>
                 </Grid>
-                <br />
-                <Grid container wrap="nowrap">
-                    <Grid container alignItems="center" justify="flex-start">
-                        <Typography variant={isWidthUp('md', this.props.width) ? 'headline' : (isWidthUp('sm', this.props.width) ? 'title' : 'subheading')} gutterBottom inline>
+                <Grid container spacing={16} alignItems="center">
+                    <Grid item xs>
+                        <Typography variant="headline" inline>
                             Fundos de Investimento <Tooltip title={
                                 <React.Fragment>
                                     <p>Lista de melhores e piores fundos de investimento. </p>
                                     <p>Por padrão somente fundos listados na BTG Pactual e XP Investimentos são exibidos. No lado direito é possível alterar o filtro.</p>
                                 </React.Fragment>
-                            }><HelpCircle fontSize={isWidthUp('md', this.props.width) ? 'default' : (isWidthUp('sm', this.props.width) ? 'small' : 'small')} /></Tooltip>
+                            }><HelpCircle fontSize="inherit" /></Tooltip>
                         </Typography>
                     </Grid>
-                    <Grid container justify="flex-end">
+                    <Hidden smDown>
                         <Grid item>
-                            <IconButton
-                                aria-label="Filtro"
-                                onClick={this.handleFilterClick}>
-                                <FilterListIcon />
-                            </IconButton>
+                            <Grid container alignItems="center" spacing="8">
+                                <Grid item>
+                                    <IconButton
+                                        aria-label="Filtro"
+                                        onClick={this.handleFilterClick}>
+                                        <FilterListIcon />
+                                    </IconButton>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                    </Hidden>
+                </Grid>
+                <Hidden smDown>
+                    <Grid container spacing={this.state.layout.showingFilter ? 16 : 0}>
+                        <Grid item xs={12}>
+                            <Paper elevation={1} square={true}>
+                                <Collapse in={this.state.layout.showingFilter}>
+                                    <FundFilterComponent onFilterChanged={this.handleFilterChange} globalClasses={globalClasses} />
+                                </Collapse>
+                            </Paper>
                         </Grid>
                     </Grid>
-                </Grid>
-                <Grid container spacing={16}>
-                    <Grid item xs={12}>
-                        <Paper elevation={1} square={true}>
-                            <Collapse in={this.state.layout.showingFilter}>
-                                <FundFilterComponent onFilterChanged={this.handleFilterChange} globalClasses={globalClasses} />
-                            </Collapse>
-                        </Paper>
-                    </Grid>
-                </Grid>
-                <Grid container spacing={16}>
+                </Hidden>
+                <Grid container spacing={16} alignItems="center">
                     <Grid item xs={12} sm={6} md={3} xl={3}>
                         <IndicatorPaper title="Desempenho" field="investment_return" range={this.state.config.range} data={this.state.data.fundIndicators} classes={classes} globalClasses={globalClasses} />
                     </Grid>
@@ -465,31 +480,32 @@ class IndicatorsView extends React.Component {
                         <IndicatorPaper title="Risco" field="risk" range={this.state.config.range} data={this.state.data.fundIndicators} classes={classes} globalClasses={globalClasses} inverted />
                     </Grid>
                 </Grid>
-                <br />
-                <Grid container wrap="nowrap">
-                    <Grid container alignItems="center" justify="flex-start">
-                        <Typography variant={isWidthUp('md', this.props.width) ? 'headline' : (isWidthUp('sm', this.props.width) ? 'title' : 'subheading')} gutterBottom inline>
+                <Grid container spacing={16} alignItems="center">
+                    <Grid item xs>
+                        <Typography variant="headline" inline>
                             Mudanças nos Fundos <Tooltip title={
                                 <React.Fragment>
                                     <p>Lista de mudanças que ocorreram recentemente nos fundos de investimento. </p>
                                     <p>Somente algumas informações são monitoradas. No lado direito é possível filtrar o intervalo de exibição.</p>
                                     <p>Início da coleta em 16/02/2019.</p>
                                 </React.Fragment>
-                            }><HelpCircle fontSize={isWidthUp('md', this.props.width) ? 'default' : (isWidthUp('sm', this.props.width) ? 'small' : 'small')} /></Tooltip>
+                            }><HelpCircle fontSize="inherit" /></Tooltip>
                         </Typography>
                     </Grid>
-                    <Grid container justify="flex-end">
-                        <Grid item>
-                            <Select
-                                value={this.state.config.changesRange}
-                                onChange={this.handleConfigChangesRangeChange}
-                                className={classes.select}
-                                inputProps={{
-                                    name: 'changesRange',
-                                    id: 'changesRange',
-                                }}>
-                                {rangeOptions.filter(range => range.name !== 'all').map(range => (<MenuItem key={range.name} value={range.name}>{range.displayName}</MenuItem>))}
-                            </Select>
+                    <Grid item>
+                        <Grid container alignItems="center" spacing="8">
+                            <Grid item>
+                                <Select
+                                    value={this.state.config.changesRange}
+                                    onChange={this.handleConfigChangesRangeChange}
+                                    className={classes.select}
+                                    inputProps={{
+                                        name: 'changesRange',
+                                        id: 'changesRange',
+                                    }}>
+                                    {rangeOptions.filter(range => range.name !== 'all').map(range => (<MenuItem key={range.name} value={range.name}>{range.displayName}</MenuItem>))}
+                                </Select>
+                            </Grid>
                         </Grid>
                     </Grid>
                 </Grid>
@@ -513,7 +529,7 @@ const FundsChangedPaper = (props) => {
         <div>
             <Paper elevation={1} square={true}>
                 <Grid container wrap="nowrap" className={classes.optionsBar}>
-                    <Typography component="h2" variant="headline">{title}</Typography>
+                    <Typography component="h2" variant="subheading"><b>{title}</b></Typography>
                 </Grid>
             </Paper>
             <Paper className={classes.paper} elevation={1} square={true}>
@@ -561,7 +577,7 @@ const IndicatorPaper = (props) => {
         <div>
             <Paper elevation={1} square={true}>
                 <Grid container wrap="nowrap" className={classes.optionsBar}>
-                    <Typography component="h2" variant="headline">{title}</Typography>
+                    <Typography component="h2" variant="subheading"><b>{title}</b></Typography>
                 </Grid>
             </Paper>
             <Paper className={classes.paper} elevation={1} square={true}>

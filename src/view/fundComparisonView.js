@@ -351,50 +351,60 @@ class FundComparisonView extends React.Component {
         return (
             <div>
                 <div className={globalClasses.appBarSpacer} />
-                <Grid container wrap="nowrap">
-                    <Grid container alignItems="center" justify="flex-start">
-                        <Typography variant={isWidthUp('md', this.props.width) ? 'display1' : (isWidthUp('sm', this.props.width) ? 'headline' : 'title')} gutterBottom inline>
-                            Comparação de Fundos <Tooltip title={
-                            <React.Fragment>
-                                <p>Comparador de desempenho de fundos.</p>
-                                <p>No lado direito é possível alterar o benchmark e intervalo visualizado.</p>
-                                <p>Procure um fundo e o adicione na lista para inicar a comparação.</p>
-                            </React.Fragment>
-                        }><HelpCircle fontSize={isWidthUp('md', this.props.width) ? 'default' : (isWidthUp('sm', this.props.width) ? 'small' : 'small')} /></Tooltip>
-                        </Typography>                        
+                <Grid container spacing={16} alignItems="center">
+                    <Grid item xs>
+                        <Grid container alignItems="center" spacing="8">
+                            <Grid item>
+                                <Typography variant="display1" inline>
+                                    Comparação de Fundos <Tooltip title={
+                                        <React.Fragment>
+                                            <p>Comparador de desempenho de fundos.</p>
+                                            <p>No lado direito é possível alterar o benchmark e intervalo visualizado.</p>
+                                            <p>Procure um fundo e o adicione na lista para inicar a comparação.</p>
+                                        </React.Fragment>
+                                    }><HelpCircle fontSize="inherit"/></Tooltip>
+                                </Typography>
+                            </Grid>
+                        </Grid>
                     </Grid>
-                    <Grid container justify="flex-end">
-                        <Grid item>
-                            <Select
-                                value={this.state.config.field}
-                                onChange={this.handleConfigFieldChange}
-                                className={classes.select}
-                                inputProps={{
-                                    name: 'field',
-                                    id: 'field',
-                                }}>
-                                {fieldOptions.map(field => (<MenuItem key={field.name} value={field.name}>{field.displayName}</MenuItem>))}
-                            </Select>
-                            <Select
-                                value={this.state.config.benchmark}
-                                onChange={this.handleConfigBenchmarkChange}
-                                className={classes.select}
-                                inputProps={{
-                                    name: 'benchmark',
-                                    id: 'benchmark',
-                                }}>
-                                {benchmarkOptions.map(benchmark => (<MenuItem key={benchmark.name} value={benchmark.name}>{benchmark.displayName}</MenuItem>))}
-                            </Select>
-                            <Select
-                                value={this.state.config.range}
-                                onChange={this.handleConfigRangeChange}
-                                className={classes.select}
-                                inputProps={{
-                                    name: 'range',
-                                    id: 'range',
-                                }}>
-                                {rangeOptions.filter(range => range.name !== 'all').map(range => (<MenuItem key={range.name} value={range.name}>{range.displayName}</MenuItem>))}
-                            </Select>
+                    <Grid item>
+                        <Grid container alignItems="center" spacing="8">
+                            <Grid item>
+                                <Select
+                                    value={this.state.config.field}
+                                    onChange={this.handleConfigFieldChange}
+                                    className={classes.select}
+                                    inputProps={{
+                                        name: 'field',
+                                        id: 'field',
+                                    }}>
+                                    {fieldOptions.map(field => (<MenuItem key={field.name} value={field.name}>{field.displayName}</MenuItem>))}
+                                </Select>
+                            </Grid>
+                            <Grid item>
+                                <Select
+                                    value={this.state.config.benchmark}
+                                    onChange={this.handleConfigBenchmarkChange}
+                                    className={classes.select}
+                                    inputProps={{
+                                        name: 'benchmark',
+                                        id: 'benchmark',
+                                    }}>
+                                    {benchmarkOptions.map(benchmark => (<MenuItem key={benchmark.name} value={benchmark.name}>{benchmark.displayName}</MenuItem>))}
+                                </Select>
+                            </Grid>
+                            <Grid item>
+                                <Select
+                                    value={this.state.config.range}
+                                    onChange={this.handleConfigRangeChange}
+                                    className={classes.select}
+                                    inputProps={{
+                                        name: 'range',
+                                        id: 'range',
+                                    }}>
+                                    {rangeOptions.filter(range => range.name !== 'all').map(range => (<MenuItem key={range.name} value={range.name}>{range.displayName}</MenuItem>))}
+                                </Select>
+                            </Grid>
                         </Grid>
                     </Grid>
                 </Grid>
