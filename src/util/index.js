@@ -102,8 +102,7 @@ fieldFormatters['iry_risk_2y'] = formatters.percentage;
 fieldFormatters['iry_risk_3y'] = formatters.percentage;
 fieldFormatters['xf_state'] = value => value === '0' ? 'Fechada' : 'Aberta';
 fieldFormatters['xf_rescue_financial_settlement'] = value => 'D+' + value;
-fieldFormatters['bf_is_blacklist'] = value => value === 't' ? 'Fechada' : 'Aberta';
-fieldFormatters['bf_inactive'] = value => value ? 'Aberta' : 'Fechada'
+fieldFormatters['bf_is_blacklist'] = value => value ? 'Fechada' : 'Aberta';
 fieldFormatters['bf_risk_name'] = formatters.capitalized;
 fieldFormatters['bf_rescue_financial_settlement'] = value => 'D+' + value;
 fieldFormatters['bf_investor_type'] = value => value === 'NAO_QUALIFICADO' ? 'Não qualificado' : 'Qualificado'

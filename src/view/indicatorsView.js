@@ -329,11 +329,7 @@ class IndicatorsView extends React.Component {
                         bf_is_blacklist: {
                             title: 'Captação',
                             text: formatters.field['bf_is_blacklist']
-                        },
-                        bf_inactive: {
-                            title: 'Captação',
-                            text: formatters.field['bf_inactive']
-                        },
+                        },                        
                         bf_risk_name: {
                             title: 'Risco formal',
                             text: formatters.field['bf_risk_name']

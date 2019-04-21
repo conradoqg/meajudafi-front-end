@@ -328,7 +328,7 @@ class FundListItemView extends React.Component {
     }
 
     getFundData = async (cnpj) => {
-        return API.getFundData(cnpj, ['f_cnpj', 'icf_dt_ini_exerc', 'icf_dt_fim_exerc', 'icf_classe', 'icf_sit', 'icf_condom', 'icf_fundo_cotas', 'icf_fundo_exclusivo', 'icf_rentab_fundo', 'icf_vl_patrim_liq', 'xf_name', 'xf_id', 'xf_formal_risk', 'xf_initial_investment', 'xf_rescue_quota', 'xf_benchmark', 'xf_type', 'bf_id', 'bf_product', 'bf_risk_level', 'bf_minimum_initial_investment', 'bf_rescue_quota', 'bf_category_description', 'bf_anbima_rating']);
+        return API.getFundData(cnpj, ['f_cnpj', 'icf_dt_ini_exerc', 'icf_dt_fim_exerc', 'icf_classe', 'icf_sit', 'icf_condom', 'icf_fundo_cotas', 'icf_fundo_exclusivo', 'icf_rentab_fundo', 'icf_vl_patrim_liq', 'xf_name', 'xf_id', 'xf_formal_risk', 'xf_initial_investment', 'xf_rescue_quota', 'xf_benchmark', 'xf_type', 'xf_state', 'bf_id', 'bf_product', 'bf_risk_level', 'bf_minimum_initial_investment', 'bf_rescue_quota', 'bf_category_description', 'bf_anbima_rating', 'bf_is_blacklist']);
     }
 
     getFundStatistic = async (cnpj, config) => {
@@ -413,7 +413,7 @@ class FundListItemView extends React.Component {
                                             <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><b>Fundo de cotas:</b> {formatters.field['icf_fundo_cotas'](this.state.data.fund.icf_fundo_cotas)}</Grid>
                                             <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><b>Fundo exclusivo:</b> {formatters.field['icf_fundo_exclusivo'](this.state.data.fund.icf_fundo_exclusivo)}</Grid>
                                             <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><b>Benchmark:</b> {formatters.field['icf_rentab_fundo'](this.state.data.fund.icf_rentab_fundo)}</Grid>
-                                            <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><b>Patrimônio:</b> {formatters.field['icf_vl_patrim_liq'](this.state.data.fund.icf_vl_patrim_liq)}</Grid>
+                                            <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><b>Patrimônio:</b> {formatters.field['icf_vl_patrim_liq'](this.state.data.fund.icf_vl_patrim_liq)}</Grid>                                            
                                         </Grid>
                                         {
                                             this.state.data.fund.xf_id && (
@@ -433,6 +433,7 @@ class FundListItemView extends React.Component {
                                                         <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><b>Dias para Resgate:</b> {formatters.field['xf_rescue_quota'](this.state.data.fund.xf_rescue_quota)}</Grid>
                                                         <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><b>Benchmark:</b> {formatters.field['xf_benchmark'](this.state.data.fund.xf_benchmark)}</Grid>
                                                         <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><b>Categoria:</b> {formatters.field['xf_type'](this.state.data.fund.xf_type)}</Grid>
+                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><b>Capitação:</b> {formatters.field['xf_state'](this.state.data.fund.xf_state)}</Grid>
                                                     </Grid>
                                                 </React.Fragment>
                                             )
@@ -455,6 +456,7 @@ class FundListItemView extends React.Component {
                                                         <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><b>Dias para Resgate:</b> {formatters.field['bf_rescue_quota'](this.state.data.fund.bf_rescue_quota)}</Grid>
                                                         <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><b>Categoria:</b> {formatters.field['bf_category_description'](this.state.data.fund.bf_category_description)}</Grid>
                                                         <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><b>Classe Anbima:</b> {formatters.field['bf_anbima_rating'](this.state.data.fund.bf_anbima_rating)}</Grid>
+                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><b>Capitação:</b> {formatters.field['bf_is_blacklist'](this.state.data.fund.bf_is_blacklist)}</Grid>
                                                     </Grid>
                                                 </React.Fragment>
                                             )
