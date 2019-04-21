@@ -5,7 +5,7 @@ export default [
     },
     {
         name: 'relative_investment_return',
-        displayName: 'Desempenho Relativo'
+        displayName: 'Desem. Relativo'
     },
     {
         name: 'correlation',

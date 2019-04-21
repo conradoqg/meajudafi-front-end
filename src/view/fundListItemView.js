@@ -462,8 +462,7 @@ class FundListItemView extends React.Component {
                         </Paper>
                     </Grid>
                 </Grid>
-                <br />
-                {/* <Hidden smDown> */}
+                <br />                
                 <Grid container wrap="nowrap">
                     <Grid container alignItems="center" justify="flex-start">
                         <Typography variant="headline" gutterBottom>Gráfico Histórico</Typography>
@@ -490,11 +489,9 @@ class FundListItemView extends React.Component {
                                     onInitialized={(figure) => this.handleChartInitialized(figure)}
                                     onUpdate={(figure) => this.handleChartUpdate(figure)} />
                             </Hidden>
-
                         </Paper>
                     </Grid>
-                </Grid>
-                {/* </Hidden> */}
+                </Grid>                
                 <br />
                 <Grid container wrap="nowrap">
                     <Grid container alignItems="center" justify="flex-start">

@@ -12,6 +12,8 @@ import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import IconButton from '@material-ui/core/IconButton';
 import { withStyles } from '@material-ui/core/styles';
+import withWidth, { isWidthUp } from '@material-ui/core/withWidth';
+import Hidden from '@material-ui/core/Hidden';
 import { produce, setAutoFreeze } from 'immer';
 import promisesEach from 'promise-results';
 import { withRouter } from 'react-router-dom';
@@ -48,7 +50,8 @@ const emptyState = {
             data: null
         },
         sortOptions: sortOptions,
-        chart: null
+        chartSmall: null,
+        chartLarge: null
     },
     config: {
         page: 0,
@@ -94,7 +97,8 @@ class FundComparisonView extends React.Component {
     handleConfigFieldChange = async event => {
         const nextState = produce(this.state, draft => {
             draft.config[event.target.name] = event.target.value;
-            draft.data.chart = null;
+            draft.data.chartSmall = null;
+            draft.data.chartLarge = null;
         });
         this.pushHistory(nextState);
         return this.updateData(nextState);
@@ -108,7 +112,8 @@ class FundComparisonView extends React.Component {
                 return fund;
             });
             draft.data.benchmark.data = null;
-            draft.data.chart = null;
+            draft.data.chartSmall = null;
+            draft.data.chartLarge = null;
         });
         this.pushHistory(nextState);
         return this.updateData(nextState);
@@ -125,7 +130,8 @@ class FundComparisonView extends React.Component {
                 name: benchmarkOptions.find(benchmark => benchmark.name === event.target.value).displayName,
                 data: null
             };
-            draft.data.chart = null;
+            draft.data.chartSmall = null;
+            draft.data.chartLarge = null;
         });
         this.pushHistory(nextState);
         return this.updateData(nextState);
@@ -173,13 +179,15 @@ class FundComparisonView extends React.Component {
 
     handleChartInitialized = async (figure) => {
         this.setState(produce(draft => {
-            draft.data.chart = figure;
+            if (figure.layout.size === 'small') draft.data.chartSmall = figure;
+            else if (figure.layout.size === 'large') draft.data.chartLarge = figure;
         }));
     }
 
     handleChartUpdate = async (figure) => {
         this.setState(produce(draft => {
-            draft.data.chart = figure;
+            if (figure.layout.size === 'small') draft.data.chartSmall = figure;
+            else if (figure.layout.size === 'large') draft.data.chartLarge = figure;
         }));
     }
 
@@ -210,7 +218,8 @@ class FundComparisonView extends React.Component {
         const fundsToUpdate = nextState.data.fundListCompare.filter(fund => fund.data == null);
 
         this.setState(produce(nextState, draft => {
-            draft.data.chart = null;
+            draft.data.chartSmall = null;
+            draft.data.chartLarge = null;
         }));
 
         let promises = {};
@@ -244,14 +253,19 @@ class FundComparisonView extends React.Component {
                 return fund;
             });
 
-            draft.data.chart = this.buildChart(draft.config.field, draft.data.benchmark, draft.data.fundListCompare);
+            draft.data.chartSmall = this.buildChart(draft.config.field, draft.data.benchmark, draft.data.fundListCompare, 'small');
+            draft.data.chartLarge = this.buildChart(draft.config.field, draft.data.benchmark, draft.data.fundListCompare, 'large');
         });
         this.setState(nextState);
     }
 
-    buildChart = (field, benchmark, fundList) => {
+    buildChart = (field, benchmark, fundList, size = 'small') => {
         let chartData = [];
         let colorIndex = 0;
+
+        let margin = null;
+        if (size === 'large') margin = { l: 60, r: 0, t: 50, b: 0 };
+        else margin = { l: 15, r: 15, t: 80, b: 10 };
 
         if (benchmark) {
             chartData.push({
@@ -283,6 +297,9 @@ class FundComparisonView extends React.Component {
                 separators: ',.',
                 autosize: true,
                 showlegend: true,
+                legend: { 'orientation': size === 'small' ? 'h' : 'v' },
+                size,
+                margin,
                 xaxis: {
                     showspikes: true,
                     spikemode: 'across'
@@ -290,7 +307,8 @@ class FundComparisonView extends React.Component {
                 yaxis: {
                     title: fieldOptions.find(fieldItem => fieldItem.name === field).displayName,
                     tickformat: chartFormatters[field].tickformat,
-                    hoverformat: chartFormatters[field].hoverformat
+                    hoverformat: chartFormatters[field].hoverformat,
+                    visible: size === 'small' ? false : true
                 }
             },
             frames: [],
@@ -324,15 +342,15 @@ class FundComparisonView extends React.Component {
     }
 
     render() {
-        const { globalClasses, classes } = this.props;
+        const { globalClasses, classes } = this.props;        
 
         return (
             <div>
                 <div className={globalClasses.appBarSpacer} />
                 <Grid container wrap="nowrap">
                     <Grid container alignItems="center" justify="flex-start">
-                        <Typography variant="display1" gutterBottom>Comparação de Fundos</Typography>
-                        <Typography component="span" gutterBottom><Tooltip title={
+                        <Typography variant={isWidthUp('md', this.props.width) ? 'display1' : 'headline'} gutterBottom>Comparação de Fundos</Typography>
+                        <Typography variant={isWidthUp('md', this.props.width) ? 'display1' : 'headline'} component="span" gutterBottom><Tooltip title={
                             <React.Fragment>
                                 <p>Comparador de desempenho de fundos.</p>
                                 <p>No lado direito é possível alterar o benchmark e intervalo visualizado.</p>
@@ -404,12 +422,14 @@ class FundComparisonView extends React.Component {
                                                         <Grid item xs={6}>
                                                             <Typography><b>Desempenho</b></Typography>
                                                         </Grid>
-                                                        <Grid item xs={6}>
-                                                            <Typography><b>Risco</b></Typography>
-                                                        </Grid>
+                                                        <Hidden smDown>
+                                                            <Grid item xs={6}>
+                                                                <Typography><b>Risco</b></Typography>
+                                                            </Grid>
+                                                        </Hidden>
                                                     </Grid>
                                                     <Grid container spacing={8}>
-                                                        <Grid item xs={6}>
+                                                        <Grid item sm={6} xs={12}>
                                                             <Typography>
                                                                 <small>
                                                                     1A: {formatters.field['iry_investment_return_1y'](fund.iry_investment_return_1y)}<br />
@@ -418,19 +438,21 @@ class FundComparisonView extends React.Component {
                                                                 </small>
                                                             </Typography>
                                                         </Grid>
-                                                        <Grid item xs={6}>
-                                                            <Typography>
-                                                                <small>
-                                                                    1A: {formatters.field['iry_risk_1y'](fund.iry_risk_1y)}<br />
-                                                                    2A: {formatters.field['iry_risk_2y'](fund.iry_risk_2y)}<br />
-                                                                    3A: {formatters.field['iry_risk_3y'](fund.iry_risk_3y)}<br />
-                                                                </small>
-                                                            </Typography>
-                                                        </Grid>
+                                                        <Hidden smDown>
+                                                            <Grid item xs={6}>
+                                                                <Typography>
+                                                                    <small>
+                                                                        1A: {formatters.field['iry_risk_1y'](fund.iry_risk_1y)}<br />
+                                                                        2A: {formatters.field['iry_risk_2y'](fund.iry_risk_2y)}<br />
+                                                                        3A: {formatters.field['iry_risk_3y'](fund.iry_risk_3y)}<br />
+                                                                    </small>
+                                                                </Typography>
+                                                            </Grid>
+                                                        </Hidden>
                                                     </Grid>
                                                 </Grid>
                                                 <Grid item xs={1} style={{ textAlign: 'center' }}>
-                                                    <IconButton
+                                                    <IconButton style={{ padding: '0px' }}
                                                         onClick={() => this.handleAddClick(fund)}>
                                                         <AddIcon />
                                                     </IconButton>
@@ -448,11 +470,18 @@ class FundComparisonView extends React.Component {
                 <Grid container spacing={16}>
                     <Grid item xs>
                         <Paper elevation={1} square={true} className={classes.chart} >
-                            <DataHistoryChartComponent
-                                fund={this.state.data.chart}
-                                onInitialized={(figure) => this.handleChartInitialized(figure)}
-                                onUpdate={(figure) => this.handleChartUpdate(figure)}
-                            />
+                            <Hidden smDown>
+                                <DataHistoryChartComponent
+                                    fund={this.state.data.chartLarge}
+                                    onInitialized={(figure) => this.handleChartInitialized(figure)}
+                                    onUpdate={(figure) => this.handleChartUpdate(figure)} />
+                            </Hidden>
+                            <Hidden mdUp>
+                                <DataHistoryChartComponent
+                                    fund={this.state.data.chartSmall}
+                                    onInitialized={(figure) => this.handleChartInitialized(figure)}
+                                    onUpdate={(figure) => this.handleChartUpdate(figure)} />
+                            </Hidden>                            
                         </Paper>
                     </Grid>
                 </Grid>
@@ -480,35 +509,43 @@ class FundComparisonView extends React.Component {
                                         </Grid>
                                         <ShowStateComponent
                                             data={this.state.data.benchmark.data}
-                                            hasData={() => (
-                                                <React.Fragment>
-                                                    <Grid item xs={2}>
-                                                        <Typography>
-                                                            Desempenho: {formatters.field['investment_return'](this.state.data.benchmark.data.accumulated.investment_return)}
-                                                        </Typography>
+                                            hasData={() => {
+                                                let availableSlots = 0;
+
+                                                if (isWidthUp('lg', this.props.width)) availableSlots = 4;
+                                                else if (isWidthUp('md', this.props.width)) availableSlots = 3;
+                                                else if (isWidthUp('sm', this.props.width)) availableSlots = 1;
+                                                else if (isWidthUp('xs', this.props.width)) availableSlots = 0;
+
+                                                let fields = ['investment_return', 'relative_investment_return', 'correlation', 'risk', 'sharpe'];
+                                                const selectedFields = [];
+
+                                                fields = fields.filter(field => field !== this.state.config.field);
+                                                selectedFields.push(this.state.config.field)
+
+                                                Array(availableSlots).fill(null).forEach(slot => {
+                                                    selectedFields.push(fields.shift());
+                                                })
+
+                                                return (
+                                                    <Grid item xs={4} sm={6} md={7} lg={9}>
+                                                        <Grid container spacing={8} alignItems="center" justify="center">
+                                                            {
+                                                                selectedFields.map(field => (
+                                                                    <Grid item key={field} xs={12} sm={6} md={3} lg={2}>
+                                                                        {this.state.data.benchmark.data.accumulated[field] ? (<Typography>{fieldOptions.find(fieldItem => fieldItem.name === field).displayName}: {formatters.field[field](this.state.data.benchmark.data.accumulated[field])}</Typography>) : (<Typography>&nbsp;</Typography>)}
+                                                                    </Grid>))
+                                                            }
+                                                        </Grid>
                                                     </Grid>
-                                                    <Grid item xs={2}>
-                                                        <Typography>&nbsp;</Typography>
-                                                    </Grid>
-                                                    <Grid item xs={1}>
-                                                        <Typography>&nbsp;</Typography>
-                                                    </Grid>
-                                                    <Grid item xs={1}>
-                                                        <Typography>
-                                                            Risco: {formatters.field['risk'](this.state.data.benchmark.data.accumulated.risk)}
-                                                        </Typography>
-                                                    </Grid>
-                                                    <Grid item xs={1}>
-                                                        <Typography>&nbsp;</Typography>
-                                                    </Grid>
-                                                    <Grid item xs={1}>
-                                                        <Typography>&nbsp;</Typography>
-                                                    </Grid>
-                                                </React.Fragment>
-                                            )}
+                                                );
+                                            }}
                                             isNull={() => (<Typography variant="subheading" align="center"><CircularProgress className={classes.progress} /></Typography>)}
                                             isErrored={() => (<Typography variant="subheading" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>)}
                                         />
+                                        <Grid item xs={1}>
+                                            <Typography>&nbsp;</Typography>
+                                        </Grid>
                                     </Grid>
                                 )}
                                 isNull={() => (<Typography variant="subheading" align="center"><CircularProgress className={classes.progress} /></Typography>)}
@@ -533,7 +570,6 @@ class FundComparisonView extends React.Component {
                                                                         <Typography>
                                                                             <b><Link to={'/fundList/' + fundObject.cnpj} className={globalClasses.link}>{fundObject.detail.name}</Link></b><br />
                                                                             <small>
-
                                                                                 <b>Benchmark:</b> {formatters.field['icf_rentab_fundo'](fundObject.detail.benchmark)}
                                                                             </small>
                                                                         </Typography>
@@ -546,39 +582,41 @@ class FundComparisonView extends React.Component {
                                                     />
                                                     <ShowStateComponent
                                                         data={fundObject.data}
-                                                        hasData={() => (
-                                                            <React.Fragment>
-                                                                <Grid item xs={2}>
-                                                                    <Typography>
-                                                                        Desempenho: {formatters.field['investment_return'](fundObject.data.accumulated.investment_return)}
-                                                                    </Typography>
+                                                        hasData={() => {
+                                                            let availableSlots = 0;
+
+                                                            if (isWidthUp('lg', this.props.width)) availableSlots = 4;
+                                                            else if (isWidthUp('md', this.props.width)) availableSlots = 3;
+                                                            else if (isWidthUp('sm', this.props.width)) availableSlots = 1;
+                                                            else if (isWidthUp('xs', this.props.width)) availableSlots = 0;
+
+                                                            let fields = ['investment_return', 'relative_investment_return', 'correlation', 'risk', 'sharpe'];
+                                                            const selectedFields = [];
+
+                                                            fields = fields.filter(field => field !== this.state.config.field);
+                                                            selectedFields.push(this.state.config.field)
+
+                                                            Array(availableSlots).fill(null).forEach(slot => {
+                                                                selectedFields.push(fields.shift());
+                                                            })
+
+                                                            return (
+                                                                <Grid item xs={4} sm={6} md={7} lg={9}>
+                                                                    <Grid container spacing={8} key={index} alignItems="center" justify="center">
+                                                                        {
+                                                                            selectedFields.map(field => (
+                                                                                <Grid item key={field} xs={12} sm={6} md={3} lg={2}>
+                                                                                    {fundObject.data.accumulated[field] ? (<Typography>{fieldOptions.find(fieldItem => fieldItem.name === field).displayName}: {formatters.field[field](fundObject.data.accumulated[field])}</Typography>) : (<Typography>&nbsp;</Typography>)}
+                                                                                </Grid>))
+                                                                        }
+                                                                    </Grid>
                                                                 </Grid>
-                                                                <Grid item xs={2}>
-                                                                    <Typography>
-                                                                        Desempenho Relativo: {formatters.field['relative_investment_return'](fundObject.data.accumulated.relative_investment_return)}
-                                                                    </Typography>
-                                                                </Grid>
-                                                                <Grid item xs={1}>
-                                                                    <Typography>
-                                                                        Correlação: {formatters.field['correlation'](fundObject.data.accumulated.correlation)}
-                                                                    </Typography>
-                                                                </Grid>
-                                                                <Grid item xs={1}>
-                                                                    <Typography>
-                                                                        Risco: {formatters.field['risk'](fundObject.data.accumulated.risk)}
-                                                                    </Typography>
-                                                                </Grid>
-                                                                <Grid item xs={1}>
-                                                                    <Typography>
-                                                                        Sharpe: {formatters.field['sharpe'](fundObject.data.accumulated.sharpe)}
-                                                                    </Typography>
-                                                                </Grid>
-                                                            </React.Fragment>
-                                                        )}
+                                                            );
+                                                        }}
                                                         isNull={() => (<Typography variant="subheading" align="center"><CircularProgress className={classes.progress} /></Typography>)}
                                                     />
                                                     <Grid item xs={1} style={{ textAlign: 'center' }}>
-                                                        <IconButton
+                                                        <IconButton style={{ padding: '0px' }}
                                                             onClick={() => this.handleRemoveClick(fundObject)}>
                                                             <ClearIcon color="error" />
                                                         </IconButton>
@@ -599,4 +637,4 @@ class FundComparisonView extends React.Component {
     }
 }
 
-export default withStyles(styles)(withRouter(FundComparisonView));
+export default withWidth()(withStyles(styles)(withRouter(FundComparisonView)));
