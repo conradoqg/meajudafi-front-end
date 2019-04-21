@@ -53,7 +53,10 @@ const styles = theme => ({
         cursor: 'pointer',
         '&:hover': {
             textDecoration: 'underline'
-        }
+        },
+        [theme.breakpoints.down('md')]: {
+            textDecoration: 'underline',
+        },
     },
     menuLink: {
         textDecoration: 'none',
