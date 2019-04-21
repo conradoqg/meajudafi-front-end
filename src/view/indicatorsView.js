@@ -1,9 +1,9 @@
 
-import Typography from '@material-ui/core/Typography';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
+import Typography from '@material-ui/core/Typography';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import List from '@material-ui/core/List';
@@ -20,6 +20,8 @@ import Collapse from '@material-ui/core/Collapse';
 import Avatar from '@material-ui/core/Avatar';
 import Tooltip from '@material-ui/core/Tooltip';
 import { withStyles } from '@material-ui/core/styles';
+import withWidth, { isWidthUp } from '@material-ui/core/withWidth';
+import Hidden from '@material-ui/core/Hidden';
 import { produce, setAutoFreeze } from 'immer';
 import allKeys from 'promise-results/allKeys';
 import FundFilterComponent from './component/fundFilterComponent';
@@ -83,7 +85,9 @@ const emptyState = {
         fundsChanged: {
             btgpactual: null,
             xpi: null
-        }
+        },
+        economyIndicatorsChartSmall: null,
+        economyIndicatorsChartLarge: null
     },
     config: {
         range: '1y',
@@ -98,10 +102,16 @@ const emptyState = {
 class IndicatorsView extends React.Component {
     state = emptyState;
 
+    async componentDidMount() {
+        return this.updateData(this.state);
+    }
+
     handleConfigRangeChange = async event => {
         const nextState = produce(this.state, draft => {
             draft.config[event.target.name] = event.target.value;
             draft.data.economyIndicators = emptyState.data.economyIndicators;
+            draft.data.economyIndicatorsChartSmall = emptyState.data.economyIndicatorsChartSmall;
+            draft.data.economyIndicatorsChartLarge = emptyState.data.economyIndicatorsChartLarge;
         });
 
         this.setState(nextState);
@@ -120,15 +130,17 @@ class IndicatorsView extends React.Component {
         return this.updateData(nextState);
     }
 
-    handleChartInitialized = async (figure) => {
+    handleChartInitialized = (figure) => {
         this.setState(produce(draft => {
-            draft.data.economyIndicators = figure;
+            if (figure.layout.size === 'small') draft.data.economyIndicatorsChartSmall = figure;
+            else if (figure.layout.size === 'large') draft.data.economyIndicatorsChartLarge = figure;
         }));
     }
 
-    handleChartUpdate = async (figure) => {
+    handleChartUpdate = (figure) => {
         this.setState(produce(draft => {
-            draft.data.economyIndicators = figure;
+            if (figure.layout.size === 'small') draft.data.economyIndicatorsChartSmall = figure;
+            else if (figure.layout.size === 'large') draft.data.economyIndicatorsChartLarge = figure;
         }));
     }
 
@@ -150,10 +162,6 @@ class IndicatorsView extends React.Component {
         return this.updateData(nextState);
     }
 
-    componentDidMount = async () => {
-        return this.updateData(this.state);
-    }
-
     updateData = async (nextState) => {
         try {
             const { fundIndicators, economyIndicators, fundsChanged } = await allKeys({
@@ -166,6 +174,8 @@ class IndicatorsView extends React.Component {
                 draft.data.fundIndicators = fundIndicators;
                 draft.data.economyIndicators = economyIndicators;
                 draft.data.fundsChanged = fundsChanged;
+                draft.data.economyIndicatorsChartSmall = this.buildChart(economyIndicators, 'small');
+                draft.data.economyIndicatorsChartLarge = this.buildChart(economyIndicators, 'large');
             });
 
             this.setState(nextState);
@@ -177,11 +187,16 @@ class IndicatorsView extends React.Component {
         }
     }
 
-    getEconomyIndicators = async (config) => {
+    buildChart = (economyIndicators, size = 'small') => {
         let colorIndex = 0;
-        const from = rangeOptions.find(range => range.name === config.range).toDate();
 
-        const economyIndicators = await API.getEconomyIndicators(from);
+        let domain = null;
+        if (size === 'large') domain = [0.08, 0.90];
+        else domain = [0, 1];
+
+        let margin = null;
+        if (size === 'large') margin = { l: 0, r: 0, t: 50, b: 0 };
+        else margin = { l: 15, r: 15, t: 80, b: 10 };
 
         return {
             data: [
@@ -214,16 +229,19 @@ class IndicatorsView extends React.Component {
                 autosize: true,
                 showlegend: true,
                 legend: { 'orientation': 'h' },
+                size,
+                margin,
                 xaxis: {
                     showspikes: true,
                     spikemode: 'across',
-                    domain: [0.00, 0.95]
+                    domain
                 },
                 yaxis: {
                     title: 'Bovespa',
                     tickformat: chartFormatters.int.tickformat,
                     hoverformat: chartFormatters.int.hoverformat,
-                    fixedrange: true
+                    fixedrange: true,
+                    visible: size === 'small' ? false : true
                 },
                 yaxis2: {
                     title: 'Dólar',
@@ -234,7 +252,8 @@ class IndicatorsView extends React.Component {
                     tickformat: chartFormatters.money.tickformat,
                     hoverformat: chartFormatters.money.hoverformat,
                     fixedrange: true,
-                    position: 0.95
+                    position: 0.90,
+                    visible: size === 'small' ? false : true
                 },
                 yaxis3: {
                     title: 'Euro',
@@ -245,7 +264,8 @@ class IndicatorsView extends React.Component {
                     tickformat: chartFormatters.money.tickformat,
                     hoverformat: chartFormatters.money.hoverformat,
                     fixedrange: true,
-                    position: 1
+                    position: 0.95,
+                    visible: size === 'small' ? false : true
                 }
             },
             frames: [],
@@ -256,8 +276,14 @@ class IndicatorsView extends React.Component {
         };
     }
 
+    getEconomyIndicators = async (config) => {
+        const from = rangeOptions.find(range => range.name === config.range).toDate();
+
+        return API.getEconomyIndicators(from);
+    }
+
     getFundIndicators = async (config) => {
-        return await API.getFundIndicators(config);
+        return API.getFundIndicators(config);
     }
 
     getFundsChanged = async (config) => {
@@ -349,8 +375,8 @@ class IndicatorsView extends React.Component {
                 <div className={globalClasses.appBarSpacer} />
                 <Grid container wrap="nowrap">
                     <Grid container alignItems="center" justify="flex-start">
-                        <Typography variant="display1" gutterBottom>Indicadores</Typography>
-                        <Typography component="span" gutterBottom><Tooltip title={
+                        <Typography variant={isWidthUp('md', this.props.width) ? 'display1' : 'headline'} gutterBottom>Indicadores</Typography>
+                        <Typography variant={isWidthUp('md', this.props.width) ? 'display1' : 'headline'} component="span" gutterBottom><Tooltip title={
                             <React.Fragment>
                                 <p>Indicadores gerais de mercado e dos fundos de investimento.</p>
                                 <p>No lado direito é possível alterar o intervalo visualizado.</p>
@@ -380,11 +406,18 @@ class IndicatorsView extends React.Component {
                 <Grid container spacing={16}>
                     <Grid item xs={12}>
                         <Paper className={classes.paper} elevation={1} square={true}>
-                            <DataHistoryChartComponent
-                                fund={this.state.data.economyIndicators}
-                                onInitialized={(figure) => this.handleChartInitialized(figure)}
-                                onUpdate={(figure) => this.handleChartUpdate(figure)}
-                            />
+                            <Hidden smDown>
+                                <DataHistoryChartComponent
+                                    fund={this.state.data.economyIndicatorsChartLarge}
+                                    onInitialized={(figure) => this.handleChartInitialized(figure)}
+                                    onUpdate={(figure) => this.handleChartUpdate(figure)} />
+                            </Hidden>
+                            <Hidden mdUp>
+                                <DataHistoryChartComponent
+                                    fund={this.state.data.economyIndicatorsChartSmall}
+                                    onInitialized={(figure) => this.handleChartInitialized(figure)}
+                                    onUpdate={(figure) => this.handleChartUpdate(figure)} />
+                            </Hidden>
                         </Paper>
                     </Grid>
                 </Grid>
@@ -419,16 +452,16 @@ class IndicatorsView extends React.Component {
                     </Grid>
                 </Grid>
                 <Grid container spacing={16}>
-                    <Grid item xs={3}>
+                    <Grid item xs={12} sm={6} md={3} xl={3}>
                         <IndicatorPaper title="Desempenho" field="investment_return" range={this.state.config.range} data={this.state.data.fundIndicators} classes={classes} globalClasses={globalClasses} />
                     </Grid>
-                    <Grid item xs={3}>
+                    <Grid item xs={12} sm={6} md={3} xl={3}>
                         <IndicatorPaper title="Patrimônio" field="networth" range={this.state.config.range} data={this.state.data.fundIndicators} classes={classes} globalClasses={globalClasses} />
                     </Grid>
-                    <Grid item xs={3}>
+                    <Grid item xs={12} sm={6} md={3} xl={3}>
                         <IndicatorPaper title="Cotistas" field="quotaholders" range={this.state.config.range} data={this.state.data.fundIndicators} classes={classes} globalClasses={globalClasses} />
                     </Grid>
-                    <Grid item xs={3}>
+                    <Grid item xs={12} sm={6} md={3} xl={3}>
                         <IndicatorPaper title="Risco" field="risk" range={this.state.config.range} data={this.state.data.fundIndicators} classes={classes} globalClasses={globalClasses} inverted />
                     </Grid>
                 </Grid>
@@ -460,10 +493,10 @@ class IndicatorsView extends React.Component {
                     </Grid>
                 </Grid>
                 <Grid container spacing={16}>
-                    <Grid item xs={6}>
+                    <Grid item xs={12} sm={12} md={6} xl={6}>
                         <FundsChangedPaper title="BTG Pactual" data={this.state.data.fundsChanged['btgpactual']} classes={classes} globalClasses={globalClasses} />
                     </Grid>
-                    <Grid item xs={6}>
+                    <Grid item xs={12} sm={12} md={6} xl={6}>
                         <FundsChangedPaper title="XP Investimentos" data={this.state.data.fundsChanged['xpi']} classes={classes} globalClasses={globalClasses} />
                     </Grid>
                 </Grid>
@@ -491,10 +524,10 @@ const FundsChangedPaper = (props) => {
                                 <React.Fragment key={index}>
                                     <Grid item xs={12}>
                                         <Grid container spacing={8}>
-                                            <Grid item xs>
+                                            <Grid item xs={12} sm={12} md={6} xl={6}>
                                                 <Typography component="span" variant="body1" align="left" className={classes.cropTextNormal}>{formatters.date(change.date)} - <Link to={'/fundList/' + change.cnpj} className={globalClasses.link}>{change.name}</Link></Typography>
                                             </Grid>
-                                            <Grid item xs>
+                                            <Grid item xs={12} sm={12} md={6} xl={6}>
                                                 {change.changes.map((fieldChange, index) => (<Typography key={index} component="span" variant="body1" align="right">{fieldChange}</Typography>))}
                                             </Grid>
                                         </Grid>
@@ -577,4 +610,4 @@ const IndicatorPaper = (props) => {
         </div>);
 };
 
-export default withStyles(styles)(IndicatorsView);
+export default withWidth()(withStyles(styles)(IndicatorsView));
