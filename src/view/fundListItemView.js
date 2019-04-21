@@ -85,7 +85,8 @@ class FundListItemView extends React.Component {
         const nextState = produce(this.state, draft => {
             draft.config[event.target.name] = event.target.value;
             draft.data.history = null;
-            draft.data.chart = null;
+            draft.data.chartSmall = null;
+            draft.data.chartLarge = null;
         });
         return this.updateData(nextState);
     }
@@ -94,7 +95,8 @@ class FundListItemView extends React.Component {
         const nextState = produce(this.state, draft => {
             draft.config[event.target.name] = event.target.value;
             draft.data.history = null;
-            draft.data.chart = null;
+            draft.data.chartSmall = null;
+            draft.data.chartLarge = null;
         });
         return this.updateData(nextState);
     }
@@ -102,7 +104,8 @@ class FundListItemView extends React.Component {
     handleConfigFieldChange = async event => {
         const nextState = produce(this.state, draft => {
             draft.config[event.target.name] = event.target.value;
-            draft.data.chart = null;
+            draft.data.chartSmall = null;
+            draft.data.chartLarge = null;
         });
         this.pushHistory(nextState);
         return this.updateData(nextState);
@@ -110,17 +113,15 @@ class FundListItemView extends React.Component {
 
     handleChartInitialized = async (figure) => {
         this.setState(produce(draft => {
-            draft.data.chart = figure;
+            if (figure.layout.size === 'small') draft.data.chartSmall = figure;
+            else if (figure.layout.size === 'large') draft.data.chartLarge = figure;
         }));
     }
 
     handleChartUpdate = async (figure) => {
         this.setState(produce(draft => {
-            if (figure.layout.forSize !== this.props.width) {
-                draft.data.chart = this.buildChart(draft.config, draft.data.fund.f_short_name, draft.data.history)
-            } else {
-                draft.data.chart = figure;
-            }
+            if (figure.layout.size === 'small') draft.data.chartSmall = figure;
+            else if (figure.layout.size === 'large') draft.data.chartLarge = figure;
         }));
     }
 
@@ -128,7 +129,8 @@ class FundListItemView extends React.Component {
         this.setState(produce(nextState, draft => {
             draft.data.fund = null;
             draft.data.history = null;
-            draft.data.chart = null;
+            draft.data.chartSmall = null;
+            draft.data.chartLarge = null;
         }));
 
         let { fundData, fundHistory } = await promisesEach({
@@ -144,12 +146,16 @@ class FundListItemView extends React.Component {
             else draft.data.history = fundHistory;
 
             if (fundHistory instanceof Error) draft.data.chart = fundHistory.message;
-            else draft.data.chart = this.buildChart(draft.config, fundData[0].f_short_name, draft.data.history);
+            else {
+                draft.data.chartSmall = this.buildChart(draft.config, fundData[0].f_short_name, draft.data.history, 'small');
+                draft.data.chartLarge = this.buildChart(draft.config, fundData[0].f_short_name, draft.data.history, 'large');
+            }
+
         });
         this.setState(nextState);
     }
 
-    buildChart = (config, name, statistics) => {
+    buildChart = (config, name, statistics, size = 'small') => {
         let colorIndex = 0;
 
         const benchmarkText = benchmarkOptions.find(benchmark => benchmark.name === config.benchmark).displayName;
@@ -157,16 +163,12 @@ class FundListItemView extends React.Component {
         const max_y = Math.max(statistics.daily.max_investment_return, statistics.daily.max_benchmark_investment_return);
 
         let domain = null;
-
-        if (isWidthUp('md', this.props.width)) domain = [0.08, 0.75];
-        else if (isWidthUp('sm', this.props.width)) domain = [0.10, 1];
+        if (size === 'large') domain = [0.08, 0.75];
         else domain = [0, 1];
 
         let margin = null;
-        if (isWidthUp('sm', this.props.width)) margin = { l: 0, r: 0, t: 50, b: 0 };
+        if (size === 'large') margin = { l: 0, r: 0, t: 50, b: 0 };
         else margin = { l: 15, r: 15, t: 80, b: 10 };
-
-        console.log(`domain = ${domain}`);
 
         return {
             data: [
@@ -237,7 +239,7 @@ class FundListItemView extends React.Component {
                 autosize: true,
                 showlegend: true,
                 legend: { 'orientation': 'h' },
-                forSize: this.props.width,
+                size,
                 margin,
                 xaxis: {
                     showspikes: true,
@@ -250,7 +252,7 @@ class FundListItemView extends React.Component {
                     hoverformat: chartFormatters.investment_return.hoverformat,
                     fixedrange: true,
                     range: [min_y, max_y],
-                    visible: isWidthUp('sm', this.props.width)
+                    visible: size === 'small' ? false : true
                 },
                 yaxis2: {
                     title: `Benchmark (${benchmarkText})`,
@@ -262,7 +264,7 @@ class FundListItemView extends React.Component {
                     range: [min_y, max_y],
                     fixedrange: true,
                     position: 0,
-                    visible: isWidthUp('sm', this.props.width)
+                    visible: size === 'small' ? false : true
                 },
                 yaxis3: {
                     title: 'Risco',
@@ -272,7 +274,7 @@ class FundListItemView extends React.Component {
                     overlaying: 'y',
                     side: 'right',
                     fixedrange: true,
-                    visible: isWidthUp('md', this.props.width)
+                    visible: size === 'small' ? false : true
                 },
                 yaxis4: {
                     title: 'Sharpe',
@@ -283,7 +285,7 @@ class FundListItemView extends React.Component {
                     side: 'right',
                     fixedrange: true,
                     position: 0.78,
-                    visible: isWidthUp('md', this.props.width)
+                    visible: size === 'small' ? false : true
                 },
                 yaxis5: {
                     title: 'Consistência',
@@ -294,7 +296,7 @@ class FundListItemView extends React.Component {
                     side: 'right',
                     fixedrange: true,
                     position: 0.84,
-                    visible: isWidthUp('md', this.props.width)
+                    visible: size === 'small' ? false : true
                 },
                 yaxis6: {
                     title: 'Patrimônio',
@@ -307,7 +309,7 @@ class FundListItemView extends React.Component {
                     side: 'right',
                     fixedrange: true,
                     position: 0.89,
-                    visible: isWidthUp('md', this.props.width)
+                    visible: size === 'small' ? false : true
                 },
                 yaxis7: {
                     title: 'Cotistas',
@@ -316,7 +318,7 @@ class FundListItemView extends React.Component {
                     side: 'right',
                     fixedrange: true,
                     position: 0.95,
-                    visible: isWidthUp('md', this.props.width)
+                    visible: size === 'small' ? false : true
                 }
             },
             frames: [],
@@ -476,10 +478,19 @@ class FundListItemView extends React.Component {
                 <Grid container spacing={16}>
                     <Grid item xs>
                         <Paper elevation={1} square={true} className={classes.chart} >
-                            <DataHistoryChartComponent
-                                fund={this.state.data.chart}
-                                onInitialized={(figure) => this.handleChartInitialized(figure)}
-                                onUpdate={(figure) => this.handleChartUpdate(figure)} />
+                            <Hidden smDown>
+                                <DataHistoryChartComponent
+                                    fund={this.state.data.chartLarge}
+                                    onInitialized={(figure) => this.handleChartInitialized(figure)}
+                                    onUpdate={(figure) => this.handleChartUpdate(figure)} />
+                            </Hidden>
+                            <Hidden mdUp>
+                                <DataHistoryChartComponent
+                                    fund={this.state.data.chartSmall}
+                                    onInitialized={(figure) => this.handleChartInitialized(figure)}
+                                    onUpdate={(figure) => this.handleChartUpdate(figure)} />
+                            </Hidden>
+
                         </Paper>
                     </Grid>
                 </Grid>
