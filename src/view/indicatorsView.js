@@ -22,7 +22,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import { withStyles } from '@material-ui/core/styles';
 import withWidth, { isWidthUp } from '@material-ui/core/withWidth';
 import Hidden from '@material-ui/core/Hidden';
-import { produce, setAutoFreeze } from 'immer';
+import { produce } from 'immer';
 import allKeys from 'promise-results/allKeys';
 import FundFilterComponent from './component/fundFilterComponent';
 import ShowStateComponent from './component/showStateComponent';
@@ -30,8 +30,6 @@ import DataHistoryChartComponent from './component/dataHistoryChartComponent';
 import API from '../api';
 import { rangeOptions } from './option';
 import { formatters, nextColorIndex, chartFormatters } from '../util';
-
-setAutoFreeze(false);
 
 const styles = theme => ({
     root: {

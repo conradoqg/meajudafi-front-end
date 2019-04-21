@@ -14,7 +14,7 @@ import IconButton from '@material-ui/core/IconButton';
 import { withStyles } from '@material-ui/core/styles';
 import withWidth, { isWidthUp } from '@material-ui/core/withWidth';
 import Hidden from '@material-ui/core/Hidden';
-import { produce, setAutoFreeze } from 'immer';
+import { produce } from 'immer';
 import promisesEach from 'promise-results';
 import { withRouter } from 'react-router-dom';
 import API from '../api';
@@ -23,8 +23,6 @@ import ShowStateComponent from './component/showStateComponent';
 import DataHistoryChartComponent from './component/dataHistoryChartComponent';
 import { fieldOptions, sortOptions, benchmarkOptions, rangeOptions } from './option';
 import { formatters, nextColorIndex, chartFormatters } from '../util';
-
-setAutoFreeze(false);
 
 const styles = theme => ({
     optionsBar: {
@@ -71,11 +69,13 @@ class FundComparisonView extends React.Component {
     constructor(props) {
         super(props);
 
-        this.state.data.benchmark.name = benchmarkOptions.find(benchmark => benchmark.name === this.state.config.benchmark).displayName;
-        this.state.data.fundListCompare = props.match.params.cnpjs ? props.match.params.cnpjs.split('/').map(cnpj => { return { cnpj, detail: null, data: null }; }) : emptyState.data.fundListCompare;
-        this.state.config.range = (typeof (props.match.params.range) != 'undefined') ? props.match.params.range : this.state.config.range;
-        this.state.config.benchmark = (typeof (props.match.params.benchmark) != 'undefined') ? props.match.params.benchmark : this.state.config.benchmark;
-        this.state.config.field = (typeof (props.match.params.field) != 'undefined') ? props.match.params.field : this.state.config.field;
+        this.state = produce(this.state, draft => {
+            draft.data.benchmark.name = benchmarkOptions.find(benchmark => benchmark.name === this.state.config.benchmark).displayName;
+            draft.data.fundListCompare = props.match.params.cnpjs ? props.match.params.cnpjs.split('/').map(cnpj => { return { cnpj, detail: null, data: null }; }) : emptyState.data.fundListCompare;
+            draft.config.range = (typeof (props.match.params.range) != 'undefined') ? props.match.params.range : this.state.config.range;
+            draft.config.benchmark = (typeof (props.match.params.benchmark) != 'undefined') ? props.match.params.benchmark : this.state.config.benchmark;
+            draft.config.field = (typeof (props.match.params.field) != 'undefined') ? props.match.params.field : this.state.config.field;
+        });
 
         this.replaceHistory(this.state);
     }
@@ -152,6 +152,10 @@ class FundComparisonView extends React.Component {
 
                 this.setState(produce(nextState, draft => {
                     draft.data.fundListSearch = result.data;
+                }));
+            } else {
+                this.setState(produce(nextState, draft => {
+                    draft.data.fundListSearch = emptyState.data.fundListSearch;
                 }));
             }
         } catch (ex) {
@@ -342,7 +346,7 @@ class FundComparisonView extends React.Component {
     }
 
     render() {
-        const { globalClasses, classes } = this.props;        
+        const { globalClasses, classes } = this.props;
 
         return (
             <div>
@@ -481,7 +485,7 @@ class FundComparisonView extends React.Component {
                                     fund={this.state.data.chartSmall}
                                     onInitialized={(figure) => this.handleChartInitialized(figure)}
                                     onUpdate={(figure) => this.handleChartUpdate(figure)} />
-                            </Hidden>                            
+                            </Hidden>
                         </Paper>
                     </Grid>
                 </Grid>

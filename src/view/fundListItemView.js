@@ -10,7 +10,7 @@ import Divider from '@material-ui/core/Divider';
 import { withStyles } from '@material-ui/core/styles';
 import withWidth, { isWidthUp } from '@material-ui/core/withWidth';
 import Hidden from '@material-ui/core/Hidden';
-import { produce, setAutoFreeze } from 'immer';
+import { produce } from 'immer';
 import promisesEach from 'promise-results';
 import { withRouter } from 'react-router-dom';
 import API from '../api';
@@ -18,8 +18,6 @@ import ShowStateComponent from './component/showStateComponent';
 import DataHistoryChartComponent from './component/dataHistoryChartComponent';
 import { fieldOptions, benchmarkOptions, rangeOptions } from './option';
 import { nextColorIndex, formatters, chartFormatters } from '../util';
-
-setAutoFreeze(false);
 
 const styles = theme => ({
     select: {
