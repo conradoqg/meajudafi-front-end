@@ -609,7 +609,7 @@ class FundListView extends React.Component {
                                                     <Grid container spacing={8}>
                                                         <Grid item xs>
                                                             <DataHistoryChartComponent
-                                                                fund={this.state.data.fundDetail[fund.icf_cnpj_fundo]}
+                                                                data={this.state.data.fundDetail[fund.icf_cnpj_fundo]}
                                                                 onInitialized={(figure) => this.handleChartInitialized(fund, figure)}
                                                                 onUpdate={(figure) => this.handleChartUpdate(fund, figure)}
                                                             />

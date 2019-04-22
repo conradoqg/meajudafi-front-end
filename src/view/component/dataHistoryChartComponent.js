@@ -10,7 +10,7 @@ const Plot = createPlotlyComponent(Plotly);
 export default class DataHistoryChartComponent extends React.Component {
 
     render() {
-        const { fund: data, onInitialized, onUpdate } = this.props;
+        const { data, onInitialized, onUpdate } = this.props;
 
         return (
             <ShowStateComponent

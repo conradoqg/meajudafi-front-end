@@ -416,13 +416,13 @@ class IndicatorsView extends React.Component {
                         <Paper className={classes.paper} elevation={1} square={true}>
                             <Hidden smDown>
                                 <DataHistoryChartComponent
-                                    fund={this.state.data.economyIndicatorsChartLarge}
+                                    data={this.state.data.economyIndicatorsChartLarge}
                                     onInitialized={(figure) => this.handleChartInitialized(figure)}
                                     onUpdate={(figure) => this.handleChartUpdate(figure)} />
                             </Hidden>
                             <Hidden mdUp>
                                 <DataHistoryChartComponent
-                                    fund={this.state.data.economyIndicatorsChartSmall}
+                                    data={this.state.data.economyIndicatorsChartSmall}
                                     onInitialized={(figure) => this.handleChartInitialized(figure)}
                                     onUpdate={(figure) => this.handleChartUpdate(figure)} />
                             </Hidden>

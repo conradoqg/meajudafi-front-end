@@ -490,13 +490,13 @@ class FundComparisonView extends React.Component {
                         <Paper elevation={1} square={true} className={classes.chart} >
                             <Hidden smDown>
                                 <DataHistoryChartComponent
-                                    fund={this.state.data.chartLarge}
+                                    data={this.state.data.chartLarge}
                                     onInitialized={(figure) => this.handleChartInitialized(figure)}
                                     onUpdate={(figure) => this.handleChartUpdate(figure)} />
                             </Hidden>
                             <Hidden mdUp>
                                 <DataHistoryChartComponent
-                                    fund={this.state.data.chartSmall}
+                                    data={this.state.data.chartSmall}
                                     onInitialized={(figure) => this.handleChartInitialized(figure)}
                                     onUpdate={(figure) => this.handleChartUpdate(figure)} />
                             </Hidden>
