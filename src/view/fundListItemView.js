@@ -10,6 +10,7 @@ import Divider from '@material-ui/core/Divider';
 import { withStyles } from '@material-ui/core/styles';
 import withWidth from '@material-ui/core/withWidth';
 import Hidden from '@material-ui/core/Hidden';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import { produce } from 'immer';
 import promisesEach from 'promise-results';
 import { withRouter } from 'react-router-dom';
@@ -32,7 +33,8 @@ const emptyState = {
     data: {
         fund: null,
         history: null,
-        chart: null
+        chartSmall: null,
+        chartLarge: null
     },
     config: {
         cnpj: null,
@@ -140,11 +142,13 @@ class FundListItemView extends React.Component {
             if (fundData instanceof Error) draft.data.fund = fundData.message;
             else draft.data.fund = fundData[0];
 
-            if (fundHistory instanceof Error) draft.data.fund = fundData.message;
+            if (fundHistory instanceof Error) draft.data.history = fundHistory.message;
             else draft.data.history = fundHistory;
 
-            if (fundHistory instanceof Error) draft.data.chart = fundHistory.message;
-            else {
+            if (fundHistory instanceof Error) {
+                draft.data.chartSmall = fundHistory.message;
+                draft.data.chartLarge = fundHistory.message;
+            } else {
                 draft.data.chartSmall = this.buildChart(draft.config, fundData[0].f_short_name, draft.data.history, 'small');
                 draft.data.chartLarge = this.buildChart(draft.config, fundData[0].f_short_name, draft.data.history, 'large');
             }
@@ -238,7 +242,7 @@ class FundListItemView extends React.Component {
                 showlegend: true,
                 legend: { 'orientation': 'h' },
                 size,
-                margin,                
+                margin,
                 dragmode: size === 'small' ? false : 'zoom',
                 xaxis: {
                     showspikes: true,
@@ -349,7 +353,6 @@ class FundListItemView extends React.Component {
                     <Grid item xs>
                         <Grid container alignItems="center" spacing={8}>
                             <Grid item>
-
                                 <Typography variant="display1" inline>
                                     {this.state.data.fund && formatters.field['f_short_name'](this.state.data.fund.f_short_name)} <Tooltip enterTouchDelay={300} leaveTouchDelay={5000} title={
                                         <React.Fragment>
@@ -415,7 +418,7 @@ class FundListItemView extends React.Component {
                                             <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><b>Fundo de cotas:</b> {formatters.field['icf_fundo_cotas'](this.state.data.fund.icf_fundo_cotas)}</Grid>
                                             <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><b>Fundo exclusivo:</b> {formatters.field['icf_fundo_exclusivo'](this.state.data.fund.icf_fundo_exclusivo)}</Grid>
                                             <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><b>Benchmark:</b> {formatters.field['icf_rentab_fundo'](this.state.data.fund.icf_rentab_fundo)}</Grid>
-                                            <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><b>Patrimônio:</b> {formatters.field['icf_vl_patrim_liq'](this.state.data.fund.icf_vl_patrim_liq)}</Grid>                                            
+                                            <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><b>Patrimônio:</b> {formatters.field['icf_vl_patrim_liq'](this.state.data.fund.icf_vl_patrim_liq)}</Grid>
                                         </Grid>
                                         {
                                             this.state.data.fund.xf_id && (
@@ -578,7 +581,9 @@ class FundListItemView extends React.Component {
                                                 }
                                             </tbody>
                                         </table>
-                                    </React.Fragment>)} />
+                                    </React.Fragment>)}
+                                isNull={() => (<Typography variant="subheading" align="center"><CircularProgress /></Typography>)}
+                                isErrored={() => (<Typography variant="subheading" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>)} />
                         </Paper>
                     </Grid>
                 </Grid>
