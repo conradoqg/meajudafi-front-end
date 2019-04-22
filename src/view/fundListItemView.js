@@ -345,11 +345,11 @@ class FundListItemView extends React.Component {
                 <div className={globalClasses.appBarSpacer} />
                 <Grid container spacing={16} alignItems="center">
                     <Grid item xs>
-                        <Grid container alignItems="center" spacing="8">
+                        <Grid container alignItems="center" spacing={8}>
                             <Grid item>
 
                                 <Typography variant="display1" inline>
-                                    {this.state.data.fund && formatters.field['f_short_name'](this.state.data.fund.f_short_name)} <Tooltip title={
+                                    {this.state.data.fund && formatters.field['f_short_name'](this.state.data.fund.f_short_name)} <Tooltip enterTouchDelay={300} leaveTouchDelay={5000} title={
                                         <React.Fragment>
                                             <p>Detalhes do fundo.</p>
                                             <p>No lado direito é possível alterar o benchmark e intervalo visualizado.</p>
@@ -360,7 +360,7 @@ class FundListItemView extends React.Component {
                         </Grid>
                     </Grid>
                     <Grid item>
-                        <Grid container alignItems="center" spacing="8">
+                        <Grid container alignItems="center" spacing={8}>
                             <Grid item>
                                 <Select
                                     value={this.state.config.benchmark}
@@ -468,10 +468,10 @@ class FundListItemView extends React.Component {
                 </Grid>
                 <Grid container spacing={16} alignItems="center">
                     <Grid item xs>
-                        <Grid container alignItems="center" spacing="8">
+                        <Grid container alignItems="center" spacing={8}>
                             <Grid item>
                                 <Typography variant="headline" inline>
-                                    Gráfico Histórico <Tooltip title={
+                                    Gráfico Histórico <Tooltip enterTouchDelay={300} leaveTouchDelay={5000} title={
                                         <React.Fragment>
                                             <p>Gráfico histórico para visualização das características do fundo no tempo.</p>
                                             <p>É possível visualizar as outras séries clicando nelas.</p>
@@ -503,7 +503,7 @@ class FundListItemView extends React.Component {
                 <Grid container spacing={16} alignItems="center">
                     <Grid item xs>
                         <Typography variant="headline" inline>
-                            Tabela Histórica <Tooltip title={
+                            Tabela Histórica <Tooltip enterTouchDelay={300} leaveTouchDelay={5000} title={
                                 <React.Fragment>
                                     <p>Histórico mensal, anual e acumulado do fundo.</p>
                                     <p>No lado direito é possível alterar a informação visualizada.</p>
@@ -512,7 +512,7 @@ class FundListItemView extends React.Component {
                         </Typography>
                     </Grid>
                     <Grid item>
-                        <Grid container alignItems="center" spacing="8">
+                        <Grid container alignItems="center" spacing={8}>
                             <Grid item>
                                 <Select
                                     value={this.state.config.field}

@@ -366,17 +366,17 @@ class IndicatorsView extends React.Component {
     }
 
     render() {
-        const { globalClasses, classes } = this.props;
+        const { globalClasses, classes } = this.props;        
 
         return (
             <div>
                 <div className={globalClasses.appBarSpacer} />
                 <Grid container spacing={16} alignItems="center">
                     <Grid item xs>
-                        <Grid container alignItems="center" spacing="8">
+                        <Grid container alignItems="center" spacing={8}>
                             <Grid item>
                                 <Typography variant="display1" inline>
-                                    Indicadores <Tooltip title={
+                                    Indicadores <Tooltip enterTouchDelay={300} leaveTouchDelay={5000} title={
                                         <React.Fragment>
                                             <p>Indicadores gerais de mercado e dos fundos de investimento.</p>
                                             <p>No lado direito é possível alterar o intervalo visualizado.</p>
@@ -387,7 +387,7 @@ class IndicatorsView extends React.Component {
                         </Grid>
                     </Grid>
                     <Grid item>
-                        <Grid container alignItems="center" spacing="8">
+                        <Grid container alignItems="center" spacing={8}>
                             <Grid item>
                                 <Select
                                     value={this.state.config.range}
@@ -429,7 +429,7 @@ class IndicatorsView extends React.Component {
                 <Grid container spacing={16} alignItems="center">
                     <Grid item xs>
                         <Typography variant="headline" inline>
-                            Fundos de Investimento <Tooltip title={
+                            Fundos de Investimento <Tooltip enterTouchDelay={300} leaveTouchDelay={5000} title={
                                 <React.Fragment>
                                     <p>Lista de melhores e piores fundos de investimento. </p>
                                     <p>Por padrão somente fundos listados na BTG Pactual e XP Investimentos são exibidos. No lado direito é possível alterar o filtro.</p>
@@ -439,7 +439,7 @@ class IndicatorsView extends React.Component {
                     </Grid>
                     <Hidden smDown>
                         <Grid item>
-                            <Grid container alignItems="center" spacing="8">
+                            <Grid container alignItems="center" spacing={8}>
                                 <Grid item>
                                     <IconButton
                                         aria-label="Filtro"
@@ -479,7 +479,7 @@ class IndicatorsView extends React.Component {
                 <Grid container spacing={16} alignItems="center">
                     <Grid item xs>
                         <Typography variant="headline" inline>
-                            Mudanças nos Fundos <Tooltip title={
+                            Mudanças nos Fundos <Tooltip enterTouchDelay={300} leaveTouchDelay={5000} title={
                                 <React.Fragment>
                                     <p>Lista de mudanças que ocorreram recentemente nos fundos de investimento. </p>
                                     <p>Somente algumas informações são monitoradas. No lado direito é possível filtrar o intervalo de exibição.</p>
@@ -489,7 +489,7 @@ class IndicatorsView extends React.Component {
                         </Typography>
                     </Grid>
                     <Grid item>
-                        <Grid container alignItems="center" spacing="8">
+                        <Grid container alignItems="center" spacing={8}>
                             <Grid item>
                                 <Select
                                     value={this.state.config.changesRange}

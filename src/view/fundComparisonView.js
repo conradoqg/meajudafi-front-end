@@ -353,10 +353,10 @@ class FundComparisonView extends React.Component {
                 <div className={globalClasses.appBarSpacer} />
                 <Grid container spacing={16} alignItems="center">
                     <Grid item xs>
-                        <Grid container alignItems="center" spacing="8">
+                        <Grid container alignItems="center" spacing={8}>
                             <Grid item>
                                 <Typography variant="display1" inline>
-                                    Comparação de Fundos <Tooltip title={
+                                    Comparação de Fundos <Tooltip enterTouchDelay={300} leaveTouchDelay={5000} title={
                                         <React.Fragment>
                                             <p>Comparador de desempenho de fundos.</p>
                                             <p>No lado direito é possível alterar o benchmark e intervalo visualizado.</p>
@@ -368,7 +368,7 @@ class FundComparisonView extends React.Component {
                         </Grid>
                     </Grid>
                     <Grid item>
-                        <Grid container alignItems="center" spacing="8">
+                        <Grid container alignItems="center" spacing={8}>
                             <Grid item>
                                 <Select
                                     value={this.state.config.field}
