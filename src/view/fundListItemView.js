@@ -166,7 +166,7 @@ class FundListItemView extends React.Component {
 
         let margin = null;
         if (size === 'large') margin = { l: 0, r: 0, t: 50, b: 0 };
-        else margin = { l: 15, r: 15, t: 80, b: 10 };
+        else margin = { l: 15, r: 15, t: 50, b: 10 };
 
         return {
             data: [
@@ -238,11 +238,13 @@ class FundListItemView extends React.Component {
                 showlegend: true,
                 legend: { 'orientation': 'h' },
                 size,
-                margin,
+                margin,                
+                dragmode: size === 'small' ? false : 'zoom',
                 xaxis: {
                     showspikes: true,
                     spikemode: 'across',
-                    domain
+                    domain,
+                    fixedrange: size === 'small' ? true : false
                 },
                 yaxis: {
                     title: 'Desempenho',

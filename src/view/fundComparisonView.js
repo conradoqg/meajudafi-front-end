@@ -269,7 +269,7 @@ class FundComparisonView extends React.Component {
 
         let margin = null;
         if (size === 'large') margin = { l: 60, r: 0, t: 50, b: 0 };
-        else margin = { l: 15, r: 15, t: 80, b: 10 };
+        else margin = { l: 15, r: 15, t: 50, b: 10 };
 
         if (benchmark) {
             chartData.push({
@@ -302,17 +302,20 @@ class FundComparisonView extends React.Component {
                 autosize: true,
                 showlegend: true,
                 legend: { 'orientation': size === 'small' ? 'h' : 'v' },
-                size,
+                size,                
+                dragmode: size === 'small' ? false : 'zoom',
                 margin,
                 xaxis: {
                     showspikes: true,
-                    spikemode: 'across'
+                    spikemode: 'across',
+                    fixedrange: size === 'small' ? true : false
                 },
                 yaxis: {
                     title: fieldOptions.find(fieldItem => fieldItem.name === field).displayName,
                     tickformat: chartFormatters[field].tickformat,
                     hoverformat: chartFormatters[field].hoverformat,
-                    visible: size === 'small' ? false : true
+                    visible: size === 'small' ? false : true,
+                    fixedrange: true
                 }
             },
             frames: [],
@@ -362,7 +365,7 @@ class FundComparisonView extends React.Component {
                                             <p>No lado direito é possível alterar o benchmark e intervalo visualizado.</p>
                                             <p>Procure um fundo e o adicione na lista para inicar a comparação.</p>
                                         </React.Fragment>
-                                    }><HelpCircle fontSize="inherit"/></Tooltip>
+                                    }><HelpCircle fontSize="inherit" /></Tooltip>
                                 </Typography>
                             </Grid>
                         </Grid>

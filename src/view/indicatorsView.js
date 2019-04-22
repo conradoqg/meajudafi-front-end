@@ -198,7 +198,7 @@ class IndicatorsView extends React.Component {
 
         let margin = null;
         if (size === 'large') margin = { l: 0, r: 0, t: 50, b: 0 };
-        else margin = { l: 15, r: 15, t: 80, b: 10 };
+        else margin = { l: 15, r: 15, t: 50, b: 10 };
 
         return {
             data: [
@@ -231,19 +231,22 @@ class IndicatorsView extends React.Component {
                 autosize: true,
                 showlegend: true,
                 legend: { 'orientation': 'h' },
+                dragmode: size === 'small' ? false : 'zoom',
+                height: size === 'small' ? 300 : null,
                 size,
                 margin,
                 xaxis: {
                     showspikes: true,
                     spikemode: 'across',
-                    domain
+                    domain,
+                    fixedrange: size === 'small' ? true : false
                 },
                 yaxis: {
                     title: 'Bovespa',
                     tickformat: chartFormatters.int.tickformat,
                     hoverformat: chartFormatters.int.hoverformat,
                     fixedrange: true,
-                    visible: size === 'small' ? false : true
+                    visible: size === 'small' ? false : true,                    
                 },
                 yaxis2: {
                     title: 'Dólar',
@@ -255,7 +258,7 @@ class IndicatorsView extends React.Component {
                     hoverformat: chartFormatters.money.hoverformat,
                     fixedrange: true,
                     position: 0.90,
-                    visible: size === 'small' ? false : true
+                    visible: size === 'small' ? false : true,                    
                 },
                 yaxis3: {
                     title: 'Euro',
