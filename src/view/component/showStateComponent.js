@@ -9,7 +9,7 @@ const ShowStateComponent = (props) => {
     else analisedData = data;
 
     if (analisedData.some(data => data == null)) content = isNull && isNull();
-    else if (analisedData.some(data => typeof (data) == 'string')) content = isErrored && isErrored(data);
+    else if (analisedData.some(data => typeof (data) == 'string') || analisedData.some(data => data instanceof Error)) content = isErrored && isErrored(data);
     else if (analisedData.some(data => Array.isArray(data) && data.length === 0)) content = isEmpty && isEmpty();
     else content = hasData();
 

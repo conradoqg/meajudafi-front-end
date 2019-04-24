@@ -23,7 +23,7 @@ import withWidth from '@material-ui/core/withWidth';
 import HelpCircle from 'mdi-material-ui/HelpCircle'
 import Hidden from '@material-ui/core/Hidden';
 import { produce } from 'immer';
-import allKeys from 'promise-results/allKeys';
+import promisesEach from 'promise-results';
 import FundFilterComponent from './component/fundFilterComponent';
 import ShowStateComponent from './component/showStateComponent';
 import DataHistoryChartComponent from './component/dataHistoryChartComponent';
@@ -84,10 +84,7 @@ const emptyState = {
     data: {
         fundIndicators: null,
         economyIndicators: null,
-        fundsChanged: {
-            btgpactual: null,
-            xpi: null
-        },
+        fundsChanged: null,
         economyIndicatorsChartSmall: null,
         economyIndicatorsChartLarge: null
     },
@@ -165,28 +162,28 @@ class IndicatorsView extends React.Component {
     }
 
     updateData = async (nextState) => {
-        try {
-            const { fundIndicators, economyIndicators, fundsChanged } = await allKeys({
-                fundIndicators: this.getFundIndicators(nextState.config),
-                economyIndicators: this.getEconomyIndicators(nextState.config),
-                fundsChanged: this.getFundsChanged(nextState.config)
-            });
 
-            nextState = produce(nextState, draft => {
-                draft.data.fundIndicators = fundIndicators;
-                draft.data.economyIndicators = economyIndicators;
-                draft.data.fundsChanged = fundsChanged;
+        const { fundIndicators, economyIndicators, fundsChanged } = await promisesEach({
+            fundIndicators: this.getFundIndicators(nextState.config),
+            economyIndicators: this.getEconomyIndicators(nextState.config),
+            fundsChanged: this.getFundsChanged(nextState.config)
+        });
+
+        nextState = produce(nextState, draft => {
+            draft.data.fundIndicators = fundIndicators;
+            draft.data.economyIndicators = economyIndicators;
+            draft.data.fundsChanged = fundsChanged;
+
+            if (economyIndicators instanceof Error) {
+                draft.data.economyIndicatorsChartSmall = economyIndicators;
+                draft.data.economyIndicatorsChartLarge = economyIndicators;
+            } else {
                 draft.data.economyIndicatorsChartSmall = this.buildChart(economyIndicators, 'small');
                 draft.data.economyIndicatorsChartLarge = this.buildChart(economyIndicators, 'large');
-            });
+            }
+        });
 
-            this.setState(nextState);
-        } catch (ex) {
-            console.error(ex.message);
-            this.setState(produce(draft => {
-                draft.data.fundIndicators = ex.message;
-            }));
-        }
+        this.setState(nextState);
     }
 
     buildChart = (economyIndicators, size = 'small') => {
@@ -246,7 +243,7 @@ class IndicatorsView extends React.Component {
                     tickformat: chartFormatters.int.tickformat,
                     hoverformat: chartFormatters.int.hoverformat,
                     fixedrange: true,
-                    visible: size === 'small' ? false : true,                    
+                    visible: size === 'small' ? false : true,
                 },
                 yaxis2: {
                     title: 'Dólar',
@@ -258,7 +255,7 @@ class IndicatorsView extends React.Component {
                     hoverformat: chartFormatters.money.hoverformat,
                     fixedrange: true,
                     position: 0.90,
-                    visible: size === 'small' ? false : true,                    
+                    visible: size === 'small' ? false : true,
                 },
                 yaxis3: {
                     title: 'Euro',
@@ -332,7 +329,7 @@ class IndicatorsView extends React.Component {
                         bf_is_blacklist: {
                             title: 'Captação',
                             text: formatters.field['bf_is_blacklist']
-                        },                        
+                        },
                         bf_risk_name: {
                             title: 'Risco formal',
                             text: formatters.field['bf_risk_name']
@@ -369,7 +366,7 @@ class IndicatorsView extends React.Component {
     }
 
     render() {
-        const { globalClasses, classes } = this.props;        
+        const { globalClasses, classes } = this.props;
 
         return (
             <div>
@@ -510,10 +507,10 @@ class IndicatorsView extends React.Component {
                 </Grid>
                 <Grid container spacing={16}>
                     <Grid item xs={12} sm={12} md={6} xl={6}>
-                        <FundsChangedPaper title="BTG Pactual" data={this.state.data.fundsChanged['btgpactual']} classes={classes} globalClasses={globalClasses} />
+                        <FundsChangedPaper title="BTG Pactual" data={this.state.data.fundsChanged} broker="btgpactual" classes={classes} globalClasses={globalClasses} />
                     </Grid>
                     <Grid item xs={12} sm={12} md={6} xl={6}>
-                        <FundsChangedPaper title="XP Investimentos" data={this.state.data.fundsChanged['xpi']} classes={classes} globalClasses={globalClasses} />
+                        <FundsChangedPaper title="XP Investimentos" data={this.state.data.fundsChanged} broker="xpi" classes={classes} globalClasses={globalClasses} />
                     </Grid>
                 </Grid>
             </div >
@@ -522,7 +519,7 @@ class IndicatorsView extends React.Component {
 }
 
 const FundsChangedPaper = (props) => {
-    const { globalClasses, classes, title, data } = props;
+    const { globalClasses, classes, title, data, broker } = props;
 
     return (
         <div>
@@ -536,7 +533,7 @@ const FundsChangedPaper = (props) => {
                     <ShowStateComponent
                         data={data}
                         hasData={() => {
-                            return data.map((change, index) => (
+                            return data[broker].map((change, index) => (
                                 <React.Fragment key={index}>
                                     <Grid item xs={12}>
                                         <Grid container spacing={8}>
@@ -581,7 +578,7 @@ const IndicatorPaper = (props) => {
             </Paper>
             <Paper className={classes.paper} elevation={1} square={true}>
                 <ShowStateComponent
-                    data={data && data[range]}
+                    data={data}
                     hasData={() => {
                         const positive = data[range][field]['top'].map((indicator, index) => (
                             <div key={index}>

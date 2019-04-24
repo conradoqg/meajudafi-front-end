@@ -453,7 +453,7 @@ class FundListItemView extends React.Component {
                                                             <Divider variant="middle" />
                                                         </Grid>
                                                         <Grid item xs={12}>
-                                                            <Typography variant="subheading" gutterBottom><b><Link className={globalClasses.link} href={`https://www.btgpactualdigital.com/investimentos/fundos-de-investimento/detalhe/${this.state.data.fund.bf_id}/${slugify(this.state.data.fund.bf_product.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(),"_")}`} target="_new" rel="noopener">BTG Pactual</Link></b></Typography>
+                                                            <Typography variant="subheading" gutterBottom><b><Link className={globalClasses.link} href={`https://www.btgpactualdigital.com/investimentos/fundos-de-investimento/detalhe/${this.state.data.fund.bf_id}/${slugify(this.state.data.fund.bf_product.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(), "_")}`} target="_new" rel="noopener">BTG Pactual</Link></b></Typography>
                                                         </Grid>
                                                     </Grid>
                                                     <Grid container spacing={16}>
@@ -469,7 +469,9 @@ class FundListItemView extends React.Component {
                                             )
                                         }
                                     </React.Fragment>
-                                )} />
+                                )}
+                                isNull={() => (<Typography variant="subheading" align="center"><CircularProgress /></Typography>)}
+                                isErrored={() => (<Typography variant="subheading" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>)} />
                         </Paper>
                     </Grid>
                 </Grid>

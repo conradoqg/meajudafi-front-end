@@ -257,8 +257,13 @@ class FundComparisonView extends React.Component {
                 return fund;
             });
 
-            draft.data.chartSmall = this.buildChart(draft.config.field, draft.data.benchmark, draft.data.fundListCompare, 'small');
-            draft.data.chartLarge = this.buildChart(draft.config.field, draft.data.benchmark, draft.data.fundListCompare, 'large');
+            if (results.benchmark instanceof Error) {
+                draft.data.chartSmall = results.benchmark;
+                draft.data.chartLarge = results.benchmark;
+            } else {
+                draft.data.chartSmall = this.buildChart(draft.config.field, draft.data.benchmark, draft.data.fundListCompare, 'small');
+                draft.data.chartLarge = this.buildChart(draft.config.field, draft.data.benchmark, draft.data.fundListCompare, 'large');
+            }
         });
         this.setState(nextState);
     }
@@ -302,7 +307,7 @@ class FundComparisonView extends React.Component {
                 autosize: true,
                 showlegend: true,
                 legend: { 'orientation': size === 'small' ? 'h' : 'v' },
-                size,                
+                size,
                 dragmode: size === 'small' ? false : 'zoom',
                 margin,
                 xaxis: {
