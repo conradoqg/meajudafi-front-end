@@ -11,9 +11,11 @@ import { withStyles } from '@material-ui/core/styles';
 import withWidth from '@material-ui/core/withWidth';
 import Hidden from '@material-ui/core/Hidden';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import Link from '@material-ui/core/Link';
 import { produce } from 'immer';
 import promisesEach from 'promise-results';
 import { withRouter } from 'react-router-dom';
+import slugify from 'slugify';
 import API from '../api';
 import ShowStateComponent from './component/showStateComponent';
 import DataHistoryChartComponent from './component/dataHistoryChartComponent';
@@ -170,7 +172,7 @@ class FundListItemView extends React.Component {
 
         let margin = null;
         if (size === 'large') margin = { l: 0, r: 0, t: 50, b: 0 };
-        else margin = { l: 15, r: 15, t: 50, b: 10 };
+        else margin = { l: 15, r: 15, t: 80, b: 10 };
 
         return {
             data: [
@@ -334,7 +336,7 @@ class FundListItemView extends React.Component {
     }
 
     getFundData = async (cnpj) => {
-        return API.getFundData(cnpj, ['f_cnpj', 'icf_dt_ini_exerc', 'icf_dt_fim_exerc', 'icf_classe', 'icf_sit', 'icf_condom', 'icf_fundo_cotas', 'icf_fundo_exclusivo', 'icf_rentab_fundo', 'icf_vl_patrim_liq', 'xf_name', 'xf_id', 'xf_formal_risk', 'xf_initial_investment', 'xf_rescue_quota', 'xf_benchmark', 'xf_type', 'xf_state', 'bf_id', 'bf_product', 'bf_risk_level', 'bf_minimum_initial_investment', 'bf_rescue_quota', 'bf_category_description', 'bf_anbima_rating', 'bf_is_blacklist']);
+        return API.getFundData(cnpj, ['f_cnpj', 'icf_dt_ini_exerc', 'icf_dt_fim_exerc', 'icf_classe', 'icf_sit', 'icf_condom', 'icf_fundo_cotas', 'icf_fundo_exclusivo', 'icf_rentab_fundo', 'icf_vl_patrim_liq', 'xf_name', 'xf_id', 'xf_formal_risk', 'xf_initial_investment', 'xf_rescue_quota', 'xf_benchmark', 'xf_type', 'xf_state', 'bf_id', 'bf_product', 'bf_risk_level', 'bf_minimum_initial_investment', 'bf_rescue_quota', 'bf_category_description', 'bf_anbima_rating', 'bf_is_blacklist', 'xf_id', 'bf_id']);
     }
 
     getFundStatistic = async (cnpj, config) => {
@@ -428,7 +430,7 @@ class FundListItemView extends React.Component {
                                                             <Divider variant="middle" />
                                                         </Grid>
                                                         <Grid item xs={12}>
-                                                            <Typography variant="subheading" gutterBottom><b>XP Investimentos</b></Typography>
+                                                            <Typography variant="subheading" gutterBottom><b><Link className={globalClasses.link} href={`https://institucional.xpi.com.br/investimentos/fundos-de-investimento/detalhes-de-fundos-de-investimento.aspx?F=${this.state.data.fund.xf_id}`} target="_new" rel="noopener">XP Investimentos</Link></b></Typography>
                                                         </Grid>
                                                     </Grid>
                                                     <Grid container spacing={16}>
@@ -451,7 +453,7 @@ class FundListItemView extends React.Component {
                                                             <Divider variant="middle" />
                                                         </Grid>
                                                         <Grid item xs={12}>
-                                                            <Typography variant="subheading" gutterBottom><b>BTG Pactual</b></Typography>
+                                                            <Typography variant="subheading" gutterBottom><b><Link className={globalClasses.link} href={`https://www.btgpactualdigital.com/investimentos/fundos-de-investimento/detalhe/${this.state.data.fund.bf_id}/${slugify(this.state.data.fund.bf_product.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(),"_")}`} target="_new" rel="noopener">BTG Pactual</Link></b></Typography>
                                                         </Grid>
                                                     </Grid>
                                                     <Grid container spacing={16}>

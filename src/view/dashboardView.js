@@ -145,7 +145,7 @@ class Dashboard extends React.Component {
                                     <MenuLink activeOnlyWhenExact={route.exact} to={route.linkTo ? route.linkTo : route.path} classes={classes} label={route.name} icon={route.icon} key={index} />
                                 ))}
                                 <Hidden smDown>
-                                    <IconButton color="inherit" aria-label="Repositório no Github" href="https://github.com/conradoqg/cvm-fund-explorer-stack" target="_new">
+                                    <IconButton color="inherit" aria-label="Repositório no Github" href="https://github.com/conradoqg/cvm-fund-explorer-stack" target="_new" rel="noopener">
                                         <GithubCircleIcon fontSize="default" />
                                     </IconButton>
                                 </Hidden>
