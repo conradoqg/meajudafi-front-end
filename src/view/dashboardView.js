@@ -79,30 +79,30 @@ const routes = [
         main: (props, classes) => <IndicatorsView {...props} globalClasses={classes} />
     },
     {
-        path: '/fundList/:cnpj',
+        path: '/funds/:cnpj',
         name: 'Informações sobre o fundo',
         showInMenu: false,
         icon: () => (<TableChartIcon />),
-        main: (props, classes) => <FundListItemView {...props} basePath={'/fundList'} globalClasses={classes} />
+        main: (props, classes) => <FundListItemView {...props} basePath={'/funds'} globalClasses={classes} />
     },
     {
-        path: '/fundList',
+        path: '/funds',
         name: 'Lista de Fundos',
         showInMenu: true,
         icon: () => (<TableChartIcon />),
         main: (props, classes) => <FundListView {...props} globalClasses={classes} />
     },
     {
-        path: ['/fundComparison/:benchmark/:range/:field/:cnpjs*', '/fundComparison'],
-        linkTo: '/fundComparison/cdi/1y/investment_return',
+        path: ['/compare/:benchmark/:range/:field/:cnpjs*', '/compare'],
+        linkTo: '/compare/cdi/1y/investment_return',
         name: 'Comparação de Fundos',
         showInMenu: true,
         icon: () => (<ScatterPlotIcon />),
-        main: (props, classes) => <FundComparisonView basePath={'/fundComparison'} globalClasses={classes} />
+        main: (props, classes) => <FundComparisonView basePath={'/compare'} globalClasses={classes} />
     }
 ];
 
-const MenuLink = ({ label, to, activeOnlyWhenExact, icon, classes }) => (
+const MenuLink = ({ label, to, activeOnlyWhenExact, classes }) => (
     <Route
         path={to}
         exact={activeOnlyWhenExact}

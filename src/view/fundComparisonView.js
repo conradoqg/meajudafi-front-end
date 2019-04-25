@@ -432,7 +432,7 @@ class FundComparisonView extends React.Component {
                                             <Grid container spacing={8} key={index} alignItems="center" justify="center">
                                                 <Grid item xs={7}>
                                                     <Typography>
-                                                        <b><Link to={'/fundList/' + fund.f_cnpj} className={globalClasses.link}>{fund.f_short_name}</Link></b><br />
+                                                        <b><Link to={'/funds/' + fund.f_cnpj} className={globalClasses.link}>{fund.f_short_name}</Link></b><br />
                                                         <small>
                                                             <b>Patrimônio:</b> {formatters.field['iry_accumulated_networth'](fund.iry_accumulated_networth)}<br />
                                                             <b>Quotistas:</b> {fund.iry_accumulated_quotaholders} <br />
@@ -591,7 +591,7 @@ class FundComparisonView extends React.Component {
                                                                     </Grid>
                                                                     <Grid item xs>
                                                                         <Typography>
-                                                                            <b><Link to={'/fundList/' + fundObject.cnpj} className={globalClasses.link}>{fundObject.detail.name}</Link></b><br />
+                                                                            <b><Link to={'/funds/' + fundObject.cnpj} className={globalClasses.link}>{fundObject.detail.name}</Link></b><br />
                                                                             <small>
                                                                                 <b>Benchmark:</b> {formatters.field['icf_rentab_fundo'](fundObject.detail.benchmark)}
                                                                             </small>

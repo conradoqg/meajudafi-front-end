@@ -559,7 +559,7 @@ class FundListView extends React.Component {
                                     <Grid container spacing={8}>
                                         <Grid item xs={8}>
                                             <Typography>
-                                                <b><Link to={'/fundList/' + fund.f_cnpj} className={globalClasses.link}>{fund.f_short_name}</Link></b><br />
+                                                <b><Link to={'/funds/' + fund.f_cnpj} className={globalClasses.link}>{fund.f_short_name}</Link></b><br />
                                                 <small>
                                                     <b>Patrimônio:</b> {formatters.field['iry_accumulated_networth'](fund.iry_accumulated_networth)}<br />
                                                     <b>Quotistas:</b> {fund.iry_accumulated_quotaholders} <br />

@@ -537,7 +537,7 @@ const FundsChangedPaper = (props) => {
                                     <Grid item xs={12}>
                                         <Grid container spacing={8}>
                                             <Grid item xs={12} sm={12} md={6} xl={6}>
-                                                <Typography component="span" variant="body1" align="left" className={classes.cropTextNormal}>{formatters.date(change.date)} - <Link to={'/fundList/' + change.cnpj} className={globalClasses.link}>{change.name}</Link></Typography>
+                                                <Typography component="span" variant="body1" align="left" className={classes.cropTextNormal}>{formatters.date(change.date)} - <Link to={'/funds/' + change.cnpj} className={globalClasses.link}>{change.name}</Link></Typography>
                                             </Grid>
                                             <Grid item xs={12} sm={12} md={6} xl={6}>
                                                 {change.changes.map((fieldChange, index) => (<Typography key={index} component="span" variant="body1" align="right">{fieldChange}</Typography>))}
@@ -583,7 +583,7 @@ const IndicatorPaper = (props) => {
                             <div key={index}>
                                 <ListItem divider>
                                     <ListItemText disableTypography classes={{ root: classes.listItemText }}>
-                                        <Typography component="span" variant="body1" className={classes.cropText}><Link to={'/fundList/' + indicator.cnpj} className={globalClasses.link}>{indicator.name}</Link></Typography>
+                                        <Typography component="span" variant="body1" className={classes.cropText}><Link to={'/funds/' + indicator.cnpj} className={globalClasses.link}>{indicator.name}</Link></Typography>
                                     </ListItemText>
                                     <ListItemSecondaryAction>
                                         <Typography component="span" variant="body1" className={getClassForValue(indicator.value)}>{formatters.percentage(indicator.value)}</Typography>
@@ -600,7 +600,7 @@ const IndicatorPaper = (props) => {
                             <div key={index}>
                                 <ListItem divider>
                                     <ListItemText disableTypography classes={{ root: classes.listItemText }}>
-                                        <Typography component="span" variant="body1" className={classes.cropText}><Link to={'/fundList/' + indicator.cnpj} className={globalClasses.link}>{indicator.name}</Link></Typography>
+                                        <Typography component="span" variant="body1" className={classes.cropText}><Link to={'/funds/' + indicator.cnpj} className={globalClasses.link}>{indicator.name}</Link></Typography>
                                     </ListItemText>
                                     <ListItemSecondaryAction>
                                         <Typography component="span" variant="body1" className={getClassForValue(indicator.value)}>{formatters.percentage(indicator.value)}</Typography>
