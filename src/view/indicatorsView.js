@@ -162,7 +162,6 @@ class IndicatorsView extends React.Component {
     }
 
     updateData = async (nextState) => {
-
         const { fundIndicators, economyIndicators, fundsChanged } = await promisesEach({
             fundIndicators: this.getFundIndicators(nextState.config),
             economyIndicators: this.getEconomyIndicators(nextState.config),

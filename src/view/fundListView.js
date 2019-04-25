@@ -25,7 +25,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import Hidden from '@material-ui/core/Hidden';
 import withWidth from '@material-ui/core/withWidth';
 import { produce } from 'immer';
-import allKeys from 'promise-results/allKeys';
+import promisesEach from 'promise-results';
 import API from '../api';
 import FundFilterComponent from './component/fundFilterComponent';
 import FundSearchComponent from './component/fundSearchComponent';
@@ -178,7 +178,7 @@ class FundListView extends React.Component {
         this.setState(nextState);
 
         for (const key in this.state.layout.showingFundDetail) {
-            if (this.state.layout.showingFundDetail[key]) this.updateChart(true, nextState.config.chart, key);
+            if (this.state.layout.showingFundDetail[key]) this.updateData(true, nextState.config.chart, key);
         }
     };
 
@@ -269,39 +269,31 @@ class FundListView extends React.Component {
             draft.layout.showingFundDetail[fund.icf_cnpj_fundo] = expanded;
         }));
 
-        this.updateChart(expanded, this.state.config.chart, fund.icf_cnpj_fundo);
+        this.updateData(expanded, this.state.config.chart, fund.icf_cnpj_fundo);
     }
 
-    updateChart = async (expanded, chartConfig, cnpj) => {
-        try {
-            const data = (expanded ? await this.getFundDetail(cnpj, chartConfig) : null);
+    updateData = async (expanded, chartConfig, cnpj) => {
+        let nextState = null;
 
-            this.setState(produce(draft => {
-                draft.data.fundDetail[cnpj] = data;
-            }));
-        } catch (ex) {
-            console.error(ex.message);
-            this.setState(produce(draft => {
-                draft.data.fundDetail[cnpj] = ex.message;
-            }));
+        if (expanded) {
+            const { fundStatistic, fundData } = await promisesEach({
+                fundStatistic: this.getFundStatistic(cnpj, chartConfig),
+                fundData: this.getFundData(cnpj)
+            });
+
+            nextState = produce(this.state, draft => {
+                const benchmarkText = benchmarkOptions.find(benchmark => benchmark.name === chartConfig.benchmark).displayName;
+
+                if (fundStatistic instanceof Error || fundData instanceof Error) draft.data.fundDetail[cnpj] = fundStatistic;
+                else draft.data.fundDetail[cnpj] = this.buildChart(fundStatistic, fundData, benchmarkText);
+            })
         }
+
+        this.setState(nextState);
     }
 
-    getFundList = async (options) => {
-        return API.getFundList(options);
-    }
-
-    getFundDetail = async (cnpj, chartConfig) => {
+    buildChart = (statistics, infCadastral, benchmarkText) => {
         let colorIndex = 0;
-
-        const from = rangeOptions.find(range => range.name === chartConfig.range).toDate();
-
-        const benchmarkText = benchmarkOptions.find(benchmark => benchmark.name === chartConfig.benchmark).displayName;
-
-        const { statistics, infCadastral } = await allKeys({
-            statistics: API.getFundStatistic(cnpj, chartConfig.benchmark, from),
-            infCadastral: API.getFundData(cnpj)
-        });
 
         const name = infCadastral[0].f_short_name;
 
@@ -457,6 +449,20 @@ class FundListView extends React.Component {
                 displayModeBar: true
             }
         };
+    }
+
+    getFundList = async (options) => {
+        return API.getFundList(options);
+    }
+
+    getFundStatistic = async (cnpj, chartConfig) => {
+        const from = rangeOptions.find(range => range.name === chartConfig.range).toDate();
+
+        return API.getFundStatistic(cnpj, chartConfig.benchmark, from);
+    }
+
+    getFundData = async (cnpj) => {
+        return API.getFundData(cnpj);
     }
 
     render() {
