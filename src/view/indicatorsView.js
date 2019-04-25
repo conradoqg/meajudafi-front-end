@@ -75,8 +75,7 @@ const styles = theme => ({
         }
     },
     help: {
-        position: "relative",
-        //top: theme.spacing.unit / 2        
+        position: "relative"        
     }
 });
 
@@ -111,6 +110,7 @@ class IndicatorsView extends React.Component {
             draft.data.economyIndicators = emptyState.data.economyIndicators;
             draft.data.economyIndicatorsChartSmall = emptyState.data.economyIndicatorsChartSmall;
             draft.data.economyIndicatorsChartLarge = emptyState.data.economyIndicatorsChartLarge;
+            draft.data.fundIndicators = emptyState.data.fundIndicators;
         });
 
         this.setState(nextState);
