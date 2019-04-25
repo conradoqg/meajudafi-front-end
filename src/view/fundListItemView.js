@@ -108,8 +108,7 @@ class FundListItemView extends React.Component {
             draft.config[event.target.name] = event.target.value;
             draft.data.chartSmall = null;
             draft.data.chartLarge = null;
-        });
-        this.pushHistory(nextState);
+        });        
         return this.updateData(nextState);
     }
 
