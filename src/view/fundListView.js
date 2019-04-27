@@ -337,7 +337,7 @@ class FundListView extends React.Component {
                 },
                 {
                     x: statistics.daily.date,
-                    y: statistics.daily.benchmark_consistency,
+                    y: statistics.daily.consistency,
                     type: 'scatter',
                     name: 'Consistência',
                     yaxis: 'y5',

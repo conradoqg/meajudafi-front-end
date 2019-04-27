@@ -380,7 +380,7 @@ const calculateStatistics = (data, benchmark) => {
             relative_investment_return: [],
             risk: [],
             sharpe: [],
-            benchmark_consistency: [],
+            consistency: [],
             networth: [],
             quotaholders: [],
             correlation: [],
@@ -425,7 +425,7 @@ const calculateStatistics = (data, benchmark) => {
             statistics.daily.relative_investment_return.push(0);
             statistics.daily.risk.push(0);
             statistics.daily.sharpe.push(0);
-            statistics.daily.benchmark_consistency.push(0);
+            statistics.daily.consistency.push(0);
             statistics.daily.networth.push(0);
             statistics.daily.quotaholders.push(0);
             statistics.daily.correlation.push(0);
@@ -464,7 +464,7 @@ const calculateStatistics = (data, benchmark) => {
         const month_sharpe = calcSharpeForPeriod(month_risk, month_investment_return, month_benchmark_investment_return, calculatorByMonth[year + month].entries);
         const year_sharpe = calcSharpeForPeriod(year_risk, year_investment_return, year_benchmark_investment_return, calculatorByYear[year].entries);
 
-        const benchmark_consistency = calculatorAccumulated.consistencyCalculator.add(item.ird_investment_return, item[`ird_${benchmark}_investment_return`], calculatorAccumulated.entries);
+        const consistency = calculatorAccumulated.consistencyCalculator.add(item.ird_investment_return, item[`ird_${benchmark}_investment_return`], calculatorAccumulated.entries);
         const month_consistency = calculatorByMonth[year + month].consistencyCalculator.add(item.ird_investment_return, item[`ird_${benchmark}_investment_return`], calculatorByMonth[year + month].entries);
         const year_consistency = calculatorByYear[year].consistencyCalculator.add(item.ird_investment_return, item[`ird_${benchmark}_investment_return`], calculatorByYear[year].entries);
 
@@ -491,7 +491,7 @@ const calculateStatistics = (data, benchmark) => {
         statistics.daily.relative_investment_return.push(relative_investment_return);
         statistics.daily.risk.push(risk);
         statistics.daily.sharpe.push(sharpe);
-        statistics.daily.benchmark_consistency.push(benchmark_consistency);
+        statistics.daily.consistency.push(consistency);
         statistics.daily.networth.push(networth);
         statistics.daily.quotaholders.push(quotaholders);
         statistics.daily.correlation.push(correlation);
@@ -505,7 +505,7 @@ const calculateStatistics = (data, benchmark) => {
             relative_investment_return,
             risk,
             sharpe,
-            benchmark_consistency,
+            consistency,
             networth,
             quotaholders,
             correlation,
@@ -521,7 +521,7 @@ const calculateStatistics = (data, benchmark) => {
             relative_investment_return,
             risk,
             sharpe,
-            benchmark_consistency,
+            consistency,
             networth,
             quotaholders,
             correlation,

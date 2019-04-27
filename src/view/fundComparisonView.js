@@ -279,7 +279,7 @@ class FundComparisonView extends React.Component {
         if (benchmark) {
             chartData.push({
                 x: benchmark.data.daily.date,
-                y: (field === 'relative_investment_return' || field === 'correlation' || field === 'sharpe' ? (new Array(benchmark.data.daily.date.length)).fill(field === 'sharpe' ? 0 : 1) : benchmark.data.daily[field]),
+                y: (field === 'relative_investment_return' || field === 'correlation' || field === 'sharpe' || field === 'consistency' ? (new Array(benchmark.data.daily.date.length)).fill(field === 'sharpe' ? 0 : 1) : benchmark.data.daily[field]),
                 type: 'scatter',
                 mode: 'lines',
                 name: benchmark.name,
@@ -511,22 +511,70 @@ class FundComparisonView extends React.Component {
                 <Grid container spacing={16}>
                     <Grid item xs>
                         <Paper elevation={1} square={true} className={classes.optionsBar}>
+                            <Grid container spacing={8} key={this.state.config.benchmark} alignItems="center">
+                                <Grid item xs>
+                                    <Grid container spacing={8}>
+                                        <Grid item>
+                                            <Typography>&nbsp;</Typography>
+                                        </Grid>
+                                        <Grid item xs>
+                                            <Typography align="center">
+                                                <b>Nome do Fundo</b>
+                                            </Typography>
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
+                                <ShowStateComponent
+                                    data={this.state.data.benchmark.data}
+                                    hasData={() => {
+                                        let availableSlots = 0;
+
+                                        if (isWidthUp('lg', this.props.width)) availableSlots = 5;
+                                        else if (isWidthUp('md', this.props.width)) availableSlots = 4;
+                                        else if (isWidthUp('sm', this.props.width)) availableSlots = 1;
+                                        else if (isWidthUp('xs', this.props.width)) availableSlots = 0;
+
+                                        let fields = ['investment_return', 'relative_investment_return', 'correlation', 'risk', 'sharpe', 'consistency'];
+                                        const selectedFields = [];
+
+                                        fields = fields.filter(field => field !== this.state.config.field);
+                                        selectedFields.push(this.state.config.field)
+
+                                        Array(availableSlots).fill(null).forEach(slot => {
+                                            selectedFields.push(fields.shift());
+                                        })
+
+                                        return (
+                                            <Grid item xs={4} sm={6} md={7} lg={9}>
+                                                <Grid container spacing={8} alignItems="center" justify="center">
+                                                    {
+                                                        selectedFields.map(field => (
+                                                            <Grid item key={field} xs={12} sm={6} md={3} lg={2}>
+                                                                <Typography align="center"><b>{fieldOptions.find(fieldItem => fieldItem.name === field).displayName}</b></Typography>
+                                                            </Grid>))
+                                                    }
+                                                </Grid>
+                                            </Grid>
+                                        );
+                                    }}
+                                    isNull={() => (<Typography variant="subheading" align="center"><CircularProgress className={classes.progress} /></Typography>)}
+                                    isErrored={() => (<Typography variant="subheading" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>)}
+                                />
+                                <Grid item xs={1}>
+                                    <Typography>&nbsp;</Typography>
+                                </Grid>
+                            </Grid>
                             <ShowStateComponent
                                 data={this.state.data.benchmark}
                                 hasData={() => (
-                                    <Grid container spacing={8} key={this.state.config.benchmark} alignItems="center">
+                                    <Grid container spacing={16} key={this.state.config.benchmark} alignItems="center">
                                         <Grid item xs>
                                             <Grid container spacing={8}>
                                                 <Grid item>
                                                     <span style={{ backgroundColor: nextColorIndex(0), minWidth: '10px', height: '100%', display: 'block' }}></span>
                                                 </Grid>
                                                 <Grid item xs>
-                                                    <Typography>
-                                                        <b>{this.state.data.benchmark.name}</b><br />
-                                                        <small>
-                                                            &nbsp;
-                                                        </small>
-                                                    </Typography>
+                                                    <Typography style={{ marginTop: '10px', marginBottom: '10px' }}><b>{this.state.data.benchmark.name}</b></Typography>
                                                 </Grid>
                                             </Grid>
                                         </Grid>
@@ -535,12 +583,12 @@ class FundComparisonView extends React.Component {
                                             hasData={() => {
                                                 let availableSlots = 0;
 
-                                                if (isWidthUp('lg', this.props.width)) availableSlots = 4;
-                                                else if (isWidthUp('md', this.props.width)) availableSlots = 3;
+                                                if (isWidthUp('lg', this.props.width)) availableSlots = 5;
+                                                else if (isWidthUp('md', this.props.width)) availableSlots = 4;
                                                 else if (isWidthUp('sm', this.props.width)) availableSlots = 1;
                                                 else if (isWidthUp('xs', this.props.width)) availableSlots = 0;
 
-                                                let fields = ['investment_return', 'relative_investment_return', 'correlation', 'risk', 'sharpe'];
+                                                let fields = ['investment_return', 'relative_investment_return', 'correlation', 'risk', 'sharpe', 'consistency'];
                                                 const selectedFields = [];
 
                                                 fields = fields.filter(field => field !== this.state.config.field);
@@ -556,7 +604,7 @@ class FundComparisonView extends React.Component {
                                                             {
                                                                 selectedFields.map(field => (
                                                                     <Grid item key={field} xs={12} sm={6} md={3} lg={2}>
-                                                                        {this.state.data.benchmark.data.accumulated[field] ? (<Typography>{fieldOptions.find(fieldItem => fieldItem.name === field).displayName}: {formatters.field[field](this.state.data.benchmark.data.accumulated[field])}</Typography>) : (<Typography>&nbsp;</Typography>)}
+                                                                        {this.state.data.benchmark.data.accumulated[field] ? (<Typography align="center">{formatters.field[field](this.state.data.benchmark.data.accumulated[field])}</Typography>) : (<Typography align="center">-</Typography>)}
                                                                     </Grid>))
                                                             }
                                                         </Grid>
@@ -608,12 +656,12 @@ class FundComparisonView extends React.Component {
                                                         hasData={() => {
                                                             let availableSlots = 0;
 
-                                                            if (isWidthUp('lg', this.props.width)) availableSlots = 4;
-                                                            else if (isWidthUp('md', this.props.width)) availableSlots = 3;
+                                                            if (isWidthUp('lg', this.props.width)) availableSlots = 5;
+                                                            else if (isWidthUp('md', this.props.width)) availableSlots = 4;
                                                             else if (isWidthUp('sm', this.props.width)) availableSlots = 1;
                                                             else if (isWidthUp('xs', this.props.width)) availableSlots = 0;
 
-                                                            let fields = ['investment_return', 'relative_investment_return', 'correlation', 'risk', 'sharpe'];
+                                                            let fields = ['investment_return', 'relative_investment_return', 'correlation', 'risk', 'sharpe', 'consistency'];
                                                             const selectedFields = [];
 
                                                             fields = fields.filter(field => field !== this.state.config.field);
@@ -629,7 +677,7 @@ class FundComparisonView extends React.Component {
                                                                         {
                                                                             selectedFields.map(field => (
                                                                                 <Grid item key={field} xs={12} sm={6} md={3} lg={2}>
-                                                                                    {fundObject.data.accumulated[field] ? (<Typography>{fieldOptions.find(fieldItem => fieldItem.name === field).displayName}: {formatters.field[field](fundObject.data.accumulated[field])}</Typography>) : (<Typography>&nbsp;</Typography>)}
+                                                                                    {fundObject.data.accumulated[field] ? (<Typography align="center">{formatters.field[field](fundObject.data.accumulated[field])}</Typography>) : (<Typography>&nbsp;</Typography>)}
                                                                                 </Grid>))
                                                                         }
                                                                     </Grid>

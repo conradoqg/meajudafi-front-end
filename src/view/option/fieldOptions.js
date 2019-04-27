@@ -18,5 +18,9 @@ export default [
     {
         name: 'sharpe',
         displayName: 'Sharpe'
+    },
+    {
+        name: 'consistency',
+        displayName: 'Consistência'
     }
 ];

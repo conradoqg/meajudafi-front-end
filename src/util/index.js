@@ -93,6 +93,7 @@ fieldFormatters['relative_investment_return'] = formatters.percentage;
 fieldFormatters['correlation'] = formatters.percentage;
 fieldFormatters['risk'] = formatters.percentage;
 fieldFormatters['sharpe'] = formatters.float;
+fieldFormatters['consistency'] = formatters.percentage;
 fieldFormatters['iry_accumulated_networth'] = formatters.money;
 fieldFormatters['iry_investment_return_1y'] = formatters.percentage;
 fieldFormatters['iry_investment_return_2y'] = formatters.percentage;
