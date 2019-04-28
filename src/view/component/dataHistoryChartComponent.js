@@ -27,8 +27,8 @@ export default class DataHistoryChartComponent extends React.Component {
                         style={{ width: '100%', height: '100%' }}
                     />
                 )}
-                isNull={() => (<Typography variant="subheading" align="center"><CircularProgress /></Typography>)}
-                isErrored={() => (<Typography variant="subheading" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>)}
+                isNull={() => (<Typography variant="subtitle1" align="center"><CircularProgress /></Typography>)}
+                isErrored={() => (<Typography variant="subtitle1" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>)}
             />
         );
     }

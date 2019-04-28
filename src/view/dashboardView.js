@@ -138,7 +138,7 @@ class Dashboard extends React.Component {
                         <AppBar
                             position="absolute">
                             <Toolbar>
-                                <Typography variant="title" color="inherit" noWrap className={classes.toolbarTitle}>
+                                <Typography variant="h5" color="inherit" noWrap className={classes.toolbarTitle}>
                                     Me Ajuda FI
                                 </Typography>
                                 {routes.filter(route => route.showInMenu).map((route, index) => (

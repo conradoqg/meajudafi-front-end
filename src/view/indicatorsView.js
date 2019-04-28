@@ -20,7 +20,6 @@ import Collapse from '@material-ui/core/Collapse';
 import Tooltip from '@material-ui/core/Tooltip';
 import { withStyles } from '@material-ui/core/styles';
 import withWidth from '@material-ui/core/withWidth';
-import HelpCircle from 'mdi-material-ui/HelpCircle'
 import Hidden from '@material-ui/core/Hidden';
 import { produce } from 'immer';
 import promisesEach from 'promise-results';
@@ -75,8 +74,9 @@ const styles = theme => ({
         }
     },
     help: {
-        position: "relative"        
-    }
+        position: "relative"
+    },
+    withTooltip: theme.withTooltip
 });
 
 const emptyState = {
@@ -229,6 +229,9 @@ class IndicatorsView extends React.Component {
                 legend: { 'orientation': 'h' },
                 dragmode: size === 'small' ? false : 'zoom',
                 height: size === 'small' ? 300 : null,
+                font: {
+                    family: '"Roboto", "Helvetica", "Arial", sans-serif'
+                },
                 size,
                 margin,
                 xaxis: {
@@ -374,14 +377,14 @@ class IndicatorsView extends React.Component {
                     <Grid item xs>
                         <Grid container alignItems="center" spacing={8}>
                             <Grid item>
-                                <Typography variant="display1" inline>
-                                    Indicadores <Tooltip enterTouchDelay={300} leaveTouchDelay={5000} title={
-                                        <React.Fragment>
-                                            <p>Indicadores gerais de mercado e dos fundos de investimento.</p>
-                                            <p>No lado direito é possível alterar o intervalo visualizado.</p>
-                                        </React.Fragment>
-                                    }><HelpCircle /></Tooltip>
-                                </Typography>
+                                <Tooltip enterTouchDelay={0} leaveTouchDelay={5000} title={
+                                    <React.Fragment>
+                                        <p>Indicadores gerais de mercado e dos fundos de investimento.</p>
+                                        <p>No lado direito é possível alterar o intervalo visualizado.</p>
+                                    </React.Fragment>
+                                }>
+                                    <Typography variant="h5" className={classes.withTooltip}>Indicadores</Typography>
+                                </Tooltip>
                             </Grid>
                         </Grid>
                     </Grid>
@@ -404,7 +407,7 @@ class IndicatorsView extends React.Component {
                 </Grid>
                 <Grid container spacing={16} alignItems="center">
                     <Grid item xs>
-                        <Typography variant="headline">Mercado</Typography>
+                        <Typography variant="h6">Mercado</Typography>
                     </Grid>
                 </Grid>
                 <Grid container spacing={16}>
@@ -427,14 +430,18 @@ class IndicatorsView extends React.Component {
                 </Grid>
                 <Grid container spacing={16} alignItems="center">
                     <Grid item xs>
-                        <Typography variant="headline" inline>
-                            Fundos de Investimento <Tooltip enterTouchDelay={300} leaveTouchDelay={5000} title={
-                                <React.Fragment>
-                                    <p>Lista de melhores e piores fundos de investimento. </p>
-                                    <p>Por padrão somente fundos listados na BTG Pactual e XP Investimentos são exibidos. No lado direito é possível alterar o filtro.</p>
-                                </React.Fragment>
-                            }><HelpCircle fontSize="inherit" /></Tooltip>
-                        </Typography>
+                        <Grid container alignItems="center" spacing={8}>
+                            <Grid item>
+                                <Tooltip enterTouchDelay={0} leaveTouchDelay={5000} title={
+                                    <React.Fragment>
+                                        <p>Lista de melhores e piores fundos de investimento. </p>
+                                        <p>Por padrão somente fundos listados na BTG Pactual e XP Investimentos são exibidos. No lado direito é possível alterar o filtro.</p>
+                                    </React.Fragment>
+                                }>
+                                    <Typography variant="h6" className={classes.withTooltip}>Fundos de Investimento</Typography>
+                                </Tooltip>
+                            </Grid>
+                        </Grid>
                     </Grid>
                     <Hidden smDown>
                         <Grid item>
@@ -477,15 +484,19 @@ class IndicatorsView extends React.Component {
                 </Grid>
                 <Grid container spacing={16} alignItems="center">
                     <Grid item xs>
-                        <Typography variant="headline" inline>
-                            Mudanças nos Fundos <Tooltip enterTouchDelay={300} leaveTouchDelay={5000} title={
-                                <React.Fragment>
-                                    <p>Lista de mudanças que ocorreram recentemente nos fundos de investimento. </p>
-                                    <p>Somente algumas informações são monitoradas. No lado direito é possível filtrar o intervalo de exibição.</p>
-                                    <p>Início da coleta em 16/02/2019.</p>
-                                </React.Fragment>
-                            }><HelpCircle fontSize="inherit" /></Tooltip>
-                        </Typography>
+                        <Grid container alignItems="center" spacing={8}>
+                            <Grid item>
+                                <Tooltip enterTouchDelay={0} leaveTouchDelay={5000} title={
+                                    <React.Fragment>
+                                        <p>Lista de mudanças que ocorreram recentemente nos fundos de investimento. </p>
+                                        <p>Somente algumas informações são monitoradas. No lado direito é possível filtrar o intervalo de exibição.</p>
+                                        <p>Início da coleta em 16/02/2019.</p>
+                                    </React.Fragment>
+                                }>
+                                    <Typography variant="h6" className={classes.withTooltip}>Mudanças nos Fundos</Typography>
+                                </Tooltip>
+                            </Grid>
+                        </Grid>
                     </Grid>
                     <Grid item>
                         <Grid container alignItems="center" spacing={8}>
@@ -517,45 +528,6 @@ class IndicatorsView extends React.Component {
     }
 }
 
-const FundsChangedPaper = (props) => {
-    const { globalClasses, classes, title, data, broker } = props;
-
-    return (
-        <div>
-            <Paper elevation={1} square={true}>
-                <Grid container wrap="nowrap" className={classes.optionsBar}>
-                    <Typography component="h2" variant="subheading"><b>{title}</b></Typography>
-                </Grid>
-            </Paper>
-            <Paper className={classes.paper} elevation={1} square={true}>
-                <Grid container spacing={8} alignItems="center" justify="center">
-                    <ShowStateComponent
-                        data={data}
-                        hasData={() => {
-                            return data[broker].map((change, index) => (
-                                <React.Fragment key={index}>
-                                    <Grid item xs={12}>
-                                        <Grid container spacing={8}>
-                                            <Grid item xs={12} sm={12} md={6} xl={6}>
-                                                <Typography component="span" variant="body1" align="left" className={classes.cropTextNormal}>{formatters.date(change.date)} - <Link to={'/funds/' + change.cnpj} className={globalClasses.link}>{change.name}</Link></Typography>
-                                            </Grid>
-                                            <Grid item xs={12} sm={12} md={6} xl={6}>
-                                                {change.changes.map((fieldChange, index) => (<Typography key={index} component="span" variant="body1" align="right">{fieldChange}</Typography>))}
-                                            </Grid>
-                                        </Grid>
-                                    </Grid>
-                                </React.Fragment>
-                            ));
-                        }}
-                        isNull={() => (<Typography variant="subheading" align="center"><CircularProgress className={classes.progress} /></Typography>)}
-                        isErrored={() => (<Typography variant="subheading" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>)}
-                        isEmpty={() => (<Typography variant="subheading" align="center">Sem dados à exibir</Typography>)}
-                    />
-                </Grid>
-            </Paper>
-        </div>);
-};
-
 const IndicatorPaper = (props) => {
     const { globalClasses, classes, range, title, field, data, inverted = false } = props;
 
@@ -572,7 +544,7 @@ const IndicatorPaper = (props) => {
         <div>
             <Paper elevation={1} square={true}>
                 <Grid container wrap="nowrap" className={classes.optionsBar}>
-                    <Typography component="h2" variant="subheading"><b>{title}</b></Typography>
+                    <Typography component="h2" variant="subtitle1"><b>{title}</b></Typography>
                 </Grid>
             </Paper>
             <Paper className={classes.paper} elevation={1} square={true}>
@@ -583,27 +555,27 @@ const IndicatorPaper = (props) => {
                             <div key={index}>
                                 <ListItem divider>
                                     <ListItemText disableTypography classes={{ root: classes.listItemText }}>
-                                        <Typography component="span" variant="body1" className={classes.cropText}><Link to={'/funds/' + indicator.cnpj} className={globalClasses.link}>{indicator.name}</Link></Typography>
+                                        <Typography component="span" className={classes.cropText}><Link to={'/funds/' + indicator.cnpj} className={globalClasses.link}>{indicator.name}</Link></Typography>
                                     </ListItemText>
                                     <ListItemSecondaryAction>
-                                        <Typography component="span" variant="body1" className={getClassForValue(indicator.value)}>{formatters.percentage(indicator.value)}</Typography>
+                                        <Typography component="span" className={getClassForValue(indicator.value)}>{formatters.percentage(indicator.value)}</Typography>
                                     </ListItemSecondaryAction>
                                 </ListItem>
                             </div>
                         ));
                         const divider = (< ListItem divider >
                             <ListItemText disableTypography={true}>
-                                <Typography component="span" variant="body1" align="center">...</Typography>
+                                <Typography component="span" align="center">...</Typography>
                             </ListItemText>
                         </ListItem>);
                         const negative = data[range][field]['bottom'].map((indicator, index) => (
                             <div key={index}>
                                 <ListItem divider>
                                     <ListItemText disableTypography classes={{ root: classes.listItemText }}>
-                                        <Typography component="span" variant="body1" className={classes.cropText}><Link to={'/funds/' + indicator.cnpj} className={globalClasses.link}>{indicator.name}</Link></Typography>
+                                        <Typography component="span" className={classes.cropText}><Link to={'/funds/' + indicator.cnpj} className={globalClasses.link}>{indicator.name}</Link></Typography>
                                     </ListItemText>
                                     <ListItemSecondaryAction>
-                                        <Typography component="span" variant="body1" className={getClassForValue(indicator.value)}>{formatters.percentage(indicator.value)}</Typography>
+                                        <Typography component="span" className={getClassForValue(indicator.value)}>{formatters.percentage(indicator.value)}</Typography>
                                     </ListItemSecondaryAction>
                                 </ListItem>
                             </div>
@@ -614,10 +586,49 @@ const IndicatorPaper = (props) => {
                             {negative}
                         </List>);
                     }}
-                    isNull={() => (<Typography variant="subheading" align="center"><CircularProgress className={classes.progress} /></Typography>)}
-                    isErrored={() => (<Typography variant="subheading" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>)}
-                    isEmpty={() => (<Typography variant="subheading" align="center">Sem dados à exibir</Typography>)}
+                    isNull={() => (<Typography variant="subtitle1" align="center"><CircularProgress className={classes.progress} /></Typography>)}
+                    isErrored={() => (<Typography variant="subtitle1" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>)}
+                    isEmpty={() => (<Typography variant="subtitle1" align="center">Sem dados à exibir</Typography>)}
                 />
+            </Paper>
+        </div>);
+};
+
+const FundsChangedPaper = (props) => {
+    const { globalClasses, classes, title, data, broker } = props;
+
+    return (
+        <div>
+            <Paper elevation={1} square={true}>
+                <Grid container wrap="nowrap" className={classes.optionsBar}>
+                    <Typography component="h2" variant="subtitle1"><b>{title}</b></Typography>
+                </Grid>
+            </Paper>
+            <Paper className={classes.paper} elevation={1} square={true}>
+                <Grid container spacing={8} alignItems="center" justify="center">
+                    <ShowStateComponent
+                        data={data}
+                        hasData={() => {
+                            return data[broker].map((change, index) => (
+                                <React.Fragment key={index}>
+                                    <Grid item xs={12}>
+                                        <Grid container spacing={8}>
+                                            <Grid item xs={12} sm={12} md={6} xl={6}>
+                                                <Typography component="span" align="left" className={classes.cropTextNormal}>{formatters.date(change.date)} - <Link to={'/funds/' + change.cnpj} className={globalClasses.link}>{change.name}</Link></Typography>
+                                            </Grid>
+                                            <Grid item xs={12} sm={12} md={6} xl={6}>
+                                                {change.changes.map((fieldChange, index) => (<Typography key={index} component="span" align="right">{fieldChange}</Typography>))}
+                                            </Grid>
+                                        </Grid>
+                                    </Grid>
+                                </React.Fragment>
+                            ));
+                        }}
+                        isNull={() => (<Typography variant="subtitle1" align="center"><CircularProgress className={classes.progress} /></Typography>)}
+                        isErrored={() => (<Typography variant="subtitle1" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>)}
+                        isEmpty={() => (<Typography variant="subtitle1" align="center">Sem dados à exibir</Typography>)}
+                    />
+                </Grid>
             </Paper>
         </div>);
 };

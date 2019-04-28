@@ -20,7 +20,6 @@ import FilterListIcon from '@material-ui/icons/FilterList';
 import Collapse from '@material-ui/core/Collapse';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Select from '@material-ui/core/Select';
-import HelpCircle from 'mdi-material-ui/HelpCircle'
 import Tooltip from '@material-ui/core/Tooltip';
 import Hidden from '@material-ui/core/Hidden';
 import withWidth from '@material-ui/core/withWidth';
@@ -46,7 +45,8 @@ const styles = theme => ({
     },
     chartSelect: {
         margin: theme.spacing.unit
-    }
+    },
+    withTooltip: theme.withTooltip
 });
 
 const emptyState = {
@@ -370,6 +370,9 @@ class FundListView extends React.Component {
                 showlegend: true,
                 legend: { 'orientation': 'h' },
                 forSize: this.props.width,
+                font: {
+                    family: '"Roboto", "Helvetica", "Arial", sans-serif'                    
+                },
                 xaxis: {
                     showspikes: true,
                     spikemode: 'across',
@@ -477,15 +480,15 @@ class FundListView extends React.Component {
                     <Grid item xs>
                         <Grid container alignItems="center" spacing={8}>
                             <Grid item>
-                                <Typography variant="display1" inline>
-                                    Lista de Fundos <Tooltip enterTouchDelay={300} leaveTouchDelay={5000} title={
-                                        <React.Fragment>
-                                            <p>Lista de fundos de investimento com gráfico diário.</p>
-                                            <p>Por padrão somente fundos listados na BTG Pactual e XP Investimentos são exibidos. No lado esquerdo é possível procurar fundos pelo nome e no lado direito é possível alterar o filtro, ordem, intervalo e benchmark.</p>
-                                            <p>Clique no fundo para visualizar o gráfico.</p>
-                                        </React.Fragment>
-                                    }><HelpCircle /></Tooltip>
-                                </Typography>
+                                <Tooltip enterTouchDelay={0} leaveTouchDelay={5000} title={
+                                    <React.Fragment>
+                                        <p>Lista de fundos de investimento com gráfico diário.</p>
+                                        <p>Por padrão somente fundos listados na BTG Pactual e XP Investimentos são exibidos. No lado esquerdo é possível procurar fundos pelo nome e no lado direito é possível alterar o filtro, ordem, intervalo e benchmark.</p>
+                                        <p>Clique no fundo para visualizar o gráfico.</p>
+                                    </React.Fragment>
+                                }>
+                                    <Typography variant="h5" className={classes.withTooltip}>Lista de Fundos</Typography>
+                                </Tooltip>
                             </Grid>
                         </Grid>
                     </Grid>
@@ -632,9 +635,9 @@ class FundListView extends React.Component {
                                     </React.Fragment>
                                 );
                             })}
-                            isNull={() => (<Paper elevation={1} square={true} className={classes.filterPaperContent}><Typography variant="subheading" align="center"><CircularProgress className={classes.progress} /></Typography></Paper>)}
-                            isErrored={() => (<Paper elevation={1} square={true} className={classes.filterPaperContent}><Typography variant="subheading" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography></Paper>)}
-                            isEmpty={() => (<Paper elevation={1} square={true} className={classes.filterPaperContent}><Typography variant="subheading" align="center">Sem dados à exibir</Typography></Paper>)}
+                            isNull={() => (<Paper elevation={1} square={true} className={classes.filterPaperContent}><Typography variant="subtitle1" align="center"><CircularProgress className={classes.progress} /></Typography></Paper>)}
+                            isErrored={() => (<Paper elevation={1} square={true} className={classes.filterPaperContent}><Typography variant="subtitle1" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography></Paper>)}
+                            isEmpty={() => (<Paper elevation={1} square={true} className={classes.filterPaperContent}><Typography variant="subtitle1" align="center">Sem dados à exibir</Typography></Paper>)}
                         />
                         {this.state.data.totalRows ?
                             <TablePagination

@@ -99,10 +99,10 @@ class FundFilterComponent extends React.Component {
 
         return (
             <div className={classes.filterPaperContent}>
-                <Typography variant="title" align="center" gutterBottom>Filtros</Typography>
+                <Typography variant="h6" align="center" gutterBottom>Filtros</Typography>
                 <Grid container spacing={24}>
                     <Grid item xs={3}>
-                        <Typography variant="subheading" align="center" gutterBottom>Classe:</Typography>
+                        <Typography variant="subtitle1" align="center" gutterBottom>Classe:</Typography>
                         <Select
                             multiple
                             displayEmpty
@@ -120,7 +120,7 @@ class FundFilterComponent extends React.Component {
                         </Select>
                     </Grid>
                     <Grid item xs={3}>
-                        <Typography variant="subheading" align="center" gutterBottom>Situação:</Typography>
+                        <Typography variant="subtitle1" align="center" gutterBottom>Situação:</Typography>
                         <Select
                             multiple
                             value={this.state.config.filter.icf_sit}
@@ -137,7 +137,7 @@ class FundFilterComponent extends React.Component {
                         </Select>
                     </Grid>
                     <Grid item xs={3}>
-                        <Typography variant="subheading" align="center" gutterBottom>Fundo de Condomínio:</Typography>
+                        <Typography variant="subtitle1" align="center" gutterBottom>Fundo de Condomínio:</Typography>
                         <Select
                             multiple
                             value={this.state.config.filter.icf_condom}
@@ -154,7 +154,7 @@ class FundFilterComponent extends React.Component {
                         </Select>
                     </Grid>
                     <Grid item xs={3}>
-                        <Typography variant="subheading" align="center" gutterBottom>Fundo de Cotas:</Typography>
+                        <Typography variant="subtitle1" align="center" gutterBottom>Fundo de Cotas:</Typography>
                         <Select
                             multiple
                             value={this.state.config.filter.icf_fundo_cotas}
@@ -171,7 +171,7 @@ class FundFilterComponent extends React.Component {
                         </Select>
                     </Grid>
                     <Grid item xs={3}>
-                        <Typography variant="subheading" align="center" gutterBottom>Fundo Exclusivo:</Typography>
+                        <Typography variant="subtitle1" align="center" gutterBottom>Fundo Exclusivo:</Typography>
                         <Select
                             multiple
                             value={this.state.config.filter.icf_fundo_exclusivo}
@@ -188,7 +188,7 @@ class FundFilterComponent extends React.Component {
                         </Select>
                     </Grid>
                     <Grid item xs={3}>
-                        <Typography variant="subheading" align="center" gutterBottom>Benchmark:</Typography>
+                        <Typography variant="subtitle1" align="center" gutterBottom>Benchmark:</Typography>
                         <Select
                             multiple
                             value={this.state.config.filter.icf_rentab_fundo}
@@ -205,7 +205,7 @@ class FundFilterComponent extends React.Component {
                         </Select>
                     </Grid>
                     <Grid item xs={3}>
-                        <Typography variant="subheading" align="center" gutterBottom>Patrimonio:</Typography>
+                        <Typography variant="subtitle1" align="center" gutterBottom>Patrimonio:</Typography>
                         <Grid container spacing={24}>
                             <Grid item xs={6}>
                                 <Input
@@ -234,7 +234,7 @@ class FundFilterComponent extends React.Component {
                         </Grid>
                     </Grid>
                     <Grid item xs={3}>
-                        <Typography variant="subheading" align="center" gutterBottom>Cotistas:</Typography>
+                        <Typography variant="subtitle1" align="center" gutterBottom>Cotistas:</Typography>
                         <Grid container spacing={24}>
                             <Grid item xs={6}>
                                 <Input
@@ -263,7 +263,7 @@ class FundFilterComponent extends React.Component {
                         </Grid>
                     </Grid>
                     <Grid item xs={3}>
-                        <Typography variant="subheading" align="center" gutterBottom>Desempenho 1A:</Typography>
+                        <Typography variant="subtitle1" align="center" gutterBottom>Desempenho 1A:</Typography>
                         <Grid container spacing={24}>
                             <Grid item xs={6}>
                                 <Input
@@ -292,7 +292,7 @@ class FundFilterComponent extends React.Component {
                         </Grid>
                     </Grid>
                     <Grid item xs={3}>
-                        <Typography variant="subheading" align="center" gutterBottom>Desempenho 2A:</Typography>
+                        <Typography variant="subtitle1" align="center" gutterBottom>Desempenho 2A:</Typography>
                         <Grid container spacing={24}>
                             <Grid item xs={6}>
                                 <Input
@@ -321,7 +321,7 @@ class FundFilterComponent extends React.Component {
                         </Grid>
                     </Grid>
                     <Grid item xs={3}>
-                        <Typography variant="subheading" align="center" gutterBottom>Desempenho 3A:</Typography>
+                        <Typography variant="subtitle1" align="center" gutterBottom>Desempenho 3A:</Typography>
                         <Grid container spacing={24}>
                             <Grid item xs={6}>
                                 <Input
@@ -350,7 +350,7 @@ class FundFilterComponent extends React.Component {
                         </Grid>
                     </Grid>
                     <Grid item xs={3}>
-                        <Typography variant="subheading" align="center" gutterBottom>Risco 1A:</Typography>
+                        <Typography variant="subtitle1" align="center" gutterBottom>Risco 1A:</Typography>
                         <Grid container spacing={24}>
                             <Grid item xs={6}>
                                 <Input
@@ -379,7 +379,7 @@ class FundFilterComponent extends React.Component {
                         </Grid>
                     </Grid>
                     <Grid item xs={3}>
-                        <Typography variant="subheading" align="center" gutterBottom>Risco 2A:</Typography>
+                        <Typography variant="subtitle1" align="center" gutterBottom>Risco 2A:</Typography>
                         <Grid container spacing={24}>
                             <Grid item xs={6}>
                                 <Input
@@ -408,7 +408,7 @@ class FundFilterComponent extends React.Component {
                         </Grid>
                     </Grid>
                     <Grid item xs={3}>
-                        <Typography variant="subheading" align="center" gutterBottom>Risco 3A:</Typography>
+                        <Typography variant="subtitle1" align="center" gutterBottom>Risco 3A:</Typography>
                         <Grid container spacing={24}>
                             <Grid item xs={6}>
                                 <Input

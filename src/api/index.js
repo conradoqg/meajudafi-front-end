@@ -17,7 +17,7 @@ export default {
     getFundList: async (options, fromDate = new Date((new Date()).getFullYear(), 0, 1)) => {
         const range = `${(options.page * options.rowsPerPage)}-${((options.page * options.rowsPerPage) + options.rowsPerPage - 1)}`;
         const sort = `${options.sort.field}.${options.sort.order}`;
-        
+
         let filterPart = '';
         if (options.filter) {
             Object.keys(options.filter).forEach(selectedFilterOptionsKey => {
@@ -150,7 +150,7 @@ export default {
     },
     getFundIndicators: async (options, fromDate = new Date((new Date()).getFullYear(), 0, 1)) => {
         const range = options.range;
-        
+
         let filterPart = '';
         if (options.filter) {
             Object.keys(options.filter).forEach(selectedFilterOptionsKey => {
@@ -372,6 +372,9 @@ const calculateBenchmarkStatistics = (data, benchmark) => {
 };
 
 const calculateStatistics = (data, benchmark) => {
+    if (process.env.NODE_ENV === 'development') {
+        console.time('calculateStatistics');
+    }
     const statistics = {
         daily: {
             date: [],
@@ -555,6 +558,10 @@ const calculateStatistics = (data, benchmark) => {
             quotaholders: year_quotaholders,
             correlation: year_correlation
         };
+    }
+
+    if (process.env.NODE_ENV === 'development') {
+        console.timeEnd('calculateStatistics');
     }
 
     return statistics;
