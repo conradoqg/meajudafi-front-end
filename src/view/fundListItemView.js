@@ -28,7 +28,17 @@ const styles = theme => ({
     chart: {
         padding: theme.spacing.unit * 2
     },
-    withTooltip: theme.withTooltip
+    withTooltip: theme.withTooltip,
+    link: theme.link,
+    appBarSpacer: theme.mixins.toolbar,
+    historyTable: {
+        width: '100%',
+        textAlign: 'center',
+        padding: '5px'
+    },
+    historyCell: {
+        padding: '5px'
+    }
 });
 
 const emptyState = {
@@ -243,7 +253,7 @@ class FundListItemView extends React.Component {
                 showlegend: true,
                 legend: { 'orientation': 'h' },
                 font: {
-                    family: '"Roboto", "Helvetica", "Arial", sans-serif'                    
+                    family: '"Roboto", "Helvetica", "Arial", sans-serif'
                 },
                 size,
                 margin,
@@ -348,11 +358,11 @@ class FundListItemView extends React.Component {
     }
 
     render() {
-        const { globalClasses, classes } = this.props;
+        const { classes } = this.props;
 
         return (
             <div>
-                <div className={globalClasses.appBarSpacer} />
+                <div className={classes.appBarSpacer} />
                 <Grid container spacing={16} alignItems="center">
                     <Grid item xs>
                         <Grid container alignItems="center" spacing={8}>
@@ -432,7 +442,7 @@ class FundListItemView extends React.Component {
                                                             <Divider variant="middle" />
                                                         </Grid>
                                                         <Grid item xs={12}>
-                                                            <Typography variant="subtitle1" gutterBottom><b><Link className={globalClasses.link} href={`https://institucional.xpi.com.br/investimentos/fundos-de-investimento/detalhes-de-fundos-de-investimento.aspx?F=${this.state.data.fund.xf_id}`} target="_new" rel="noopener">XP Investimentos</Link></b></Typography>
+                                                            <Typography variant="subtitle1" gutterBottom><b><Link className={classes.link} href={`https://institucional.xpi.com.br/investimentos/fundos-de-investimento/detalhes-de-fundos-de-investimento.aspx?F=${this.state.data.fund.xf_id}`} target="_new" rel="noopener">XP Investimentos</Link></b></Typography>
                                                         </Grid>
                                                     </Grid>
                                                     <Grid container spacing={16}>
@@ -455,7 +465,7 @@ class FundListItemView extends React.Component {
                                                             <Divider variant="middle" />
                                                         </Grid>
                                                         <Grid item xs={12}>
-                                                            <Typography variant="subtitle1" gutterBottom><b><Link className={globalClasses.link} href={`https://www.btgpactualdigital.com/investimentos/fundos-de-investimento/detalhe/${this.state.data.fund.bf_id}/${slugify(this.state.data.fund.bf_product.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(), "_")}`} target="_new" rel="noopener">BTG Pactual</Link></b></Typography>
+                                                            <Typography variant="subtitle1" gutterBottom><b><Link className={classes.link} href={`https://www.btgpactualdigital.com/investimentos/fundos-de-investimento/detalhe/${this.state.data.fund.bf_id}/${slugify(this.state.data.fund.bf_product.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(), "_")}`} target="_new" rel="noopener">BTG Pactual</Link></b></Typography>
                                                         </Grid>
                                                     </Grid>
                                                     <Grid container spacing={16}>
@@ -550,10 +560,10 @@ class FundListItemView extends React.Component {
                                 data={this.state.data.history}
                                 hasData={() => (
                                     <React.Fragment>
-                                        <table style={{ width: '100%', textAlign: 'center', padding: '5px' }}>
+                                        <table className={classes.historyTable}>
                                             <thead>
-                                                <tr style={{ padding: '5px' }}>
-                                                    <th style={{ padding: '5px' }}>Ano</th>
+                                                <tr className={classes.historyCell}>
+                                                    <th className={classes.historyCell}>Ano</th>
                                                     <Hidden mdDown>
                                                         <th><Typography>Jan</Typography></th>
                                                         <th><Typography>Fev</Typography></th>
@@ -575,8 +585,8 @@ class FundListItemView extends React.Component {
                                             <tbody>
                                                 {
                                                     Object.keys(this.state.data.history.byYear).map(year => (
-                                                        <tr style={{ padding: '5px' }} key={year}>
-                                                            <th style={{ padding: '5px' }}>{year}</th>
+                                                        <tr className={classes.historyCell} key={year}>
+                                                            <th className={classes.historyCell}>{year}</th>
                                                             <Hidden mdDown>
                                                                 {
                                                                     ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'].map(month => (

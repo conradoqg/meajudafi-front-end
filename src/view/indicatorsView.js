@@ -9,9 +9,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
-import LightGreen from '@material-ui/core/colors/lightGreen';
 import Blue from '@material-ui/core/colors/blue';
-import Red from '@material-ui/core/colors/red';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import IconButton from '@material-ui/core/IconButton';
@@ -43,13 +41,13 @@ const styles = theme => ({
         padding: theme.spacing.unit * 2
     },
     indicatorValuePositive: {
-        color: LightGreen[500]
+        color: '#3cb44b'
     },
     indicatorValueBlue: {
         color: Blue[500]
     },
     indicatorValueNegative: {
-        color: Red[500]
+        color: '#e6194B'
     },
     select: {
         margin: theme.spacing.unit
@@ -73,10 +71,9 @@ const styles = theme => ({
             paddingLeft: 0
         }
     },
-    help: {
-        position: "relative"
-    },
-    withTooltip: theme.withTooltip
+    appBarSpacer: theme.mixins.toolbar,
+    withTooltip: theme.withTooltip,
+    link: theme.link
 });
 
 const emptyState = {
@@ -368,11 +365,11 @@ class IndicatorsView extends React.Component {
     }
 
     render() {
-        const { globalClasses, classes } = this.props;
+        const { classes } = this.props;
 
         return (
             <div>
-                <div className={globalClasses.appBarSpacer} />
+                <div className={classes.appBarSpacer} />
                 <Grid container spacing={16} alignItems="center">
                     <Grid item xs>
                         <Grid container alignItems="center" spacing={8}>
@@ -462,7 +459,7 @@ class IndicatorsView extends React.Component {
                         <Grid item xs={12}>
                             <Paper elevation={1} square={true}>
                                 <Collapse in={this.state.layout.showingFilter}>
-                                    <FundFilterComponent onFilterChanged={this.handleFilterChange} globalClasses={globalClasses} />
+                                    <FundFilterComponent onFilterChanged={this.handleFilterChange} />
                                 </Collapse>
                             </Paper>
                         </Grid>
@@ -470,16 +467,16 @@ class IndicatorsView extends React.Component {
                 </Hidden>
                 <Grid container spacing={16} alignItems="center">
                     <Grid item xs={12} sm={6} md={3} xl={3}>
-                        <IndicatorPaper title="Desempenho" field="investment_return" range={this.state.config.range} data={this.state.data.fundIndicators} classes={classes} globalClasses={globalClasses} />
+                        <IndicatorPaper title="Desempenho" field="investment_return" range={this.state.config.range} data={this.state.data.fundIndicators} classes={classes} />
                     </Grid>
                     <Grid item xs={12} sm={6} md={3} xl={3}>
-                        <IndicatorPaper title="Patrimônio" field="networth" range={this.state.config.range} data={this.state.data.fundIndicators} classes={classes} globalClasses={globalClasses} />
+                        <IndicatorPaper title="Patrimônio" field="networth" range={this.state.config.range} data={this.state.data.fundIndicators} classes={classes} />
                     </Grid>
                     <Grid item xs={12} sm={6} md={3} xl={3}>
-                        <IndicatorPaper title="Cotistas" field="quotaholders" range={this.state.config.range} data={this.state.data.fundIndicators} classes={classes} globalClasses={globalClasses} />
+                        <IndicatorPaper title="Cotistas" field="quotaholders" range={this.state.config.range} data={this.state.data.fundIndicators} classes={classes} />
                     </Grid>
                     <Grid item xs={12} sm={6} md={3} xl={3}>
-                        <IndicatorPaper title="Risco" field="risk" range={this.state.config.range} data={this.state.data.fundIndicators} classes={classes} globalClasses={globalClasses} inverted />
+                        <IndicatorPaper title="Risco" field="risk" range={this.state.config.range} data={this.state.data.fundIndicators} classes={classes} inverted />
                     </Grid>
                 </Grid>
                 <Grid container spacing={16} alignItems="center">
@@ -517,10 +514,10 @@ class IndicatorsView extends React.Component {
                 </Grid>
                 <Grid container spacing={16}>
                     <Grid item xs={12} sm={12} md={6} xl={6}>
-                        <FundsChangedPaper title="BTG Pactual" data={this.state.data.fundsChanged} broker="btgpactual" classes={classes} globalClasses={globalClasses} />
+                        <FundsChangedPaper title="BTG Pactual" data={this.state.data.fundsChanged} broker="btgpactual" classes={classes} />
                     </Grid>
                     <Grid item xs={12} sm={12} md={6} xl={6}>
-                        <FundsChangedPaper title="XP Investimentos" data={this.state.data.fundsChanged} broker="xpi" classes={classes} globalClasses={globalClasses} />
+                        <FundsChangedPaper title="XP Investimentos" data={this.state.data.fundsChanged} broker="xpi" classes={classes} />
                     </Grid>
                 </Grid>
             </div >
@@ -529,7 +526,7 @@ class IndicatorsView extends React.Component {
 }
 
 const IndicatorPaper = (props) => {
-    const { globalClasses, classes, range, title, field, data, inverted = false } = props;
+    const { classes, range, title, field, data, inverted = false } = props;
 
     const getClassForValue = value => {
         if (value === 0)
@@ -555,7 +552,7 @@ const IndicatorPaper = (props) => {
                             <div key={index}>
                                 <ListItem divider>
                                     <ListItemText disableTypography classes={{ root: classes.listItemText }}>
-                                        <Typography component="span" className={classes.cropText}><Link to={'/funds/' + indicator.cnpj} className={globalClasses.link}>{indicator.name}</Link></Typography>
+                                        <Typography component="span" className={classes.cropText}><Link to={'/funds/' + indicator.cnpj} className={classes.link}>{indicator.name}</Link></Typography>
                                     </ListItemText>
                                     <ListItemSecondaryAction>
                                         <Typography component="span" className={getClassForValue(indicator.value)}>{formatters.percentage(indicator.value)}</Typography>
@@ -572,7 +569,7 @@ const IndicatorPaper = (props) => {
                             <div key={index}>
                                 <ListItem divider>
                                     <ListItemText disableTypography classes={{ root: classes.listItemText }}>
-                                        <Typography component="span" className={classes.cropText}><Link to={'/funds/' + indicator.cnpj} className={globalClasses.link}>{indicator.name}</Link></Typography>
+                                        <Typography component="span" className={classes.cropText}><Link to={'/funds/' + indicator.cnpj} className={classes.link}>{indicator.name}</Link></Typography>
                                     </ListItemText>
                                     <ListItemSecondaryAction>
                                         <Typography component="span" className={getClassForValue(indicator.value)}>{formatters.percentage(indicator.value)}</Typography>
@@ -595,7 +592,7 @@ const IndicatorPaper = (props) => {
 };
 
 const FundsChangedPaper = (props) => {
-    const { globalClasses, classes, title, data, broker } = props;
+    const { classes, title, data, broker } = props;
 
     return (
         <div>
@@ -614,7 +611,7 @@ const FundsChangedPaper = (props) => {
                                     <Grid item xs={12}>
                                         <Grid container spacing={8}>
                                             <Grid item xs={12} sm={12} md={6} xl={6}>
-                                                <Typography component="span" align="left" className={classes.cropTextNormal}>{formatters.date(change.date)} - <Link to={'/funds/' + change.cnpj} className={globalClasses.link}>{change.name}</Link></Typography>
+                                                <Typography component="span" align="left" className={classes.cropTextNormal}>{formatters.date(change.date)} - <Link to={'/funds/' + change.cnpj} className={classes.link}>{change.name}</Link></Typography>
                                             </Grid>
                                             <Grid item xs={12} sm={12} md={6} xl={6}>
                                                 {change.changes.map((fieldChange, index) => (<Typography key={index} component="span" align="right">{fieldChange}</Typography>))}

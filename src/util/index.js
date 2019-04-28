@@ -71,8 +71,6 @@ Object.keys(filterOptions).map(key => {
 });
 
 fieldFormatters['icf_vl_patrim_liq'] = formatters.money;
-fieldFormatters['icf_dt_ini_exerc'] = value => formatters.date;
-fieldFormatters['icf_dt_fim_exerc'] = value => formatters.date;
 fieldFormatters['f_short_name'] = value => value;
 fieldFormatters['f_name'] = value => value;
 fieldFormatters['f_cnpj'] = value => value.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');

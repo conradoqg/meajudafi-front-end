@@ -35,28 +35,11 @@ const styles = theme => ({
         overflow: 'auto',
         backgroundColor: 'ghostwhite'
     },
-    chartContainer: {
-        marginLeft: -22,
-    },
-    tableContainer: {
-        height: 320,
-    },
     centered: {
         position: 'fixed',
         top: '50%',
         left: '50%',
         transform: 'translate(-50%, -50%)'
-    },
-    link: {
-        textDecoration: 'none',
-        color: 'black',
-        cursor: 'pointer',
-        '&:hover': {
-            textDecoration: 'underline'
-        },
-        [theme.breakpoints.down('md')]: {
-            textDecoration: 'underline',
-        },
     },
     menuLink: {
         textDecoration: 'none',
@@ -76,21 +59,21 @@ const routes = [
         showInMenu: true,
         exact: true,
         icon: () => (<ShowChartIcon />),
-        main: (props, classes) => <IndicatorsView {...props} globalClasses={classes} />
+        main: (props, classes) => <IndicatorsView {...props} />
     },
     {
         path: '/funds/:cnpj',
         name: 'Informações sobre o fundo',
         showInMenu: false,
         icon: () => (<TableChartIcon />),
-        main: (props, classes) => <FundListItemView {...props} basePath={'/funds'} globalClasses={classes} />
+        main: (props, classes) => <FundListItemView {...props} basePath={'/funds'} />
     },
     {
         path: '/funds',
         name: 'Lista de Fundos',
         showInMenu: true,
         icon: () => (<TableChartIcon />),
-        main: (props, classes) => <FundListView {...props} globalClasses={classes} />
+        main: (props, classes) => <FundListView {...props} />
     },
     {
         path: ['/compare/:benchmark/:range/:field/:cnpjs*', '/compare'],
@@ -98,7 +81,7 @@ const routes = [
         name: 'Comparação de Fundos',
         showInMenu: true,
         icon: () => (<ScatterPlotIcon />),
-        main: (props, classes) => <FundComparisonView basePath={'/compare'} globalClasses={classes} />
+        main: (props, classes) => <FundComparisonView basePath={'/compare'} />
     }
 ];
 

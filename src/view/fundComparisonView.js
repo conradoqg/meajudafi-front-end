@@ -36,7 +36,19 @@ const styles = theme => ({
     chart: {
         padding: theme.spacing.unit * 2
     },
-    withTooltip: theme.withTooltip
+    withTooltip: theme.withTooltip,
+    link: theme.link,
+    appBarSpacer: theme.mixins.toolbar,
+    button: {
+        [theme.breakpoints.down('md')]: {
+            padding: '0px',
+            margin: '0px',
+        }
+    },
+    benchmarkCell: {
+        marginTop: '10px',
+        marginBottom: '10px'
+    }
 });
 
 const emptyState = {
@@ -309,7 +321,7 @@ class FundComparisonView extends React.Component {
                 legend: { 'orientation': size === 'small' ? 'h' : 'v' },
                 size,
                 font: {
-                    family: '"Roboto", "Helvetica", "Arial", sans-serif'                    
+                    family: '"Roboto", "Helvetica", "Arial", sans-serif'
                 },
                 dragmode: size === 'small' ? false : 'zoom',
                 margin,
@@ -357,11 +369,11 @@ class FundComparisonView extends React.Component {
     }
 
     render() {
-        const { globalClasses, classes } = this.props;
+        const { classes } = this.props;
 
         return (
             <div>
-                <div className={globalClasses.appBarSpacer} />
+                <div className={classes.appBarSpacer} />
                 <Grid container spacing={16} alignItems="center">
                     <Grid item xs>
                         <Grid container alignItems="center" spacing={8}>
@@ -433,7 +445,7 @@ class FundComparisonView extends React.Component {
                                             <Grid container spacing={8} key={index} alignItems="center" justify="center">
                                                 <Grid item xs={7}>
                                                     <Typography>
-                                                        <b><Link to={'/funds/' + fund.f_cnpj} className={globalClasses.link}>{fund.f_short_name}</Link></b><br />
+                                                        <b><Link to={'/funds/' + fund.f_cnpj} className={classes.link}>{fund.f_short_name}</Link></b><br />
                                                         <small>
                                                             <b>Patrimônio:</b> {formatters.field['iry_accumulated_networth'](fund.iry_accumulated_networth)}<br />
                                                             <b>Quotistas:</b> {fund.iry_accumulated_quotaholders} <br />
@@ -475,11 +487,13 @@ class FundComparisonView extends React.Component {
                                                         </Hidden>
                                                     </Grid>
                                                 </Grid>
-                                                <Grid item xs={1} style={{ textAlign: 'center' }}>
-                                                    <IconButton style={{ padding: '0px' }}
-                                                        onClick={() => this.handleAddClick(fund)}>
-                                                        <AddIcon />
-                                                    </IconButton>
+                                                <Grid item xs={1}>
+                                                    <Typography align="center" >
+                                                        <IconButton className={classes.button}
+                                                            onClick={() => this.handleAddClick(fund)}>
+                                                            <AddIcon />
+                                                        </IconButton>
+                                                    </Typography>
                                                 </Grid>
                                             </Grid>
                                         ))
@@ -575,7 +589,7 @@ class FundComparisonView extends React.Component {
                                                     <span style={{ backgroundColor: nextColorIndex(0), minWidth: '10px', height: '100%', display: 'block' }}></span>
                                                 </Grid>
                                                 <Grid item xs>
-                                                    <Typography style={{ marginTop: '10px', marginBottom: '10px' }}><b>{this.state.data.benchmark.name}</b></Typography>
+                                                    <Typography className={classes.benchmarkCell}><b>{this.state.data.benchmark.name}</b></Typography>
                                                 </Grid>
                                             </Grid>
                                         </Grid>
@@ -640,7 +654,7 @@ class FundComparisonView extends React.Component {
                                                                     </Grid>
                                                                     <Grid item xs>
                                                                         <Typography>
-                                                                            <b><Link to={'/funds/' + fundObject.cnpj} className={globalClasses.link}>{fundObject.detail.name}</Link></b><br />
+                                                                            <b><Link to={'/funds/' + fundObject.cnpj} className={classes.link}>{fundObject.detail.name}</Link></b><br />
                                                                             <small>
                                                                                 <b>Benchmark:</b> {formatters.field['icf_rentab_fundo'](fundObject.detail.benchmark)}
                                                                             </small>
@@ -687,11 +701,13 @@ class FundComparisonView extends React.Component {
                                                         }}
                                                         isNull={() => (<Typography variant="subtitle1" align="center"><CircularProgress className={classes.progress} /></Typography>)}
                                                     />
-                                                    <Grid item xs={1} style={{ textAlign: 'center' }}>
-                                                        <IconButton style={{ padding: '0px' }}
-                                                            onClick={() => this.handleRemoveClick(fundObject)}>
-                                                            <ClearIcon color="error" />
-                                                        </IconButton>
+                                                    <Grid item xs={1}>
+                                                        <Typography align="center">
+                                                            <IconButton className={classes.button}
+                                                                onClick={() => this.handleRemoveClick(fundObject)}>
+                                                                <ClearIcon color="error" />
+                                                            </IconButton>
+                                                        </Typography>
                                                     </Grid>
                                                 </Grid>
                                             ))

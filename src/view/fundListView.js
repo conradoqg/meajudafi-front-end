@@ -46,7 +46,9 @@ const styles = theme => ({
     chartSelect: {
         margin: theme.spacing.unit
     },
-    withTooltip: theme.withTooltip
+    appBarSpacer: theme.mixins.toolbar,
+    withTooltip: theme.withTooltip,
+    link: theme.link
 });
 
 const emptyState = {
@@ -371,7 +373,7 @@ class FundListView extends React.Component {
                 legend: { 'orientation': 'h' },
                 forSize: this.props.width,
                 font: {
-                    family: '"Roboto", "Helvetica", "Arial", sans-serif'                    
+                    family: '"Roboto", "Helvetica", "Arial", sans-serif'
                 },
                 xaxis: {
                     showspikes: true,
@@ -469,13 +471,13 @@ class FundListView extends React.Component {
     }
 
     render() {
-        const { classes, globalClasses } = this.props;
+        const { classes } = this.props;
         const { layout } = this.state;
         const open = Boolean(layout.anchorEl);
 
         return (
             <div>
-                <div className={globalClasses.appBarSpacer} />
+                <div className={classes.appBarSpacer} />
                 <Grid container spacing={16} alignItems="center">
                     <Grid item xs>
                         <Grid container alignItems="center" spacing={8}>
@@ -552,7 +554,7 @@ class FundListView extends React.Component {
                         </Paper>
                         <Paper elevation={1} square={true}>
                             <Collapse in={layout.showingFilter}>
-                                <FundFilterComponent onFilterChanged={this.handleFilterChange} globalClasses={globalClasses} />
+                                <FundFilterComponent onFilterChanged={this.handleFilterChange} />
                             </Collapse>
                         </Paper>
                         <ShowStateComponent
@@ -562,7 +564,7 @@ class FundListView extends React.Component {
                                     <Grid container spacing={8}>
                                         <Grid item xs={8}>
                                             <Typography>
-                                                <b><Link to={'/funds/' + fund.f_cnpj} className={globalClasses.link}>{fund.f_short_name}</Link></b><br />
+                                                <b><Link to={'/funds/' + fund.f_cnpj} className={classes.link}>{fund.f_short_name}</Link></b><br />
                                                 <small>
                                                     <b>Patrimônio:</b> {formatters.field['iry_accumulated_networth'](fund.iry_accumulated_networth)}<br />
                                                     <b>Quotistas:</b> {fund.iry_accumulated_quotaholders} <br />
