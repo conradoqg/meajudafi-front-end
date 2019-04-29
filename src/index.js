@@ -5,7 +5,7 @@ import theme from './util/theme';
 import DashboardView from './view/dashboardView';
 import * as serviceWorker from './serviceWorker';
 
-const Root = () => (
+const Root = () => (    
     <MuiThemeProvider theme={theme}>
         <DashboardView />
     </MuiThemeProvider>

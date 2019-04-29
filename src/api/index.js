@@ -1,9 +1,7 @@
 import allKeys from 'promise-results/allKeys';
 import packageJson from '../../package.json';
-//import calculateStatistics from '../math/calculateStatistics';
 import calculateBenchmarkStatistics from '../math/calculateBenchmarkStatistics';
-import WebWorker from '../util/webWorker';
-import calculateStatistics from '../worker/calculateStatistics';
+import CalculateStatistics from '../worker/calculateStatistics.worker.js';
 
 /* global process */
 const API_URL = `api.${window.location.host}`;
@@ -108,16 +106,22 @@ export default {
 
         const data = await result.json();
 
-        if (data.length === 0) throw new Error(`No data found for CNPJ ${cnpj}`);
+        if (data.length === 0) throw new Error(`No data found for CNPJ ${cnpj}`);        
 
         return new Promise((resolve, reject) => {
-            const worker = new WebWorker(calculateStatistics);
-
-            worker.postMessage({ data, benchmark });
+            const worker = new CalculateStatistics();
 
             worker.addEventListener('message', (event) => {
                 resolve(event.data);
+                worker.terminate();
             });
+
+            worker.addEventListener('error', (error) => {
+                reject(new Error(error.message));
+                worker.terminate();
+            });
+
+            worker.postMessage({ data, benchmark });
         });
     },
     getBenchmarkStatistic: async (benchmark, lastDaysOrFromDate) => {
