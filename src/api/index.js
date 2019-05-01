@@ -1,7 +1,6 @@
 import allKeys from 'promise-results/allKeys';
 import packageJson from '../../package.json';
-import calculateBenchmarkStatistics from '../math/calculateBenchmarkStatistics';
-import CalculateStatistics from '../worker/calculateStatistics.worker.js';
+import StatisticsService from '../service/statisticsService';
 
 /* global process */
 const API_URL = `api.${window.location.host}`;
@@ -106,23 +105,9 @@ export default {
 
         const data = await result.json();
 
-        if (data.length === 0) throw new Error(`No data found for CNPJ ${cnpj}`);        
+        if (data.length === 0) throw new Error(`No data found for CNPJ ${cnpj}`);
 
-        return new Promise((resolve, reject) => {
-            const worker = new CalculateStatistics();
-
-            worker.addEventListener('message', (event) => {
-                resolve(event.data);
-                worker.terminate();
-            });
-
-            worker.addEventListener('error', (error) => {
-                reject(new Error(error.message));
-                worker.terminate();
-            });
-
-            worker.postMessage({ data, benchmark });
-        });
+        return (await StatisticsService.getInstance()).calculateFundHistory(data, benchmark);
     },
     getBenchmarkStatistic: async (benchmark, lastDaysOrFromDate) => {
         let fromDatePart = '';
@@ -153,7 +138,7 @@ export default {
 
         let data = await result.json();
 
-        return calculateBenchmarkStatistics(data, benchmark);
+        return (await StatisticsService.getInstance()).calculateBenchmarkHistory(data, benchmark);
     },
     getFundIndicators: async (options, fromDate = new Date((new Date()).getFullYear(), 0, 1)) => {
         const range = options.range;

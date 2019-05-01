@@ -1,6 +1,9 @@
 import StandardDeviation from './standardDeviation';
 
 export default (data, benchmark) => {
+    if (process.env.NODE_ENV === 'development') {
+        console.time('calculateBenchmarkStatistics');
+    }
     let fromQuoteToPercentage = null;
     if (benchmark === 'cdi') {
         fromQuoteToPercentage = (value, prevValue) => prevValue == null ? 0 : value / 100;
@@ -48,6 +51,9 @@ export default (data, benchmark) => {
             min_investment_return,
             max_investment_return
         };
+    }
+    if (process.env.NODE_ENV === 'development') {
+        console.timeEnd('calculateBenchmarkStatistics');
     }
     return statistics;
 };
