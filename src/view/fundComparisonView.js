@@ -69,7 +69,7 @@ const emptyState = {
         sort: sortOptions[0],
         search: FundSearchComponent.emptyState.config.search,
         searchRevision: 0,
-        benchmark: 'bovespa',
+        benchmark: 'cdi',
         range: '1y',
         field: 'investment_return'
     }
