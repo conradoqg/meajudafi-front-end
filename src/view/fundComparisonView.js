@@ -285,7 +285,7 @@ class FundComparisonView extends React.Component {
         let colorIndex = 0;
 
         let margin = null;
-        if (size === 'large') margin = { l: 60, r: 0, t: 50, b: 0 };
+        if (size === 'large') margin = { l: 60, r: 0, t: 50, b: 40 };
         else margin = { l: 15, r: 15, t: 50, b: 10 };
 
         if (benchmark) {

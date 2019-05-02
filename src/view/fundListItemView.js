@@ -68,6 +68,7 @@ class FundListItemView extends React.Component {
     }
 
     async componentDidMount() {
+        API.getCorrelationMatrix()
         return this.updateData(this.state);
     }
 

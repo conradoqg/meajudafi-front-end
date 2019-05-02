@@ -1,5 +1,6 @@
 import calculateStatistics from '../math/calculateStatistics';
 import calculateBenchmarkStatistics from '../math/calculateBenchmarkStatistics';
+import calculateCorrelationMatrix from '../math/calculateCorrelationMatrix';
 import * as Comlink from 'comlinkjs';
 
 class CalculateStatisticsWorker {
@@ -9,6 +10,10 @@ class CalculateStatisticsWorker {
 
     calculateBenchmarkHistory(data, benchmark) {
         return calculateBenchmarkStatistics(data, benchmark);
+    }
+
+    calculateCorrelationMatrix(fundsHistory, benchmarksHistory, benchmark) {
+        return calculateCorrelationMatrix(fundsHistory, benchmarksHistory, benchmark);
     }
 }
 
