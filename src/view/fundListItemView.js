@@ -367,7 +367,7 @@ class FundListItemView extends React.Component {
                     <Grid item xs>
                         <Grid container alignItems="center" spacing={8}>
                             <Grid item>
-                                <Tooltip enterTouchDelay={0} leaveTouchDelay={5000} title={
+                                <Tooltip enterTouchDelay={100} leaveTouchDelay={5000} title={
                                     <React.Fragment>
                                         <p>Detalhes do fundo.</p>
                                         <p>No lado direito é possível alterar o benchmark e intervalo visualizado.</p>
@@ -491,7 +491,7 @@ class FundListItemView extends React.Component {
                     <Grid item xs>
                         <Grid container alignItems="center" spacing={8}>
                             <Grid item>
-                                <Tooltip enterTouchDelay={0} leaveTouchDelay={5000} title={
+                                <Tooltip enterTouchDelay={100} leaveTouchDelay={5000} title={
                                     <React.Fragment>
                                         <p>Gráfico histórico para visualização das características do fundo no tempo.</p>
                                         <p>É possível visualizar as outras séries clicando nelas.</p>
@@ -525,7 +525,7 @@ class FundListItemView extends React.Component {
                     <Grid item xs>
                         <Grid container alignItems="center" spacing={8}>
                             <Grid item>
-                                <Tooltip enterTouchDelay={0} leaveTouchDelay={5000} title={
+                                <Tooltip enterTouchDelay={100} leaveTouchDelay={5000} title={
                                     <React.Fragment>
                                         <p>Histórico mensal, anual e acumulado do fundo.</p>
                                         <p>No lado direito é possível alterar a informação visualizada.</p>

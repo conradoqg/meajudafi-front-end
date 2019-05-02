@@ -378,7 +378,7 @@ class FundComparisonView extends React.Component {
                     <Grid item xs>
                         <Grid container alignItems="center" spacing={8}>
                             <Grid item>
-                                <Tooltip enterTouchDelay={0} leaveTouchDelay={5000} title={
+                                <Tooltip enterTouchDelay={100} leaveTouchDelay={5000} title={
                                     <React.Fragment>
                                         <p>Comparador de desempenho de fundos.</p>
                                         <p>No lado direito é possível alterar o benchmark e intervalo visualizado.</p>
