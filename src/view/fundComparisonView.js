@@ -17,6 +17,7 @@ import { produce } from 'immer';
 import promisesEach from 'promise-results';
 import { withRouter } from 'react-router-dom';
 import API from '../api';
+import StatisticsService from '../service/statisticsService';
 import FundSearchComponent from './component/fundSearchComponent';
 import ShowStateComponent from './component/showStateComponent';
 import DataHistoryChartComponent from './component/dataHistoryChartComponent';
@@ -58,7 +59,7 @@ const emptyState = {
         benchmark: {
             name: benchmarkOptions.find(benchmark => benchmark.name === 'cdi').displayName,
             data: null
-        },
+        },        
         sortOptions: sortOptions,
         chartSmall: null,
         chartLarge: null
@@ -83,7 +84,7 @@ class FundComparisonView extends React.Component {
 
         this.state = produce(this.state, draft => {
             draft.data.benchmark.name = benchmarkOptions.find(benchmark => benchmark.name === this.state.config.benchmark).displayName;
-            draft.data.fundListCompare = props.match.params.cnpjs ? props.match.params.cnpjs.split('/').map(cnpj => { return { cnpj, detail: null, data: null }; }) : emptyState.data.fundListCompare;
+            draft.data.fundListCompare = props.match.params.cnpjs ? props.match.params.cnpjs.split('/').map(cnpj => { return { cnpj, detail: null, data: null, statistics: null }; }) : emptyState.data.fundListCompare;
             draft.config.range = (typeof (props.match.params.range) != 'undefined') ? props.match.params.range : this.state.config.range;
             draft.config.benchmark = (typeof (props.match.params.benchmark) != 'undefined') ? props.match.params.benchmark : this.state.config.benchmark;
             draft.config.field = (typeof (props.match.params.field) != 'undefined') ? props.match.params.field : this.state.config.field;
@@ -121,9 +122,11 @@ class FundComparisonView extends React.Component {
             draft.config[event.target.name] = event.target.value;
             draft.data.fundListCompare = draft.data.fundListCompare.map(fund => {
                 fund.data = null;
+                fund.statistics = null;
                 return fund;
             });
             draft.data.benchmark.data = null;
+            draft.data.benchmark.statistics = null;
             draft.data.chartSmall = null;
             draft.data.chartLarge = null;
         });
@@ -136,6 +139,7 @@ class FundComparisonView extends React.Component {
             draft.config[event.target.name] = event.target.value;
             draft.data.fundListCompare = draft.data.fundListCompare.map(fund => {
                 fund.data = null;
+                fund.statistics = null;
                 return fund;
             });
             draft.data.benchmark = {
@@ -185,7 +189,10 @@ class FundComparisonView extends React.Component {
             if (!draft.data.fundListCompare.find(existingFund => existingFund.cnpj === fund.icf_cnpj_fundo)) {
                 draft.data.fundListCompare.push({
                     cnpj: fund.icf_cnpj_fundo,
-                    data: null
+                    detail: null,
+                    data: null,
+                    statistics: null,
+
                 });
             }
         });
@@ -229,7 +236,7 @@ class FundComparisonView extends React.Component {
     }
 
     updateData = async (nextState) => {
-
+        const statisticsServiceInstance = await StatisticsService.getInstance();
         const benchmarkToUpdate = nextState.data.benchmark && nextState.data.benchmark.data == null ? nextState.data.benchmark : null;
         const fundsToUpdate = nextState.data.fundListCompare.filter(fund => fund.data == null);
 
@@ -238,40 +245,62 @@ class FundComparisonView extends React.Component {
             draft.data.chartLarge = null;
         }));
 
-        let promises = {};
+        let dataPromises = {};
         fundsToUpdate.forEach(fund => {
-            promises[fund.cnpj] = promisesEach({ detail: this.getFundData(fund.cnpj), data: this.getFundStatistic(fund.cnpj, nextState.config) });
+            dataPromises[fund.cnpj] = promisesEach({
+                detail: this.getFundData(fund.cnpj),
+                data: this.getFundHistory(fund.cnpj, nextState.config)
+            });
         });
-        promises.benchmark = benchmarkToUpdate ? this.getBenchmarkStatistic(nextState.config) : null;
+        dataPromises.benchmark = benchmarkToUpdate ? this.getBenchmarkHistory(nextState.config) : null;
 
-        let results = await promisesEach(promises);
+        const dataResults = await promisesEach(dataPromises);
+
+        let statisticsPromises = {};
+        fundsToUpdate.forEach(fund => {
+            if (dataResults[fund.cnpj].data instanceof Error) statisticsPromises[fund.cnpj] = dataResults[fund.cnpj].data
+            else statisticsPromises[fund.cnpj] = statisticsServiceInstance.calculateFundHistory(dataResults[fund.cnpj].data, nextState.config.benchmark);
+        });
+        statisticsPromises.benchmark = benchmarkToUpdate ? statisticsServiceInstance.calculateBenchmarkHistory(dataResults.benchmark, nextState.config.benchmark) : null;
+
+        const statisticsResults = await promisesEach(statisticsPromises);
 
         nextState = produce(nextState, draft => {
-            if (results.benchmark) {
-                if (results.benchmark instanceof Error) draft.data.benchmark.data = results.benchmark.message;
-                else draft.data.benchmark.data = results.benchmark;
+            // If there's a dataResult for the benchmark, the benchmark's data was updated
+            if (dataResults.benchmark) {
+                draft.data.benchmark.data = dataResults.benchmark;
+                draft.data.benchmark.statistics = statisticsResults.benchmark;
             }
 
             draft.data.fundListCompare = draft.data.fundListCompare.map(fund => {
-                if (results[fund.cnpj]) {
-                    if (results[fund.cnpj].data instanceof Error) fund.data = results[fund.cnpj].data.message;
-                    else fund.data = results[fund.cnpj].data;
+                // If there's a dataResult for a CNPJ, the fund's data was updated
+                if (dataResults[fund.cnpj]) {
+                    if (dataResults[fund.cnpj].data instanceof Error) fund.data = dataResults[fund.cnpj].data;
+                    else fund.data = dataResults[fund.cnpj].data;
 
-                    if (results[fund.cnpj].detail.length === 0) fund.detail = 'Não encontrado';
+                    if (statisticsResults[fund.cnpj] instanceof Error) fund.statistics = statisticsResults[fund.cnpj];
+                    else fund.statistics = statisticsResults[fund.cnpj];
+
+                    if (dataResults[fund.cnpj].detail instanceof Error) fund.detail = dataResults[fund.cnpj].detail;
                     else {
-                        fund.detail = {
-                            name: results[fund.cnpj].detail[0].f_short_name,
-                            benchmark: results[fund.cnpj].detail[0].icf_rentab_fundo
-                        };
+                        if (dataResults[fund.cnpj].detail.length === 0) fund.detail = 'Não encontrado';
+                        else {
+                            fund.detail = {
+                                name: dataResults[fund.cnpj].detail[0].f_short_name,
+                                benchmark: dataResults[fund.cnpj].detail[0].icf_rentab_fundo
+                            };
+                        }
                     }
                 }
 
                 return fund;
             });
 
-            if (results.benchmark instanceof Error) {
-                draft.data.chartSmall = results.benchmark;
-                draft.data.chartLarge = results.benchmark;
+            // Every state change results in the chart being updated
+            // We don't check draft.data.fundListCompare for erros, because the chart can be shown without funds (it's necessary only the benchmark data)
+            if (dataResults.benchmark instanceof Error || dataResults.benchmark.statistics instanceof Error) {
+                draft.data.chartSmall = dataResults.benchmark;
+                draft.data.chartLarge = dataResults.benchmark;
             } else {
                 draft.data.chartSmall = this.buildChart(draft.config.field, draft.data.benchmark, draft.data.fundListCompare, 'small');
                 draft.data.chartLarge = this.buildChart(draft.config.field, draft.data.benchmark, draft.data.fundListCompare, 'large');
@@ -290,8 +319,8 @@ class FundComparisonView extends React.Component {
 
         if (benchmark) {
             chartData.push({
-                x: benchmark.data.daily.date,
-                y: (field === 'relative_investment_return' || field === 'correlation' || field === 'sharpe' || field === 'consistency' ? (new Array(benchmark.data.daily.date.length)).fill(field === 'sharpe' ? 0 : 1) : benchmark.data.daily[field]),
+                x: benchmark.statistics.daily.date,
+                y: (field === 'relative_investment_return' || field === 'correlation' || field === 'sharpe' || field === 'consistency' ? (new Array(benchmark.statistics.daily.date.length)).fill(field === 'sharpe' ? 0 : 1) : benchmark.statistics.daily[field]),
                 type: 'scatter',
                 mode: 'lines',
                 name: benchmark.name,
@@ -300,16 +329,17 @@ class FundComparisonView extends React.Component {
         }
 
         if (fundList) {
-            chartData = chartData.concat(fundList.map(fund => {
-                return {
-                    x: fund.data.daily.date,
-                    y: fund.data.daily[field],
-                    type: 'scatter',
-                    mode: 'lines',
-                    name: fund.detail.name,
-                    line: { color: nextColorIndex(colorIndex++) }
-                };
-            }));
+            fundList.forEach(fund => {
+                if (!(fund.statistics instanceof Error))
+                    chartData.push({
+                        x: fund.statistics.daily.date,
+                        y: fund.statistics.daily[field],
+                        type: 'scatter',
+                        mode: 'lines',
+                        name: fund.detail.name,
+                        line: { color: nextColorIndex(colorIndex++) }
+                    });
+            });
         }
 
         const chart = {
@@ -348,10 +378,10 @@ class FundComparisonView extends React.Component {
         return chart;
     }
 
-    getBenchmarkStatistic = async (config) => {
+    getBenchmarkHistory = async (config) => {
         const from = rangeOptions.find(range => range.name === config.range).toDate();
 
-        return API.getBenchmarkStatistic(config.benchmark, from);
+        return API.getBenchmarkHistory(config.benchmark, from);
     }
 
     getFundData = async (cnpj) => {
@@ -362,10 +392,10 @@ class FundComparisonView extends React.Component {
         return API.getFundList(config);
     }
 
-    getFundStatistic = async (cnpj, config) => {
+    getFundHistory = async (cnpj, config) => {
         const from = rangeOptions.find(range => range.name === config.range).toDate();
 
-        return API.getFundStatistic(cnpj, config.benchmark, from);
+        return API.getFundHistory(cnpj, config.benchmark, from);
     }
 
     render() {
@@ -540,7 +570,7 @@ class FundComparisonView extends React.Component {
                                     </Grid>
                                 </Grid>
                                 <ShowStateComponent
-                                    data={this.state.data.benchmark.data}
+                                    data={this.state.data.benchmark.statistics}
                                     hasData={() => {
                                         let availableSlots = 0;
 
@@ -594,7 +624,7 @@ class FundComparisonView extends React.Component {
                                             </Grid>
                                         </Grid>
                                         <ShowStateComponent
-                                            data={this.state.data.benchmark.data}
+                                            data={this.state.data.benchmark.statistics}
                                             hasData={() => {
                                                 let availableSlots = 0;
 
@@ -619,7 +649,7 @@ class FundComparisonView extends React.Component {
                                                             {
                                                                 selectedFields.map(field => (
                                                                     <Grid item key={field} xs={12} sm={6} md={3} lg={2}>
-                                                                        {this.state.data.benchmark.data.accumulated[field] ? (<Typography align="center">{formatters.field[field](this.state.data.benchmark.data.accumulated[field])}</Typography>) : (<Typography align="center">-</Typography>)}
+                                                                        {this.state.data.benchmark.statistics.accumulated[field] ? (<Typography align="center">{formatters.field[field](this.state.data.benchmark.statistics.accumulated[field])}</Typography>) : (<Typography align="center">-</Typography>)}
                                                                     </Grid>))
                                                             }
                                                         </Grid>
@@ -667,7 +697,7 @@ class FundComparisonView extends React.Component {
                                                         isErrored={() => (<Typography variant="subtitle1" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>)}
                                                     />
                                                     <ShowStateComponent
-                                                        data={fundObject.data}
+                                                        data={fundObject.statistics}
                                                         hasData={() => {
                                                             let availableSlots = 0;
 
@@ -692,7 +722,7 @@ class FundComparisonView extends React.Component {
                                                                         {
                                                                             selectedFields.map(field => (
                                                                                 <Grid item key={field} xs={12} sm={6} md={3} lg={2}>
-                                                                                    {fundObject.data.accumulated[field] ? (<Typography align="center">{formatters.field[field](fundObject.data.accumulated[field])}</Typography>) : (<Typography>&nbsp;</Typography>)}
+                                                                                    {fundObject.statistics.accumulated[field] ? (<Typography align="center">{formatters.field[field](fundObject.statistics.accumulated[field])}</Typography>) : (<Typography>&nbsp;</Typography>)}
                                                                                 </Grid>))
                                                                         }
                                                                     </Grid>

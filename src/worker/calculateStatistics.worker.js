@@ -4,12 +4,12 @@ import calculateCorrelationMatrix from '../math/calculateCorrelationMatrix';
 import * as Comlink from 'comlinkjs';
 
 class CalculateStatisticsWorker {
-    calculateFundHistory(data, benchmark) {
-        return calculateStatistics(data, benchmark);
+    calculateFundHistory(fundHistory, benchmark) {
+        return calculateStatistics(fundHistory, benchmark);
     }
 
-    calculateBenchmarkHistory(data, benchmark) {
-        return calculateBenchmarkStatistics(data, benchmark);
+    calculateBenchmarkHistory(benchmarkHistory, benchmark) {
+        return calculateBenchmarkStatistics(benchmarkHistory, benchmark);
     }
 
     calculateCorrelationMatrix(fundsHistory, benchmarksHistory, benchmark) {
