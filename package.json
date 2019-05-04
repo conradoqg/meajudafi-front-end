@@ -26,7 +26,7 @@
     "worker-loader": "^2.0.0"
   },
   "scripts": {
-    "start": "cross-env PORT=9966 react-app-rewired start",
+    "start": "cross-env REACT_APP_API_URL=api.meajudafi.com.br PORT=9966 react-app-rewired start",
     "build": "react-app-rewired build",
     "test": "react-app-rewired test",
     "eject": "react-app-rewired eject"
