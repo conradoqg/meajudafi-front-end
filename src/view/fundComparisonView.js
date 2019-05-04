@@ -83,11 +83,11 @@ class FundComparisonView extends React.Component {
         super(props);
 
         this.state = produce(this.state, draft => {
-            draft.data.benchmark.name = benchmarkOptions.find(benchmark => benchmark.name === this.state.config.benchmark).displayName;
-            draft.data.fundListCompare = props.match.params.cnpjs ? props.match.params.cnpjs.split('/').map(cnpj => { return { cnpj, detail: null, data: null, statistics: null }; }) : emptyState.data.fundListCompare;
             draft.config.range = (typeof (props.match.params.range) != 'undefined') ? props.match.params.range : this.state.config.range;
             draft.config.benchmark = (typeof (props.match.params.benchmark) != 'undefined') ? props.match.params.benchmark : this.state.config.benchmark;
             draft.config.field = (typeof (props.match.params.field) != 'undefined') ? props.match.params.field : this.state.config.field;
+            draft.data.fundListCompare = props.match.params.cnpjs ? props.match.params.cnpjs.split('/').map(cnpj => { return { cnpj, detail: null, data: null, statistics: null }; }) : emptyState.data.fundListCompare;
+            draft.data.benchmark.name = benchmarkOptions.find(benchmark => benchmark.name === draft.config.benchmark).displayName;
         });
 
         this.replaceHistory(this.state);
@@ -323,7 +323,7 @@ class FundComparisonView extends React.Component {
                 y: (field === 'relative_investment_return' || field === 'correlation' || field === 'sharpe' || field === 'consistency' ? (new Array(benchmark.statistics.daily.date.length)).fill(field === 'sharpe' ? 0 : 1) : benchmark.statistics.daily[field]),
                 type: 'scatter',
                 mode: 'lines',
-                name: benchmark.name,
+                name: benchmark.name.toUpperCase(),
                 line: { color: nextColorIndex(colorIndex++) }
             });
         }
@@ -619,7 +619,7 @@ class FundComparisonView extends React.Component {
                                                     <span style={{ backgroundColor: nextColorIndex(0), minWidth: '10px', height: '100%', display: 'block' }}></span>
                                                 </Grid>
                                                 <Grid item xs>
-                                                    <Typography className={classes.benchmarkCell}><b>{this.state.data.benchmark.name}</b></Typography>
+                                                    <Typography className={classes.benchmarkCell}><b>{this.state.data.benchmark.name.toUpperCase()}</b></Typography>
                                                 </Grid>
                                             </Grid>
                                         </Grid>
