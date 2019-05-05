@@ -348,7 +348,7 @@ class FundListItemView extends React.Component {
     }
 
     getFundData = async (cnpj) => {
-        return API.getFundData(cnpj, ['f_cnpj', 'icf_dt_ini_exerc', 'icf_dt_fim_exerc', 'icf_classe', 'icf_sit', 'icf_condom', 'icf_fundo_cotas', 'icf_fundo_exclusivo', 'icf_rentab_fundo', 'icf_vl_patrim_liq', 'xf_name', 'xf_id', 'xf_formal_risk', 'xf_initial_investment', 'xf_rescue_quota', 'xf_benchmark', 'xf_type', 'xf_state', 'bf_id', 'bf_product', 'bf_risk_level', 'bf_minimum_initial_investment', 'bf_rescue_quota', 'bf_category_description', 'bf_anbima_rating', 'bf_is_blacklist', 'xf_id', 'bf_id']);
+        return API.getFundData(cnpj, ['f_cnpj', 'icf_dt_ini_exerc', 'icf_dt_fim_exerc', 'icf_classe', 'icf_sit', 'icf_condom', 'icf_fundo_cotas', 'icf_fundo_exclusivo', 'icf_rentab_fundo', 'icf_vl_patrim_liq', 'xf_name', 'xf_id', 'xf_formal_risk', 'xf_initial_investment', 'xf_rescue_quota', 'xf_benchmark', 'xf_type', 'xf_state', 'bf_id', 'bf_product', 'bf_risk_level', 'bf_minimum_initial_investment', 'bf_rescue_quota', 'bf_category_description', 'bf_anbima_rating', 'bf_is_blacklist', 'bf_inactive', 'xf_id', 'bf_id']);
     }
 
     getFundStatistic = async (cnpj, config) => {
@@ -476,6 +476,7 @@ class FundListItemView extends React.Component {
                                                         <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography><b>Categoria:</b> {formatters.field['bf_category_description'](this.state.data.fund.bf_category_description)}</Typography></Grid>
                                                         <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography><b>Classe Anbima:</b> {formatters.field['bf_anbima_rating'](this.state.data.fund.bf_anbima_rating)}</Typography></Grid>
                                                         <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography><b>Capitação:</b> {formatters.field['bf_is_blacklist'](this.state.data.fund.bf_is_blacklist)}</Typography></Grid>
+                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography><b>Atividade:</b> {formatters.field['bf_inactive'](this.state.data.fund.bf_inactive)}</Typography></Grid>
                                                     </Grid>
                                                 </React.Fragment>
                                             )
