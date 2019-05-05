@@ -11,8 +11,10 @@ import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import IconButton from '@material-ui/core/IconButton';
 import { withStyles } from '@material-ui/core/styles';
-import withWidth, { isWidthUp } from '@material-ui/core/withWidth';
+import withWidth, { isWidthUp, isWidthDown } from '@material-ui/core/withWidth';
 import Hidden from '@material-ui/core/Hidden';
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
 import { produce } from 'immer';
 import promisesEach from 'promise-results';
 import { withRouter } from 'react-router-dom';
@@ -47,8 +49,54 @@ const styles = theme => ({
         }
     },
     benchmarkCell: {
-        marginTop: '10px',
-        marginBottom: '10px'
+        marginTop: '5px',
+        marginBottom: '5px'
+    },
+    tabsRoot: {
+        borderBottom: '1px solid #e8e8e8',
+        marginBottom: '5px'
+    },
+    tabsIndicator: {
+        backgroundColor: '#1890ff',
+    },
+    historyTable: {
+        width: '100%',
+        textAlign: 'center',
+        padding: '5px'
+    },
+    historyCell: {
+        padding: '5px'
+    },
+    textOverflowDynamicContainer: {
+        position: 'relative',
+        maxWidth: '100%',
+        padding: '10px !important',
+        display: 'flex',
+        verticalAlign: 'text-center !important',
+        '&:after': {
+            content: '-',
+            display: 'inline',
+            visibility: 'hidden',
+            width: 0
+        }
+    },
+    textOverflowDynamicEllipsis: {
+        position: 'absolute',
+        whiteSpace: 'nowrap',
+        overflowY: 'visible',
+        overflowX: 'hidden',
+        textOverflow: 'ellipsis',
+        maxWidth: '100%',
+        minWidth: '0',
+        width: '100%',
+        top: 0,
+        left: 0,
+        '&:after': {
+            content: '-',
+            display: 'inline',
+            visibility: 'hidden',
+            width: 0
+        }
     }
 });
 
@@ -59,7 +107,8 @@ const emptyState = {
         benchmark: {
             name: benchmarkOptions.find(benchmark => benchmark.name === 'cdi').displayName,
             data: null
-        },        
+        },
+        correlationMatrix: null,
         sortOptions: sortOptions,
         chartSmall: null,
         chartLarge: null
@@ -72,7 +121,8 @@ const emptyState = {
         searchRevision: 0,
         benchmark: 'cdi',
         range: '1y',
-        field: 'investment_return'
+        field: 'investment_return',
+        selectedTab: 0
     }
 };
 
@@ -222,10 +272,31 @@ class FundComparisonView extends React.Component {
         return this.updateData(nextState);
     }
 
+    handleTabChange = (event, value) => {
+        this.setState(produce(draft => {
+            draft.config.selectedTab = value;
+
+        }));
+
+        if (value === 1 && this.state.data.correlationMatrix === null) this.updateCorrelationMatrx();
+    };
+
+    updateCorrelationMatrx = async () => {
+        const statisticsServiceInstance = await StatisticsService.getInstance();
+
+        const fundsHistory = this.state.data.fundListCompare.map(fund => fund.data);
+        const benchmarksHistory = [this.state.data.benchmark.data];
+        const benchmark = this.state.config.benchmark;
+
+        const correlationMatrix = await statisticsServiceInstance.calculateCorrelationMatrix(fundsHistory, benchmarksHistory, benchmark);
+        this.setState(produce(draft => {
+            draft.data.correlationMatrix = correlationMatrix;
+        }));
+    }
+
     buildHistoryPath = (nextState) => {
         return this.props.basePath + '/' + nextState.config.benchmark + '/' + nextState.config.range + '/' + nextState.config.field + (nextState.data.fundListCompare ? '/' + nextState.data.fundListCompare.map(fund => fund.cnpj).join('/') : '');
     }
-
 
     replaceHistory = (nextState) => {
         this.props.history.replace(this.buildHistoryPath(nextState), nextState);
@@ -539,20 +610,91 @@ class FundComparisonView extends React.Component {
                     <Grid item xs>
                         <Paper elevation={1} square={true} className={classes.chart} >
                             <Hidden smDown>
-                                <DataHistoryChartComponent
-                                    data={this.state.data.chartLarge}
-                                    onInitialized={(figure) => this.handleChartInitialized(figure)}
-                                    onUpdate={(figure) => this.handleChartUpdate(figure)} />
+                                <Tabs
+                                    value={this.state.config.selectedTab}
+                                    onChange={this.handleTabChange}
+                                    classes={{ root: classes.tabsRoot, indicator: classes.tabsIndicator }}>
+                                    <Tab label="Gráfico" />
+                                    <Tab label="Matriz de Correlação" />
+                                </Tabs>
                             </Hidden>
-                            <Hidden mdUp>
-                                <DataHistoryChartComponent
-                                    data={this.state.data.chartSmall}
-                                    onInitialized={(figure) => this.handleChartInitialized(figure)}
-                                    onUpdate={(figure) => this.handleChartUpdate(figure)} />
-                            </Hidden>
+                            {(this.state.config.selectedTab === 0 || isWidthDown('sm', this.props.width)) && <React.Fragment>
+                                <Hidden smDown>
+                                    <DataHistoryChartComponent
+                                        data={this.state.data.chartLarge}
+                                        onInitialized={(figure) => this.handleChartInitialized(figure)}
+                                        onUpdate={(figure) => this.handleChartUpdate(figure)} />
+                                </Hidden>
+                                <Hidden mdUp>
+                                    <DataHistoryChartComponent
+                                        data={this.state.data.chartSmall}
+                                        onInitialized={(figure) => this.handleChartInitialized(figure)}
+                                        onUpdate={(figure) => this.handleChartUpdate(figure)} />
+                                </Hidden>
+                            </React.Fragment>}
+                            {(this.state.config.selectedTab === 1 && !isWidthDown('sm', this.props.width)) && <React.Fragment>
+                                <ShowStateComponent
+                                    data={this.state.data.correlationMatrix}
+                                    hasData={() => {
+                                        let correlationItems = [];
+                                        correlationItems.push(this.state.data.benchmark.name.toUpperCase());
+                                        correlationItems = correlationItems.concat(this.state.data.fundListCompare.map(fund => fund.detail.name));
+
+                                        return (
+                                            <table className={classes.historyTable}>
+                                                <thead>
+                                                    <tr className={classes.historyCell}>
+                                                        <th className={classes.historyCell}>&nbsp;</th>
+                                                        {correlationItems.map((correlationItem, index) => (
+                                                            <th key={`head${correlationItem}`} className={classes.historyCell} style={{ borderWidth: '0px 0px 5px 0px', borderColor: nextColorIndex(index), borderStyle: 'solid' }}>
+                                                                <Typography className={classes.textOverflowDynamicContainer}>
+                                                                    <span className={classes.textOverflowDynamicEllipsis}>
+                                                                        <b title={correlationItem}>
+                                                                            {correlationItem}
+                                                                        </b>
+                                                                    </span>
+                                                                </Typography>
+                                                            </th>))}
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {correlationItems.map((name, index) => {
+                                                        const restOfCorrelations = correlationItems.slice(index + 1);
+                                                        const correlationMirror = restOfCorrelations.map((name, indexCol) => {
+                                                            const correlation = this.state.data.correlationMatrix[index + indexCol + 1][index];
+                                                            return (
+                                                                <td key={`bodyreverse${name}${index}`} className={classes.historyCell} style={{ backgroundColor: getGradientColor('#FFFFFF', '#E6194B', Math.abs(correlation)) }}>
+                                                                    <Typography style={{ color: Math.abs(correlation) > 0.3 ? '#FFFFFF' : '#000000' }}>
+                                                                        {formatters.percentage(this.state.data.correlationMatrix[index + indexCol + 1][index])}
+                                                                    </Typography>
+                                                                </td>
+                                                            );
+                                                        });
+                                                        return (<tr key={`row${name}`}>
+                                                            <th style={{ minWidth: '100px', borderWidth: '0px 5px 0px 0px', borderColor: nextColorIndex(index), borderStyle: 'solid' }}><Typography className={classes.textOverflowDynamicContainer}><span className={classes.textOverflowDynamicEllipsis} title={name}><b>{name}</b></span></Typography></th>
+                                                            {this.state.data.correlationMatrix[index].map(correlation => {
+                                                                return (
+                                                                    <td key={`body${name}${index}${correlation}`} className={classes.historyCell} style={{ backgroundColor: getGradientColor('#FFFFFF', '#E6194B', Math.abs(correlation)) }}>
+                                                                        <Typography style={{ color: Math.abs(correlation) > 0.3 ? '#FFFFFF' : '#000000' }}>
+                                                                            {formatters.percentage(correlation)}
+                                                                        </Typography>
+                                                                    </td>);
+                                                            })}
+                                                            {correlationMirror}
+                                                        </tr>
+                                                        );
+                                                    })}
+                                                </tbody>
+                                            </table>
+                                        );
+                                    }}
+                                    isNull={() => (<Typography variant="subtitle1" align="center"><CircularProgress className={classes.progress} /></Typography>)}
+                                    isErrored={() => (<Typography variant="subtitle1" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>)}
+                                />
+                            </React.Fragment>}
                         </Paper>
                     </Grid>
-                </Grid>
+                </Grid >
                 <Grid container spacing={16}>
                     <Grid item xs>
                         <Paper elevation={1} square={true} className={classes.optionsBar}>
@@ -753,6 +895,68 @@ class FundComparisonView extends React.Component {
             </div >
         );
     }
+}
+
+const getGradientColor = (start_color, end_color, percent) => {
+    // strip the leading # if it's there
+    start_color = start_color.replace(/^\s*#|\s*$/g, '');
+    end_color = end_color.replace(/^\s*#|\s*$/g, '');
+
+    // convert 3 char codes --> 6, e.g. `E0F` --> `EE00FF`
+    if (start_color.length === 3) {
+        start_color = start_color.replace(/(.)/g, '$1$1');
+    }
+
+    if (end_color.length === 3) {
+        end_color = end_color.replace(/(.)/g, '$1$1');
+    }
+
+    // get colors
+    var start_red = parseInt(start_color.substr(0, 2), 16),
+        start_green = parseInt(start_color.substr(2, 2), 16),
+        start_blue = parseInt(start_color.substr(4, 2), 16);
+
+    var end_red = parseInt(end_color.substr(0, 2), 16),
+        end_green = parseInt(end_color.substr(2, 2), 16),
+        end_blue = parseInt(end_color.substr(4, 2), 16);
+
+    // calculate new color
+    var diff_red = end_red - start_red;
+    var diff_green = end_green - start_green;
+    var diff_blue = end_blue - start_blue;
+
+    diff_red = ((diff_red * percent) + start_red).toString(16).split('.')[0];
+    diff_green = ((diff_green * percent) + start_green).toString(16).split('.')[0];
+    diff_blue = ((diff_blue * percent) + start_blue).toString(16).split('.')[0];
+
+    // ensure 2 digits by color
+    if (diff_red.length === 1) diff_red = '0' + diff_red
+    if (diff_green.length === 1) diff_green = '0' + diff_green
+    if (diff_blue.length === 1) diff_blue = '0' + diff_blue
+
+    return '#' + diff_red + diff_green + diff_blue;
+};
+
+function idealTextColor(bgColor) {
+
+    var nThreshold = 105;
+    var components = getRGBComponents(bgColor);
+    var bgDelta = (components.R * 0.299) + (components.G * 0.587) + (components.B * 0.114);
+
+    return ((255 - bgDelta) < nThreshold) ? "#000000" : "#ffffff";
+}
+
+function getRGBComponents(color) {
+
+    var r = color.substring(1, 3);
+    var g = color.substring(3, 5);
+    var b = color.substring(5, 7);
+
+    return {
+        R: parseInt(r, 16),
+        G: parseInt(g, 16),
+        B: parseInt(b, 16)
+    };
 }
 
 export default withWidth()(withStyles(styles)(withRouter(FundComparisonView)));

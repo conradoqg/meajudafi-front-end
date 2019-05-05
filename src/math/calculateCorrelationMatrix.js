@@ -18,7 +18,7 @@ export default async (fundsHistory, benchmarksHistory, benchmark) => {
         return newBenchmarkHistory;
     });
 
-    let history = fundsHistory.concat(benchmarksHistory);
+    let history = benchmarksHistory.concat(fundsHistory);
 
     const data = Array(history.length);
 
