@@ -179,6 +179,7 @@ class FundComparisonView extends React.Component {
             draft.data.benchmark.statistics = null;
             draft.data.chartSmall = null;
             draft.data.chartLarge = null;
+            draft.data.correlationMatrix = null;
         });
         this.pushHistory(nextState);
         return this.updateData(nextState);
@@ -198,6 +199,7 @@ class FundComparisonView extends React.Component {
             };
             draft.data.chartSmall = null;
             draft.data.chartLarge = null;
+            draft.data.correlationMatrix = null;
         });
         this.pushHistory(nextState);
         return this.updateData(nextState);
@@ -241,10 +243,17 @@ class FundComparisonView extends React.Component {
                     cnpj: fund.icf_cnpj_fundo,
                     detail: null,
                     data: null,
-                    statistics: null,
-
+                    statistics: null
                 });
-            }
+            }            
+        });
+        this.pushHistory(nextState);
+        return this.updateData(nextState);
+    }
+
+    handleRemoveClick = async (fund) => {
+        const nextState = produce(this.state, draft => {
+            draft.data.fundListCompare = draft.data.fundListCompare.filter(fundItem => fundItem.cnpj !== fund.cnpj);            
         });
         this.pushHistory(nextState);
         return this.updateData(nextState);
@@ -264,35 +273,11 @@ class FundComparisonView extends React.Component {
         }));
     }
 
-    handleRemoveClick = async (fund) => {
-        const nextState = produce(this.state, draft => {
-            draft.data.fundListCompare = draft.data.fundListCompare.filter(fundItem => fundItem.cnpj !== fund.cnpj);
-        });
-        this.pushHistory(nextState);
-        return this.updateData(nextState);
-    }
-
     handleTabChange = (event, value) => {
         this.setState(produce(draft => {
             draft.config.selectedTab = value;
-
         }));
-
-        if (value === 1 && this.state.data.correlationMatrix === null) this.updateCorrelationMatrx();
     };
-
-    updateCorrelationMatrx = async () => {
-        const statisticsServiceInstance = await StatisticsService.getInstance();
-
-        const fundsHistory = this.state.data.fundListCompare.map(fund => fund.data);
-        const benchmarksHistory = [this.state.data.benchmark.data];
-        const benchmark = this.state.config.benchmark;
-
-        const correlationMatrix = await statisticsServiceInstance.calculateCorrelationMatrix(fundsHistory, benchmarksHistory, benchmark);
-        this.setState(produce(draft => {
-            draft.data.correlationMatrix = correlationMatrix;
-        }));
-    }
 
     buildHistoryPath = (nextState) => {
         return this.props.basePath + '/' + nextState.config.benchmark + '/' + nextState.config.range + '/' + nextState.config.field + (nextState.data.fundListCompare ? '/' + nextState.data.fundListCompare.map(fund => fund.cnpj).join('/') : '');
@@ -314,6 +299,7 @@ class FundComparisonView extends React.Component {
         this.setState(produce(nextState, draft => {
             draft.data.chartSmall = null;
             draft.data.chartLarge = null;
+            draft.data.correlationMatrix = null;
         }));
 
         let dataPromises = {};
@@ -369,7 +355,7 @@ class FundComparisonView extends React.Component {
 
             // Every state change results in the chart being updated
             // We don't check draft.data.fundListCompare for erros, because the chart can be shown without funds (it's necessary only the benchmark data)
-            if (dataResults.benchmark instanceof Error || dataResults.benchmark.statistics instanceof Error) {
+            if (dataResults.benchmark && (dataResults.benchmark instanceof Error || dataResults.benchmark.statistics instanceof Error)) {
                 draft.data.chartSmall = dataResults.benchmark;
                 draft.data.chartLarge = dataResults.benchmark;
             } else {
@@ -377,6 +363,16 @@ class FundComparisonView extends React.Component {
                 draft.data.chartLarge = this.buildChart(draft.config.field, draft.data.benchmark, draft.data.fundListCompare, 'large');
             }
         });
+
+        const fundsHistory = nextState.data.fundListCompare.map(fund => fund.data);
+        const benchmarksHistory = [nextState.data.benchmark.data];
+        const benchmark = nextState.config.benchmark;
+
+        const correlationMatrix = await statisticsServiceInstance.calculateCorrelationMatrix(fundsHistory, benchmarksHistory, benchmark);
+        nextState = produce(nextState, draft => {
+            draft.data.correlationMatrix = correlationMatrix;
+        });
+
         this.setState(nextState);
     }
 
@@ -936,27 +932,5 @@ const getGradientColor = (start_color, end_color, percent) => {
 
     return '#' + diff_red + diff_green + diff_blue;
 };
-
-function idealTextColor(bgColor) {
-
-    var nThreshold = 105;
-    var components = getRGBComponents(bgColor);
-    var bgDelta = (components.R * 0.299) + (components.G * 0.587) + (components.B * 0.114);
-
-    return ((255 - bgDelta) < nThreshold) ? "#000000" : "#ffffff";
-}
-
-function getRGBComponents(color) {
-
-    var r = color.substring(1, 3);
-    var g = color.substring(3, 5);
-    var b = color.substring(5, 7);
-
-    return {
-        R: parseInt(r, 16),
-        G: parseInt(g, 16),
-        B: parseInt(b, 16)
-    };
-}
 
 export default withWidth()(withStyles(styles)(withRouter(FundComparisonView)));
