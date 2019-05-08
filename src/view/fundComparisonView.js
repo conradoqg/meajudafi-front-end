@@ -24,7 +24,7 @@ import FundSearchComponent from './component/fundSearchComponent';
 import ShowStateComponent from './component/showStateComponent';
 import DataHistoryChartComponent from './component/dataHistoryChartComponent';
 import { fieldOptions, sortOptions, benchmarkOptions, rangeOptions } from './option';
-import { formatters, nextColorIndex, chartFormatters } from '../util';
+import { formatters, nextColorIndex, chartFormatters, getGradientColor } from '../util';
 
 const styles = theme => ({
     optionsBar: {
@@ -316,9 +316,9 @@ class FundComparisonView extends React.Component {
         let statisticsPromises = {};
         fundsToUpdate.forEach(fund => {
             if (dataResults[fund.cnpj].data instanceof Error) statisticsPromises[fund.cnpj] = dataResults[fund.cnpj].data
-            else statisticsPromises[fund.cnpj] = statisticsServiceInstance.calculateFundHistory(dataResults[fund.cnpj].data, nextState.config.benchmark);
+            else statisticsPromises[fund.cnpj] = statisticsServiceInstance.calculateFundStatistics(dataResults[fund.cnpj].data, nextState.config.benchmark);
         });
-        statisticsPromises.benchmark = benchmarkToUpdate ? statisticsServiceInstance.calculateBenchmarkHistory(dataResults.benchmark, nextState.config.benchmark) : null;
+        statisticsPromises.benchmark = benchmarkToUpdate ? statisticsServiceInstance.calculateBenchmarkStatistics(dataResults.benchmark, nextState.config.benchmark) : null;
 
         const statisticsResults = await promisesEach(statisticsPromises);
 
@@ -892,45 +892,5 @@ class FundComparisonView extends React.Component {
         );
     }
 }
-
-const getGradientColor = (start_color, end_color, percent) => {
-    // strip the leading # if it's there
-    start_color = start_color.replace(/^\s*#|\s*$/g, '');
-    end_color = end_color.replace(/^\s*#|\s*$/g, '');
-
-    // convert 3 char codes --> 6, e.g. `E0F` --> `EE00FF`
-    if (start_color.length === 3) {
-        start_color = start_color.replace(/(.)/g, '$1$1');
-    }
-
-    if (end_color.length === 3) {
-        end_color = end_color.replace(/(.)/g, '$1$1');
-    }
-
-    // get colors
-    var start_red = parseInt(start_color.substr(0, 2), 16),
-        start_green = parseInt(start_color.substr(2, 2), 16),
-        start_blue = parseInt(start_color.substr(4, 2), 16);
-
-    var end_red = parseInt(end_color.substr(0, 2), 16),
-        end_green = parseInt(end_color.substr(2, 2), 16),
-        end_blue = parseInt(end_color.substr(4, 2), 16);
-
-    // calculate new color
-    var diff_red = end_red - start_red;
-    var diff_green = end_green - start_green;
-    var diff_blue = end_blue - start_blue;
-
-    diff_red = ((diff_red * percent) + start_red).toString(16).split('.')[0];
-    diff_green = ((diff_green * percent) + start_green).toString(16).split('.')[0];
-    diff_blue = ((diff_blue * percent) + start_blue).toString(16).split('.')[0];
-
-    // ensure 2 digits by color
-    if (diff_red.length === 1) diff_red = '0' + diff_red
-    if (diff_green.length === 1) diff_green = '0' + diff_green
-    if (diff_blue.length === 1) diff_blue = '0' + diff_blue
-
-    return '#' + diff_red + diff_green + diff_blue;
-};
 
 export default withWidth()(withStyles(styles)(withRouter(FundComparisonView)));

@@ -1,14 +1,14 @@
-import calculateStatistics from '../math/calculateStatistics';
+import calculateFundStatistics from '../math/calculateFundStatistics';
 import calculateBenchmarkStatistics from '../math/calculateBenchmarkStatistics';
 import calculateCorrelationMatrix from '../math/calculateCorrelationMatrix';
 import * as Comlink from 'comlinkjs';
 
 class CalculateStatisticsWorker {
-    calculateFundHistory(fundHistory, benchmark) {
-        return calculateStatistics(fundHistory, benchmark);
+    calculateFundStatistics(fundHistory, benchmark) {
+        return calculateFundStatistics(fundHistory, benchmark);
     }
 
-    calculateBenchmarkHistory(benchmarkHistory, benchmark) {
+    calculateBenchmarkStatistics(benchmarkHistory, benchmark) {
         return calculateBenchmarkStatistics(benchmarkHistory, benchmark);
     }
 

@@ -2,7 +2,7 @@ import React from 'react';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Typography from '@material-ui/core/Typography';
 import ShowStateComponent from './showStateComponent';
-import { Plotly } from '../../util';
+import Plotly from '../../vendor/plotly';
 import createPlotlyComponent from 'react-plotly.js/factory';
 
 const Plot = createPlotlyComponent(Plotly);
