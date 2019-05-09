@@ -33,6 +33,7 @@ export default (data, benchmark) => {
     for (let index = data.length - 1; index >= 0; index--) {
         const item = data[index];
         const date = item.data;
+        if (item.valor == null) continue;
         const value = fromQuoteToPercentage(item.valor, prevValue);
         prevValue = item.valor;
         investment_return = ((1 + investment_return) * (1 + value)) - 1;
