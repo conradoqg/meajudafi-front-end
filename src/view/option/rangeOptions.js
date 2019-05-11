@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 
-export default [
+export default [    
     {
         name: 'all',
         displayName: 'Desde o início',
@@ -50,5 +50,10 @@ export default [
         name: '3y',
         displayName: '3 anos',
         toDate: () => dayjs().subtract(3, 'year').toDate()
+    },
+    {
+        name: 'best',
+        displayName: 'Ótimo',
+        toDate: () => new Date('0001-01-01T00:00:00Z')
     }
 ];

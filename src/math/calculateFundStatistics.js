@@ -7,7 +7,7 @@ import calcSharpeForPeriod from './calcSharpeForPeriod';
 import calcRelativeInvestmentReturn from './calcRelativeInvestmentReturn';
 import CorrelationCalculator from './correlationCalculator';
 
-export default (data, benchmark) => {
+export default (data, benchmark, startingFrom = '0001-01-01') => {
     if (process.env.NODE_ENV === 'development') {
         console.time('calculateStatistics');
     }
@@ -48,12 +48,14 @@ export default (data, benchmark) => {
     const calculatorAccumulated = createCalculators();
     const calculatorByMonth = {};
     const calculatorByYear = {};
-    for (let index = data.length - 1; index >= 0; index--) {
-        const item = data[index];
-        const date = item.ird_dt_comptc;
+    let first = true;
+    for (let index = data.length - 1; index >= 0; index--) {        
+        const item = data[index];        
+        const date = item.ird_dt_comptc;        
         const year = date.substring(0, 4);
-        const month = date.substring(5, 7);
-        if (index === data.length - 1) {
+        const month = date.substring(5, 7);        
+
+        if (date >= startingFrom && first) {
             statistics.daily.date.push(date);
             statistics.daily.investment_return.push(0);
             statistics.daily.benchmark_investment_return.push(0);
@@ -68,8 +70,9 @@ export default (data, benchmark) => {
             statistics.daily.max_investment_return = 0;
             statistics.daily.min_benchmark_investment_return = 0;
             statistics.daily.max_benchmark_investment_return = 0;
+            first = false;
             continue;
-        }
+        } else if (first) continue;
         calculatorAccumulated.entries += 1;
         if (!calculatorByMonth[year + month])
             calculatorByMonth[year + month] = createCalculators();

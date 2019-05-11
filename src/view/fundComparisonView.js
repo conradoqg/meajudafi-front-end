@@ -245,7 +245,7 @@ class FundComparisonView extends React.Component {
                     data: null,
                     statistics: null
                 });
-            }            
+            }
         });
         this.pushHistory(nextState);
         return this.updateData(nextState);
@@ -253,7 +253,7 @@ class FundComparisonView extends React.Component {
 
     handleRemoveClick = async (fund) => {
         const nextState = produce(this.state, draft => {
-            draft.data.fundListCompare = draft.data.fundListCompare.filter(fundItem => fundItem.cnpj !== fund.cnpj);            
+            draft.data.fundListCompare = draft.data.fundListCompare.filter(fundItem => fundItem.cnpj !== fund.cnpj);
         });
         this.pushHistory(nextState);
         return this.updateData(nextState);
@@ -313,12 +313,21 @@ class FundComparisonView extends React.Component {
 
         const dataResults = await promisesEach(dataPromises);
 
+        let startingFrom = '0001-01-01';
+
+        if (nextState.config.range === 'best') {
+            const minDatesDataResults = Object.values(dataResults).filter(result => result != null && !(result.data instanceof Error)).map(value => value.data ? value.data[value.data.length - 1].ird_dt_comptc : null);
+            const minDatesFundListCompare = nextState.data.fundListCompare.map(value => value.data ? value.data[value.data.length - 1].ird_dt_comptc : null);
+
+            startingFrom = minDatesDataResults.concat(minDatesFundListCompare).filter(date => date != null).reduce((acc, curr) => acc > curr ? acc : curr, '0001-01-01');
+        }
+
         let statisticsPromises = {};
         fundsToUpdate.forEach(fund => {
             if (dataResults[fund.cnpj].data instanceof Error) statisticsPromises[fund.cnpj] = dataResults[fund.cnpj].data
-            else statisticsPromises[fund.cnpj] = statisticsServiceInstance.calculateFundStatistics(dataResults[fund.cnpj].data, nextState.config.benchmark);
+            else statisticsPromises[fund.cnpj] = statisticsServiceInstance.calculateFundStatistics(dataResults[fund.cnpj].data, nextState.config.benchmark, startingFrom);
         });
-        statisticsPromises.benchmark = benchmarkToUpdate ? statisticsServiceInstance.calculateBenchmarkStatistics(dataResults.benchmark, nextState.config.benchmark) : null;
+        statisticsPromises.benchmark = benchmarkToUpdate ? statisticsServiceInstance.calculateBenchmarkStatistics(dataResults.benchmark, nextState.config.benchmark, startingFrom) : null;
 
         const statisticsResults = await promisesEach(statisticsPromises);
 
@@ -364,7 +373,7 @@ class FundComparisonView extends React.Component {
             }
         });
 
-        const fundsHistory = nextState.data.fundListCompare.map(fund => fund.data);
+        const fundsHistory = nextState.data.fundListCompare.filter(fundHistory => !(fundHistory.data instanceof Error)).map(fund => fund.data);
         const benchmarksHistory = [nextState.data.benchmark.data];
         const benchmark = nextState.config.benchmark;
 

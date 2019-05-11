@@ -67,7 +67,7 @@ class FundListItemView extends React.Component {
         this.replaceHistory(this.state);
     }
 
-    async componentDidMount() {        
+    async componentDidMount() {
         return this.updateData(this.state);
     }
 
@@ -401,7 +401,7 @@ class FundListItemView extends React.Component {
                                         name: 'range',
                                         id: 'range',
                                     }}>
-                                    {rangeOptions.map(range => (<MenuItem key={range.name} value={range.name}>{range.displayName}</MenuItem>))}
+                                    {rangeOptions.filter(range => range.name !== 'best').map(range => (<MenuItem key={range.name} value={range.name}>{range.displayName}</MenuItem>))}
                                 </Select>
                             </Grid>
                         </Grid>

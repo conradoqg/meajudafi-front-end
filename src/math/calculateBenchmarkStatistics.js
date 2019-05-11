@@ -1,6 +1,6 @@
 import StandardDeviation from './standardDeviation';
 
-export default (data, benchmark) => {
+export default (data, benchmark, startingFrom = '0001-01-01') => {
     if (process.env.NODE_ENV === 'development') {
         console.time('calculateBenchmarkStatistics');
     }
@@ -34,6 +34,7 @@ export default (data, benchmark) => {
         const item = data[index];
         const date = item.data;
         if (item.valor == null) continue;
+        if (date < startingFrom) continue;
         const value = fromQuoteToPercentage(item.valor, prevValue);
         prevValue = item.valor;
         investment_return = ((1 + investment_return) * (1 + value)) - 1;

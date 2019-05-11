@@ -511,7 +511,7 @@ class FundListView extends React.Component {
                                                     name: 'range',
                                                     id: 'range',
                                                 }}>
-                                                {rangeOptions.map(range => (<MenuItem key={range.name} value={range.name}>{range.displayName}</MenuItem>))}
+                                                {rangeOptions.filter(range => range.name !== 'best').map(range => (<MenuItem key={range.name} value={range.name}>{range.displayName}</MenuItem>))}
                                             </Select>
                                             <Select
                                                 value={this.state.config.chart.benchmark}
