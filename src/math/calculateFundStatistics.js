@@ -10,7 +10,7 @@ import CorrelationCalculator from './correlationCalculator';
 export default (data, benchmark, startingFrom = '0001-01-01') => {
     if (process.env.NODE_ENV === 'development') {
         console.time('calculateStatistics');
-    }
+    }    
     const statistics = {
         daily: {
             date: [],
@@ -106,9 +106,9 @@ export default (data, benchmark, startingFrom = '0001-01-01') => {
         const quotaholders = calculatorAccumulated.quotaholdersCalculator.add(item.ird_accumulated_quotaholders);
         const month_quotaholders = calculatorByMonth[year + month].quotaholdersCalculator.add(item.ird_accumulated_quotaholders);
         const year_quotaholders = calculatorByYear[year].quotaholdersCalculator.add(item.ird_accumulated_quotaholders);
-        const correlation = calculatorAccumulated.correlationCalculator.add(item.ird_investment_return, item[`ird_${benchmark}_investment_return`], calculatorAccumulated.entries);
-        const month_correlation = calculatorByMonth[year + month].correlationCalculator.add(item.ird_investment_return, item[`ird_${benchmark}_investment_return`], calculatorByMonth[year + month].entries);
-        const year_correlation = calculatorByYear[year].correlationCalculator.add(item.ird_investment_return, item[`ird_${benchmark}_investment_return`], calculatorByYear[year].entries);
+        const correlation = item[`ird_${benchmark}_investment_return`] !== 0 && calculatorAccumulated.correlationCalculator.add(item.ird_investment_return, item[`ird_${benchmark}_investment_return`], calculatorAccumulated.entries);
+        const month_correlation = item[`ird_${benchmark}_investment_return`] !== 0 && calculatorByMonth[year + month].correlationCalculator.add(item.ird_investment_return, item[`ird_${benchmark}_investment_return`], calculatorByMonth[year + month].entries);
+        const year_correlation = item[`ird_${benchmark}_investment_return`] !== 0 && calculatorByYear[year].correlationCalculator.add(item.ird_investment_return, item[`ird_${benchmark}_investment_return`], calculatorByYear[year].entries);
         const min_investment_return = Math.min(statistics.daily.min_investment_return, investment_return);
         const max_investment_return = Math.max(statistics.daily.max_investment_return, investment_return);
         const min_benchmark_investment_return = Math.min(statistics.daily.min_benchmark_investment_return, benchmark_investment_return);

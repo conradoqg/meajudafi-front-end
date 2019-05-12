@@ -57,7 +57,10 @@ export default async (fundsHistory, benchmarksHistory, benchmark) => {
             const fundAgainst = data[index];
             if (index !== currentIndex) {
                 const correlationCalculator = new CorrelationCalculator();
-                correlations.push(fund.reduce((acc, day, reduceIndex) => correlationCalculator.add(day.value, fundAgainst[reduceIndex].value, reduceIndex + 1), 0));
+                correlations.push(fund.reduce((acc, day, reduceIndex) => {
+                    if (reduceIndex === 0) return 0;
+                    return correlationCalculator.add(day.value, fundAgainst[reduceIndex].value, reduceIndex + 1)
+                }, 0));
             } else {
                 correlations.push(1)
             }
