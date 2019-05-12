@@ -302,6 +302,7 @@ class FundComparisonView extends React.Component {
             draft.data.correlationMatrix = null;
         }));
 
+        // Retrieve funds and benchmark data
         let dataPromises = {};
         fundsToUpdate.forEach(fund => {
             dataPromises[fund.cnpj] = promisesEach({
@@ -313,8 +314,8 @@ class FundComparisonView extends React.Component {
 
         const dataResults = await promisesEach(dataPromises);
 
+        // If the selected range is "best", find the max first date available so the statistics will be calculated starting from that date
         let startingFrom = '0001-01-01';
-
         if (nextState.config.range === 'best') {
             const minDatesDataResults = Object.values(dataResults).filter(result => result != null && !(result.data instanceof Error)).map(value => value.data ? value.data[value.data.length - 1].ird_dt_comptc : null);
             const minDatesFundListCompare = nextState.data.fundListCompare.map(value => value.data ? value.data[value.data.length - 1].ird_dt_comptc : null);
@@ -322,6 +323,7 @@ class FundComparisonView extends React.Component {
             startingFrom = minDatesDataResults.concat(minDatesFundListCompare).filter(date => date != null).reduce((acc, curr) => acc > curr ? acc : curr, '0001-01-01');
         }
 
+        // Calculate funds and benchmark statistics
         let statisticsPromises = {};
         fundsToUpdate.forEach(fund => {
             if (dataResults[fund.cnpj].data instanceof Error) statisticsPromises[fund.cnpj] = dataResults[fund.cnpj].data
@@ -363,7 +365,7 @@ class FundComparisonView extends React.Component {
             });
 
             // Every state change results in the chart being updated
-            // We don't check draft.data.fundListCompare for erros, because the chart can be shown without funds (it's necessary only the benchmark data)
+            // We don't check draft.data.fundListCompare for erros, because the chart can be shown without the funds (it's only necessary the benchmark data)
             if (dataResults.benchmark && (dataResults.benchmark instanceof Error || dataResults.benchmark.statistics instanceof Error)) {
                 draft.data.chartSmall = dataResults.benchmark;
                 draft.data.chartLarge = dataResults.benchmark;
@@ -373,13 +375,22 @@ class FundComparisonView extends React.Component {
             }
         });
 
-        const fundsHistory = nextState.data.fundListCompare.filter(fundHistory => !(fundHistory.data instanceof Error)).map(fund => fund.data);
-        const benchmarksHistory = [nextState.data.benchmark.data];
+        // Calculate the correlation matrix of the not errored funds and benchmark
+        const notErroredFunds = fundHistory => !(fundHistory.data instanceof Error);
+        const notErroredBenchmark = !(nextState.data.benchmark.data instanceof Error)
+
+        const fundsHistory = nextState.data.fundListCompare.filter(notErroredFunds).map(fund => fund.data);
+        const fundsHeader = nextState.data.fundListCompare.filter(notErroredFunds).map(fund => fund.detail.name);
+        const benchmarksHistory =  notErroredBenchmark ? [nextState.data.benchmark.data] : [];
+        const benchmarkHeader = notErroredBenchmark ? [nextState.data.benchmark.name.toUpperCase()] : [];
         const benchmark = nextState.config.benchmark;
 
-        const correlationMatrix = await statisticsServiceInstance.calculateCorrelationMatrix(fundsHistory, benchmarksHistory, benchmark);
-        nextState = produce(nextState, draft => {
-            draft.data.correlationMatrix = correlationMatrix;
+        const data = await statisticsServiceInstance.calculateCorrelationMatrix(fundsHistory, benchmarksHistory, benchmark);
+        nextState = produce(nextState, draft => {                        
+            draft.data.correlationMatrix = {
+                headers: benchmarkHeader.concat(fundsHeader),
+                data
+            };
         });
 
         this.setState(nextState);
@@ -640,17 +651,13 @@ class FundComparisonView extends React.Component {
                             {(this.state.config.selectedTab === 1 && !isWidthDown('sm', this.props.width)) && <React.Fragment>
                                 <ShowStateComponent
                                     data={this.state.data.correlationMatrix}
-                                    hasData={() => {
-                                        let correlationItems = [];
-                                        correlationItems.push(this.state.data.benchmark.name.toUpperCase());
-                                        correlationItems = correlationItems.concat(this.state.data.fundListCompare.map(fund => fund.detail.name));
-
+                                    hasData={() => {                                        
                                         return (
                                             <table className={classes.historyTable}>
                                                 <thead>
                                                     <tr className={classes.historyCell}>
                                                         <th className={classes.historyCell}>&nbsp;</th>
-                                                        {correlationItems.map((correlationItem, index) => (
+                                                        {this.state.data.correlationMatrix.headers.map((correlationItem, index) => (
                                                             <th key={`head${correlationItem}`} className={classes.historyCell} style={{ borderWidth: '0px 0px 5px 0px', borderColor: nextColorIndex(index), borderStyle: 'solid' }}>
                                                                 <Typography className={classes.textOverflowDynamicContainer}>
                                                                     <span className={classes.textOverflowDynamicEllipsis}>
@@ -663,21 +670,21 @@ class FundComparisonView extends React.Component {
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {correlationItems.map((name, index) => {
-                                                        const restOfCorrelations = correlationItems.slice(index + 1);
+                                                    {this.state.data.correlationMatrix.headers.map((name, index) => {
+                                                        const restOfCorrelations = this.state.data.correlationMatrix.headers.slice(index + 1);
                                                         const correlationMirror = restOfCorrelations.map((name, indexCol) => {
-                                                            const correlation = this.state.data.correlationMatrix[index + indexCol + 1][index];
+                                                            const correlation = this.state.data.correlationMatrix.data[index + indexCol + 1][index];
                                                             return (
                                                                 <td key={`bodyreverse${name}${index}`} className={classes.historyCell} style={{ backgroundColor: getGradientColor('#FFFFFF', '#E6194B', Math.abs(correlation)) }}>
                                                                     <Typography style={{ color: Math.abs(correlation) > 0.3 ? '#FFFFFF' : '#000000' }}>
-                                                                        {formatters.percentage(this.state.data.correlationMatrix[index + indexCol + 1][index])}
+                                                                        {formatters.percentage(this.state.data.correlationMatrix.data[index + indexCol + 1][index])}
                                                                     </Typography>
                                                                 </td>
                                                             );
                                                         });
                                                         return (<tr key={`row${name}`}>
                                                             <th style={{ minWidth: '100px', borderWidth: '0px 5px 0px 0px', borderColor: nextColorIndex(index), borderStyle: 'solid' }}><Typography className={classes.textOverflowDynamicContainer}><span className={classes.textOverflowDynamicEllipsis} title={name}><b>{name}</b></span></Typography></th>
-                                                            {this.state.data.correlationMatrix[index].map(correlation => {
+                                                            {this.state.data.correlationMatrix.data[index].map(correlation => {
                                                                 return (
                                                                     <td key={`body${name}${index}${correlation}`} className={classes.historyCell} style={{ backgroundColor: getGradientColor('#FFFFFF', '#E6194B', Math.abs(correlation)) }}>
                                                                         <Typography style={{ color: Math.abs(correlation) > 0.3 ? '#FFFFFF' : '#000000' }}>
