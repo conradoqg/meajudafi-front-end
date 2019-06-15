@@ -67,7 +67,12 @@ export const formatters = {
 
 const fieldFormatters = {};
 Object.keys(filterOptions).map(key => {
-    return fieldFormatters[key] = (value) => filterOptions[key].options.find(item => item.value === value).displayName;
+    return fieldFormatters[key] = (value) => {
+        const foundItem = filterOptions[key].options.find(item => item.value === value);
+        
+        if (foundItem) return foundItem.displayName;
+        else return value;
+    }
 });
 
 fieldFormatters['icf_vl_patrim_liq'] = formatters.money;
