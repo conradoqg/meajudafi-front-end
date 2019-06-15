@@ -1,18 +1,13 @@
 import { PROTOCOL, API_URL } from './index';
 
 export default async (lastDaysOrFromDate) => {
-    let fromDatePart = '';
-    let rangePart = null;
+    let limit = '';    
     if (lastDaysOrFromDate instanceof Date)
-        fromDatePart = `&dt_comptc=gte.${lastDaysOrFromDate.toJSON().slice(0, 10)}`;
+        limit = `&dt_comptc=gte.${lastDaysOrFromDate.toJSON().slice(0, 10)}`;
     else if (typeof (lastDaysOrFromDate) == 'number')
-        rangePart = {
-            headers: {
-                'Range-Unit': 'items',
-                'Range': `0-${lastDaysOrFromDate - 1}`
-            }
-        };
-    const fundIndicatorsObject = await fetch(`${PROTOCOL}//${API_URL}/running_days_with_indicators?select=dt_comptc,cdi_valor,selic_valor,bovespa_valor,euro_valor,dolar_valor${fromDatePart}&order=dt_comptc.desc`, rangePart);
+        limit = `&limit=${lastDaysOrFromDate - 1}`;
+
+    const fundIndicatorsObject = await fetch(`${PROTOCOL}//${API_URL}/running_days_with_indicators?select=dt_comptc,cdi_valor,selic_valor,bovespa_valor,euro_valor,dolar_valor${limit}&order=dt_comptc.desc`);
     if (fundIndicatorsObject.status < 200 || fundIndicatorsObject.status > 299)
         throw new Error('Unable to retrieve economy indicators');
     let data = await fundIndicatorsObject.json();

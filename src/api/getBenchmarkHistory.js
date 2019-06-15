@@ -1,17 +1,12 @@
 import { PROTOCOL, API_URL } from './index';
 
 export default async (benchmark, lastDaysOrFromDate) => {
-    let fromDatePart = '';
-    let rangePart = null;
+    let limit = '';    
     if (lastDaysOrFromDate instanceof Date)
-        fromDatePart = `&data=gte.${lastDaysOrFromDate.toJSON().slice(0, 10)}`;
+        limit = `&data=gte.${lastDaysOrFromDate.toJSON().slice(0, 10)}`;
     else if (typeof (lastDaysOrFromDate) == 'number')
-        rangePart = {
-            headers: {
-                'Range-Unit': 'items',
-                'Range': `0-${lastDaysOrFromDate - 1}`
-            }
-        };
+        limit = `&limit=${lastDaysOrFromDate - 1}`;
+       
     let tablePart = null;
     if (benchmark === 'cdi') {
         tablePart = 'fbcdata_sgs_12i';
@@ -25,7 +20,7 @@ export default async (benchmark, lastDaysOrFromDate) => {
     else if (benchmark === 'euro') {
         tablePart = 'fbcdata_sgs_21619i';
     }
-    const result = await fetch(`${PROTOCOL}//${API_URL}/${tablePart}?select=data,valor${fromDatePart}&order=data.desc`, rangePart);
+    const result = await fetch(`${PROTOCOL}//${API_URL}/${tablePart}?select=data,valor${limit}&order=data.desc`);
     if (result.status < 200 || result.status > 299)
         throw new Error('Unable to retrieve benchmark statistic');
     let data = await result.json();
