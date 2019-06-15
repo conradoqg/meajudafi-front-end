@@ -1,7 +1,7 @@
 import { PROTOCOL, API_URL } from './index';
 
-export default async (options, fromDate = new Date((new Date()).getFullYear(), 0, 1)) => {
-    const range = `${(options.page * options.rowsPerPage)}-${((options.page * options.rowsPerPage) + options.rowsPerPage - 1)}`;
+export default async (options, fromDate = new Date((new Date()).getFullYear(), 0, 1)) => {    
+    const range = options.page === 0 ? `&limit=${options.rowsPerPage}` : `&offset=${(options.page * options.rowsPerPage) + 1}&limit=${options.rowsPerPage}`;
     const sort = `${options.sort.field}.${options.sort.order}`;
     let filterPart = '';
     if (options.filter) {
@@ -52,11 +52,9 @@ export default async (options, fromDate = new Date((new Date()).getFullYear(), 0
             }
         }
     }
-    const fundListObject = await fetch(`${PROTOCOL}//${API_URL}/icf_with_xf_and_bf_and_iry_and_f_of_last_year?select=icf_cnpj_fundo,f_cnpj,f_short_name,iry_accumulated_networth,iry_accumulated_quotaholders,icf_rentab_fundo,iry_investment_return_1y,iry_investment_return_2y,iry_investment_return_3y,iry_risk_1y,iry_risk_2y,iry_risk_3y&${filterPart}${searchPart}iry_dt_comptc=gte.${fromDate.toJSON().slice(0, 10)}&order=${sort}`, {
+    const fundListObject = await fetch(`${PROTOCOL}//${API_URL}/icf_with_xf_and_bf_and_iry_and_f_of_last_year?select=icf_cnpj_fundo,f_cnpj,f_short_name,iry_accumulated_networth,iry_accumulated_quotaholders,icf_rentab_fundo,iry_investment_return_1y,iry_investment_return_2y,iry_investment_return_3y,iry_risk_1y,iry_risk_2y,iry_risk_3y&${filterPart}${searchPart}iry_dt_comptc=gte.${fromDate.toJSON().slice(0, 10)}&order=${sort}${range}`, {
         method: 'GET',
         headers: {
-            'Range-Unit': 'items',
-            'Range': range,
             'Prefer': 'count=exact'
         }
     });
