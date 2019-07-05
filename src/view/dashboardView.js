@@ -41,6 +41,10 @@ const styles = theme => ({
         left: '50%',
         transform: 'translate(-50%, -50%)'
     },
+    centeredImage: {
+        verticalAlign: "middle",
+        margin: theme.spacing.unit * 3
+    },
     menuLink: {
         textDecoration: 'none',
         color: 'white'
@@ -99,7 +103,7 @@ const MenuLink = ({ label, to, activeOnlyWhenExact, classes }) => (
 
 class Dashboard extends React.Component {
     state = {
-        maintenanceMode: false
+        maintenanceMode: false        
     };
 
     componentDidMount = async () => {
@@ -107,12 +111,17 @@ class Dashboard extends React.Component {
     };
 
     render() {
-        const { classes } = this.props;
+        const { classes } = this.props;        
 
         if (this.state.maintenanceMode)
-            return (<div className={classes.centered}>
-                <Typography variant="title" noWrap>Estamos em manutenção, volte em alguns minutos.</Typography>
-            </div>);
+            return (
+                <div className={classes.centered}>
+                    <Typography variant="h6" component="span">
+                        <img src="/img/emoticon-cry-outline.png" className={classes.centeredImage} alt="saddiness" />
+                        Estamos em manutenção, volte em alguns minutos.
+                </Typography>
+                </div>
+            );
         else return (
             <Router>
                 <React.Fragment>

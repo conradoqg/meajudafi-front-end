@@ -6,6 +6,7 @@
   "dependencies": {
     "@material-ui/core": "^3.1.0",
     "@material-ui/icons": "^3.0.1",
+    "@sentry/browser": "^5.4.3",
     "classnames": "^2.2.6",
     "comlinkjs": "^3.2.0",
     "cross-env": "^5.2.0",
