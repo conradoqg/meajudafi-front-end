@@ -20,6 +20,7 @@ import ShowStateComponent from './component/showStateComponent';
 import DataHistoryChartComponent from './component/dataHistoryChartComponent';
 import { fieldOptions, benchmarkOptions, rangeOptions } from './option';
 import { nextColorIndex, formatters, chartFormatters } from '../util';
+import * as Sentry from '@sentry/browser';
 
 const styles = theme => ({
     select: {
@@ -150,15 +151,19 @@ class FundListItemView extends React.Component {
         });
 
         nextState = produce(nextState, draft => {
-            if (fundData instanceof Error) draft.data.fund = fundData.message;
-            else draft.data.fund = fundData[0];
+            if (fundData instanceof Error) {
+                Sentry.captureException(fundData);
+                draft.data.fund = fundData.message;
+            } else draft.data.fund = fundData[0];
 
-            if (fundHistory instanceof Error) draft.data.history = fundHistory.message;
-            else draft.data.history = fundHistory;
+            if (fundHistory instanceof Error) {
+                Sentry.captureException(fundHistory);
+                draft.data.history = fundHistory.message;                
+            } else draft.data.history = fundHistory;
 
             if (fundHistory instanceof Error) {
                 draft.data.chartSmall = fundHistory.message;
-                draft.data.chartLarge = fundHistory.message;
+                draft.data.chartLarge = fundHistory.message;                
             } else {
                 draft.data.chartSmall = this.buildChart(draft.config, fundData[0].f_short_name, draft.data.history, 'small');
                 draft.data.chartLarge = this.buildChart(draft.config, fundData[0].f_short_name, draft.data.history, 'large');

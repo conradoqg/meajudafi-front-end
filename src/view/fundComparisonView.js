@@ -25,6 +25,7 @@ import ShowStateComponent from './component/showStateComponent';
 import DataHistoryChartComponent from './component/dataHistoryChartComponent';
 import { fieldOptions, sortOptions, benchmarkOptions, rangeOptions } from './option';
 import { formatters, nextColorIndex, chartFormatters, getGradientColor } from '../util';
+import * as Sentry from '@sentry/browser';
 
 const styles = theme => ({
     optionsBar: {
@@ -227,6 +228,7 @@ class FundComparisonView extends React.Component {
                 }));
             }
         } catch (ex) {
+            Sentry.captureException(ex);
             console.error(ex.message);
             this.setState(produce(draft => {
                 draft.data.fundListSearch = ex.message;
@@ -326,8 +328,10 @@ class FundComparisonView extends React.Component {
         // Calculate funds and benchmark statistics
         let statisticsPromises = {};
         fundsToUpdate.forEach(fund => {
-            if (dataResults[fund.cnpj].data instanceof Error) statisticsPromises[fund.cnpj] = dataResults[fund.cnpj].data
-            else statisticsPromises[fund.cnpj] = statisticsServiceInstance.calculateFundStatistics(dataResults[fund.cnpj].data, nextState.config.benchmark, startingFrom);
+            if (dataResults[fund.cnpj].data instanceof Error) {
+                Sentry.captureException(dataResults[fund.cnpj].data);
+                statisticsPromises[fund.cnpj] = dataResults[fund.cnpj].data
+            } else statisticsPromises[fund.cnpj] = statisticsServiceInstance.calculateFundStatistics(dataResults[fund.cnpj].data, nextState.config.benchmark, startingFrom);
         });
         statisticsPromises.benchmark = benchmarkToUpdate ? statisticsServiceInstance.calculateBenchmarkStatistics(dataResults.benchmark, nextState.config.benchmark, startingFrom) : null;
 
@@ -343,14 +347,20 @@ class FundComparisonView extends React.Component {
             draft.data.fundListCompare = draft.data.fundListCompare.map(fund => {
                 // If there's a dataResult for a CNPJ, the fund's data was updated
                 if (dataResults[fund.cnpj]) {
-                    if (dataResults[fund.cnpj].data instanceof Error) fund.data = dataResults[fund.cnpj].data;
-                    else fund.data = dataResults[fund.cnpj].data;
+                    if (dataResults[fund.cnpj].data instanceof Error) {
+                        Sentry.captureException(dataResults[fund.cnpj].data);
+                        fund.data = dataResults[fund.cnpj].data;
+                    } else fund.data = dataResults[fund.cnpj].data;
 
-                    if (statisticsResults[fund.cnpj] instanceof Error) fund.statistics = statisticsResults[fund.cnpj];
-                    else fund.statistics = statisticsResults[fund.cnpj];
+                    if (statisticsResults[fund.cnpj] instanceof Error) {
+                        Sentry.captureException(statisticsResults[fund.cnpj]);
+                        fund.statistics = statisticsResults[fund.cnpj];
+                    } else fund.statistics = statisticsResults[fund.cnpj];
 
-                    if (dataResults[fund.cnpj].detail instanceof Error) fund.detail = dataResults[fund.cnpj].detail;
-                    else {
+                    if (dataResults[fund.cnpj].detail instanceof Error) {
+                        Sentry.captureException(dataResults[fund.cnpj].detail);
+                        fund.detail = dataResults[fund.cnpj].detail;
+                    } else {
                         if (dataResults[fund.cnpj].detail.length === 0) fund.detail = 'Não encontrado';
                         else {
                             fund.detail = {
@@ -366,9 +376,14 @@ class FundComparisonView extends React.Component {
 
             // Every state change results in the chart being updated
             // We don't check draft.data.fundListCompare for erros, because the chart can be shown without the funds (it's only necessary the benchmark data)
-            if (dataResults.benchmark && (dataResults.benchmark instanceof Error || dataResults.benchmark.statistics instanceof Error)) {
+            if (dataResults.benchmark && dataResults.benchmark instanceof Error){
+                Sentry.captureException(dataResults.benchmark);
                 draft.data.chartSmall = dataResults.benchmark;
                 draft.data.chartLarge = dataResults.benchmark;
+            } else if (dataResults.benchmark && dataResults.benchmark.statistics instanceof Error) {
+                Sentry.captureException(dataResults.benchmark.statistics);
+                draft.data.chartSmall = dataResults.benchmark.statistics;
+                draft.data.chartLarge = dataResults.benchmark.statistics;
             } else {
                 draft.data.chartSmall = this.buildChart(draft.config.field, draft.data.benchmark, draft.data.fundListCompare, 'small');
                 draft.data.chartLarge = this.buildChart(draft.config.field, draft.data.benchmark, draft.data.fundListCompare, 'large');

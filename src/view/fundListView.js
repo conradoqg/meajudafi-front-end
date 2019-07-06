@@ -32,6 +32,7 @@ import ShowStateComponent from './component/showStateComponent';
 import DataHistoryChartComponent from './component/dataHistoryChartComponent';
 import { sortOptions, benchmarkOptions, rangeOptions } from './option';
 import { formatters, nextColorIndex, chartFormatters } from '../util';
+import * as Sentry from '@sentry/browser';
 
 const styles = theme => ({
     filterPaperContent: {
@@ -87,7 +88,8 @@ class FundListView extends React.Component {
                 draft.data.fundList = result.data;
             }));
         } catch (ex) {
-            console.error(ex.message);
+            Sentry.captureException(ex);     
+            console.error(ex.message);       
             this.setState(produce(draft => {
                 draft.data.fundList = ex.message;
             }));
@@ -112,6 +114,7 @@ class FundListView extends React.Component {
                 draft.data.fundList = result.data;
             }));
         } catch (ex) {
+            Sentry.captureException(ex);            
             console.error(ex.message);
             this.setState(produce(nextState, draft => {
                 draft.data.fundList = ex.message;
@@ -139,6 +142,7 @@ class FundListView extends React.Component {
                 draft.data.fundList = result.data;
             }));
         } catch (ex) {
+            Sentry.captureException(ex);
             console.error(ex.message);
             this.setState(produce(nextState, draft => {
                 draft.data.fundList = ex.message;
@@ -165,6 +169,7 @@ class FundListView extends React.Component {
                 draft.data.fundList = result.data;
             }));
         } catch (ex) {
+            Sentry.captureException(ex);
             console.error(ex.message);
             this.setState(produce(draft => {
                 draft.data.fundList = ex.message;
@@ -213,6 +218,7 @@ class FundListView extends React.Component {
                 draft.data.fundList = result.data;
             }));
         } catch (ex) {
+            Sentry.captureException(ex);
             console.error(ex.message);
             this.setState(produce(nextState, draft => {
                 draft.data.fundList = ex.message;
@@ -246,6 +252,7 @@ class FundListView extends React.Component {
                 draft.data.fundList = result.data;
             }));
         } catch (ex) {
+            Sentry.captureException(ex);
             console.error(ex.message);
             this.setState(produce(draft => {
                 draft.data.fundList = ex.message;
@@ -286,7 +293,13 @@ class FundListView extends React.Component {
             nextState = produce(this.state, draft => {
                 const benchmarkText = benchmarkOptions.find(benchmark => benchmark.name === chartConfig.benchmark).displayName;
 
-                if (fundStatistic instanceof Error || fundData instanceof Error) draft.data.fundDetail[cnpj] = fundStatistic;
+                if (fundStatistic instanceof Error) {
+                    Sentry.captureException(fundStatistic);
+                    draft.data.fundDetail[cnpj] = fundStatistic;
+                } else if (fundData instanceof Error) {
+                    Sentry.captureException(fundData);
+                    draft.data.fundDetail[cnpj] = fundData;
+                }
                 else draft.data.fundDetail[cnpj] = this.buildChart(fundStatistic, fundData, benchmarkText);
             })
         }

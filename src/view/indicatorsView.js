@@ -27,6 +27,7 @@ import DataHistoryChartComponent from './component/dataHistoryChartComponent';
 import API from '../api';
 import { rangeOptions } from './option';
 import { formatters, nextColorIndex, chartFormatters } from '../util';
+import * as Sentry from '@sentry/browser';
 
 const styles = theme => ({
     root: {
@@ -171,6 +172,7 @@ class IndicatorsView extends React.Component {
             draft.data.fundsChanged = fundsChanged;
 
             if (economyIndicators instanceof Error) {
+                Sentry.captureException(economyIndicators);
                 draft.data.economyIndicatorsChartSmall = economyIndicators;
                 draft.data.economyIndicatorsChartLarge = economyIndicators;
             } else {
