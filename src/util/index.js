@@ -69,7 +69,7 @@ const fieldFormatters = {};
 Object.keys(filterOptions).map(key => {
     return fieldFormatters[key] = (value) => {
         const foundItem = filterOptions[key].options.find(item => item.value === value);
-        
+
         if (foundItem) return foundItem.displayName;
         else return value;
     }
@@ -110,7 +110,13 @@ fieldFormatters['bf_is_blacklist'] = value => (value === true || value === 't') 
 fieldFormatters['bf_inactive'] = value => (value === true || value === 't') ? 'Inativo' : 'Ativo';
 fieldFormatters['bf_risk_name'] = formatters.capitalized;
 fieldFormatters['bf_rescue_financial_settlement'] = value => 'D+' + value;
-fieldFormatters['bf_investor_type'] = value => value === 'NAO_QUALIFICADO' ? 'Não qualificado' : 'Qualificado'
+fieldFormatters['bf_investor_type'] = value => value === 'NAO_QUALIFICADO' ? 'Não qualificado' : 'Qualificado';
+fieldFormatters['mf_name'] = value => value;
+fieldFormatters['mf_risk_level'] = value => value == null ? 'Não Identificado' : ['Desconhecido', 'Risco baixo', 'Risco médio', 'Risco alto'][value];
+fieldFormatters['mf_minimum_initial_investment'] = formatters.money;
+fieldFormatters['mf_rescue_quota'] = value => 'D+' + value;
+fieldFormatters['mf_benchmark'] = value => value;
+fieldFormatters['mf_active'] = value => (value === true) ? 'Ativo' : 'Inativo';
 
 formatters.field = fieldFormatters;
 

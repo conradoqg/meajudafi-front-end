@@ -158,12 +158,12 @@ class FundListItemView extends React.Component {
 
             if (fundHistory instanceof Error) {
                 Sentry.captureException(fundHistory);
-                draft.data.history = fundHistory.message;                
+                draft.data.history = fundHistory.message;
             } else draft.data.history = fundHistory;
 
             if (fundHistory instanceof Error) {
                 draft.data.chartSmall = fundHistory.message;
-                draft.data.chartLarge = fundHistory.message;                
+                draft.data.chartLarge = fundHistory.message;
             } else {
                 draft.data.chartSmall = this.buildChart(draft.config, fundData[0].f_short_name, draft.data.history, 'small');
                 draft.data.chartLarge = this.buildChart(draft.config, fundData[0].f_short_name, draft.data.history, 'large');
@@ -353,7 +353,44 @@ class FundListItemView extends React.Component {
     }
 
     getFundData = async (cnpj) => {
-        return API.getFundData(cnpj, ['f_cnpj', 'icf_dt_ini_exerc', 'icf_dt_fim_exerc', 'icf_classe', 'icf_sit', 'icf_condom', 'icf_fundo_cotas', 'icf_fundo_exclusivo', 'icf_rentab_fundo', 'icf_vl_patrim_liq', 'xf_name', 'xf_id', 'xf_formal_risk', 'xf_initial_investment', 'xf_rescue_quota', 'xf_benchmark', 'xf_type', 'xf_state', 'bf_id', 'bf_product', 'bf_risk_level', 'bf_minimum_initial_investment', 'bf_rescue_quota', 'bf_category_description', 'bf_anbima_rating', 'bf_is_blacklist', 'bf_inactive', 'xf_id', 'bf_id']);
+        const additionalFields = [
+            'f_cnpj',
+            'icf_dt_ini_exerc',
+            'icf_dt_fim_exerc',
+            'icf_classe',
+            'icf_sit',
+            'icf_condom',
+            'icf_fundo_cotas',
+            'icf_fundo_exclusivo',
+            'icf_rentab_fundo',
+            'icf_vl_patrim_liq',
+            'xf_name',
+            'xf_id',
+            'xf_formal_risk',
+            'xf_initial_investment',
+            'xf_rescue_quota',
+            'xf_benchmark',
+            'xf_type',
+            'xf_state',
+            'bf_id',
+            'bf_product',
+            'bf_risk_level',
+            'bf_minimum_initial_investment',
+            'bf_rescue_quota',
+            'bf_category_description',
+            'bf_anbima_rating',
+            'bf_is_blacklist',
+            'bf_inactive',
+            'mf_id',
+            'mf_name',
+            'mf_risk_level',
+            'mf_minimum_initial_investment',
+            'mf_rescue_quota',
+            'mf_benchmark',
+            'mf_active',
+            'mf_detail_link'];
+
+        return API.getFundData(cnpj, additionalFields);
     }
 
     getFundStatistic = async (cnpj, config) => {
@@ -482,6 +519,28 @@ class FundListItemView extends React.Component {
                                                         <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography><b>Classe Anbima:</b> {formatters.field['bf_anbima_rating'](this.state.data.fund.bf_anbima_rating)}</Typography></Grid>
                                                         <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography><b>Capitação:</b> {formatters.field['bf_is_blacklist'](this.state.data.fund.bf_is_blacklist)}</Typography></Grid>
                                                         <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography><b>Atividade:</b> {formatters.field['bf_inactive'](this.state.data.fund.bf_inactive)}</Typography></Grid>
+                                                    </Grid>
+                                                </React.Fragment>
+                                            )
+                                        }
+                                        {
+                                            this.state.data.fund.mf_id && (
+                                                <React.Fragment>
+                                                    <Grid container spacing={16}>
+                                                        <Grid item xs={12}>
+                                                            <Divider variant="middle" />
+                                                        </Grid>
+                                                        <Grid item xs={12}>
+                                                            <Typography variant="subtitle1" gutterBottom><b><Link className={classes.link} href={`https://www.modalmais.com.br${this.state.data.fund.mf_detail_link}`} target="_new" rel="noopener">Modal Mais</Link></b></Typography>
+                                                        </Grid>
+                                                    </Grid>
+                                                    <Grid container spacing={16}>
+                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography><b>Nome:</b> {formatters.field['mf_name'](this.state.data.fund.bf_product)}</Typography></Grid>
+                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography><b>Risco Formal:</b> {formatters.field['mf_risk_level'](this.state.data.fund.mf_risk_level)}</Typography></Grid>
+                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography><b>Investimento Inicial:</b> {formatters.field['mf_minimum_initial_investment'](this.state.data.fund.mf_minimum_initial_investment)}</Typography></Grid>
+                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography><b>Dias para Resgate:</b> {formatters.field['mf_rescue_quota'](this.state.data.fund.mf_rescue_quota)}</Typography></Grid>
+                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography><b>Benchmark:</b> {formatters.field['mf_benchmark'](this.state.data.fund.mf_benchmark)}</Typography></Grid>
+                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography><b>Atividade:</b> {formatters.field['mf_active'](this.state.data.fund.mf_active)}</Typography></Grid>
                                                     </Grid>
                                                 </React.Fragment>
                                             )
