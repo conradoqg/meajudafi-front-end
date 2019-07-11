@@ -44,7 +44,8 @@ const emptyState = {
             iry_risk_3y: { min: '', max: '', format: value => value / 100 },
             switch: {
                 xf_id: true,
-                bf_id: true
+                bf_id: true,
+                mf_id: true
             }
         }
     }
@@ -460,6 +461,18 @@ class FundFilterComponent extends React.Component {
                                         />
                                     }
                                     label="Somente fundos BTG Pactual"
+                                />
+                            </Grid>
+                            <Grid item xs={6}>
+                                <FormControlLabel
+                                    control={
+                                        <Switch
+                                            checked={this.state.config.filter.switch.mf_id}
+                                            onChange={this.handleSwitchChange('mf_id')}
+                                            value={this.state.config.filter.switch.mf_id ? 'true' : 'false'}
+                                        />
+                                    }
+                                    label="Somente fundos Modal Mais"
                                 />
                             </Grid>
                         </Grid>

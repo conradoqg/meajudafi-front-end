@@ -296,11 +296,16 @@ class IndicatorsView extends React.Component {
 
         const fundsChanges = {
             btgpactual: [],
-            xpi: []
+            xpi: [],
+            modalmais: []
         };
 
-        fundsChanged.forEach(change => {
-            const key = change.table_name === 'btgpactual_funds' ? 'btgpactual' : 'xpi';
+        fundsChanged.forEach(change => {            
+            let key = null;
+
+            if (change.table_name === 'btgpactual_funds') key =  'btgpactual';
+            else if (change.table_name === 'xpi_funds') key = 'xpi';
+            else if (change.table_name === 'modalmais_funds') key = 'modalmais';
 
             const relevantChanges = [];
 
@@ -350,6 +355,22 @@ class IndicatorsView extends React.Component {
                         bf_investor_type: {
                             title: 'Tipo de investidor',
                             text: formatters.field['bf_investor_type']
+                        },
+                        mf_risk_level: {
+                            title: 'Risco formal',
+                            text: formatters.field['mf_risk_level']
+                        },
+                        mf_minimum_initial_investment: {
+                            title: 'Investimento inicial',
+                            text: formatters.field['mf_minimum_initial_investment']
+                        },
+                        mf_rescue_quota: {
+                            title: 'Dias para resgate',
+                            text: formatters.field['mf_rescue_quota']
+                        },
+                        mf_active: {
+                            title: 'Ativo',
+                            text: formatters.field['mf_active']
                         }
                     };
                     if (relevantFields[changedField]) {
@@ -518,12 +539,15 @@ class IndicatorsView extends React.Component {
                         </Grid>
                     </Grid>
                 </Grid>
-                <Grid container spacing={16}>
+                <Grid container spacing={16}>                    
+                    <Grid item xs={12} sm={12} md={6} xl={6}>
+                        <FundsChangedPaper title="XP Investimentos" data={this.state.data.fundsChanged} broker="xpi" classes={classes} />
+                    </Grid>
                     <Grid item xs={12} sm={12} md={6} xl={6}>
                         <FundsChangedPaper title="BTG Pactual" data={this.state.data.fundsChanged} broker="btgpactual" classes={classes} />
                     </Grid>
                     <Grid item xs={12} sm={12} md={6} xl={6}>
-                        <FundsChangedPaper title="XP Investimentos" data={this.state.data.fundsChanged} broker="xpi" classes={classes} />
+                        <FundsChangedPaper title="Modal Mais" data={this.state.data.fundsChanged} broker="modalmais" classes={classes} />
                     </Grid>
                 </Grid>
             </div >

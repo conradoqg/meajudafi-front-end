@@ -40,7 +40,7 @@ export default async (options, fromDate = new Date((new Date()).getFullYear(), 0
             }
         });
     }
-    const makeURL = (field, side) => `${PROTOCOL}//${API_URL}/icf_with_xf_and_bf_and_iry_and_f_of_last_year?select=${field},f_short_name,f_cnpj&${filterPart}&iry_dt_comptc=gte.${fromDate.toJSON().slice(0, 10)}&order=${field}.${side}&limit=5`;
+    const makeURL = (field, side) => `${PROTOCOL}//${API_URL}/icf_with_xf_and_bf_and_mf_and_iry_and_f_of_last_year?select=${field},f_short_name,f_cnpj&${filterPart}&iry_dt_comptc=gte.${fromDate.toJSON().slice(0, 10)}&order=${field}.${side}&limit=5`;
     const indicatorsObject = await allKeys({
         investment_return_top: fetch(makeURL(`iry_investment_return_${range}`, 'desc')),
         investment_return_bottom: fetch(makeURL(`iry_investment_return_${range}`, 'asc')),
