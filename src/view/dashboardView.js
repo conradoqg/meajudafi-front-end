@@ -12,6 +12,7 @@ import ShowChartIcon from '@material-ui/icons/ShowChart';
 import TableChartIcon from '@material-ui/icons/TableChart';
 import ScatterPlotIcon from '@material-ui/icons/ScatterPlot';
 import GithubCircleIcon from 'mdi-material-ui/GithubCircle';
+import withWidth, { isWidthUp } from '@material-ui/core/withWidth';
 import Grid from '@material-ui/core/Grid';
 import Hidden from '@material-ui/core/Hidden';
 import IndicatorsView from './indicatorsView';
@@ -64,6 +65,7 @@ const routes = [
         showInMenu: true,
         exact: true,
         icon: () => (<ShowChartIcon />),
+        widthUp: 'xs',
         main: (props, classes) => <IndicatorsView {...props} />
     },
     {
@@ -71,6 +73,7 @@ const routes = [
         name: 'Informações sobre o fundo',
         showInMenu: false,
         icon: () => (<TableChartIcon />),
+        widthUp: 'xs',
         main: (props, classes) => <FundListItemView {...props} basePath={'/funds'} />
     },
     {
@@ -78,6 +81,7 @@ const routes = [
         name: 'Lista de Fundos',
         showInMenu: true,
         icon: () => (<TableChartIcon />),
+        widthUp: 'xs',
         main: (props, classes) => <FundListView {...props} />
     },
     {
@@ -86,13 +90,16 @@ const routes = [
         name: 'Comparação de Fundos',
         showInMenu: true,
         icon: () => (<ScatterPlotIcon />),
+        widthUp: 'xs',
         main: (props, classes) => <FundComparisonView basePath={'/compare'} />
     },
     {
-        path: '/comparative',        
+        path: ['/comparative/:range/:sizeField/:yField/:xField', '/compare'],
+        linkTo: '/comparative/1y/irm_accumulated_networth/irm_investment_return_1y/irm_risk_1y',    
         name: 'Comparativo de Fundos',
         showInMenu: true,
         icon: () => (<ScatterPlotIcon />),
+        widthUp: 'sm',
         main: (props, classes) => <FundCompariveView basePath={'/comparative'} />
     }
 ];
@@ -141,7 +148,7 @@ class Dashboard extends React.Component {
                                 <Typography variant="h5" color="inherit" noWrap className={classes.toolbarTitle}>
                                     Me Ajuda FI
                                 </Typography>
-                                {routes.filter(route => route.showInMenu).map((route, index) => (
+                                {routes.filter(route => route.showInMenu).filter(route => isWidthUp(route.widthUp, this.props.width)).map((route, index) => (
                                     <MenuLink activeOnlyWhenExact={route.exact} to={route.linkTo ? route.linkTo : route.path} classes={classes} label={route.name} icon={route.icon} key={index} />
                                 ))}
                                 <Hidden smDown>
@@ -153,7 +160,7 @@ class Dashboard extends React.Component {
                         </AppBar>
                         <main className={classes.content}>
                             <Switch>
-                                {routes.map((route, index) => (
+                                {routes.filter(route => isWidthUp(route.widthUp, this.props.width)).map((route, index) => (
                                     <Route
                                         key={index}
                                         path={route.path}
@@ -166,7 +173,7 @@ class Dashboard extends React.Component {
                                         <div className={classes.appBarSpacer} />
                                         <Grid container spacing={16}>
                                             <Grid item xs={12}>
-                                                <Typography variant="title" align="center" noWrap>Página não encontrada.</Typography>
+                                                <Typography variant="h6" align="center" noWrap>Página não encontrada.</Typography>
                                             </Grid>
                                         </Grid>
                                     </div>)} />
@@ -194,4 +201,4 @@ Dashboard.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(Dashboard);
+export default withWidth()(withStyles(styles)(Dashboard));

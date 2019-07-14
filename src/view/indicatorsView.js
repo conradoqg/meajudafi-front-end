@@ -459,7 +459,7 @@ class IndicatorsView extends React.Component {
                                 <Tooltip enterTouchDelay={100} leaveTouchDelay={5000} title={
                                     <React.Fragment>
                                         <p>Lista de melhores e piores fundos de investimento. </p>
-                                        <p>Por padrão somente fundos listados na BTG Pactual e XP Investimentos são exibidos. No lado direito é possível alterar o filtro.</p>
+                                        <p>Por padrão somente fundos listados na BTG Pactual, XP Investimentos e Modal Mais são exibidos. No lado direito é possível alterar o filtro.</p>
                                     </React.Fragment>
                                 }>
                                     <Typography variant="h6" className={classes.withTooltip}>Fundos de Investimento</Typography>

@@ -498,7 +498,7 @@ class FundListView extends React.Component {
                                 <Tooltip enterTouchDelay={100} leaveTouchDelay={5000} title={
                                     <React.Fragment>
                                         <p>Lista de fundos de investimento com gráfico diário.</p>
-                                        <p>Por padrão somente fundos listados na BTG Pactual e XP Investimentos são exibidos. No lado esquerdo é possível procurar fundos pelo nome e no lado direito é possível alterar o filtro, ordem, intervalo e benchmark.</p>
+                                        <p>Por padrão somente fundos listados na BTG Pactual, XP Investimentos e Modal Mais são exibidos. No lado esquerdo é possível procurar fundos pelo nome e no lado direito é possível alterar o filtro, ordem, intervalo e benchmark.</p>
                                         <p>Clique no fundo para visualizar o gráfico.</p>
                                     </React.Fragment>
                                 }>
