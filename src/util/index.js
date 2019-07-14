@@ -61,6 +61,7 @@ export const formatters = {
     money: (value) => value == null || isNaN(value) || !isFinite(value) ? '-' : d3Format.format('$,.2f')(value),
     float: (value) => value == null || isNaN(value) || !isFinite(value) ? '-' : d3Format.format(',.2f')(value),
     date: (value) => value == null ? '-' : dayjs(value).format('L'),
+    month: (value) => value == null ? '-' : dayjs(value).format('MMM, YYYY'),
     capitalized: value => value.charAt(0).toUpperCase() + value.slice(1).toLowerCase(),
     field: {}
 };

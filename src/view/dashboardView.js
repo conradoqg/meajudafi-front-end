@@ -18,6 +18,7 @@ import IndicatorsView from './indicatorsView';
 import FundListView from './fundListView';
 import FundListItemView from './fundListItemView';
 import FundComparisonView from './fundComparisonView';
+import FundCompariveView from './fundComparativeView';
 import API from '../api';
 
 const styles = theme => ({
@@ -86,6 +87,13 @@ const routes = [
         showInMenu: true,
         icon: () => (<ScatterPlotIcon />),
         main: (props, classes) => <FundComparisonView basePath={'/compare'} />
+    },
+    {
+        path: '/comparative',        
+        name: 'Comparativo de Fundos',
+        showInMenu: true,
+        icon: () => (<ScatterPlotIcon />),
+        main: (props, classes) => <FundCompariveView basePath={'/comparative'} />
     }
 ];
 
