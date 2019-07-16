@@ -283,7 +283,7 @@ class FundComparativeView extends React.Component {
     }
 
     handleChartClick = (data) => {
-        this.props.history.push('/funds/' + data.points[0].data.id[data.points[0].pointIndex]);
+        if (data.event.ctrlKey) this.props.history.push('/funds/' + data.points[0].data.id[data.points[0].pointIndex]);
     }
 
     handleConfigChange = async event => {
@@ -445,6 +445,7 @@ class FundComparativeView extends React.Component {
                 range: yRange
             },
             hovermode: 'closest',
+            clickmode: 'select+event',
             // We'll use updatemenus (whose functionality includes menus as
             // well as buttons) to create a play button and a pause button.
             // The play button works by passing `null`, which indicates that
@@ -466,8 +467,8 @@ class FundComparativeView extends React.Component {
                     args: [null, {
                         mode: 'immediate',
                         fromcurrent: true,
-                        transition: { duration: 300 },
-                        frame: { duration: 500, redraw: false }
+                        transition: { duration: 1000 },
+                        frame: { duration: 2000, redraw: false }
                     }],
                     label: '>'
                 }, {
@@ -527,6 +528,8 @@ class FundComparativeView extends React.Component {
                                         <p>Comparativo de fundos de investimento sobre o tempo.</p>
                                         <p>Somente fundos listados na BTG Pactual, XP Investimentos e Modal Mais são exibidos.</p>
                                         <p>No lado direito é possível alterar os campos de X e Y, tamanho do ponto e o intervalo visualizado.</p>
+                                        <p>Selecione fundos clicando nele (e utilize o shift para adicionar outro a seleção).</p>
+                                        <p>Clique utilizando o &#60;CTRL&#62; para abrir detalhes do fundo.</p>
                                     </React.Fragment>
                                 }>
                                     <Typography variant="h5" className={classes.withTooltip}>Comparativo de Fundos</Typography>
