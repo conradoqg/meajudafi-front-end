@@ -1,6 +1,7 @@
+import dayjs from 'dayjs';
 import { PROTOCOL, API_URL } from './index';
 
-export default async (options, fromDate = new Date((new Date()).getFullYear(), 0, 1)) => {    
+export default async (options, fromDate = dayjs().subtract(1, 'month').toDate()) => {    
     const range = options.page === 0 ? `&limit=${options.rowsPerPage}` : `&offset=${(options.page * options.rowsPerPage) + 1}&limit=${options.rowsPerPage}`;
     const sort = `${options.sort.field}.${options.sort.order}`;
     let filterPart = '';

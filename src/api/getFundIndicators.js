@@ -1,7 +1,8 @@
 import allKeys from 'promise-results/allKeys';
+import dayjs from 'dayjs';
 import { PROTOCOL, API_URL } from './index';
 
-export default async (options, fromDate = new Date((new Date()).getFullYear(), 0, 1)) => {
+export default async (options, fromDate = dayjs().subtract(1, 'month').toDate()) => {
     const range = options.range;
     let filterPart = '';
     if (options.filter) {
