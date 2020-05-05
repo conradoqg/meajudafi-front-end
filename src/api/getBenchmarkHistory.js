@@ -10,8 +10,8 @@ export default async (benchmark, lastDaysOrFromDate) => {
         dateField = 'data';
     }
     else if (benchmark === 'bovespa') {
-        tablePart = 'wtd_ibov';
-        selectPart = 'data:date,valor:close';
+        tablePart = 'eod_historial_data';
+        selectPart = 'data:date,valor:adjusted_close';
         dateField = 'date';
     }
     else if (benchmark === 'dolar') {
