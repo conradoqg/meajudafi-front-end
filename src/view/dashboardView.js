@@ -20,6 +20,7 @@ import FundListView from './fundListView';
 import FundListItemView from './fundListItemView';
 import FundComparisonView from './fundComparisonView';
 import FundCompariveView from './fundComparativeView';
+import ProgressView from './progressView';
 import API from '../api';
 
 const styles = theme => ({
@@ -101,6 +102,14 @@ const routes = [
         icon: () => (<ScatterPlotIcon />),
         widthUp: 'sm',
         main: (props, classes) => <FundCompariveView basePath={'/comparative'} />
+    },
+    {
+        path: ['/progress'],        
+        name: 'Progresso de atualizacao',
+        showInMenu: false,
+        icon: () => (<ScatterPlotIcon />),
+        widthUp: 'sm',
+        main: (props, classes) => <ProgressView basePath={'/progress'} />
     }
 ];
 
@@ -185,7 +194,7 @@ class Dashboard extends React.Component {
                                         <p>A rentabilidade divulgada não é líquida de impostos.</p>
                                         <p>Fundos de investimento não contam com garantia do administrador, do gestor, de qualquer mecanismo de seguro ou fundo garantidor de crédito – FGC.</p>
                                         <p>Alguns fundos tem menos de 12 (doze) meses. Para avaliação da performance de um fundo de investimento, é recomendável a análise de, no mínimo, 12 (doze) meses.</p>
-                                        <p>Os dados são extraídos do site da CVM diariamente e podem conter erros.</p>
+                                        <p>Os dados são extraídos do site da CVM <Link to='/progress'>diariamente</Link> e podem conter erros.</p>
                                     </Typography>
                                 </Grid>
                             </Grid>

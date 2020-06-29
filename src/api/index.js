@@ -8,6 +8,7 @@ import getFundIndicators from './getFundIndicators';
 import getEconomyIndicators from './getEconomyIndicators';
 import getFundsChanged from './getFundsChanged';
 import getFundsTimeseries from './getFundsTimeseries';
+import getProgress from './getProgress';
 import isInMaintenanceMode from './isInMaintenanceMode';
 
 /* global process */
@@ -25,6 +26,7 @@ export default {
     getEconomyIndicators,
     getFundsChanged,
     getFundsTimeseries,
+    getProgress,
     isInMaintenanceMode
 };
 
