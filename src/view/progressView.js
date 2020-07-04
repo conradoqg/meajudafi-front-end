@@ -9,7 +9,6 @@ import Typography from '@material-ui/core/Typography';
 import ShowStateComponent from './component/showStateComponent';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import API from '../api';
-import * as Sentry from '@sentry/browser';
 
 const defaultTemplate = (progressTracker, prettyProgress) => {
     if (progressTracker.state.status === 'new')
