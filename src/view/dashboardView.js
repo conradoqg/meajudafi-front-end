@@ -11,7 +11,7 @@ import Button from '@material-ui/core/Button';
 import ShowChartIcon from '@material-ui/icons/ShowChart';
 import TableChartIcon from '@material-ui/icons/TableChart';
 import ScatterPlotIcon from '@material-ui/icons/ScatterPlot';
-import GithubCircleIcon from 'mdi-material-ui/GithubCircle';
+import GithubIcon from 'mdi-material-ui/Github';
 import withWidth, { isWidthUp } from '@material-ui/core/withWidth';
 import Grid from '@material-ui/core/Grid';
 import Hidden from '@material-ui/core/Hidden';
@@ -162,7 +162,7 @@ class Dashboard extends React.Component {
                                 ))}
                                 <Hidden smDown>
                                     <IconButton color="inherit" aria-label="Repositório no Github" href="https://github.com/conradoqg/cvm-fund-explorer-stack" target="_new" rel="noopener">
-                                        <GithubCircleIcon fontSize="default" />
+                                        <GithubIcon fontSize="default" />
                                     </IconButton>
                                 </Hidden>
                             </Toolbar>

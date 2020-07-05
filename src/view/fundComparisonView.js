@@ -15,6 +15,7 @@ import withWidth, { isWidthUp, isWidthDown } from '@material-ui/core/withWidth';
 import Hidden from '@material-ui/core/Hidden';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
+import TablePagination from '@material-ui/core/TablePagination';
 import { produce } from 'immer';
 import promisesEach from 'promise-results';
 import { withRouter } from 'react-router-dom';
@@ -104,6 +105,7 @@ const styles = theme => ({
 const emptyState = {
     data: {
         fundListSearch: [],
+        totalRows: null,
         fundListCompare: [],
         benchmark: {
             name: benchmarkOptions.find(benchmark => benchmark.name === 'cdi').displayName,
@@ -209,10 +211,12 @@ class FundComparisonView extends React.Component {
     handleSearchChange = async (search) => {
         const nextState = produce(this.state, draft => {
             draft.config.search = search;
+            draft.config.page = 0;
         });
 
         this.setState(produce(draft => {
-            draft.data.fundListSearch = null;
+            draft.data.fundListSearch = emptyState.data.fundListSearch;
+            draft.data.totalRows = emptyState.data.totalRows;
         }));
 
         try {
@@ -221,16 +225,72 @@ class FundComparisonView extends React.Component {
 
                 this.setState(produce(nextState, draft => {
                     draft.data.fundListSearch = result.data;
+                    draft.data.totalRows = result.totalRows;
                 }));
             } else {
                 this.setState(produce(nextState, draft => {
                     draft.data.fundListSearch = emptyState.data.fundListSearch;
+                    draft.data.totalRows = emptyState.data.totalRows;
                 }));
             }
         } catch (ex) {
             Sentry.captureException(ex);
             console.error(ex.message);
             this.setState(produce(draft => {
+                draft.data.fundListSearch = ex.message;
+            }));
+        }
+    }
+
+    handleChangePage = async (object, page) => {
+        this.setState(produce(draft => {
+            draft.data.fundListSearch = emptyState.data.fundListSearch;
+            draft.data.totalRows = emptyState.data.totalRows;            
+        }));
+
+        const nextState = produce(this.state, draft => {
+            draft.config.page = page;
+        });
+
+        try {
+            const result = await this.getFundList(nextState.config);
+
+            this.setState(produce(nextState, draft => {
+                draft.data.totalRows = result.totalRows;
+                draft.data.fundListSearch = result.data;
+            }));
+        } catch (ex) {
+            Sentry.captureException(ex);            
+            console.error(ex.message);
+            this.setState(produce(nextState, draft => {
+                draft.data.fundListSearch = ex.message;
+            }));
+        }
+    }
+
+    handleChangeRowsPerPage = async (event) => {
+        const nextState = produce(this.state, draft => {
+            draft.config.rowsPerPage = event.target.value;
+        });
+
+        this.setState(produce(draft => {
+            draft.config.rowsPerPage = emptyState.config.rowsPerPage;
+            draft.data.totalRows = emptyState.data.totalRows;
+            draft.data.fundListSearch = emptyState.data.fundList;
+        }));
+
+        try {
+            const result = await this.getFundList(nextState.config);
+
+            this.setState(produce(nextState, draft => {
+                draft.config.rowsPerPage = event.target.value;
+                draft.data.totalRows = result.totalRows;
+                draft.data.fundListSearch = result.data;
+            }));
+        } catch (ex) {
+            Sentry.captureException(ex);
+            console.error(ex.message);
+            this.setState(produce(nextState, draft => {
                 draft.data.fundListSearch = ex.message;
             }));
         }
@@ -376,7 +436,7 @@ class FundComparisonView extends React.Component {
 
             // Every state change results in the chart being updated
             // We don't check draft.data.fundListCompare for erros, because the chart can be shown without the funds (it's only necessary the benchmark data)
-            if (dataResults.benchmark && dataResults.benchmark instanceof Error){
+            if (dataResults.benchmark && dataResults.benchmark instanceof Error) {
                 Sentry.captureException(dataResults.benchmark);
                 draft.data.chartSmall = dataResults.benchmark;
                 draft.data.chartLarge = dataResults.benchmark;
@@ -396,12 +456,12 @@ class FundComparisonView extends React.Component {
 
         const fundsHistory = nextState.data.fundListCompare.filter(notErroredFunds).map(fund => fund.data);
         const fundsHeader = nextState.data.fundListCompare.filter(notErroredFunds).map(fund => fund.detail.name);
-        const benchmarksHistory =  notErroredBenchmark ? [nextState.data.benchmark.data] : [];
+        const benchmarksHistory = notErroredBenchmark ? [nextState.data.benchmark.data] : [];
         const benchmarkHeader = notErroredBenchmark ? [nextState.data.benchmark.name.toUpperCase()] : [];
         const benchmark = nextState.config.benchmark;
 
         const data = await statisticsServiceInstance.calculateCorrelationMatrix(fundsHistory, benchmarksHistory, benchmark);
-        nextState = produce(nextState, draft => {                        
+        nextState = produce(nextState, draft => {
             draft.data.correlationMatrix = {
                 headers: benchmarkHeader.concat(fundsHeader),
                 data
@@ -630,6 +690,25 @@ class FundComparisonView extends React.Component {
                                             </Grid>
                                         ))
                                     }
+                                    {this.state.data.totalRows ?
+                                        <TablePagination
+                                            component="div"
+                                            count={this.state.data.totalRows}
+                                            rowsPerPage={this.state.config.rowsPerPage}
+                                            page={this.state.config.page}
+                                            backIconButtonProps={{
+                                                'aria-label': 'Página Anterior',
+                                            }}
+                                            nextIconButtonProps={{
+                                                'aria-label': 'Próxima Página',
+                                            }}
+                                            onChangePage={this.handleChangePage}
+                                            onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                                            labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
+                                            labelRowsPerPage={'Registros por página:'}
+                                            rowsPerPageOptions={[5, 10, 25, 50, 100]}
+                                        />
+                                        : null}
                                 </Paper>
                             )}
                             isNull={() => (<Paper elevation={1} square={true} className={classes.filterPaperContent}><Typography variant="subtitle1" align="center"><CircularProgress className={classes.progress} /></Typography></Paper>)}
@@ -666,7 +745,7 @@ class FundComparisonView extends React.Component {
                             {(this.state.config.selectedTab === 1 && !isWidthDown('sm', this.props.width)) && <React.Fragment>
                                 <ShowStateComponent
                                     data={this.state.data.correlationMatrix}
-                                    hasData={() => {                                        
+                                    hasData={() => {
                                         return (
                                             <table className={classes.historyTable}>
                                                 <thead>

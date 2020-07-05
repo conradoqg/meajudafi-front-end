@@ -65,6 +65,7 @@ class FundSearchComponent extends React.Component {
                     onChange={this.handleSearchChange}
                     onKeyPress={this.handleKeyPress}
                     className={classes.input}
+                    autoComplete="new-search"                    
                     fullWidth
                     startAdornment={
                         <InputAdornment position="start">
