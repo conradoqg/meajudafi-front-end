@@ -8,6 +8,7 @@ import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import ShowStateComponent from './component/showStateComponent';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import { formatters } from '../util';
 import API from '../api';
 
 const defaultTemplate = (progressTracker, prettyProgress) => {
@@ -30,6 +31,9 @@ const styles = theme => ({
     filterPaperContent: {
         padding: theme.spacing.unit * 2
     },
+    progressContent: {
+        padding: theme.spacing.unit * 2
+    },
     progress: {
         margin: theme.spacing.unit * 2
     }
@@ -37,7 +41,9 @@ const styles = theme => ({
 
 const emptyState = {
     data: {
-        progress: null
+        progress: null,
+        lastKnownStart: null,
+        lastKnownFinish: null
     }
 };
 
@@ -56,8 +62,14 @@ class ProgressView extends React.Component {
     updateData = async (nextState) => {
         const progress = await this.getProgress();
 
+        const cvmDataWorkerProgresss = progress.find(item => item.path === 'CVMDataWorker');
+        const xpiFundWorkerProgresss = progress.find(item => item.path === 'XPIFundWorker');
+
+
         this.setState(produce(nextState, draft => {
             draft.data.progress = progress;
+            draft.data.lastKnownStart = cvmDataWorkerProgresss && cvmDataWorkerProgresss.data.progressTracker.state.start;
+            draft.data.lastKnownFinish = xpiFundWorkerProgresss && xpiFundWorkerProgresss.data.progressTracker.state.finish;
         }));
     }
 
@@ -75,17 +87,31 @@ class ProgressView extends React.Component {
                     <Grid item xs>
                         <Grid container alignItems="center" spacing={8}>
                             <Grid item>
-                                <ShowStateComponent
-                                    data={this.state.data.progress}
-                                    hasData={() => this.state.data.progress.map(item => {
-                                        return (<Typography key={item.path} style={{ fontFamily: "monospace" }}>{defaultTemplate(item.data.progressTracker, item.data.prettyProgressTracker)}</Typography>);
-                                    })}
-                                    isNull={() => (<Paper elevation={1} square={true} className={classes.filterPaperContent}><Typography variant="subtitle1" align="center"><CircularProgress className={classes.progress} /></Typography></Paper>)}
-                                    isErrored={() => (<Paper elevation={1} square={true} className={classes.filterPaperContent}><Typography variant="subtitle1" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography></Paper>)}
-                                    isEmpty={() => (<Paper elevation={1} square={true} className={classes.filterPaperContent}><Typography variant="subtitle1" align="center">Sem dados à exibir</Typography></Paper>)}
-                                />
+                                <Typography variant="h5">Progresso de atualização</Typography>
+                            </Grid>
+                            <Grid item>
+                                <Typography variant="body">(Último início: {this.state.data.lastKnownStart ? formatters.date(this.state.data.lastKnownStart) : 'Desconhecido'} - Último fim: {this.state.data.lastKnownFinish ? formatters.date(this.state.data.lastKnownFinish) : 'Desconhecido'})</Typography>
                             </Grid>
                         </Grid>
+                    </Grid>
+                </Grid>
+                <Grid container spacing={16} alignItems="center">
+                    <Grid item xs>
+                        <ShowStateComponent
+                            data={this.state.data.progress}
+                            hasData={() => (<Paper elevation={1} square={true}>
+                                <Grid container className={classes.progressContent}>
+                                    <Grid item>
+                                        <Typography style={{ fontFamily: "monospace" }}>
+                                            {this.state.data.progress.filter(item => item.data.progressTracker.state.start > this.state.data.lastKnownStart).map(item => (<span key={item.path}>{defaultTemplate(item.data.progressTracker, item.data.prettyProgressTracker)}<br /></span>))}
+                                        </Typography>
+                                    </Grid>
+                                </Grid>
+                            </Paper>)}
+                            isNull={() => (<Paper elevation={1} square={true} className={classes.filterPaperContent}><Typography variant="subtitle1" align="center"><CircularProgress className={classes.progress} /></Typography></Paper>)}
+                            isErrored={() => (<Paper elevation={1} square={true} className={classes.filterPaperContent}><Typography variant="subtitle1" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography></Paper>)}
+                            isEmpty={() => (<Paper elevation={1} square={true} className={classes.filterPaperContent}><Typography variant="subtitle1" align="center">Sem dados à exibir</Typography></Paper>)}
+                        />
                     </Grid>
                 </Grid>
             </div >

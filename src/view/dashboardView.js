@@ -105,7 +105,7 @@ const routes = [
     },
     {
         path: ['/progress'],        
-        name: 'Progresso de atualizacao',
+        name: 'Progresso de atualização',
         showInMenu: false,
         icon: () => (<ScatterPlotIcon />),
         widthUp: 'sm',
