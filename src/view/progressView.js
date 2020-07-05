@@ -90,7 +90,7 @@ class ProgressView extends React.Component {
                                 <Typography variant="h5">Progresso de atualização</Typography>
                             </Grid>
                             <Grid item>
-                                <Typography variant="body">(Último início: {this.state.data.lastKnownStart ? formatters.date(this.state.data.lastKnownStart) : 'Desconhecido'} - Último fim: {this.state.data.lastKnownFinish ? formatters.date(this.state.data.lastKnownFinish) : 'Desconhecido'})</Typography>
+                                <Typography variant="body">(Último início: {this.state.data.lastKnownStart ? formatters.dateWithTime(this.state.data.lastKnownStart) : 'Desconhecido'} - Último fim: {this.state.data.lastKnownFinish ? formatters.dateWithTime(this.state.data.lastKnownFinish) : 'Desconhecido'})</Typography>
                             </Grid>
                         </Grid>
                     </Grid>
