@@ -22,7 +22,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import Select from '@material-ui/core/Select';
 import Tooltip from '@material-ui/core/Tooltip';
 import Hidden from '@material-ui/core/Hidden';
-import withWidth from '@material-ui/core/withWidth';
+import withWidth, { isWidthUp } from '@material-ui/core/withWidth';
 import { produce } from 'immer';
 import promisesEach from 'promise-results';
 import API from '../api';
@@ -669,7 +669,7 @@ class FundListView extends React.Component {
                                 onChangePage={this.handleChangePage}
                                 onChangeRowsPerPage={this.handleChangeRowsPerPage}
                                 labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
-                                labelRowsPerPage={'Registros por página:'}
+                                labelRowsPerPage={isWidthUp('sm', this.props.width, true) ? 'Registros por página:' : ''}
                                 rowsPerPageOptions={[5, 10, 25, 50, 100]}
                             />
                             : null}

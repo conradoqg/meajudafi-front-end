@@ -705,7 +705,7 @@ class FundComparisonView extends React.Component {
                                             onChangePage={this.handleChangePage}
                                             onChangeRowsPerPage={this.handleChangeRowsPerPage}
                                             labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
-                                            labelRowsPerPage={'Registros por página:'}
+                                            labelRowsPerPage={isWidthUp('sm', this.props.width, true) ? 'Registros por página:' : ''}
                                             rowsPerPageOptions={[5, 10, 25, 50, 100]}
                                         />
                                         : null}
