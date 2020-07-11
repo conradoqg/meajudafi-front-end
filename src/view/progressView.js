@@ -52,21 +52,21 @@ class ProgressView extends React.Component {
     interval = null;
 
     async componentDidMount() {
-        this.interval = setInterval(() => this.updateData(this.state), 2000);
+        this.interval = setInterval(() => this.updateData(), 2000);
     }
 
     async componentWillUnmount() {
         this.interval && clearInterval(this.interval);
     }
 
-    updateData = async (nextState) => {
+    updateData = async () => {
         const progress = await this.getProgress();
 
         const cvmDataWorkerProgresss = progress.find(item => item.path === 'CVMDataWorker');
         const xpiFundWorkerProgresss = progress.find(item => item.path === 'XPIFundWorker');
 
 
-        this.setState(produce(nextState, draft => {
+        this.setState(produce(draft => {
             draft.data.progress = progress;
             draft.data.lastKnownStart = cvmDataWorkerProgresss && cvmDataWorkerProgresss.data.progressTracker.state.start;
             draft.data.lastKnownFinish = xpiFundWorkerProgresss && xpiFundWorkerProgresss.data.progressTracker.state.finish;
