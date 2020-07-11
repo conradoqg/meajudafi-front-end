@@ -34,12 +34,12 @@ const styles = theme => ({
         flexGrow: 1,
     },
     paper: {
-        padding: theme.spacing.unit * 2,
+        padding: theme.spacing(2),
         textAlign: 'center',
         color: theme.palette.text.secondary,
     },
     optionsBar: {
-        padding: theme.spacing.unit * 2
+        padding: theme.spacing(2)
     },
     indicatorValuePositive: {
         color: '#3cb44b'
@@ -51,21 +51,20 @@ const styles = theme => ({
         color: '#e6194B'
     },
     select: {
-        margin: theme.spacing.unit
+        margin: theme.spacing(1)
     },
     cropTextNormal: {
         whiteSpace: 'nowrap',
         overflow: 'hidden',
         textOverflow: 'ellipsis'
     },
-    cropText: {
-        maxWidth: '20em',
+    cropText: {        
         whiteSpace: 'nowrap',
         overflow: 'hidden',
         textOverflow: 'ellipsis'
     },
     listItemText: {
-        flex: '1 1 auto',
+        display: 'flex',
         minWidth: 0,
         padding: '0 50px',
         '&:first-child': {
@@ -397,9 +396,9 @@ class IndicatorsView extends React.Component {
         return (
             <div>
                 <div className={classes.appBarSpacer} />
-                <Grid container spacing={16} alignItems="center">
+                <Grid container spacing={2} alignItems="center">
                     <Grid item xs>
-                        <Grid container alignItems="center" spacing={8}>
+                        <Grid container alignItems="center" spacing={1}>
                             <Grid item>
                                 <Tooltip enterTouchDelay={100} leaveTouchDelay={5000} title={
                                     <React.Fragment>
@@ -413,7 +412,7 @@ class IndicatorsView extends React.Component {
                         </Grid>
                     </Grid>
                     <Grid item>
-                        <Grid container alignItems="center" spacing={8}>
+                        <Grid container alignItems="center" spacing={1}>
                             <Grid item>
                                 <Select
                                     value={this.state.config.range}
@@ -429,12 +428,12 @@ class IndicatorsView extends React.Component {
                         </Grid>
                     </Grid>
                 </Grid>
-                <Grid container spacing={16} alignItems="center">
+                <Grid container spacing={2} alignItems="center">
                     <Grid item xs>
                         <Typography variant="h6">Mercado</Typography>
                     </Grid>
                 </Grid>
-                <Grid container spacing={16}>
+                <Grid container spacing={2}>
                     <Grid item xs={12}>
                         <Paper className={classes.paper} elevation={1} square={true}>
                             <Hidden smDown>
@@ -452,9 +451,9 @@ class IndicatorsView extends React.Component {
                         </Paper>
                     </Grid>
                 </Grid>
-                <Grid container spacing={16} alignItems="center">
+                <Grid container spacing={2} alignItems="center">
                     <Grid item xs>
-                        <Grid container alignItems="center" spacing={8}>
+                        <Grid container alignItems="center" spacing={1}>
                             <Grid item>
                                 <Tooltip enterTouchDelay={100} leaveTouchDelay={5000} title={
                                     <React.Fragment>
@@ -469,7 +468,7 @@ class IndicatorsView extends React.Component {
                     </Grid>
                     <Hidden smDown>
                         <Grid item>
-                            <Grid container alignItems="center" spacing={8}>
+                            <Grid container alignItems="center" spacing={1}>
                                 <Grid item>
                                     <IconButton
                                         aria-label="Filtro"
@@ -492,7 +491,7 @@ class IndicatorsView extends React.Component {
                         </Grid>
                     </Grid>
                 </Hidden>
-                <Grid container spacing={16} alignItems="center">
+                <Grid container spacing={2} alignItems="center">
                     <Grid item xs={12} sm={6} md={3} xl={3}>
                         <IndicatorPaper title="Desempenho" field="investment_return" range={this.state.config.range} data={this.state.data.fundIndicators} classes={classes} />
                     </Grid>
@@ -506,9 +505,9 @@ class IndicatorsView extends React.Component {
                         <IndicatorPaper title="Risco" field="risk" range={this.state.config.range} data={this.state.data.fundIndicators} classes={classes} inverted />
                     </Grid>
                 </Grid>
-                <Grid container spacing={16} alignItems="center">
+                <Grid container spacing={2} alignItems="center">
                     <Grid item xs>
-                        <Grid container alignItems="center" spacing={8}>
+                        <Grid container alignItems="center" spacing={1}>
                             <Grid item>
                                 <Tooltip enterTouchDelay={100} leaveTouchDelay={5000} title={
                                     <React.Fragment>
@@ -523,7 +522,7 @@ class IndicatorsView extends React.Component {
                         </Grid>
                     </Grid>
                     <Grid item>
-                        <Grid container alignItems="center" spacing={8}>
+                        <Grid container alignItems="center" spacing={1}>
                             <Grid item>
                                 <Select
                                     value={this.state.config.changesRange}
@@ -539,7 +538,7 @@ class IndicatorsView extends React.Component {
                         </Grid>
                     </Grid>
                 </Grid>
-                <Grid container spacing={16}>                    
+                <Grid container spacing={2}>                    
                     <Grid item xs={12} sm={12} md={6} xl={6}>
                         <FundsChangedPaper title="XP Investimentos" data={this.state.data.fundsChanged} broker="xpi" classes={classes} />
                     </Grid>
@@ -582,27 +581,27 @@ const IndicatorPaper = (props) => {
                             <div key={index}>
                                 <ListItem divider>
                                     <ListItemText disableTypography classes={{ root: classes.listItemText }}>
-                                        <Typography component="span" className={classes.cropText}><Link to={'/funds/' + indicator.cnpj} className={classes.link}>{indicator.name}</Link></Typography>
+                                        <Typography variant="body2" component="span" className={classes.cropText}><Link to={'/funds/' + indicator.cnpj} className={classes.link}>{indicator.name}</Link></Typography>
                                     </ListItemText>
                                     <ListItemSecondaryAction>
-                                        <Typography component="span" className={getClassForValue(indicator.value)}>{formatters.percentage(indicator.value)}</Typography>
+                                        <Typography variant="body2" component="span" className={getClassForValue(indicator.value)}>{formatters.percentage(indicator.value)}</Typography>
                                     </ListItemSecondaryAction>
                                 </ListItem>
                             </div>
                         ));
                         const divider = (< ListItem divider >
                             <ListItemText disableTypography={true}>
-                                <Typography component="span" align="center">...</Typography>
+                                <Typography variant="body2" component="span" align="center">...</Typography>
                             </ListItemText>
                         </ListItem>);
                         const negative = data[range][field]['bottom'].map((indicator, index) => (
                             <div key={index}>
                                 <ListItem divider>
                                     <ListItemText disableTypography classes={{ root: classes.listItemText }}>
-                                        <Typography component="span" className={classes.cropText}><Link to={'/funds/' + indicator.cnpj} className={classes.link}>{indicator.name}</Link></Typography>
+                                        <Typography variant="body2" component="span" className={classes.cropText}><Link to={'/funds/' + indicator.cnpj} className={classes.link}>{indicator.name}</Link></Typography>
                                     </ListItemText>
                                     <ListItemSecondaryAction>
-                                        <Typography component="span" className={getClassForValue(indicator.value)}>{formatters.percentage(indicator.value)}</Typography>
+                                        <Typography variant="body2" component="span" className={getClassForValue(indicator.value)}>{formatters.percentage(indicator.value)}</Typography>
                                     </ListItemSecondaryAction>
                                 </ListItem>
                             </div>
@@ -632,19 +631,19 @@ const FundsChangedPaper = (props) => {
                 </Grid>
             </Paper>
             <Paper className={classes.paper} elevation={1} square={true}>
-                <Grid container spacing={8} alignItems="center" justify="center">
+                <Grid container spacing={1} alignItems="center" justify="center">
                     <ShowStateComponent
                         data={data}
                         hasData={() => {
                             return data[broker].map((change, index) => (
                                 <React.Fragment key={index}>
                                     <Grid item xs={12}>
-                                        <Grid container spacing={8}>
+                                        <Grid container spacing={1}>
                                             <Grid item xs={12} sm={12} md={6} xl={6}>
-                                                <Typography component="span" align="left" className={classes.cropTextNormal}>{formatters.date(change.date)} - <Link to={'/funds/' + change.cnpj} className={classes.link}>{change.name}</Link></Typography>
+                                                <Typography variant="body2" component="span" align="left" className={classes.cropTextNormal}>{formatters.date(change.date)} - <Link to={'/funds/' + change.cnpj} className={classes.link}>{change.name}</Link></Typography>
                                             </Grid>
                                             <Grid item xs={12} sm={12} md={6} xl={6}>
-                                                {change.changes.map((fieldChange, index) => (<Typography key={index} component="span" align="right">{fieldChange}</Typography>))}
+                                                {change.changes.map((fieldChange, index) => (<Typography variant="body2" key={index} component="span" align="right">{fieldChange}</Typography>))}
                                             </Grid>
                                         </Grid>
                                     </Grid>

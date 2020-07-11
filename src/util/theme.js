@@ -1,15 +1,9 @@
 import { createMuiTheme } from '@material-ui/core/styles';
 
-const defaultTheme = createMuiTheme({
-    typography: {
-        useNextVariants: true,
-    },
+const defaultTheme = createMuiTheme({    
 });
 
-const theme = createMuiTheme({
-    typography: {
-        useNextVariants: true,
-    },
+const theme = createMuiTheme({    
     overrides: {
         MuiTooltip: {
             tooltip: {

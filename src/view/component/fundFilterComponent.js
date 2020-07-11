@@ -18,7 +18,7 @@ setAutoFreeze(false);
 
 const styles = theme => ({
     filterPaperContent: {
-        padding: theme.spacing.unit * 2
+        padding: theme.spacing(2)
     }
 });
 
@@ -101,7 +101,7 @@ class FundFilterComponent extends React.Component {
         return (
             <div className={classes.filterPaperContent}>
                 <Typography variant="h6" align="center" gutterBottom>Filtros</Typography>
-                <Grid container spacing={24}>
+                <Grid container spacing={3}>
                     <Grid item xs={3}>
                         <Typography variant="subtitle1" align="center" gutterBottom>Classe:</Typography>
                         <Select
@@ -109,7 +109,7 @@ class FundFilterComponent extends React.Component {
                             displayEmpty
                             value={this.state.config.filter.icf_classe}
                             onChange={this.handleFilterOptionsChange('icf_classe')}
-                            input={<Input id="select-multiple-placeholder" />}
+                            input={<Input id="icf_classe_input" />}
                             renderValue={selected => selected.length === 0 ? <em>Todos</em> : selected.map(item => this.state.data.filterOptions.icf_classe.options.find(clazz => clazz.value === item).displayName).join(', ')}
                             fullWidth>
                             {this.state.data.filterOptions.icf_classe.options.map(option => (
@@ -126,7 +126,7 @@ class FundFilterComponent extends React.Component {
                             multiple
                             value={this.state.config.filter.icf_sit}
                             onChange={this.handleFilterOptionsChange('icf_sit')}
-                            input={<Input id="select-multiple-checkbox" />}
+                            input={<Input id="icf_sit_input" />}
                             renderValue={selected => selected.map(item => this.state.data.filterOptions.icf_sit.options.find(clazz => clazz.value === item).displayName).join(', ')}
                             fullWidth>
                             {this.state.data.filterOptions.icf_sit.options.map(classOption => (
@@ -143,7 +143,7 @@ class FundFilterComponent extends React.Component {
                             multiple
                             value={this.state.config.filter.icf_condom}
                             onChange={this.handleFilterOptionsChange('icf_condom')}
-                            input={<Input id="select-multiple-checkbox" />}
+                            input={<Input id="icf_condom_input" />}
                             renderValue={selected => selected.map(item => this.state.data.filterOptions.icf_condom.options.find(clazz => clazz.value === item).displayName).join(', ')}
                             fullWidth>
                             {this.state.data.filterOptions.icf_condom.options.map(classOption => (
@@ -160,7 +160,7 @@ class FundFilterComponent extends React.Component {
                             multiple
                             value={this.state.config.filter.icf_fundo_cotas}
                             onChange={this.handleFilterOptionsChange('icf_fundo_cotas')}
-                            input={<Input id="select-multiple-checkbox" />}
+                            input={<Input id="icf_fundo_cotas_input" />}
                             renderValue={selected => selected.map(item => this.state.data.filterOptions.icf_fundo_cotas.options.find(clazz => clazz.value === item).displayName).join(', ')}
                             fullWidth>
                             {this.state.data.filterOptions.icf_fundo_cotas.options.map(classOption => (
@@ -177,7 +177,7 @@ class FundFilterComponent extends React.Component {
                             multiple
                             value={this.state.config.filter.icf_fundo_exclusivo}
                             onChange={this.handleFilterOptionsChange('icf_fundo_exclusivo')}
-                            input={<Input id="select-multiple-checkbox" />}
+                            input={<Input id="icf_fundo_exclusivo_input" />}
                             renderValue={selected => selected.map(item => this.state.data.filterOptions.icf_fundo_exclusivo.options.find(clazz => clazz.value === item).displayName).join(', ')}
                             fullWidth>
                             {this.state.data.filterOptions.icf_fundo_exclusivo.options.map(classOption => (
@@ -194,7 +194,7 @@ class FundFilterComponent extends React.Component {
                             multiple
                             value={this.state.config.filter.icf_rentab_fundo}
                             onChange={this.handleFilterOptionsChange('icf_rentab_fundo')}
-                            input={<Input id="select-multiple-checkbox" />}
+                            input={<Input id="icf_rentab_fundo_input" />}
                             renderValue={selected => selected.map(item => this.state.data.filterOptions.icf_rentab_fundo.options.find(clazz => clazz.value === item).displayName).join(', ')}
                             fullWidth>
                             {this.state.data.filterOptions.icf_rentab_fundo.options.map(classOption => (
@@ -207,7 +207,7 @@ class FundFilterComponent extends React.Component {
                     </Grid>
                     <Grid item xs={3}>
                         <Typography variant="subtitle1" align="center" gutterBottom>Patrimonio:</Typography>
-                        <Grid container spacing={24}>
+                        <Grid container spacing={3}>
                             <Grid item xs={6}>
                                 <Input
                                     id="iry_accumulated_networth-from"
@@ -236,7 +236,7 @@ class FundFilterComponent extends React.Component {
                     </Grid>
                     <Grid item xs={3}>
                         <Typography variant="subtitle1" align="center" gutterBottom>Cotistas:</Typography>
-                        <Grid container spacing={24}>
+                        <Grid container spacing={3}>
                             <Grid item xs={6}>
                                 <Input
                                     id="iry_accumulated_quotaholders-from"
@@ -265,7 +265,7 @@ class FundFilterComponent extends React.Component {
                     </Grid>
                     <Grid item xs={3}>
                         <Typography variant="subtitle1" align="center" gutterBottom>Desempenho 1A:</Typography>
-                        <Grid container spacing={24}>
+                        <Grid container spacing={3}>
                             <Grid item xs={6}>
                                 <Input
                                     id="iry_investment_return_1y-from"
@@ -294,7 +294,7 @@ class FundFilterComponent extends React.Component {
                     </Grid>
                     <Grid item xs={3}>
                         <Typography variant="subtitle1" align="center" gutterBottom>Desempenho 2A:</Typography>
-                        <Grid container spacing={24}>
+                        <Grid container spacing={3}>
                             <Grid item xs={6}>
                                 <Input
                                     id="iry_investment_return_2y-from"
@@ -323,7 +323,7 @@ class FundFilterComponent extends React.Component {
                     </Grid>
                     <Grid item xs={3}>
                         <Typography variant="subtitle1" align="center" gutterBottom>Desempenho 3A:</Typography>
-                        <Grid container spacing={24}>
+                        <Grid container spacing={3}>
                             <Grid item xs={6}>
                                 <Input
                                     id="iry_investment_return_3y-from"
@@ -352,7 +352,7 @@ class FundFilterComponent extends React.Component {
                     </Grid>
                     <Grid item xs={3}>
                         <Typography variant="subtitle1" align="center" gutterBottom>Risco 1A:</Typography>
-                        <Grid container spacing={24}>
+                        <Grid container spacing={3}>
                             <Grid item xs={6}>
                                 <Input
                                     id="iry_risk_1y-from"
@@ -381,7 +381,7 @@ class FundFilterComponent extends React.Component {
                     </Grid>
                     <Grid item xs={3}>
                         <Typography variant="subtitle1" align="center" gutterBottom>Risco 2A:</Typography>
-                        <Grid container spacing={24}>
+                        <Grid container spacing={3}>
                             <Grid item xs={6}>
                                 <Input
                                     id="iry_risk_2y-from"
@@ -410,7 +410,7 @@ class FundFilterComponent extends React.Component {
                     </Grid>
                     <Grid item xs={3}>
                         <Typography variant="subtitle1" align="center" gutterBottom>Risco 3A:</Typography>
-                        <Grid container spacing={24}>
+                        <Grid container spacing={3}>
                             <Grid item xs={6}>
                                 <Input
                                     id="iry_risk_3y-from"
@@ -438,7 +438,7 @@ class FundFilterComponent extends React.Component {
                         </Grid>
                     </Grid>
                     <Grid item xs={3} align="center">
-                        <Grid container spacing={24}>
+                        <Grid container spacing={3}>
                             <Grid item xs={6}>
                                 <FormControlLabel
                                     control={

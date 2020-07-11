@@ -29,13 +29,13 @@ const defaultTemplate = (progressTracker, prettyProgress) => {
 const styles = theme => ({
     appBarSpacer: theme.mixins.toolbar,
     filterPaperContent: {
-        padding: theme.spacing.unit * 2
+        padding: theme.spacing(2)
     },
     progressContent: {
-        padding: theme.spacing.unit * 2
+        padding: theme.spacing(2)
     },
     progress: {
-        margin: theme.spacing.unit * 2
+        margin: theme.spacing(2)
     }
 });
 
@@ -83,26 +83,26 @@ class ProgressView extends React.Component {
         return (
             <div>
                 <div className={classes.appBarSpacer} />
-                <Grid container spacing={16} alignItems="center">
+                <Grid container spacing={2} alignItems="center">
                     <Grid item xs>
-                        <Grid container alignItems="center" spacing={8}>
+                        <Grid container alignItems="center" spacing={1}>
                             <Grid item>
                                 <Typography variant="h5">Progresso de atualização</Typography>
                             </Grid>
                             <Grid item>
-                                <Typography variant="body">(Último início: {this.state.data.lastKnownStart ? formatters.dateWithTime(this.state.data.lastKnownStart) : 'Desconhecido'} - Último fim: {this.state.data.lastKnownFinish ? formatters.dateWithTime(this.state.data.lastKnownFinish) : 'Desconhecido'})</Typography>
+                                <Typography variant="body2">(Último início: {this.state.data.lastKnownStart ? formatters.dateWithTime(this.state.data.lastKnownStart) : 'Desconhecido'} - Último fim: {this.state.data.lastKnownFinish ? formatters.dateWithTime(this.state.data.lastKnownFinish) : 'Desconhecido'})</Typography>
                             </Grid>
                         </Grid>
                     </Grid>
                 </Grid>
-                <Grid container spacing={16} alignItems="center">
+                <Grid container spacing={2} alignItems="center">
                     <Grid item xs>
                         <ShowStateComponent
                             data={this.state.data.progress}
                             hasData={() => (<Paper elevation={1} square={true}>
                                 <Grid container className={classes.progressContent}>
                                     <Grid item>
-                                        <Typography style={{ fontFamily: "monospace" }}>
+                                        <Typography variant="body2" style={{ fontFamily: "monospace" }}>
                                             {this.state.data.progress.filter(item => item.data.progressTracker.state.start > this.state.data.lastKnownStart).map(item => (<span key={item.path}>{defaultTemplate(item.data.progressTracker, item.data.prettyProgressTracker)}<br /></span>))}
                                         </Typography>
                                     </Grid>

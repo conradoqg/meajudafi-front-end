@@ -21,10 +21,10 @@ const Plot = createPlotlyComponent(Plotly);
 
 const styles = theme => ({
     select: {
-        margin: theme.spacing.unit
+        margin: theme.spacing(1)
     },
     chart: {
-        padding: theme.spacing.unit * 2
+        padding: theme.spacing(2)
     },
     withTooltip: theme.withTooltip,
     appBarSpacer: theme.mixins.toolbar,
@@ -519,9 +519,9 @@ class FundComparativeView extends React.Component {
         return (
             <React.Fragment>
                 <div className={classes.appBarSpacer} />
-                <Grid container spacing={16} alignItems="center">
+                <Grid container spacing={2} alignItems="center">
                     <Grid item xs>
-                        <Grid container alignItems="center" spacing={8}>
+                        <Grid container alignItems="center" spacing={1}>
                             <Grid item>
                                 <Tooltip enterTouchDelay={100} leaveTouchDelay={5000} title={
                                     <React.Fragment>
@@ -538,7 +538,7 @@ class FundComparativeView extends React.Component {
                         </Grid>
                     </Grid>
                     <Grid item>
-                        <Grid container alignItems="center" spacing={8}>
+                        <Grid container alignItems="center" spacing={1}>
                             <Grid item>
                                 <Select
                                     value={this.state.config.xField}
@@ -596,7 +596,7 @@ class FundComparativeView extends React.Component {
                         </Grid>
                     </Grid>
                 </Grid>
-                <Grid container spacing={16}>
+                <Grid container spacing={2}>
                     <Grid item xs>
                         <Paper elevation={1} square={true} className={classes.chart} >
                             <ShowStateComponent

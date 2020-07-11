@@ -24,10 +24,10 @@ import * as Sentry from '@sentry/browser';
 
 const styles = theme => ({
     select: {
-        margin: theme.spacing.unit
+        margin: theme.spacing(1)
     },
     chart: {
-        padding: theme.spacing.unit * 2
+        padding: theme.spacing(2)
     },
     withTooltip: theme.withTooltip,
     link: theme.link,
@@ -405,9 +405,9 @@ class FundListItemView extends React.Component {
         return (
             <div>
                 <div className={classes.appBarSpacer} />
-                <Grid container spacing={16} alignItems="center">
+                <Grid container spacing={2} alignItems="center">
                     <Grid item xs>
-                        <Grid container alignItems="center" spacing={8}>
+                        <Grid container alignItems="center" spacing={1}>
                             <Grid item>
                                 <Tooltip enterTouchDelay={100} leaveTouchDelay={5000} title={
                                     <React.Fragment>
@@ -421,7 +421,7 @@ class FundListItemView extends React.Component {
                         </Grid>
                     </Grid>
                     <Grid item>
-                        <Grid container alignItems="center" spacing={8}>
+                        <Grid container alignItems="center" spacing={1}>
                             <Grid item>
                                 <Select
                                     value={this.state.config.benchmark}
@@ -449,37 +449,37 @@ class FundListItemView extends React.Component {
                         </Grid>
                     </Grid>
                 </Grid>
-                <Grid container spacing={16} alignItems="center">
+                <Grid container spacing={2} alignItems="center">
                     <Grid item xs>
                         <Typography variant="h6">Informações Gerais</Typography>
                     </Grid>
                 </Grid>
-                <Grid container spacing={16}>
+                <Grid container spacing={2}>
                     <Grid item xs>
                         <Paper elevation={1} square={true} className={classes.chart} >
                             <ShowStateComponent
                                 data={this.state.data.fund}
                                 hasData={() => (
                                     <React.Fragment>
-                                        <Grid container spacing={16}>
+                                        <Grid container spacing={2}>
                                             <Grid item xs={12}>
                                                 <Typography variant="subtitle1" gutterBottom><b>CVM</b></Typography>
                                             </Grid>
                                         </Grid>
-                                        <Grid container spacing={16}>
-                                            <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography><b>CNPJ:</b> {formatters.field['f_cnpj'](this.state.data.fund.f_cnpj)}</Typography></Grid>
-                                            <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography><b>Classe:</b> {formatters.field['icf_classe'](this.state.data.fund.icf_classe)}</Typography></Grid>
-                                            <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography><b>Situação:</b> {formatters.field['icf_sit'](this.state.data.fund.icf_sit)}</Typography></Grid>
-                                            <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography><b>Fundo de condomínio:</b> {formatters.field['icf_condom'](this.state.data.fund.icf_condom)}</Typography></Grid>
-                                            <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography><b>Fundo de cotas:</b> {formatters.field['icf_fundo_cotas'](this.state.data.fund.icf_fundo_cotas)}</Typography></Grid>
-                                            <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography><b>Fundo exclusivo:</b> {formatters.field['icf_fundo_exclusivo'](this.state.data.fund.icf_fundo_exclusivo)}</Typography></Grid>
-                                            <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography><b>Benchmark:</b> {formatters.field['icf_rentab_fundo'](this.state.data.fund.icf_rentab_fundo)}</Typography></Grid>
-                                            <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography><b>Patrimônio:</b> {formatters.field['icf_vl_patrim_liq'](this.state.data.fund.icf_vl_patrim_liq)}</Typography></Grid>
+                                        <Grid container spacing={2}>
+                                            <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography variant="body2"><b>CNPJ:</b> {formatters.field['f_cnpj'](this.state.data.fund.f_cnpj)}</Typography></Grid>
+                                            <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography variant="body2"><b>Classe:</b> {formatters.field['icf_classe'](this.state.data.fund.icf_classe)}</Typography></Grid>
+                                            <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography variant="body2"><b>Situação:</b> {formatters.field['icf_sit'](this.state.data.fund.icf_sit)}</Typography></Grid>
+                                            <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography variant="body2"><b>Fundo de condomínio:</b> {formatters.field['icf_condom'](this.state.data.fund.icf_condom)}</Typography></Grid>
+                                            <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography variant="body2"><b>Fundo de cotas:</b> {formatters.field['icf_fundo_cotas'](this.state.data.fund.icf_fundo_cotas)}</Typography></Grid>
+                                            <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography variant="body2"><b>Fundo exclusivo:</b> {formatters.field['icf_fundo_exclusivo'](this.state.data.fund.icf_fundo_exclusivo)}</Typography></Grid>
+                                            <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography variant="body2"><b>Benchmark:</b> {formatters.field['icf_rentab_fundo'](this.state.data.fund.icf_rentab_fundo)}</Typography></Grid>
+                                            <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography variant="body2"><b>Patrimônio:</b> {formatters.field['icf_vl_patrim_liq'](this.state.data.fund.icf_vl_patrim_liq)}</Typography></Grid>
                                         </Grid>
                                         {
                                             this.state.data.fund.xf_id && (
                                                 <React.Fragment>
-                                                    <Grid container spacing={16}>
+                                                    <Grid container spacing={2}>
                                                         <Grid item xs={12}>
                                                             <Divider variant="middle" />
                                                         </Grid>
@@ -487,14 +487,14 @@ class FundListItemView extends React.Component {
                                                             <Typography variant="subtitle1" gutterBottom><b><Link className={classes.link} href={`https://institucional.xpi.com.br/investimentos/fundos-de-investimento/detalhes-de-fundos-de-investimento.aspx?F=${this.state.data.fund.xf_id}`} target="_new" rel="noopener">XP Investimentos</Link></b></Typography>
                                                         </Grid>
                                                     </Grid>
-                                                    <Grid container spacing={16}>
-                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography><b>Nome:</b> {formatters.field['xf_name'](this.state.data.fund.xf_name)}</Typography></Grid>
-                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography><b>Risco Formal:</b> {formatters.field['xf_formal_risk'](this.state.data.fund.xf_formal_risk)}</Typography></Grid>
-                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography><b>Investimento Inicial:</b> {formatters.field['xf_initial_investment'](this.state.data.fund.xf_initial_investment)}</Typography></Grid>
-                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography><b>Dias para Resgate:</b> {formatters.field['xf_rescue_quota'](this.state.data.fund.xf_rescue_quota)}</Typography></Grid>
-                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography><b>Benchmark:</b> {formatters.field['xf_benchmark'](this.state.data.fund.xf_benchmark)}</Typography></Grid>
-                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography><b>Categoria:</b> {formatters.field['xf_type'](this.state.data.fund.xf_type)}</Typography></Grid>
-                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography><b>Capitação:</b> {formatters.field['xf_state'](this.state.data.fund.xf_state)}</Typography></Grid>
+                                                    <Grid container spacing={2}>
+                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography variant="body2"><b>Nome:</b> {formatters.field['xf_name'](this.state.data.fund.xf_name)}</Typography></Grid>
+                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography variant="body2"><b>Risco Formal:</b> {formatters.field['xf_formal_risk'](this.state.data.fund.xf_formal_risk)}</Typography></Grid>
+                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography variant="body2"><b>Investimento Inicial:</b> {formatters.field['xf_initial_investment'](this.state.data.fund.xf_initial_investment)}</Typography></Grid>
+                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography variant="body2"><b>Dias para Resgate:</b> {formatters.field['xf_rescue_quota'](this.state.data.fund.xf_rescue_quota)}</Typography></Grid>
+                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography variant="body2"><b>Benchmark:</b> {formatters.field['xf_benchmark'](this.state.data.fund.xf_benchmark)}</Typography></Grid>
+                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography variant="body2"><b>Categoria:</b> {formatters.field['xf_type'](this.state.data.fund.xf_type)}</Typography></Grid>
+                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography variant="body2"><b>Capitação:</b> {formatters.field['xf_state'](this.state.data.fund.xf_state)}</Typography></Grid>
                                                     </Grid>
                                                 </React.Fragment>
                                             )
@@ -502,7 +502,7 @@ class FundListItemView extends React.Component {
                                         {
                                             this.state.data.fund.bf_id && (
                                                 <React.Fragment>
-                                                    <Grid container spacing={16}>
+                                                    <Grid container spacing={2}>
                                                         <Grid item xs={12}>
                                                             <Divider variant="middle" />
                                                         </Grid>
@@ -510,15 +510,15 @@ class FundListItemView extends React.Component {
                                                             <Typography variant="subtitle1" gutterBottom><b><Link className={classes.link} href={`https://www.btgpactualdigital.com/investimentos/fundos-de-investimento/detalhe/${this.state.data.fund.bf_id}/${slugify(this.state.data.fund.bf_product.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(), "_")}`} target="_new" rel="noopener">BTG Pactual</Link></b></Typography>
                                                         </Grid>
                                                     </Grid>
-                                                    <Grid container spacing={16}>
-                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography><b>Nome:</b> {formatters.field['bf_product'](this.state.data.fund.bf_product)}</Typography></Grid>
-                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography><b>Risco Formal:</b> {formatters.field['bf_risk_level'](this.state.data.fund.bf_risk_level)}</Typography></Grid>
-                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography><b>Investimento Inicial:</b> {formatters.field['bf_minimum_initial_investment'](this.state.data.fund.bf_minimum_initial_investment)}</Typography></Grid>
-                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography><b>Dias para Resgate:</b> {formatters.field['bf_rescue_quota'](this.state.data.fund.bf_rescue_quota)}</Typography></Grid>
-                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography><b>Categoria:</b> {formatters.field['bf_category_description'](this.state.data.fund.bf_category_description)}</Typography></Grid>
-                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography><b>Classe Anbima:</b> {formatters.field['bf_anbima_rating'](this.state.data.fund.bf_anbima_rating)}</Typography></Grid>
-                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography><b>Capitação:</b> {formatters.field['bf_is_blacklist'](this.state.data.fund.bf_is_blacklist)}</Typography></Grid>
-                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography><b>Atividade:</b> {formatters.field['bf_inactive'](this.state.data.fund.bf_inactive)}</Typography></Grid>
+                                                    <Grid container spacing={2}>
+                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography variant="body2"><b>Nome:</b> {formatters.field['bf_product'](this.state.data.fund.bf_product)}</Typography></Grid>
+                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography variant="body2"><b>Risco Formal:</b> {formatters.field['bf_risk_level'](this.state.data.fund.bf_risk_level)}</Typography></Grid>
+                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography variant="body2"><b>Investimento Inicial:</b> {formatters.field['bf_minimum_initial_investment'](this.state.data.fund.bf_minimum_initial_investment)}</Typography></Grid>
+                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography variant="body2"><b>Dias para Resgate:</b> {formatters.field['bf_rescue_quota'](this.state.data.fund.bf_rescue_quota)}</Typography></Grid>
+                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography variant="body2"><b>Categoria:</b> {formatters.field['bf_category_description'](this.state.data.fund.bf_category_description)}</Typography></Grid>
+                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography variant="body2"><b>Classe Anbima:</b> {formatters.field['bf_anbima_rating'](this.state.data.fund.bf_anbima_rating)}</Typography></Grid>
+                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography variant="body2"><b>Capitação:</b> {formatters.field['bf_is_blacklist'](this.state.data.fund.bf_is_blacklist)}</Typography></Grid>
+                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography variant="body2"><b>Atividade:</b> {formatters.field['bf_inactive'](this.state.data.fund.bf_inactive)}</Typography></Grid>
                                                     </Grid>
                                                 </React.Fragment>
                                             )
@@ -526,7 +526,7 @@ class FundListItemView extends React.Component {
                                         {
                                             this.state.data.fund.mf_id && (
                                                 <React.Fragment>
-                                                    <Grid container spacing={16}>
+                                                    <Grid container spacing={2}>
                                                         <Grid item xs={12}>
                                                             <Divider variant="middle" />
                                                         </Grid>
@@ -534,13 +534,13 @@ class FundListItemView extends React.Component {
                                                             <Typography variant="subtitle1" gutterBottom><b><Link className={classes.link} href={`https://www.modalmais.com.br${this.state.data.fund.mf_detail_link}`} target="_new" rel="noopener">Modal Mais</Link></b></Typography>
                                                         </Grid>
                                                     </Grid>
-                                                    <Grid container spacing={16}>
-                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography><b>Nome:</b> {formatters.field['mf_name'](this.state.data.fund.bf_product)}</Typography></Grid>
-                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography><b>Risco Formal:</b> {formatters.field['mf_risk_level'](this.state.data.fund.mf_risk_level)}</Typography></Grid>
-                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography><b>Investimento Inicial:</b> {formatters.field['mf_minimum_initial_investment'](this.state.data.fund.mf_minimum_initial_investment)}</Typography></Grid>
-                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography><b>Dias para Resgate:</b> {formatters.field['mf_rescue_quota'](this.state.data.fund.mf_rescue_quota)}</Typography></Grid>
-                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography><b>Benchmark:</b> {formatters.field['mf_benchmark'](this.state.data.fund.mf_benchmark)}</Typography></Grid>
-                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography><b>Atividade:</b> {formatters.field['mf_active'](this.state.data.fund.mf_active)}</Typography></Grid>
+                                                    <Grid container spacing={2}>
+                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography variant="body2"><b>Nome:</b> {formatters.field['mf_name'](this.state.data.fund.bf_product)}</Typography></Grid>
+                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography variant="body2"><b>Risco Formal:</b> {formatters.field['mf_risk_level'](this.state.data.fund.mf_risk_level)}</Typography></Grid>
+                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography variant="body2"><b>Investimento Inicial:</b> {formatters.field['mf_minimum_initial_investment'](this.state.data.fund.mf_minimum_initial_investment)}</Typography></Grid>
+                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography variant="body2"><b>Dias para Resgate:</b> {formatters.field['mf_rescue_quota'](this.state.data.fund.mf_rescue_quota)}</Typography></Grid>
+                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography variant="body2"><b>Benchmark:</b> {formatters.field['mf_benchmark'](this.state.data.fund.mf_benchmark)}</Typography></Grid>
+                                                        <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography variant="body2"><b>Atividade:</b> {formatters.field['mf_active'](this.state.data.fund.mf_active)}</Typography></Grid>
                                                     </Grid>
                                                 </React.Fragment>
                                             )
@@ -552,9 +552,9 @@ class FundListItemView extends React.Component {
                         </Paper>
                     </Grid>
                 </Grid>
-                <Grid container spacing={16} alignItems="center">
+                <Grid container spacing={2} alignItems="center">
                     <Grid item xs>
-                        <Grid container alignItems="center" spacing={8}>
+                        <Grid container alignItems="center" spacing={1}>
                             <Grid item>
                                 <Tooltip enterTouchDelay={100} leaveTouchDelay={5000} title={
                                     <React.Fragment>
@@ -568,7 +568,7 @@ class FundListItemView extends React.Component {
                         </Grid>
                     </Grid>
                 </Grid>
-                <Grid container spacing={16}>
+                <Grid container spacing={2}>
                     <Grid item xs>
                         <Paper elevation={1} square={true} className={classes.chart} >
                             <Hidden smDown>
@@ -586,9 +586,9 @@ class FundListItemView extends React.Component {
                         </Paper>
                     </Grid>
                 </Grid>
-                <Grid container spacing={16} alignItems="center">
+                <Grid container spacing={2} alignItems="center">
                     <Grid item xs>
-                        <Grid container alignItems="center" spacing={8}>
+                        <Grid container alignItems="center" spacing={1}>
                             <Grid item>
                                 <Tooltip enterTouchDelay={100} leaveTouchDelay={5000} title={
                                     <React.Fragment>
@@ -602,7 +602,7 @@ class FundListItemView extends React.Component {
                         </Grid>
                     </Grid>
                     <Grid item>
-                        <Grid container alignItems="center" spacing={8}>
+                        <Grid container alignItems="center" spacing={1}>
                             <Grid item>
                                 <Select
                                     value={this.state.config.field}
@@ -618,7 +618,7 @@ class FundListItemView extends React.Component {
                         </Grid>
                     </Grid>
                 </Grid>
-                <Grid container spacing={16}>
+                <Grid container spacing={2}>
                     <Grid item xs>
                         <Paper elevation={1} square={true} className={classes.chart}>
                             <ShowStateComponent
@@ -630,21 +630,21 @@ class FundListItemView extends React.Component {
                                                 <tr className={classes.historyCell}>
                                                     <th className={classes.historyCell}>Ano</th>
                                                     <Hidden mdDown>
-                                                        <th><Typography>Jan</Typography></th>
-                                                        <th><Typography>Fev</Typography></th>
-                                                        <th><Typography>Mar</Typography></th>
-                                                        <th><Typography>Abr</Typography></th>
-                                                        <th><Typography>Mai</Typography></th>
-                                                        <th><Typography>Jun</Typography></th>
-                                                        <th><Typography>Jul</Typography></th>
-                                                        <th><Typography>Ago</Typography></th>
-                                                        <th><Typography>Set</Typography></th>
-                                                        <th><Typography>Out</Typography></th>
-                                                        <th><Typography>Nov</Typography></th>
-                                                        <th><Typography>Dez</Typography></th>
+                                                        <th><Typography variant="body2">Jan</Typography></th>
+                                                        <th><Typography variant="body2">Fev</Typography></th>
+                                                        <th><Typography variant="body2">Mar</Typography></th>
+                                                        <th><Typography variant="body2">Abr</Typography></th>
+                                                        <th><Typography variant="body2">Mai</Typography></th>
+                                                        <th><Typography variant="body2">Jun</Typography></th>
+                                                        <th><Typography variant="body2">Jul</Typography></th>
+                                                        <th><Typography variant="body2">Ago</Typography></th>
+                                                        <th><Typography variant="body2">Set</Typography></th>
+                                                        <th><Typography variant="body2">Out</Typography></th>
+                                                        <th><Typography variant="body2">Nov</Typography></th>
+                                                        <th><Typography variant="body2">Dez</Typography></th>
                                                     </Hidden>
-                                                    <th><Typography>Ano</Typography></th>
-                                                    <th><Typography>Accumulado</Typography></th>
+                                                    <th><Typography variant="body2">Ano</Typography></th>
+                                                    <th><Typography variant="body2">Accumulado</Typography></th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -659,8 +659,8 @@ class FundListItemView extends React.Component {
                                                                     ))
                                                                 }
                                                             </Hidden>
-                                                            <td><Typography>{this.state.data.history.byYear[year] != null ? formatters.field[this.state.config.field](this.state.data.history.byYear[year][this.state.config.field]) : ''}</Typography></td>
-                                                            <td><Typography>{this.state.data.history.accumulatedByYear[year] != null ? formatters.field[this.state.config.field](this.state.data.history.accumulatedByYear[year][this.state.config.field]) : ''}</Typography></td>
+                                                            <td><Typography variant="body2">{this.state.data.history.byYear[year] != null ? formatters.field[this.state.config.field](this.state.data.history.byYear[year][this.state.config.field]) : ''}</Typography></td>
+                                                            <td><Typography variant="body2">{this.state.data.history.accumulatedByYear[year] != null ? formatters.field[this.state.config.field](this.state.data.history.accumulatedByYear[year][this.state.config.field]) : ''}</Typography></td>
                                                         </tr>
                                                     ))
                                                 }

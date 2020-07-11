@@ -30,16 +30,16 @@ import * as Sentry from '@sentry/browser';
 
 const styles = theme => ({
     optionsBar: {
-        padding: theme.spacing.unit
+        padding: theme.spacing(1)
     },
     progress: {
-        margin: theme.spacing.unit * 2
+        margin: theme.spacing(2)
     },
     select: {
-        margin: theme.spacing.unit
+        margin: theme.spacing(1)
     },
     chart: {
-        padding: theme.spacing.unit * 2
+        padding: theme.spacing(2)
     },
     withTooltip: theme.withTooltip,
     link: theme.link,
@@ -566,9 +566,9 @@ class FundComparisonView extends React.Component {
         return (
             <div>
                 <div className={classes.appBarSpacer} />
-                <Grid container spacing={16} alignItems="center">
+                <Grid container spacing={2} alignItems="center">
                     <Grid item xs>
-                        <Grid container alignItems="center" spacing={8}>
+                        <Grid container alignItems="center" spacing={1}>
                             <Grid item>
                                 <Tooltip enterTouchDelay={100} leaveTouchDelay={5000} title={
                                     <React.Fragment>
@@ -581,7 +581,7 @@ class FundComparisonView extends React.Component {
                         </Grid>
                     </Grid>
                     <Grid item>
-                        <Grid container alignItems="center" spacing={8}>
+                        <Grid container alignItems="center" spacing={1}>
                             <Grid item>
                                 <Select
                                     value={this.state.config.field}
@@ -621,7 +621,7 @@ class FundComparisonView extends React.Component {
                         </Grid>
                     </Grid>
                 </Grid>
-                <Grid container spacing={16}>
+                <Grid container spacing={2}>
                     <Grid item xs>
                         <Paper elevation={1} square={true} >
                             <Grid container wrap="nowrap" className={classes.optionsBar}>
@@ -634,9 +634,9 @@ class FundComparisonView extends React.Component {
                                 <Paper elevation={1} square={true} className={classes.optionsBar}>
                                     {
                                         this.state.data.fundListSearch.map((fund, index) => (
-                                            <Grid container spacing={8} key={index} alignItems="center" justify="center">
+                                            <Grid container spacing={1} key={index} alignItems="center" justify="center">
                                                 <Grid item xs={7}>
-                                                    <Typography>
+                                                    <Typography variant="body2">
                                                         <b><Link to={'/funds/' + fund.f_cnpj} className={classes.link}>{fund.f_short_name}</Link></b><br />
                                                         <small>
                                                             <b>Patrimônio:</b> {formatters.field['iry_accumulated_networth'](fund.iry_accumulated_networth)}<br />
@@ -646,19 +646,19 @@ class FundComparisonView extends React.Component {
                                                     </Typography>
                                                 </Grid>
                                                 <Grid item xs={4}>
-                                                    <Grid container spacing={8}>
+                                                    <Grid container spacing={1}>
                                                         <Grid item xs={6}>
-                                                            <Typography><b>Desempenho</b></Typography>
+                                                            <Typography variant="body2"><b>Desempenho</b></Typography>
                                                         </Grid>
                                                         <Hidden smDown>
                                                             <Grid item xs={6}>
-                                                                <Typography><b>Risco</b></Typography>
+                                                                <Typography variant="body2"><b>Risco</b></Typography>
                                                             </Grid>
                                                         </Hidden>
                                                     </Grid>
-                                                    <Grid container spacing={8}>
+                                                    <Grid container spacing={1}>
                                                         <Grid item sm={6} xs={12}>
-                                                            <Typography>
+                                                            <Typography variant="body2">
                                                                 <small>
                                                                     1A: {formatters.field['iry_investment_return_1y'](fund.iry_investment_return_1y)}<br />
                                                                     2A: {formatters.field['iry_investment_return_2y'](fund.iry_investment_return_2y)}<br />
@@ -668,7 +668,7 @@ class FundComparisonView extends React.Component {
                                                         </Grid>
                                                         <Hidden smDown>
                                                             <Grid item xs={6}>
-                                                                <Typography>
+                                                                <Typography variant="body2">
                                                                     <small>
                                                                         1A: {formatters.field['iry_risk_1y'](fund.iry_risk_1y)}<br />
                                                                         2A: {formatters.field['iry_risk_2y'](fund.iry_risk_2y)}<br />
@@ -680,7 +680,7 @@ class FundComparisonView extends React.Component {
                                                     </Grid>
                                                 </Grid>
                                                 <Grid item xs={1}>
-                                                    <Typography align="center" >
+                                                    <Typography variant="body2" align="center" >
                                                         <IconButton className={classes.button}
                                                             onClick={() => this.handleAddClick(fund)}>
                                                             <AddIcon />
@@ -716,7 +716,7 @@ class FundComparisonView extends React.Component {
                         />
                     </Grid>
                 </Grid>
-                <Grid container spacing={16}>
+                <Grid container spacing={2}>
                     <Grid item xs>
                         <Paper elevation={1} square={true} className={classes.chart} >
                             <Hidden smDown>
@@ -753,7 +753,7 @@ class FundComparisonView extends React.Component {
                                                         <th className={classes.historyCell}>&nbsp;</th>
                                                         {this.state.data.correlationMatrix.headers.map((correlationItem, index) => (
                                                             <th key={`head${correlationItem}`} className={classes.historyCell} style={{ borderWidth: '0px 0px 5px 0px', borderColor: nextColorIndex(index), borderStyle: 'solid' }}>
-                                                                <Typography className={classes.textOverflowDynamicContainer}>
+                                                                <Typography variant="body2" className={classes.textOverflowDynamicContainer}>
                                                                     <span className={classes.textOverflowDynamicEllipsis}>
                                                                         <b title={correlationItem}>
                                                                             {correlationItem}
@@ -770,7 +770,7 @@ class FundComparisonView extends React.Component {
                                                             const correlation = this.state.data.correlationMatrix.data[index + indexCol + 1][index];
                                                             return (
                                                                 <td key={`bodyreverse${name}${index}`} className={classes.historyCell} style={{ backgroundColor: getGradientColor('#FFFFFF', '#E6194B', Math.abs(correlation)) }}>
-                                                                    <Typography style={{ color: Math.abs(correlation) > 0.3 ? '#FFFFFF' : '#000000' }}>
+                                                                    <Typography variant="body2" style={{ color: Math.abs(correlation) > 0.3 ? '#FFFFFF' : '#000000' }}>
                                                                         {formatters.percentage(this.state.data.correlationMatrix.data[index + indexCol + 1][index])}
                                                                     </Typography>
                                                                 </td>
@@ -781,7 +781,7 @@ class FundComparisonView extends React.Component {
                                                             {this.state.data.correlationMatrix.data[index].map(correlation => {
                                                                 return (
                                                                     <td key={`body${name}${index}${correlation}`} className={classes.historyCell} style={{ backgroundColor: getGradientColor('#FFFFFF', '#E6194B', Math.abs(correlation)) }}>
-                                                                        <Typography style={{ color: Math.abs(correlation) > 0.3 ? '#FFFFFF' : '#000000' }}>
+                                                                        <Typography variant="body2" style={{ color: Math.abs(correlation) > 0.3 ? '#FFFFFF' : '#000000' }}>
                                                                             {formatters.percentage(correlation)}
                                                                         </Typography>
                                                                     </td>);
@@ -801,17 +801,17 @@ class FundComparisonView extends React.Component {
                         </Paper>
                     </Grid>
                 </Grid >
-                <Grid container spacing={16}>
+                <Grid container spacing={2}>
                     <Grid item xs>
                         <Paper elevation={1} square={true} className={classes.optionsBar}>
-                            <Grid container spacing={8} key={this.state.config.benchmark} alignItems="center">
+                            <Grid container spacing={1} key={this.state.config.benchmark} alignItems="center">
                                 <Grid item xs>
-                                    <Grid container spacing={8}>
+                                    <Grid container spacing={1}>
                                         <Grid item>
-                                            <Typography>&nbsp;</Typography>
+                                            <Typography variant="body2">&nbsp;</Typography>
                                         </Grid>
                                         <Grid item xs>
-                                            <Typography align="center">
+                                            <Typography variant="body2" align="center">
                                                 <b>Nome do Fundo</b>
                                             </Typography>
                                         </Grid>
@@ -839,11 +839,11 @@ class FundComparisonView extends React.Component {
 
                                         return (
                                             <Grid item xs={4} sm={6} md={7} lg={9}>
-                                                <Grid container spacing={8} alignItems="center" justify="center">
+                                                <Grid container spacing={1} alignItems="center" justify="center">
                                                     {
                                                         selectedFields.map(field => (
                                                             <Grid item key={field} xs={12} sm={6} md={3} lg={2}>
-                                                                <Typography align="center"><b>{fieldOptions.find(fieldItem => fieldItem.name === field).displayName}</b></Typography>
+                                                                <Typography variant="body2" align="center"><b>{fieldOptions.find(fieldItem => fieldItem.name === field).displayName}</b></Typography>
                                                             </Grid>))
                                                     }
                                                 </Grid>
@@ -854,20 +854,20 @@ class FundComparisonView extends React.Component {
                                     isErrored={() => (<Typography variant="subtitle1" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>)}
                                 />
                                 <Grid item xs={1}>
-                                    <Typography>&nbsp;</Typography>
+                                    <Typography variant="body2">&nbsp;</Typography>
                                 </Grid>
                             </Grid>
                             <ShowStateComponent
                                 data={this.state.data.benchmark}
                                 hasData={() => (
-                                    <Grid container spacing={16} key={this.state.config.benchmark} alignItems="center">
+                                    <Grid container spacing={2} key={this.state.config.benchmark} alignItems="center">
                                         <Grid item xs>
-                                            <Grid container spacing={8}>
+                                            <Grid container spacing={1}>
                                                 <Grid item>
                                                     <span style={{ backgroundColor: nextColorIndex(0), minWidth: '10px', height: '100%', display: 'block' }}></span>
                                                 </Grid>
                                                 <Grid item xs>
-                                                    <Typography className={classes.benchmarkCell}><b>{this.state.data.benchmark.name.toUpperCase()}</b></Typography>
+                                                    <Typography variant="body2" className={classes.benchmarkCell}><b>{this.state.data.benchmark.name.toUpperCase()}</b></Typography>
                                                 </Grid>
                                             </Grid>
                                         </Grid>
@@ -893,11 +893,11 @@ class FundComparisonView extends React.Component {
 
                                                 return (
                                                     <Grid item xs={4} sm={6} md={7} lg={9}>
-                                                        <Grid container spacing={8} alignItems="center" justify="center">
+                                                        <Grid container spacing={1} alignItems="center" justify="center">
                                                             {
                                                                 selectedFields.map(field => (
                                                                     <Grid item key={field} xs={12} sm={6} md={3} lg={2}>
-                                                                        {this.state.data.benchmark.statistics.accumulated[field] ? (<Typography align="center">{formatters.field[field](this.state.data.benchmark.statistics.accumulated[field])}</Typography>) : (<Typography align="center">-</Typography>)}
+                                                                        {this.state.data.benchmark.statistics.accumulated[field] ? (<Typography variant="body2" align="center">{formatters.field[field](this.state.data.benchmark.statistics.accumulated[field])}</Typography>) : (<Typography variant="body2" align="center">-</Typography>)}
                                                                     </Grid>))
                                                             }
                                                         </Grid>
@@ -908,7 +908,7 @@ class FundComparisonView extends React.Component {
                                             isErrored={() => (<Typography variant="subtitle1" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>)}
                                         />
                                         <Grid item xs={1}>
-                                            <Typography>&nbsp;</Typography>
+                                            <Typography variant="body2">&nbsp;</Typography>
                                         </Grid>
                                     </Grid>
                                 )}
@@ -921,17 +921,17 @@ class FundComparisonView extends React.Component {
                                     <React.Fragment>
                                         {
                                             this.state.data.fundListCompare.map((fundObject, index) => (
-                                                <Grid container spacing={8} key={index} alignItems="center" justify="center">
+                                                <Grid container spacing={1} key={index} alignItems="center" justify="center">
                                                     <ShowStateComponent
                                                         data={fundObject.detail}
                                                         hasData={() => (
                                                             <Grid item xs>
-                                                                <Grid container spacing={8}>
+                                                                <Grid container spacing={1}>
                                                                     <Grid item>
                                                                         <span style={{ backgroundColor: nextColorIndex(index + 1), minWidth: '10px', height: '100%', display: 'block' }}></span>
                                                                     </Grid>
                                                                     <Grid item xs>
-                                                                        <Typography>
+                                                                        <Typography variant="body2">
                                                                             <b><Link to={'/funds/' + fundObject.cnpj} className={classes.link}>{fundObject.detail.name}</Link></b><br />
                                                                             <small>
                                                                                 <b>Benchmark:</b> {formatters.field['icf_rentab_fundo'](fundObject.detail.benchmark)}
@@ -966,11 +966,11 @@ class FundComparisonView extends React.Component {
 
                                                             return (
                                                                 <Grid item xs={4} sm={6} md={7} lg={9}>
-                                                                    <Grid container spacing={8} key={index} alignItems="center" justify="center">
+                                                                    <Grid container spacing={1} key={index} alignItems="center" justify="center">
                                                                         {
                                                                             selectedFields.map(field => (
                                                                                 <Grid item key={field} xs={12} sm={6} md={3} lg={2}>
-                                                                                    {fundObject.statistics.accumulated[field] ? (<Typography align="center">{formatters.field[field](fundObject.statistics.accumulated[field])}</Typography>) : (<Typography>&nbsp;</Typography>)}
+                                                                                    {fundObject.statistics.accumulated[field] ? (<Typography variant="body2" align="center">{formatters.field[field](fundObject.statistics.accumulated[field])}</Typography>) : (<Typography variant="body2">&nbsp;</Typography>)}
                                                                                 </Grid>))
                                                                         }
                                                                     </Grid>
@@ -980,7 +980,7 @@ class FundComparisonView extends React.Component {
                                                         isNull={() => (<Typography variant="subtitle1" align="center"><CircularProgress className={classes.progress} /></Typography>)}
                                                     />
                                                     <Grid item xs={1}>
-                                                        <Typography align="center">
+                                                        <Typography variant="body2" align="center">
                                                             <IconButton className={classes.button}
                                                                 onClick={() => this.handleRemoveClick(fundObject)}>
                                                                 <ClearIcon color="error" />

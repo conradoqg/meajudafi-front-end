@@ -33,7 +33,7 @@ const styles = theme => ({
     appBarSpacer: theme.mixins.toolbar,
     content: {
         flexGrow: 1,
-        padding: theme.spacing.unit * 3,
+        padding: theme.spacing(3),
         height: '100vh',
         overflow: 'auto',
         backgroundColor: 'ghostwhite'
@@ -46,7 +46,7 @@ const styles = theme => ({
     },
     centeredImage: {
         verticalAlign: "middle",
-        margin: theme.spacing.unit * 3
+        margin: theme.spacing(3)
     },
     menuLink: {
         textDecoration: 'none',
@@ -180,14 +180,14 @@ class Dashboard extends React.Component {
                                 <Route component={() => (
                                     <div>
                                         <div className={classes.appBarSpacer} />
-                                        <Grid container spacing={16}>
+                                        <Grid container spacing={2}>
                                             <Grid item xs={12}>
                                                 <Typography variant="h6" align="center" noWrap>Página não encontrada.</Typography>
                                             </Grid>
                                         </Grid>
                                     </div>)} />
                             </Switch>
-                            <Grid container spacing={16}>
+                            <Grid container spacing={2}>
                                 <Grid item xs={12}>
                                     <Typography variant="caption" gutterBottom>
                                         <p>Rentabilidade passada não representa garantia de rentabilidade futura.</p>

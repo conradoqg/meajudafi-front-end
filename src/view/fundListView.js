@@ -2,10 +2,10 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
-import ExpansionPanel from '@material-ui/core/ExpansionPanel';
-import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
+import Accordion from '@material-ui/core/Accordion';
+import AccordionDetails from '@material-ui/core/AccordionDetails';
+import AccordionSummary from '@material-ui/core/AccordionSummary';
 import Divider from '@material-ui/core/Divider';
-import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import TablePagination from '@material-ui/core/TablePagination';
 import Typography from '@material-ui/core/Typography';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
@@ -36,16 +36,16 @@ import * as Sentry from '@sentry/browser';
 
 const styles = theme => ({
     filterPaperContent: {
-        padding: theme.spacing.unit * 2
+        padding: theme.spacing(2)
     },
     optionsBar: {
-        padding: theme.spacing.unit
+        padding: theme.spacing(1)
     },
     progress: {
-        margin: theme.spacing.unit * 2
+        margin: theme.spacing(2)
     },
     chartSelect: {
-        margin: theme.spacing.unit
+        margin: theme.spacing(1)
     },
     appBarSpacer: theme.mixins.toolbar,
     withTooltip: theme.withTooltip,
@@ -491,9 +491,9 @@ class FundListView extends React.Component {
         return (
             <div>
                 <div className={classes.appBarSpacer} />
-                <Grid container spacing={16} alignItems="center">
+                <Grid container spacing={2} alignItems="center">
                     <Grid item xs>
-                        <Grid container alignItems="center" spacing={8}>
+                        <Grid container alignItems="center" spacing={1}>
                             <Grid item>
                                 <Tooltip enterTouchDelay={100} leaveTouchDelay={5000} title={
                                     <React.Fragment>
@@ -508,12 +508,12 @@ class FundListView extends React.Component {
                         </Grid>
                     </Grid>
                 </Grid>
-                <Grid container spacing={16}>
+                <Grid container spacing={2}>
                     <Grid item xs>
                         <Paper elevation={1} square={true} >
                             <Grid container wrap="nowrap" className={classes.optionsBar}>
                                 <FundSearchComponent onSearchChanged={this.handleSearchChange} />
-                                <Grid container justify="flex-end" spacing={8}>
+                                <Grid container justify="flex-end" spacing={1}>
                                     <Grid item>
                                         <Hidden smDown>
                                             <Select
@@ -574,9 +574,9 @@ class FundListView extends React.Component {
                             data={this.state.data.fundList}
                             hasData={() => this.state.data.fundList.map((fund, index) => {
                                 const content = (
-                                    <Grid container spacing={8}>
+                                    <Grid container spacing={1}>
                                         <Grid item xs={8}>
-                                            <Typography>
+                                            <Typography variant="body2">
                                                 <b><Link to={'/funds/' + fund.f_cnpj} className={classes.link}>{fund.f_short_name}</Link></b><br />
                                                 <small>
                                                     <b>Patrimônio:</b> {formatters.field['iry_accumulated_networth'](fund.iry_accumulated_networth)}<br />
@@ -586,19 +586,19 @@ class FundListView extends React.Component {
                                             </Typography>
                                         </Grid>
                                         <Grid item xs={4}>
-                                            <Grid container spacing={8}>
+                                            <Grid container spacing={1}>
                                                 <Grid item xs={6}>
-                                                    <Typography><b>Desempenho</b></Typography>
+                                                    <Typography variant="body2"><b>Desempenho</b></Typography>
                                                 </Grid>
                                                 <Hidden smDown>
                                                     <Grid item xs={6}>
-                                                        <Typography><b>Risco</b></Typography>
+                                                        <Typography variant="body2"><b>Risco</b></Typography>
                                                     </Grid>
                                                 </Hidden>
                                             </Grid>
-                                            <Grid container spacing={8}>
+                                            <Grid container spacing={1}>
                                                 <Grid item sm={6} xs={12}>
-                                                    <Typography>
+                                                    <Typography variant="body2">
                                                         <small>
                                                             1A: {formatters.field['iry_investment_return_1y'](fund.iry_investment_return_1y)}<br />
                                                             2A: {formatters.field['iry_investment_return_2y'](fund.iry_investment_return_2y)}<br />
@@ -608,7 +608,7 @@ class FundListView extends React.Component {
                                                 </Grid>
                                                 <Hidden smDown>
                                                     <Grid item xs={6}>
-                                                        <Typography>
+                                                        <Typography variant="body2">
                                                             <small>
                                                                 1A: {formatters.field['iry_risk_1y'](fund.iry_risk_1y)}<br />
                                                                 2A: {formatters.field['iry_risk_2y'](fund.iry_risk_2y)}<br />
@@ -624,13 +624,13 @@ class FundListView extends React.Component {
                                 return (
                                     <React.Fragment key={index}>
                                         <Hidden xsDown>
-                                            <ExpansionPanel expanded={this.state.layout.showingFundDetail[fund.icf_cnpj_fundo] ? true : false} onChange={(e, expanded) => this.handleFundExpansion(expanded, fund)}>
-                                                <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+                                            <Accordion elevation={1} expanded={this.state.layout.showingFundDetail[fund.icf_cnpj_fundo] ? true : false} onChange={(e, expanded) => this.handleFundExpansion(expanded, fund)}>
+                                                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                                                     {content}
-                                                </ExpansionPanelSummary>
+                                                </AccordionSummary>
                                                 <Divider />
-                                                <ExpansionPanelDetails>
-                                                    <Grid container spacing={8}>
+                                                <AccordionDetails>
+                                                    <Grid container spacing={1}>
                                                         <Grid item xs>
                                                             <DataHistoryChartComponent
                                                                 data={this.state.data.fundDetail[fund.icf_cnpj_fundo]}
@@ -639,8 +639,8 @@ class FundListView extends React.Component {
                                                             />
                                                         </Grid>
                                                     </Grid>
-                                                </ExpansionPanelDetails>
-                                            </ExpansionPanel>
+                                                </AccordionDetails>
+                                            </Accordion>
                                         </Hidden>
                                         <Hidden smUp>
                                             <Paper elevation={1} square={true} className={classes.filterPaperContent}>

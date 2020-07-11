@@ -10,7 +10,7 @@ setAutoFreeze(false);
 
 const styles = theme => ({
     input: {
-        marginLeft: theme.spacing.unit
+        marginLeft: theme.spacing(1)
     },
 });
 
