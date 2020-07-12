@@ -11,7 +11,6 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import Blue from '@material-ui/core/colors/blue';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
-import CircularProgress from '@material-ui/core/CircularProgress';
 import IconButton from '@material-ui/core/IconButton';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import Collapse from '@material-ui/core/Collapse';
@@ -19,6 +18,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import { withStyles } from '@material-ui/core/styles';
 import withWidth from '@material-ui/core/withWidth';
 import Hidden from '@material-ui/core/Hidden';
+import Skeleton from '@material-ui/lab/Skeleton';
 import { produce } from 'immer';
 import promisesEach from 'promise-results';
 import FundFilterComponent from './component/fundFilterComponent';
@@ -58,7 +58,7 @@ const styles = theme => ({
         overflow: 'hidden',
         textOverflow: 'ellipsis'
     },
-    cropText: {        
+    cropText: {
         whiteSpace: 'nowrap',
         overflow: 'hidden',
         textOverflow: 'ellipsis'
@@ -299,10 +299,10 @@ class IndicatorsView extends React.Component {
             modalmais: []
         };
 
-        fundsChanged.forEach(change => {            
+        fundsChanged.forEach(change => {
             let key = null;
 
-            if (change.table_name === 'btgpactual_funds') key =  'btgpactual';
+            if (change.table_name === 'btgpactual_funds') key = 'btgpactual';
             else if (change.table_name === 'xpi_funds') key = 'xpi';
             else if (change.table_name === 'modalmais_funds') key = 'modalmais';
 
@@ -538,7 +538,7 @@ class IndicatorsView extends React.Component {
                         </Grid>
                     </Grid>
                 </Grid>
-                <Grid container spacing={2}>                    
+                <Grid container spacing={2}>
                     <Grid item xs={12} sm={12} md={6} xl={6}>
                         <FundsChangedPaper title="XP Investimentos" data={this.state.data.fundsChanged} broker="xpi" classes={classes} />
                     </Grid>
@@ -612,7 +612,27 @@ const IndicatorPaper = (props) => {
                             {negative}
                         </List>);
                     }}
-                    isNull={() => (<Typography variant="subtitle1" align="center"><CircularProgress className={classes.progress} /></Typography>)}
+                    isNull={() => (
+                        <List>
+                            {[1, 2, 3, 4, 5].map(item => (
+                                <ListItem key={item} divider>
+                                    <ListItemText disableTypography ><Typography variant="body2" component="span" ><Skeleton /></Typography></ListItemText>
+                                    <ListItemSecondaryAction><Typography variant="body2" component="span"><Skeleton /></Typography></ListItemSecondaryAction>
+                                </ListItem>
+                            ))}
+                            < ListItem divider >
+                                <ListItemText disableTypography>
+                                    <Typography variant="body2" component="span" align="center">...</Typography>
+                                </ListItemText>
+                            </ListItem>
+                            {[1, 2, 3, 4, 5].map(item => (
+                                <ListItem key={item} divider>
+                                    <ListItemText disableTypography ><Typography variant="body2" component="span" ><Skeleton /></Typography></ListItemText>
+                                    <ListItemSecondaryAction><Typography variant="body2" component="span"><Skeleton /></Typography></ListItemSecondaryAction>
+                                </ListItem>
+                            ))}
+                        </List>
+                    )}
                     isErrored={() => (<Typography variant="subtitle1" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>)}
                     isEmpty={() => (<Typography variant="subtitle1" align="center">Sem dados à exibir</Typography>)}
                 />
@@ -639,24 +659,41 @@ const FundsChangedPaper = (props) => {
                                 <React.Fragment key={index}>
                                     <Grid item xs={12}>
                                         <Grid container spacing={1}>
-                                            <Grid item xs={12} sm={12} md={6} xl={6}>
-                                                <Typography variant="body2" component="span" align="left" className={classes.cropTextNormal}>{formatters.date(change.date)} - <Link to={'/funds/' + change.cnpj} className={classes.link}>{change.name}</Link></Typography>
+                                            <Grid item xs={12} sm={12} md={6} xl={6} >
+                                                <Typography variant="body2" align="left" display="block" component="span" className={classes.cropTextNormal}>{formatters.date(change.date)} - <Link to={'/funds/' + change.cnpj} className={classes.link}>{change.name}</Link></Typography>
                                             </Grid>
                                             <Grid item xs={12} sm={12} md={6} xl={6}>
-                                                {change.changes.map((fieldChange, index) => (<Typography variant="body2" key={index} component="span" align="right">{fieldChange}</Typography>))}
+                                                {change.changes.map((fieldChange, index) => (<Typography variant="body2" key={index} component="span" align="right" display="block">{fieldChange}</Typography>))}
                                             </Grid>
                                         </Grid>
                                     </Grid>
                                 </React.Fragment>
                             ));
                         }}
-                        isNull={() => (<Typography variant="subtitle1" align="center"><CircularProgress className={classes.progress} /></Typography>)}
+                        isNull={() => (
+                            <React.Fragment>
+                                {
+                                    [1, 2, 3, 4, 5].map(index => (
+                                        <Grid item key={index} xs={12}>
+                                            <Grid container spacing={1}>
+                                                <Grid item xs={12} sm={12} md={6} xl={6} >
+                                                    <Typography variant="body2" align="left" display="block" component="span" className={classes.cropTextNormal}><Skeleton /></Typography>
+                                                </Grid>
+                                                <Grid item xs={12} sm={12} md={6} xl={6}>
+                                                    <Typography variant="body2" key={index} component="span" align="right" display="block"><Skeleton /></Typography>
+                                                </Grid>
+                                            </Grid>
+                                        </Grid>
+                                    ))
+                                }
+                            </React.Fragment>
+                        )}
                         isErrored={() => (<Typography variant="subtitle1" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>)}
                         isEmpty={() => (<Typography variant="subtitle1" align="center">Sem dados à exibir</Typography>)}
                     />
                 </Grid>
             </Paper>
-        </div>);
+        </div >);
 };
 
 export default withWidth()(withStyles(styles)(IndicatorsView));

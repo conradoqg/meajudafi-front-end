@@ -1,6 +1,6 @@
 import React from 'react';
-import CircularProgress from '@material-ui/core/CircularProgress';
 import Typography from '@material-ui/core/Typography';
+import Skeleton from '@material-ui/lab/Skeleton';
 import ShowStateComponent from './showStateComponent';
 import Plotly from '../../vendor/plotly';
 import createPlotlyComponent from 'react-plotly.js/factory';
@@ -27,7 +27,7 @@ export default class DataHistoryChartComponent extends React.Component {
                         style={{ width: '100%', height: '100%' }}
                     />
                 )}
-                isNull={() => (<Typography variant="subtitle1" align="center"><CircularProgress /></Typography>)}
+                isNull={() => (<Skeleton height={300}/>)}
                 isErrored={() => (<Typography variant="subtitle1" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>)}
             />
         );
