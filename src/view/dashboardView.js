@@ -106,9 +106,7 @@ const routes = [
     {
         path: ['/progress'],
         name: 'Progresso de atualização',
-        showInMenu: false,
-        icon: () => (<ScatterPlotIcon />),
-        widthUp: 'sm',
+        showInMenu: false,        
         main: (props, classes) => <ProgressView basePath={'/progress'} />
     }
 ];

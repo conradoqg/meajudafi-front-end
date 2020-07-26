@@ -4,7 +4,7 @@ import createPlotlyComponent from 'react-plotly.js/factory';
 import Grid from '@material-ui/core/Grid';
 import Tooltip from '@material-ui/core/Tooltip';
 import Typography from '@material-ui/core/Typography';
-import CircularProgress from '@material-ui/core/CircularProgress';
+import Skeleton from '@material-ui/lab/Skeleton';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import Paper from '@material-ui/core/Paper';
@@ -610,7 +610,7 @@ class FundComparativeView extends React.Component {
                                         style={{ width: '100%', height: '800px' }}
                                     />
                                 )}
-                                isNull={() => (<Typography variant="subtitle1" align="center"><CircularProgress /></Typography>)}
+                                isNull={() => (<Typography variant="subtitle1" align="center"><Skeleton variant="rect" height={300} /></Typography>)}
                                 isErrored={() => (<Typography variant="subtitle1" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>)}
                             />
                         </Paper>

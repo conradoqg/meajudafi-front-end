@@ -628,7 +628,7 @@ const IndicatorPaper = props => {
                     }}
                     isNull={() => (
                         <List>
-                            {[1, 2, 3, 4, 5].map(item => (
+                            {[...Array(5).keys()].map(item => (
                                 <ListItem key={item} divider>
                                     <ListItemText disableTypography ><Typography variant="body2" component="span" ><Skeleton /></Typography></ListItemText>
                                     <ListItemSecondaryAction><Typography variant="body2" component="span"><Skeleton /></Typography></ListItemSecondaryAction>
@@ -639,7 +639,7 @@ const IndicatorPaper = props => {
                                     <Typography variant="body2" component="span" align="center">...</Typography>
                                 </ListItemText>
                             </ListItem>
-                            {[1, 2, 3, 4, 5].map(item => (
+                            {[...Array(5).keys()].map(item => (
                                 <ListItem key={item} divider>
                                     <ListItemText disableTypography ><Typography variant="body2" component="span" ><Skeleton /></Typography></ListItemText>
                                     <ListItemSecondaryAction><Typography variant="body2" component="span"><Skeleton /></Typography></ListItemSecondaryAction>
@@ -686,7 +686,7 @@ const FundsChangedPaper = props => {
                         isNull={() => (
                             <React.Fragment>
                                 {
-                                    [1, 2, 3, 4, 5].map(index => (
+                                    [...Array(5).keys()].map(index => (
                                         <Grid item key={index} xs={12}>
                                             <Grid container spacing={1}>
                                                 <Grid item xs={12} sm={12} md={6} xl={6} >

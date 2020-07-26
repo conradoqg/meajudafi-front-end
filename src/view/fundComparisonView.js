@@ -4,7 +4,6 @@ import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import Tooltip from '@material-ui/core/Tooltip';
-import CircularProgress from '@material-ui/core/CircularProgress';
 import AddIcon from '@material-ui/icons/Add';
 import ClearIcon from '@material-ui/icons/Clear';
 import Select from '@material-ui/core/Select';
@@ -16,6 +15,7 @@ import Hidden from '@material-ui/core/Hidden';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import TablePagination from '@material-ui/core/TablePagination';
+import Skeleton from '@material-ui/lab/Skeleton';
 import { produce } from 'immer';
 import promisesEach from 'promise-results';
 import { withRouter } from 'react-router-dom';
@@ -705,7 +705,7 @@ class FundComparisonView extends React.Component {
                                         : null}
                                 </Paper>
                             )}
-                            isNull={() => (<Paper elevation={1} square={true} className={classes.filterPaperContent}><Typography variant="subtitle1" align="center"><CircularProgress className={classes.progress} /></Typography></Paper>)}
+                            isNull={() => (<Paper elevation={1} square={true} className={classes.filterPaperContent}><Typography variant="subtitle1" align="center"><Skeleton /></Typography></Paper>)}
                             isErrored={() => (<Paper elevation={1} square={true} className={classes.filterPaperContent}><Typography variant="subtitle1" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography></Paper>)}
                         />
                     </Grid>
@@ -785,7 +785,7 @@ class FundComparisonView extends React.Component {
                                             </tbody>
                                         </table>
                                     )}
-                                    isNull={() => (<Typography variant="subtitle1" align="center"><CircularProgress className={classes.progress} /></Typography>)}
+                                    isNull={() => (<Typography variant="subtitle1" align="center"><Skeleton /></Typography>)}
                                     isErrored={() => (<Typography variant="subtitle1" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>)}
                                 />
                             </React.Fragment>}
@@ -841,7 +841,7 @@ class FundComparisonView extends React.Component {
                                             </Grid>
                                         );
                                     }}
-                                    isNull={() => (<Typography variant="subtitle1" align="center"><CircularProgress className={classes.progress} /></Typography>)}
+                                    isNull={() => (<Typography variant="subtitle1" align="center"><Skeleton /></Typography>)}
                                     isErrored={() => (<Typography variant="subtitle1" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>)}
                                 />
                                 <Grid item xs={1}>
@@ -895,7 +895,7 @@ class FundComparisonView extends React.Component {
                                                     </Grid>
                                                 );
                                             }}
-                                            isNull={() => (<Typography variant="subtitle1" align="center"><CircularProgress className={classes.progress} /></Typography>)}
+                                            isNull={() => (<Typography variant="subtitle1" align="center"><Skeleton /></Typography>)}
                                             isErrored={() => (<Typography variant="subtitle1" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>)}
                                         />
                                         <Grid item xs={1}>
@@ -903,7 +903,7 @@ class FundComparisonView extends React.Component {
                                         </Grid>
                                     </Grid>
                                 )}
-                                isNull={() => (<Typography variant="subtitle1" align="center"><CircularProgress className={classes.progress} /></Typography>)}
+                                isNull={() => (<Typography variant="subtitle1" align="center"><Skeleton /></Typography>)}
                                 isErrored={() => (<Typography variant="subtitle1" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>)}
                             />
                             <ShowStateComponent
@@ -932,7 +932,7 @@ class FundComparisonView extends React.Component {
                                                                 </Grid>
                                                             </Grid>
                                                         )}
-                                                        isNull={() => (<Typography variant="subtitle1" align="center"><CircularProgress className={classes.progress} /></Typography>)}
+                                                        isNull={() => (<Typography variant="subtitle1" align="center"><Skeleton /></Typography>)}
                                                         isErrored={() => (<Typography variant="subtitle1" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>)}
                                                     />
                                                     <ShowStateComponent
@@ -968,7 +968,7 @@ class FundComparisonView extends React.Component {
                                                                 </Grid>
                                                             );
                                                         }}
-                                                        isNull={() => (<Typography variant="subtitle1" align="center"><CircularProgress className={classes.progress} /></Typography>)}
+                                                        isNull={() => (<Typography variant="subtitle1" align="center"><Skeleton /></Typography>)}
                                                     />
                                                     <Grid item xs={1}>
                                                         <Typography variant="body2" align="center">
@@ -983,7 +983,7 @@ class FundComparisonView extends React.Component {
                                         }
                                     </React.Fragment>
                                 )}
-                                isNull={() => (<Paper elevation={1} square={true} className={classes.filterPaperContent}><Typography variant="subtitle1" align="center"><CircularProgress className={classes.progress} /></Typography></Paper>)}
+                                isNull={() => (<Paper elevation={1} square={true} className={classes.filterPaperContent}><Typography variant="subtitle1" align="center"><Skeleton /></Typography></Paper>)}
                                 isErrored={() => (<Paper elevation={1} square={true} className={classes.filterPaperContent}><Typography variant="subtitle1" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography></Paper>)}
                             />
                         </Paper>

@@ -9,8 +9,8 @@ import Divider from '@material-ui/core/Divider';
 import { withStyles } from '@material-ui/core/styles';
 import withWidth from '@material-ui/core/withWidth';
 import Hidden from '@material-ui/core/Hidden';
-import CircularProgress from '@material-ui/core/CircularProgress';
 import Link from '@material-ui/core/Link';
+import Skeleton from '@material-ui/lab/Skeleton';
 import { produce } from 'immer';
 import promisesEach from 'promise-results';
 import { withRouter } from 'react-router-dom';
@@ -541,7 +541,7 @@ class FundListItemView extends React.Component {
                                         }
                                     </React.Fragment>
                                 )}
-                                isNull={() => (<Typography variant="subtitle1" align="center"><CircularProgress /></Typography>)}
+                                isNull={() => (<Typography variant="subtitle1" align="center"><Skeleton/></Typography>)}
                                 isErrored={() => (<Typography variant="subtitle1" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>)} />
                         </Paper>
                     </Grid>
@@ -661,7 +661,7 @@ class FundListItemView extends React.Component {
                                             </tbody>
                                         </table>
                                     </React.Fragment>)}
-                                isNull={() => (<Typography variant="subtitle1" align="center"><CircularProgress /></Typography>)}
+                                isNull={() => (<Typography variant="subtitle1" align="center"><Skeleton /></Typography>)}
                                 isErrored={() => (<Typography variant="subtitle1" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>)} />
                         </Paper>
                     </Grid>

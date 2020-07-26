@@ -7,7 +7,7 @@ import { withRouter } from 'react-router-dom';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import ShowStateComponent from './component/showStateComponent';
-import CircularProgress from '@material-ui/core/CircularProgress';
+import Skeleton from '@material-ui/lab/Skeleton';
 import { formatters } from '../util';
 import API from '../api';
 
@@ -106,7 +106,15 @@ class ProgressView extends React.Component {
                                     </Grid>
                                 </Grid>
                             </Paper>)}
-                            isNull={() => (<Paper elevation={1} square={true} className={classes.filterPaperContent}><Typography variant="subtitle1" align="center"><CircularProgress className={classes.progress} /></Typography></Paper>)}
+                            isNull={() => (<Paper elevation={1} square={true}>
+                                <Grid container className={classes.progressContent}>
+                                    <Grid item xs={12} sm={12} md={12} xl={12}>
+                                        <Typography variant="body2" style={{ fontFamily: "monospace" }} component="span" display="block">
+                                            {[...Array(10).keys()].map(item => (<Skeleton key={item} />))}
+                                        </Typography>
+                                    </Grid>
+                                </Grid>
+                            </Paper>)}
                             isErrored={() => (<Paper elevation={1} square={true} className={classes.filterPaperContent}><Typography variant="subtitle1" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography></Paper>)}
                             isEmpty={() => (<Paper elevation={1} square={true} className={classes.filterPaperContent}><Typography variant="subtitle1" align="center">Sem dados à exibir</Typography></Paper>)}
                         />
