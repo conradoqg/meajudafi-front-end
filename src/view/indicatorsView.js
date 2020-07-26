@@ -356,9 +356,7 @@ function IndicatorsView(props) {
     // Layout
     const [showingFilter, setShowingFilter] = useState(emptyState.layout.showingFilter);
 
-    const { classes } = props;
-
-    console.log('Updating UI');
+    const { classes } = props;    
 
     useEffect(() => {
         updateFundIndicators(setFundIndicators, economyIndicatorAndFundsRange, fundsFilter);

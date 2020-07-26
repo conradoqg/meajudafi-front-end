@@ -18,9 +18,9 @@ import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import Collapse from '@material-ui/core/Collapse';
-import CircularProgress from '@material-ui/core/CircularProgress';
 import Select from '@material-ui/core/Select';
 import Tooltip from '@material-ui/core/Tooltip';
+import Skeleton from '@material-ui/lab/Skeleton';
 import Hidden from '@material-ui/core/Hidden';
 import withWidth, { isWidthUp } from '@material-ui/core/withWidth';
 import { produce } from 'immer';
@@ -646,7 +646,73 @@ class FundListView extends React.Component {
                                     </React.Fragment>
                                 );
                             })}
-                            isNull={() => (<Paper elevation={1} square={true} className={classes.filterPaperContent}><Typography variant="subtitle1" align="center"><CircularProgress className={classes.progress} /></Typography></Paper>)}
+                            isNull={() => [...Array(this.state.config.rowsPerPage).keys()].map((fund, index) => {
+                                const content = (
+                                    <Grid container spacing={1}>
+                                        <Grid item xs={8}>
+                                            <Typography variant="body2">
+                                                <b><Skeleton /></b>
+                                                <small>
+                                                    <Skeleton />
+                                                    <Skeleton />
+                                                    <Skeleton />
+                                                </small>
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item xs={4}>
+                                            <Grid container spacing={1}>
+                                                <Grid item xs={6}>
+                                                    <Typography variant="body2"><b><Skeleton /></b></Typography>
+                                                </Grid>
+                                                <Hidden smDown>
+                                                    <Grid item xs={6}>
+                                                        <Typography variant="body2"><b><Skeleton /></b></Typography>
+                                                    </Grid>
+                                                </Hidden>
+                                            </Grid>
+                                            <Grid container spacing={1}>
+                                                <Grid item sm={6} xs={12}>
+                                                    <Typography variant="body2">
+                                                        <small>
+                                                            <Skeleton />
+                                                            <Skeleton  />
+                                                            <Skeleton  />
+                                                        </small>
+                                                    </Typography>
+                                                </Grid>
+                                                <Hidden smDown>
+                                                    <Grid item xs={6}>
+                                                        <Typography variant="body2">
+                                                            <small>
+                                                                <Skeleton  />
+                                                                <Skeleton  />
+                                                                <Skeleton  />
+                                                            </small>
+                                                        </Typography>
+                                                    </Grid>
+                                                </Hidden>
+                                            </Grid>
+                                        </Grid>
+                                    </Grid>
+                                );
+                                return (
+                                    <React.Fragment key={index}>
+                                        <Hidden xsDown>
+                                            <Accordion elevation={1} expanded={false}>
+                                                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                                                    {content}
+                                                </AccordionSummary>
+                                                <Divider />
+                                            </Accordion>
+                                        </Hidden>
+                                        <Hidden smUp>
+                                            <Paper elevation={1} square={true} className={classes.filterPaperContent}>
+                                                {content}
+                                            </Paper>
+                                        </Hidden>
+                                    </React.Fragment>
+                                );
+                            })}
                             isErrored={() => (<Paper elevation={1} square={true} className={classes.filterPaperContent}><Typography variant="subtitle1" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography></Paper>)}
                             isEmpty={() => (<Paper elevation={1} square={true} className={classes.filterPaperContent}><Typography variant="subtitle1" align="center">Sem dados à exibir</Typography></Paper>)}
                         />
