@@ -1,6 +1,6 @@
 import React from 'react';
 
-const ShowStateComponent = (props) => {
+const ShowStateComponent = props => {
     const { type, data, hasData, isNull, isErrored, isEmpty } = props;
     let analisedData = null;
     let content = null;

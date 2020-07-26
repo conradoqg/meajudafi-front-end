@@ -15,5 +15,5 @@ export default async (lastDaysOrFromDate, additionalFields) => {
     if (investment_return_monthly_complete.status < 200 || investment_return_monthly_complete.status > 299)
         throw new Error('Unable to retrieve fund data');
 
-    return investment_return_monthly_complete.json()
-}
+    return investment_return_monthly_complete.json();
+};

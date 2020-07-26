@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import { PROTOCOL, API_URL } from './index';
 
-export default async (options, fromDate = dayjs().subtract(1, 'month').toDate()) => {    
+export default async (options, fromDate = dayjs().subtract(1, 'month').toDate()) => {
     const range = options.page === 0 ? `&limit=${options.rowsPerPage}` : `&offset=${(options.page * options.rowsPerPage) + 1}&limit=${options.rowsPerPage}`;
     const sort = `${options.sort.field}.${options.sort.order}`;
     let filterPart = '';
@@ -9,9 +9,7 @@ export default async (options, fromDate = dayjs().subtract(1, 'month').toDate())
         Object.keys(options.filter).forEach(selectedFilterOptionsKey => {
             if (selectedFilterOptionsKey === 'switch') {
                 let switchItems = [];
-                Object.keys(options.filter.switch).map(switchItem => {
-                    return options.filter.switch[switchItem] ? switchItems.push(`${switchItem}.not.is.null`) : null;
-                });
+                Object.keys(options.filter.switch).map(switchItem => options.filter.switch[switchItem] ? switchItems.push(`${switchItem}.not.is.null`) : null);
                 if (switchItems.length > 0)
                     filterPart += `or=(${switchItems.join(',')})&`;
             }

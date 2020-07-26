@@ -56,38 +56,30 @@ class FundFilterComponent extends React.Component {
 
     static emptyState = emptyState;
 
-    handleFilterOptionsChange = field => {
-        return event => {
-            const value = event.target.value;
-            this.setState(produce(draft => {
-                draft.config.filter[field] = value;
-            }));
-        };
-    }
+    handleFilterOptionsChange = field => event => {
+        const value = event.target.value;
+        this.setState(produce(draft => {
+            draft.config.filter[field] = value;
+        }));
+    };
 
-    handleFilterTextRangeChange = (field, range) => {
-        return event => {
-            const value = event.target.value;
-            this.setState(produce(draft => {
-                draft.config.filter[field][range] = value;
-            }));
-        };
-    }
+    handleFilterTextRangeChange = (field, range) => event => {
+        const value = event.target.value;
+        this.setState(produce(draft => {
+            draft.config.filter[field][range] = value;
+        }));
+    };
 
-    handleSwitchChange = field => {
-        return event => {
-            const value = event.target.value;
-            this.setState(produce(draft => {
-                draft.config.filter.switch[field] = value === 'false' ? true : false;
-            }));
-        };
-    }
+    handleSwitchChange = field => event => {
+        const value = event.target.value;
+        this.setState(produce(draft => {
+            draft.config.filter.switch[field] = value === 'false' ? true : false;
+        }));
+    };
 
-    handleFilterApplyClick = async () => {
-        return this.props.onFilterChanged(this.state.config.filter);
-    }
+    handleFilterApplyClick = () => this.props.onFilterChanged(this.state.config.filter);
 
-    handleFilterClearClick = async () => {
+    handleFilterClearClick = () => {
         this.setState(produce(draft => {
             draft.config.filter = emptyState.config.filter;
         }));

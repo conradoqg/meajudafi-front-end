@@ -1,15 +1,13 @@
-const createOptionsFor = (displayName, field) => {
-    return [{
-        displayName,
-        field,
-        order: 'asc'
-    },
-    {
-        displayName,
-        field,
-        order: 'desc'
-    }];
-};
+const createOptionsFor = (displayName, field) => [{
+    displayName,
+    field,
+    order: 'asc'
+},
+{
+    displayName,
+    field,
+    order: 'desc'
+}];
 
 export default [
     ...createOptionsFor('CNPJ', 'icf_cnpj_fundo'),

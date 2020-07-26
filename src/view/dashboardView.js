@@ -96,7 +96,7 @@ const routes = [
     },
     {
         path: ['/comparative/:range/:sizeField/:yField/:xField', '/compare'],
-        linkTo: '/comparative/1y/irm_accumulated_networth/irm_investment_return_1y/irm_risk_1y',    
+        linkTo: '/comparative/1y/irm_accumulated_networth/irm_investment_return_1y/irm_risk_1y',
         name: 'Comparativo de Fundos',
         showInMenu: true,
         icon: () => (<ScatterPlotIcon />),
@@ -104,7 +104,7 @@ const routes = [
         main: (props, classes) => <FundCompariveView basePath={'/comparative'} />
     },
     {
-        path: ['/progress'],        
+        path: ['/progress'],
         name: 'Progresso de atualização',
         showInMenu: false,
         icon: () => (<ScatterPlotIcon />),
@@ -127,7 +127,7 @@ const MenuLink = ({ label, to, activeOnlyWhenExact, classes }) => (
 
 class Dashboard extends React.Component {
     state = {
-        maintenanceMode: false        
+        maintenanceMode: false
     };
 
     componentDidMount = async () => {
@@ -135,7 +135,7 @@ class Dashboard extends React.Component {
     };
 
     render() {
-        const { classes } = this.props;        
+        const { classes } = this.props;
 
         if (this.state.maintenanceMode)
             return (
@@ -174,7 +174,7 @@ class Dashboard extends React.Component {
                                         key={index}
                                         path={route.path}
                                         exact={route.exact}
-                                        render={(props) => route.main(props, classes)}
+                                        render={props => route.main(props, classes)}
                                     />
                                 ))}
                                 <Route component={() => (

@@ -51,11 +51,11 @@ class ProgressView extends React.Component {
     state = emptyState;
     interval = null;
 
-    async componentDidMount() {
+    componentDidMount() {
         this.interval = setInterval(() => this.updateData(), 2000);
     }
 
-    async componentWillUnmount() {
+    componentWillUnmount() {
         this.interval && clearInterval(this.interval);
     }
 
@@ -73,9 +73,7 @@ class ProgressView extends React.Component {
         }));
     }
 
-    getProgress = async () => {
-        return API.getProgress();
-    }
+    getProgress = () => API.getProgress();
 
     render() {
         const { classes } = this.props;

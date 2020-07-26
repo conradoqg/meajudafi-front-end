@@ -1,7 +1,7 @@
 import { PROTOCOL, API_URL } from './index';
 
-export default async (lastDaysOrFromDate) => {
-    let limit = '';    
+export default async lastDaysOrFromDate => {
+    let limit = '';
     if (lastDaysOrFromDate instanceof Date)
         limit = `&dt_comptc=gte.${lastDaysOrFromDate.toJSON().slice(0, 10)}`;
     else if (typeof (lastDaysOrFromDate) == 'number')

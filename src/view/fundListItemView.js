@@ -68,7 +68,7 @@ class FundListItemView extends React.Component {
         this.replaceHistory(this.state);
     }
 
-    async componentDidMount() {
+    componentDidMount() {
         return this.updateData(this.state);
     }
 
@@ -82,19 +82,13 @@ class FundListItemView extends React.Component {
         }
     }
 
-    buildHistoryPath = (nextState) => {
-        return this.props.basePath + '/' + nextState.config.cnpj;
-    }
+    buildHistoryPath = nextState => this.props.basePath + '/' + nextState.config.cnpj;
 
-    replaceHistory = (nextState) => {
-        this.props.history.replace(this.buildHistoryPath(nextState), nextState);
-    }
+    replaceHistory = nextState => this.props.history.replace(this.buildHistoryPath(nextState), nextState);
 
-    pushHistory = (nextState) => {
-        this.props.history.push(this.buildHistoryPath(nextState), nextState);
-    }
+    pushHistory = nextState => this.props.history.push(this.buildHistoryPath(nextState), nextState);
 
-    handleConfigRangeChange = async event => {
+    handleConfigRangeChange = event => {
         const nextState = produce(this.state, draft => {
             draft.config[event.target.name] = event.target.value;
             draft.data.history = null;
@@ -104,7 +98,7 @@ class FundListItemView extends React.Component {
         return this.updateData(nextState);
     }
 
-    handleConfigBenchmarkChange = async event => {
+    handleConfigBenchmarkChange = event => {
         const nextState = produce(this.state, draft => {
             draft.config[event.target.name] = event.target.value;
             draft.data.history = null;
@@ -114,7 +108,7 @@ class FundListItemView extends React.Component {
         return this.updateData(nextState);
     }
 
-    handleConfigFieldChange = async event => {
+    handleConfigFieldChange = event => {
         const nextState = produce(this.state, draft => {
             draft.config[event.target.name] = event.target.value;
             draft.data.chartSmall = null;
@@ -123,21 +117,21 @@ class FundListItemView extends React.Component {
         return this.updateData(nextState);
     }
 
-    handleChartInitialized = async (figure) => {
+    handleChartInitialized = figure => {
         this.setState(produce(draft => {
             if (figure.layout.size === 'small') draft.data.chartSmall = figure;
             else if (figure.layout.size === 'large') draft.data.chartLarge = figure;
         }));
     }
 
-    handleChartUpdate = async (figure) => {
+    handleChartUpdate = figure => {
         this.setState(produce(draft => {
             if (figure.layout.size === 'small') draft.data.chartSmall = figure;
             else if (figure.layout.size === 'large') draft.data.chartLarge = figure;
         }));
     }
 
-    updateData = async (nextState) => {
+    updateData = async nextState => {
         this.setState(produce(nextState, draft => {
             draft.data.fund = null;
             draft.data.history = null;
@@ -352,7 +346,7 @@ class FundListItemView extends React.Component {
         };
     }
 
-    getFundData = async (cnpj) => {
+    getFundData = cnpj => {
         const additionalFields = [
             'f_cnpj',
             'icf_dt_ini_exerc',
@@ -393,7 +387,7 @@ class FundListItemView extends React.Component {
         return API.getFundData(cnpj, additionalFields);
     }
 
-    getFundStatistic = async (cnpj, config) => {
+    getFundStatistic = (cnpj, config) => {
         const from = rangeOptions.find(range => range.name === config.range).toDate();
 
         return API.getFundStatistic(cnpj, config.benchmark, from);
@@ -574,14 +568,14 @@ class FundListItemView extends React.Component {
                             <Hidden smDown>
                                 <DataHistoryChartComponent
                                     data={this.state.data.chartLarge}
-                                    onInitialized={(figure) => this.handleChartInitialized(figure)}
-                                    onUpdate={(figure) => this.handleChartUpdate(figure)} />
+                                    onInitialized={figure => this.handleChartInitialized(figure)}
+                                    onUpdate={figure => this.handleChartUpdate(figure)} />
                             </Hidden>
                             <Hidden mdUp>
                                 <DataHistoryChartComponent
                                     data={this.state.data.chartSmall}
-                                    onInitialized={(figure) => this.handleChartInitialized(figure)}
-                                    onUpdate={(figure) => this.handleChartUpdate(figure)} />
+                                    onInitialized={figure => this.handleChartInitialized(figure)}
+                                    onUpdate={figure => this.handleChartUpdate(figure)} />
                             </Hidden>
                         </Paper>
                     </Grid>

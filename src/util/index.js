@@ -54,27 +54,25 @@ export const chartFormatters = {
         tickformat: ',.2f',
         hoverformat: ',.2f',
     },
-}
+};
 
 export const formatters = {
-    percentage: (value) => value == null || isNaN(value) || !isFinite(value) ? '-' : d3Format.format('.2%')(value),
-    money: (value) => value == null || isNaN(value) || !isFinite(value) ? '-' : d3Format.format('$,.2f')(value),
-    float: (value) => value == null || isNaN(value) || !isFinite(value) ? '-' : d3Format.format(',.2f')(value),
-    date: (value) => value == null ? '-' : dayjs(value).format('L'),
-    dateWithTime: (value) => value == null ? '-' : dayjs(value).format('L LT'),
-    month: (value) => value == null ? '-' : dayjs(value).format('MMM, YYYY'),
+    percentage: value => value == null || isNaN(value) || !isFinite(value) ? '-' : d3Format.format('.2%')(value),
+    money: value => value == null || isNaN(value) || !isFinite(value) ? '-' : d3Format.format('$,.2f')(value),
+    float: value => value == null || isNaN(value) || !isFinite(value) ? '-' : d3Format.format(',.2f')(value),
+    date: value => value == null ? '-' : dayjs(value).format('L'),
+    dateWithTime: value => value == null ? '-' : dayjs(value).format('L LT'),
+    month: value => value == null ? '-' : dayjs(value).format('MMM, YYYY'),
     capitalized: value => value.charAt(0).toUpperCase() + value.slice(1).toLowerCase(),
     field: {}
 };
 
 const fieldFormatters = {};
-Object.keys(filterOptions).map(key => {
-    return fieldFormatters[key] = (value) => {
-        const foundItem = filterOptions[key].options.find(item => item.value === value);
+Object.keys(filterOptions).map(key => fieldFormatters[key] = value => {
+    const foundItem = filterOptions[key].options.find(item => item.value === value);
 
-        if (foundItem) return foundItem.displayName;
-        else return value;
-    }
+    if (foundItem) return foundItem.displayName;
+    else return value;
 });
 
 fieldFormatters['icf_vl_patrim_liq'] = formatters.money;
@@ -82,13 +80,13 @@ fieldFormatters['f_short_name'] = value => value;
 fieldFormatters['f_name'] = value => value;
 fieldFormatters['f_cnpj'] = value => value.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
 fieldFormatters['xf_name'] = value => value;
-fieldFormatters['xf_formal_risk'] = (value) => value == null ? 'Não Identificado' : ['Desconhecido', 'Risco baixo', 'Risco médio baixo', 'Risco médio', 'Risco médio alto', 'Risco alto'][value];
+fieldFormatters['xf_formal_risk'] = value => value == null ? 'Não Identificado' : ['Desconhecido', 'Risco baixo', 'Risco médio baixo', 'Risco médio', 'Risco médio alto', 'Risco alto'][value];
 fieldFormatters['xf_initial_investment'] = formatters.money;
 fieldFormatters['xf_rescue_quota'] = value => 'D+' + value;
 fieldFormatters['xf_benchmark'] = value => value;
 fieldFormatters['xf_type'] = value => value;
 fieldFormatters['bf_product'] = value => value;
-fieldFormatters['bf_risk_level'] = (value) => value == null ? 'Não Identificado' : ['Desconhecido', 'Risco baixo', 'Risco médio baixo', 'Risco médio', 'Risco médio alto', 'Risco alto'][value];
+fieldFormatters['bf_risk_level'] = value => value == null ? 'Não Identificado' : ['Desconhecido', 'Risco baixo', 'Risco médio baixo', 'Risco médio', 'Risco médio alto', 'Risco alto'][value];
 fieldFormatters['bf_minimum_initial_investment'] = formatters.money;
 fieldFormatters['bf_rescue_quota'] = value => 'D+' + value;
 fieldFormatters['bf_category_description'] = value => value;
@@ -122,7 +120,7 @@ fieldFormatters['mf_active'] = value => (value === true) ? 'Ativo' : 'Inativo';
 
 formatters.field = fieldFormatters;
 
-export const nextColorIndex = (i) => colors[(i % colors.length + colors.length) % colors.length];
+export const nextColorIndex = i => colors[(i % colors.length + colors.length) % colors.length];
 
 export const getGradientColor = (start_color, end_color, percent) => {
     // strip the leading # if it's there
@@ -157,9 +155,9 @@ export const getGradientColor = (start_color, end_color, percent) => {
     diff_blue = ((diff_blue * percent) + start_blue).toString(16).split('.')[0];
 
     // ensure 2 digits by color
-    if (diff_red.length === 1) diff_red = '0' + diff_red
-    if (diff_green.length === 1) diff_green = '0' + diff_green
-    if (diff_blue.length === 1) diff_blue = '0' + diff_blue
+    if (diff_red.length === 1) diff_red = '0' + diff_red;
+    if (diff_green.length === 1) diff_green = '0' + diff_green;
+    if (diff_blue.length === 1) diff_blue = '0' + diff_blue;
 
     return '#' + diff_red + diff_green + diff_blue;
 };

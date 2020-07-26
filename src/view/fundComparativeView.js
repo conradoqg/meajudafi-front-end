@@ -222,7 +222,7 @@ const availableAxisFields = [
         displayName: 'Consistência CDI 3 anos',
         formatter: chartFormatters.risk
     }
-    
+
 ];
 
 const availableSizeFields = [
@@ -248,15 +248,15 @@ class FundComparativeView extends React.Component {
 
         this.state = produce(this.state, draft => {
             draft.config.range = (typeof (props.match.params.range) != 'undefined') ? props.match.params.range : this.state.config.range;
-            draft.config.sizeField = (typeof (props.match.params.sizeField) != 'undefined') ? props.match.params.sizeField : this.state.config.sizeField;            
+            draft.config.sizeField = (typeof (props.match.params.sizeField) != 'undefined') ? props.match.params.sizeField : this.state.config.sizeField;
             draft.config.yField = (typeof (props.match.params.yField) != 'undefined') ? props.match.params.yField : this.state.config.yField;
-            draft.config.xField = (typeof (props.match.params.xField) != 'undefined') ? props.match.params.xField : this.state.config.xField;                        
+            draft.config.xField = (typeof (props.match.params.xField) != 'undefined') ? props.match.params.xField : this.state.config.xField;
         });
 
         this.replaceHistory(this.state);
     }
 
-    async componentDidMount() {
+    componentDidMount() {
         this.updateData(this.state);
     }
 
@@ -270,23 +270,21 @@ class FundComparativeView extends React.Component {
         }
     }
 
-    buildHistoryPath = (nextState) => {
-        return this.props.basePath + '/' + nextState.config.range + '/' + nextState.config.sizeField + '/' + nextState.config.yField + '/' + nextState.config.xField;
-    }
+    buildHistoryPath = nextState => this.props.basePath + '/' + nextState.config.range + '/' + nextState.config.sizeField + '/' + nextState.config.yField + '/' + nextState.config.xField;
 
-    replaceHistory = (nextState) => {
+    replaceHistory = nextState => {
         this.props.history.replace(this.buildHistoryPath(nextState), nextState);
     }
 
-    pushHistory = (nextState) => {
+    pushHistory = nextState => {
         this.props.history.push(this.buildHistoryPath(nextState), nextState);
     }
 
-    handleChartClick = (data) => {
+    handleChartClick = data => {
         if (data.event.ctrlKey) this.props.history.push('/funds/' + data.points[0].data.id[data.points[0].pointIndex]);
     }
 
-    handleConfigChange = async event => {
+    handleConfigChange = event => {
         const nextState = produce(this.state, draft => {
             draft.config[event.target.name] = event.target.value;
             draft.data.chart = null;
@@ -295,14 +293,14 @@ class FundComparativeView extends React.Component {
         return this.updateData(nextState);
     }
 
-    updateData = async (nextState) => {
+    updateData = async nextState => {
         this.setState(produce(nextState, draft => {
             draft.data.chart = null;
         }));
 
         const { fundsTimeseries } = await promisesEach({
             fundsTimeseries: this.getFundsTimeseries(nextState.config)
-        })
+        });
 
         nextState = produce(nextState, draft => {
             if (fundsTimeseries instanceof Error) draft.data.chart = fundsTimeseries;
@@ -493,7 +491,7 @@ class FundComparativeView extends React.Component {
                 },
                 steps: sliderSteps
             }]
-        };        
+        };
 
         // Create the plot:
         return {
@@ -507,7 +505,7 @@ class FundComparativeView extends React.Component {
         };
     }
 
-    getFundsTimeseries = async (config) => {
+    getFundsTimeseries = config => {
         const from = rangeOptions.find(range => range.name === config.range).toDate();
 
         return API.getFundsTimeseries(from, [config.xField, config.yField, config.sizeField]);

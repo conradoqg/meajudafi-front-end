@@ -6,6 +6,6 @@ export default async (benchmark, lastDaysOrFromDate) => {
     const { statisticsServiceInstance, data } = await allKeys({
         statisticsServiceInstance: StatisticsService.getInstance(),
         data: getBenchmarkHistory(benchmark, lastDaysOrFromDate)
-    })
+    });
     return statisticsServiceInstance.calculateBenchmarkStatistics(data, benchmark);
 };

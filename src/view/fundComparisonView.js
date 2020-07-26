@@ -139,14 +139,14 @@ class FundComparisonView extends React.Component {
             draft.config.range = (typeof (props.match.params.range) != 'undefined') ? props.match.params.range : this.state.config.range;
             draft.config.benchmark = (typeof (props.match.params.benchmark) != 'undefined') ? props.match.params.benchmark : this.state.config.benchmark;
             draft.config.field = (typeof (props.match.params.field) != 'undefined') ? props.match.params.field : this.state.config.field;
-            draft.data.fundListCompare = props.match.params.cnpjs ? props.match.params.cnpjs.split('/').map(cnpj => { return { cnpj, detail: null, data: null, statistics: null }; }) : emptyState.data.fundListCompare;
+            draft.data.fundListCompare = props.match.params.cnpjs ? props.match.params.cnpjs.split('/').map(cnpj => ({ cnpj, detail: null, data: null, statistics: null })) : emptyState.data.fundListCompare;
             draft.data.benchmark.name = benchmarkOptions.find(benchmark => benchmark.name === draft.config.benchmark).displayName;
         });
 
         this.replaceHistory(this.state);
     }
 
-    async componentDidMount() {
+    componentDidMount() {
         return this.updateData(this.state);
     }
 
@@ -160,7 +160,7 @@ class FundComparisonView extends React.Component {
         }
     }
 
-    handleConfigFieldChange = async event => {
+    handleConfigFieldChange = event => {
         const nextState = produce(this.state, draft => {
             draft.config[event.target.name] = event.target.value;
             draft.data.chartSmall = null;
@@ -170,7 +170,7 @@ class FundComparisonView extends React.Component {
         return this.updateData(nextState);
     }
 
-    handleConfigRangeChange = async event => {
+    handleConfigRangeChange = event => {
         const nextState = produce(this.state, draft => {
             draft.config[event.target.name] = event.target.value;
             draft.data.fundListCompare = draft.data.fundListCompare.map(fund => {
@@ -188,7 +188,7 @@ class FundComparisonView extends React.Component {
         return this.updateData(nextState);
     }
 
-    handleConfigBenchmarkChange = async event => {
+    handleConfigBenchmarkChange = event => {
         const nextState = produce(this.state, draft => {
             draft.config[event.target.name] = event.target.value;
             draft.data.fundListCompare = draft.data.fundListCompare.map(fund => {
@@ -208,7 +208,7 @@ class FundComparisonView extends React.Component {
         return this.updateData(nextState);
     }
 
-    handleSearchChange = async (search) => {
+    handleSearchChange = async search => {
         const nextState = produce(this.state, draft => {
             draft.config.search = search;
             draft.config.page = 0;
@@ -245,7 +245,7 @@ class FundComparisonView extends React.Component {
     handleChangePage = async (object, page) => {
         this.setState(produce(draft => {
             draft.data.fundListSearch = emptyState.data.fundListSearch;
-            draft.data.totalRows = emptyState.data.totalRows;            
+            draft.data.totalRows = emptyState.data.totalRows;
         }));
 
         const nextState = produce(this.state, draft => {
@@ -260,7 +260,7 @@ class FundComparisonView extends React.Component {
                 draft.data.fundListSearch = result.data;
             }));
         } catch (ex) {
-            Sentry.captureException(ex);            
+            Sentry.captureException(ex);
             console.error(ex.message);
             this.setState(produce(nextState, draft => {
                 draft.data.fundListSearch = ex.message;
@@ -268,7 +268,7 @@ class FundComparisonView extends React.Component {
         }
     }
 
-    handleChangeRowsPerPage = async (event) => {
+    handleChangeRowsPerPage = async event => {
         const nextState = produce(this.state, draft => {
             draft.config.rowsPerPage = event.target.value;
         });
@@ -296,7 +296,7 @@ class FundComparisonView extends React.Component {
         }
     }
 
-    handleAddClick = async (fund) => {
+    handleAddClick = fund => {
         const nextState = produce(this.state, draft => {
             draft.config.searchRevision = draft.config.searchRevision + 1;
             draft.data.fundListSearch = emptyState.data.fundListSearch;
@@ -313,7 +313,7 @@ class FundComparisonView extends React.Component {
         return this.updateData(nextState);
     }
 
-    handleRemoveClick = async (fund) => {
+    handleRemoveClick = fund => {
         const nextState = produce(this.state, draft => {
             draft.data.fundListCompare = draft.data.fundListCompare.filter(fundItem => fundItem.cnpj !== fund.cnpj);
         });
@@ -321,14 +321,14 @@ class FundComparisonView extends React.Component {
         return this.updateData(nextState);
     }
 
-    handleChartInitialized = async (figure) => {
+    handleChartInitialized = figure => {
         this.setState(produce(draft => {
             if (figure.layout.size === 'small') draft.data.chartSmall = figure;
             else if (figure.layout.size === 'large') draft.data.chartLarge = figure;
         }));
     }
 
-    handleChartUpdate = async (figure) => {
+    handleChartUpdate = figure => {
         this.setState(produce(draft => {
             if (figure.layout.size === 'small') draft.data.chartSmall = figure;
             else if (figure.layout.size === 'large') draft.data.chartLarge = figure;
@@ -341,19 +341,17 @@ class FundComparisonView extends React.Component {
         }));
     };
 
-    buildHistoryPath = (nextState) => {
-        return this.props.basePath + '/' + nextState.config.benchmark + '/' + nextState.config.range + '/' + nextState.config.field + (nextState.data.fundListCompare ? '/' + nextState.data.fundListCompare.map(fund => fund.cnpj).join('/') : '');
-    }
+    buildHistoryPath = nextState => this.props.basePath + '/' + nextState.config.benchmark + '/' + nextState.config.range + '/' + nextState.config.field + (nextState.data.fundListCompare ? '/' + nextState.data.fundListCompare.map(fund => fund.cnpj).join('/') : '');
 
-    replaceHistory = (nextState) => {
+    replaceHistory = nextState => {
         this.props.history.replace(this.buildHistoryPath(nextState), nextState);
     }
 
-    pushHistory = (nextState) => {
+    pushHistory = nextState => {
         this.props.history.push(this.buildHistoryPath(nextState), nextState);
     }
 
-    updateData = async (nextState) => {
+    updateData = async nextState => {
         const statisticsServiceInstance = await StatisticsService.getInstance();
         const benchmarkToUpdate = nextState.data.benchmark && nextState.data.benchmark.data == null ? nextState.data.benchmark : null;
         const fundsToUpdate = nextState.data.fundListCompare.filter(fund => fund.data == null);
@@ -390,7 +388,7 @@ class FundComparisonView extends React.Component {
         fundsToUpdate.forEach(fund => {
             if (dataResults[fund.cnpj].data instanceof Error) {
                 Sentry.captureException(dataResults[fund.cnpj].data);
-                statisticsPromises[fund.cnpj] = dataResults[fund.cnpj].data
+                statisticsPromises[fund.cnpj] = dataResults[fund.cnpj].data;
             } else statisticsPromises[fund.cnpj] = statisticsServiceInstance.calculateFundStatistics(dataResults[fund.cnpj].data, nextState.config.benchmark, startingFrom);
         });
         statisticsPromises.benchmark = benchmarkToUpdate ? statisticsServiceInstance.calculateBenchmarkStatistics(dataResults.benchmark, nextState.config.benchmark, startingFrom) : null;
@@ -452,7 +450,7 @@ class FundComparisonView extends React.Component {
 
         // Calculate the correlation matrix of the not errored funds and benchmark
         const notErroredFunds = fundHistory => !(fundHistory.data instanceof Error);
-        const notErroredBenchmark = !(nextState.data.benchmark.data instanceof Error)
+        const notErroredBenchmark = !(nextState.data.benchmark.data instanceof Error);
 
         const fundsHistory = nextState.data.fundListCompare.filter(notErroredFunds).map(fund => fund.data);
         const fundsHeader = nextState.data.fundListCompare.filter(notErroredFunds).map(fund => fund.detail.name);
@@ -540,21 +538,17 @@ class FundComparisonView extends React.Component {
         return chart;
     }
 
-    getBenchmarkHistory = async (config) => {
+    getBenchmarkHistory = config => {
         const from = rangeOptions.find(range => range.name === config.range).toDate();
 
         return API.getBenchmarkHistory(config.benchmark, from);
     }
 
-    getFundData = async (cnpj) => {
-        return API.getFundData(cnpj);
-    }
+    getFundData = cnpj => API.getFundData(cnpj);
 
-    getFundList = async (config) => {
-        return API.getFundList(config);
-    }
+    getFundList = config => API.getFundList(config);
 
-    getFundHistory = async (cnpj, config) => {
+    getFundHistory = (cnpj, config) => {
         const from = rangeOptions.find(range => range.name === config.range).toDate();
 
         return API.getFundHistory(cnpj, config.benchmark, from);
@@ -732,68 +726,65 @@ class FundComparisonView extends React.Component {
                                 <Hidden smDown>
                                     <DataHistoryChartComponent
                                         data={this.state.data.chartLarge}
-                                        onInitialized={(figure) => this.handleChartInitialized(figure)}
-                                        onUpdate={(figure) => this.handleChartUpdate(figure)} />
+                                        onInitialized={figure => this.handleChartInitialized(figure)}
+                                        onUpdate={figure => this.handleChartUpdate(figure)} />
                                 </Hidden>
                                 <Hidden mdUp>
                                     <DataHistoryChartComponent
                                         data={this.state.data.chartSmall}
-                                        onInitialized={(figure) => this.handleChartInitialized(figure)}
-                                        onUpdate={(figure) => this.handleChartUpdate(figure)} />
+                                        onInitialized={figure => this.handleChartInitialized(figure)}
+                                        onUpdate={figure => this.handleChartUpdate(figure)} />
                                 </Hidden>
                             </React.Fragment>}
                             {(this.state.config.selectedTab === 1 && !isWidthDown('sm', this.props.width)) && <React.Fragment>
                                 <ShowStateComponent
                                     data={this.state.data.correlationMatrix}
-                                    hasData={() => {
-                                        return (
-                                            <table className={classes.historyTable}>
-                                                <thead>
-                                                    <tr className={classes.historyCell}>
-                                                        <th className={classes.historyCell}>&nbsp;</th>
-                                                        {this.state.data.correlationMatrix.headers.map((correlationItem, index) => (
-                                                            <th key={`head${correlationItem}`} className={classes.historyCell} style={{ borderWidth: '0px 0px 5px 0px', borderColor: nextColorIndex(index), borderStyle: 'solid' }}>
-                                                                <Typography variant="body2" className={classes.textOverflowDynamicContainer}>
-                                                                    <span className={classes.textOverflowDynamicEllipsis}>
-                                                                        <b title={correlationItem}>
-                                                                            {correlationItem}
-                                                                        </b>
-                                                                    </span>
+                                    hasData={() => (
+                                        <table className={classes.historyTable}>
+                                            <thead>
+                                                <tr className={classes.historyCell}>
+                                                    <th className={classes.historyCell}>&nbsp;</th>
+                                                    {this.state.data.correlationMatrix.headers.map((correlationItem, index) => (
+                                                        <th key={`head${correlationItem}`} className={classes.historyCell} style={{ borderWidth: '0px 0px 5px 0px', borderColor: nextColorIndex(index), borderStyle: 'solid' }}>
+                                                            <Typography variant="body2" className={classes.textOverflowDynamicContainer}>
+                                                                <span className={classes.textOverflowDynamicEllipsis}>
+                                                                    <b title={correlationItem}>
+                                                                        {correlationItem}
+                                                                    </b>
+                                                                </span>
+                                                            </Typography>
+                                                        </th>))}
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {this.state.data.correlationMatrix.headers.map((name, index) => {
+                                                    const restOfCorrelations = this.state.data.correlationMatrix.headers.slice(index + 1);
+                                                    const correlationMirror = restOfCorrelations.map((name, indexCol) => {
+                                                        const correlation = this.state.data.correlationMatrix.data[index + indexCol + 1][index];
+                                                        return (
+                                                            <td key={`bodyreverse${name}${index}`} className={classes.historyCell} style={{ backgroundColor: getGradientColor('#FFFFFF', '#E6194B', Math.abs(correlation)) }}>
+                                                                <Typography variant="body2" style={{ color: Math.abs(correlation) > 0.3 ? '#FFFFFF' : '#000000' }}>
+                                                                    {formatters.percentage(this.state.data.correlationMatrix.data[index + indexCol + 1][index])}
                                                                 </Typography>
-                                                            </th>))}
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {this.state.data.correlationMatrix.headers.map((name, index) => {
-                                                        const restOfCorrelations = this.state.data.correlationMatrix.headers.slice(index + 1);
-                                                        const correlationMirror = restOfCorrelations.map((name, indexCol) => {
-                                                            const correlation = this.state.data.correlationMatrix.data[index + indexCol + 1][index];
-                                                            return (
-                                                                <td key={`bodyreverse${name}${index}`} className={classes.historyCell} style={{ backgroundColor: getGradientColor('#FFFFFF', '#E6194B', Math.abs(correlation)) }}>
-                                                                    <Typography variant="body2" style={{ color: Math.abs(correlation) > 0.3 ? '#FFFFFF' : '#000000' }}>
-                                                                        {formatters.percentage(this.state.data.correlationMatrix.data[index + indexCol + 1][index])}
-                                                                    </Typography>
-                                                                </td>
-                                                            );
-                                                        });
-                                                        return (<tr key={`row${name}`}>
-                                                            <th style={{ minWidth: '100px', borderWidth: '0px 5px 0px 0px', borderColor: nextColorIndex(index), borderStyle: 'solid' }}><Typography className={classes.textOverflowDynamicContainer}><span className={classes.textOverflowDynamicEllipsis} title={name}><b>{name}</b></span></Typography></th>
-                                                            {this.state.data.correlationMatrix.data[index].map(correlation => {
-                                                                return (
-                                                                    <td key={`body${name}${index}${correlation}`} className={classes.historyCell} style={{ backgroundColor: getGradientColor('#FFFFFF', '#E6194B', Math.abs(correlation)) }}>
-                                                                        <Typography variant="body2" style={{ color: Math.abs(correlation) > 0.3 ? '#FFFFFF' : '#000000' }}>
-                                                                            {formatters.percentage(correlation)}
-                                                                        </Typography>
-                                                                    </td>);
-                                                            })}
-                                                            {correlationMirror}
-                                                        </tr>
+                                                            </td>
                                                         );
-                                                    })}
-                                                </tbody>
-                                            </table>
-                                        );
-                                    }}
+                                                    });
+                                                    return (<tr key={`row${name}`}>
+                                                        <th style={{ minWidth: '100px', borderWidth: '0px 5px 0px 0px', borderColor: nextColorIndex(index), borderStyle: 'solid' }}><Typography className={classes.textOverflowDynamicContainer}><span className={classes.textOverflowDynamicEllipsis} title={name}><b>{name}</b></span></Typography></th>
+                                                        {this.state.data.correlationMatrix.data[index].map(correlation => (
+                                                            <td key={`body${name}${index}${correlation}`} className={classes.historyCell} style={{ backgroundColor: getGradientColor('#FFFFFF', '#E6194B', Math.abs(correlation)) }}>
+                                                                <Typography variant="body2" style={{ color: Math.abs(correlation) > 0.3 ? '#FFFFFF' : '#000000' }}>
+                                                                    {formatters.percentage(correlation)}
+                                                                </Typography>
+                                                            </td>)
+                                                        )}
+                                                        {correlationMirror}
+                                                    </tr>
+                                                    );
+                                                })}
+                                            </tbody>
+                                        </table>
+                                    )}
                                     isNull={() => (<Typography variant="subtitle1" align="center"><CircularProgress className={classes.progress} /></Typography>)}
                                     isErrored={() => (<Typography variant="subtitle1" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>)}
                                 />
@@ -831,11 +822,11 @@ class FundComparisonView extends React.Component {
                                         const selectedFields = [];
 
                                         fields = fields.filter(field => field !== this.state.config.field);
-                                        selectedFields.push(this.state.config.field)
+                                        selectedFields.push(this.state.config.field);
 
                                         Array(availableSlots).fill(null).forEach(slot => {
                                             selectedFields.push(fields.shift());
-                                        })
+                                        });
 
                                         return (
                                             <Grid item xs={4} sm={6} md={7} lg={9}>
@@ -885,11 +876,11 @@ class FundComparisonView extends React.Component {
                                                 const selectedFields = [];
 
                                                 fields = fields.filter(field => field !== this.state.config.field);
-                                                selectedFields.push(this.state.config.field)
+                                                selectedFields.push(this.state.config.field);
 
                                                 Array(availableSlots).fill(null).forEach(slot => {
                                                     selectedFields.push(fields.shift());
-                                                })
+                                                });
 
                                                 return (
                                                     <Grid item xs={4} sm={6} md={7} lg={9}>
@@ -958,11 +949,11 @@ class FundComparisonView extends React.Component {
                                                             const selectedFields = [];
 
                                                             fields = fields.filter(field => field !== this.state.config.field);
-                                                            selectedFields.push(this.state.config.field)
+                                                            selectedFields.push(this.state.config.field);
 
                                                             Array(availableSlots).fill(null).forEach(slot => {
                                                                 selectedFields.push(fields.shift());
-                                                            })
+                                                            });
 
                                                             return (
                                                                 <Grid item xs={4} sm={6} md={7} lg={9}>

@@ -29,11 +29,9 @@ class FundSearchComponent extends React.Component {
 
     timeout = null;
 
-    triggerOnSearchChanged = () => {
-        return this.props.onSearchChanged(this.state.config.search);
-    };
+    triggerOnSearchChanged = () => this.props.onSearchChanged(this.state.config.search);
 
-    handleSearchChange = (event) => {
+    handleSearchChange = event => {
         const value = event.target.value;
         this.setState(produce(draft => {
             draft.config.search.term = value;
@@ -42,7 +40,7 @@ class FundSearchComponent extends React.Component {
         this.timeout = setTimeout(this.triggerOnSearchChanged, 1000);
     }
 
-    handleKeyPress = (event) => {
+    handleKeyPress = event => {
         if (event.key === 'Enter') {
             const value = event.target.value;
             this.setState(produce(draft => {
@@ -65,7 +63,7 @@ class FundSearchComponent extends React.Component {
                     onChange={this.handleSearchChange}
                     onKeyPress={this.handleKeyPress}
                     className={classes.input}
-                    autoComplete="new-search"                    
+                    autoComplete="new-search"
                     fullWidth
                     startAdornment={
                         <InputAdornment position="start">

@@ -106,7 +106,7 @@ const reportErrorIfNecessary = data => {
         Sentry.captureException(data);
         console.error(data.message);
     }
-}
+};
 
 async function updateEconomyIndicators(setEconomyIndicators, range) {
     const economyIndicators = await settle(getEconomyIndicators(range));
@@ -116,7 +116,7 @@ async function updateEconomyIndicators(setEconomyIndicators, range) {
         large: buildChart(economyIndicators, 'large')
     });
 
-    reportErrorIfNecessary(economyIndicators);    
+    reportErrorIfNecessary(economyIndicators);
 }
 
 async function updateFundIndicators(setFundIndicators, range, filter) {
@@ -124,7 +124,7 @@ async function updateFundIndicators(setFundIndicators, range, filter) {
 
     setFundIndicators(fundIndicators);
 
-    reportErrorIfNecessary(fundIndicators);    
+    reportErrorIfNecessary(fundIndicators);
 }
 
 async function updateFundsChanged(setFundsChanged, range) {
@@ -132,7 +132,7 @@ async function updateFundsChanged(setFundsChanged, range) {
 
     setFundsChanged(fundsChanged);
 
-    reportErrorIfNecessary(fundsChanged);    
+    reportErrorIfNecessary(fundsChanged);
 }
 
 function buildChart(economyIndicators, size = 'small') {
@@ -670,22 +670,21 @@ const FundsChangedPaper = props => {
                 <Grid container spacing={1} alignItems="center" justify="center">
                     <ShowStateComponent
                         data={data}
-                        hasData={() => {
-                            return data[broker].map((change, index) => (
-                                <React.Fragment key={index}>
-                                    <Grid item xs={12}>
-                                        <Grid container spacing={1}>
-                                            <Grid item xs={12} sm={12} md={6} xl={6} >
-                                                <Typography variant="body2" align="left" display="block" component="span" className={classes.cropTextNormal}>{formatters.date(change.date)} - <Link to={'/funds/' + change.cnpj} className={classes.link}>{change.name}</Link></Typography>
-                                            </Grid>
-                                            <Grid item xs={12} sm={12} md={6} xl={6}>
-                                                {change.changes.map((fieldChange, index) => (<Typography variant="body2" key={index} component="span" align="right" display="block">{fieldChange}</Typography>))}
-                                            </Grid>
+                        hasData={() => data[broker].map((change, index) => (
+                            <React.Fragment key={index}>
+                                <Grid item xs={12}>
+                                    <Grid container spacing={1}>
+                                        <Grid item xs={12} sm={12} md={6} xl={6} >
+                                            <Typography variant="body2" align="left" display="block" component="span" className={classes.cropTextNormal}>{formatters.date(change.date)} - <Link to={'/funds/' + change.cnpj} className={classes.link}>{change.name}</Link></Typography>
+                                        </Grid>
+                                        <Grid item xs={12} sm={12} md={6} xl={6}>
+                                            {change.changes.map((fieldChange, index) => (<Typography variant="body2" key={index} component="span" align="right" display="block">{fieldChange}</Typography>))}
                                         </Grid>
                                     </Grid>
-                                </React.Fragment>
-                            ));
-                        }}
+                                </Grid>
+                            </React.Fragment>
+                        ))
+                        }
                         isNull={() => (
                             <React.Fragment>
                                 {

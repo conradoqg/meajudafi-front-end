@@ -9,9 +9,7 @@ export default async (options, fromDate = dayjs().subtract(1, 'month').toDate())
         Object.keys(options.filter).forEach(selectedFilterOptionsKey => {
             if (selectedFilterOptionsKey === 'switch') {
                 let switchItems = [];
-                Object.keys(options.filter.switch).map(switchItem => {
-                    return options.filter.switch[switchItem] ? switchItems.push(`${switchItem}.not.is.null`) : null;
-                });
+                Object.keys(options.filter.switch).map(switchItem => options.filter.switch[switchItem] ? switchItems.push(`${switchItem}.not.is.null`) : null);
                 if (switchItems.length > 0)
                     filterPart += `or=(${switchItems.join(',')})&`;
             }
@@ -64,13 +62,11 @@ export default async (options, fromDate = dayjs().subtract(1, 'month').toDate())
         risk_top: indicatorsObject.risk_top.json(),
         risk_bottom: indicatorsObject.risk_bottom.json()
     });
-    const toIndicatorObject = (array, field) => array.map(item => {
-        return {
-            name: item.f_short_name,
-            cnpj: item.f_cnpj,
-            value: item[field]
-        };
-    });
+    const toIndicatorObject = (array, field) => array.map(item => ({
+        name: item.f_short_name,
+        cnpj: item.f_cnpj,
+        value: item[field]
+    }));
     const indicators = {
         [range]: {
             investment_return: {
