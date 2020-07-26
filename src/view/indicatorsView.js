@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
@@ -20,7 +19,6 @@ import withWidth from '@material-ui/core/withWidth';
 import Hidden from '@material-ui/core/Hidden';
 import Skeleton from '@material-ui/lab/Skeleton';
 import { produce } from 'immer';
-import promisesEach from 'promise-results';
 import FundFilterComponent from './component/fundFilterComponent';
 import ShowStateComponent from './component/showStateComponent';
 import DataHistoryChartComponent from './component/dataHistoryChartComponent';
@@ -78,483 +76,499 @@ const styles = theme => ({
 
 const emptyState = {
     data: {
+        economyIndicators: {
+            small: null,
+            large: null
+        },
         fundIndicators: null,
-        economyIndicators: null,
         fundsChanged: null,
-        economyIndicatorsChartSmall: null,
-        economyIndicatorsChartLarge: null
     },
     config: {
-        range: '1y',
-        changesRange: '1w',
-        filter: FundFilterComponent.emptyState.config.filter
+        economyIndicatorAndFundsRange: '1y',
+        fundsChangeRange: '1w',
+        fundsFilter: FundFilterComponent.emptyState.config.filter
     },
     layout: {
         showingFilter: false
     }
 };
 
-class IndicatorsView extends React.Component {
-    state = emptyState;
-
-    async componentDidMount() {
-        return this.updateData(this.state);
+const settle = async promise => {
+    try {
+        return await promise;
+    } catch (ex) {
+        return ex;
     }
+};
 
-    handleConfigRangeChange = async event => {
-        const nextState = produce(this.state, draft => {
-            draft.config[event.target.name] = event.target.value;
-            draft.data.economyIndicators = emptyState.data.economyIndicators;
-            draft.data.economyIndicatorsChartSmall = emptyState.data.economyIndicatorsChartSmall;
-            draft.data.economyIndicatorsChartLarge = emptyState.data.economyIndicatorsChartLarge;
-            draft.data.fundIndicators = emptyState.data.fundIndicators;
-        });
-
-        this.setState(nextState);
-
-        return this.updateData(nextState);
-    }
-
-    handleConfigChangesRangeChange = async event => {
-        const nextState = produce(this.state, draft => {
-            draft.config[event.target.name] = event.target.value;
-            draft.data.fundsChanged = emptyState.data.fundsChanged;
-        });
-
-        this.setState(nextState);
-
-        return this.updateData(nextState);
-    }
-
-    handleChartInitialized = (figure) => {
-        this.setState(produce(draft => {
-            if (figure.layout.size === 'small') draft.data.economyIndicatorsChartSmall = figure;
-            else if (figure.layout.size === 'large') draft.data.economyIndicatorsChartLarge = figure;
-        }));
-    }
-
-    handleChartUpdate = (figure) => {
-        this.setState(produce(draft => {
-            if (figure.layout.size === 'small') draft.data.economyIndicatorsChartSmall = figure;
-            else if (figure.layout.size === 'large') draft.data.economyIndicatorsChartLarge = figure;
-        }));
-    }
-
-    handleFilterClick = () => {
-        this.setState(produce(draft => {
-            draft.layout.showingFilter = !draft.layout.showingFilter;
-        }));
-    }
-
-    handleFilterChange = async (filter) => {
-        const nextState = produce(this.state, draft => {
-            draft.config.filter = filter;
-            draft.layout.showingFilter = false;
-            draft.data.fundIndicators = emptyState.data.fundIndicators;
-        });
-
-        this.setState(nextState);
-
-        return this.updateData(nextState);
-    }
-
-    updateData = async (nextState) => {
-        const { fundIndicators, economyIndicators, fundsChanged } = await promisesEach({
-            fundIndicators: this.getFundIndicators(nextState.config),
-            economyIndicators: this.getEconomyIndicators(nextState.config),
-            fundsChanged: this.getFundsChanged(nextState.config)
-        });
-
-        nextState = produce(nextState, draft => {
-            draft.data.fundIndicators = fundIndicators;
-            draft.data.economyIndicators = economyIndicators;
-            draft.data.fundsChanged = fundsChanged;
-
-            if (economyIndicators instanceof Error) {
-                Sentry.captureException(economyIndicators);
-                draft.data.economyIndicatorsChartSmall = economyIndicators;
-                draft.data.economyIndicatorsChartLarge = economyIndicators;
-            } else {
-                draft.data.economyIndicatorsChartSmall = this.buildChart(economyIndicators, 'small');
-                draft.data.economyIndicatorsChartLarge = this.buildChart(economyIndicators, 'large');
-            }
-        });
-
-        this.setState(nextState);
-    }
-
-    buildChart = (economyIndicators, size = 'small') => {
-        let colorIndex = 0;
-
-        let domain = null;
-        if (size === 'large') domain = [0.08, 0.90];
-        else domain = [0, 1];
-
-        let margin = null;
-        if (size === 'large') margin = { l: 0, r: 0, t: 50, b: 0 };
-        else margin = { l: 15, r: 15, t: 50, b: 10 };
-
-        return {
-            data: [
-                {
-                    x: economyIndicators.date,
-                    y: economyIndicators.bovespa,
-                    type: 'scatter',
-                    name: 'Bovespa',
-                    line: { color: nextColorIndex(colorIndex++) }
-                },
-                {
-                    x: economyIndicators.date,
-                    y: economyIndicators.dolar,
-                    type: 'scatter',
-                    name: 'Dólar',
-                    yaxis: 'y2',
-                    line: { color: nextColorIndex(colorIndex++) }
-                },
-                {
-                    x: economyIndicators.date,
-                    y: economyIndicators.euro,
-                    type: 'scatter',
-                    name: 'Euro',
-                    yaxis: 'y3',
-                    line: { color: nextColorIndex(colorIndex++) }
-                }
-            ],
-            layout: {
-                separators: ',.',
-                autosize: true,
-                showlegend: true,
-                legend: { 'orientation': 'h' },
-                dragmode: size === 'small' ? false : 'zoom',
-                height: size === 'small' ? 300 : null,
-                font: {
-                    family: '"Roboto", "Helvetica", "Arial", sans-serif'
-                },
-                size,
-                margin,
-                xaxis: {
-                    showspikes: true,
-                    spikemode: 'across',
-                    domain,
-                    fixedrange: size === 'small' ? true : false
-                },
-                yaxis: {
-                    title: 'Bovespa',
-                    tickformat: chartFormatters.int.tickformat,
-                    hoverformat: chartFormatters.int.hoverformat,
-                    fixedrange: true,
-                    visible: size === 'small' ? false : true,
-                },
-                yaxis2: {
-                    title: 'Dólar',
-                    anchor: 'x',
-                    overlaying: 'y',
-                    side: 'right',
-                    tickprefix: chartFormatters.money.tickprefix,
-                    tickformat: chartFormatters.money.tickformat,
-                    hoverformat: chartFormatters.money.hoverformat,
-                    fixedrange: true,
-                    position: 0.90,
-                    visible: size === 'small' ? false : true,
-                },
-                yaxis3: {
-                    title: 'Euro',
-                    anchor: 'free',
-                    overlaying: 'y',
-                    side: 'right',
-                    tickprefix: chartFormatters.money.tickprefix,
-                    tickformat: chartFormatters.money.tickformat,
-                    hoverformat: chartFormatters.money.hoverformat,
-                    fixedrange: true,
-                    position: 0.95,
-                    visible: size === 'small' ? false : true
-                }
-            },
-            frames: [],
-            config: {
-                locale: 'pt-BR',
-                displayModeBar: true
-            }
-        };
-    }
-
-    getEconomyIndicators = async (config) => {
-        const from = rangeOptions.find(range => range.name === config.range).toDate();
-
-        return API.getEconomyIndicators(from);
-    }
-
-    getFundIndicators = async (config) => {
-        return API.getFundIndicators(config);
-    }
-
-    getFundsChanged = async (config) => {
-        const from = rangeOptions.find(range => range.name === config.changesRange).toDate();
-
-        const fundsChanged = await API.getFundsChanged(from);
-
-        const fundsChanges = {
-            btgpactual: [],
-            xpi: [],
-            modalmais: []
-        };
-
-        fundsChanged.forEach(change => {
-            let key = null;
-
-            if (change.table_name === 'btgpactual_funds') key = 'btgpactual';
-            else if (change.table_name === 'xpi_funds') key = 'xpi';
-            else if (change.table_name === 'modalmais_funds') key = 'modalmais';
-
-            const relevantChanges = [];
-
-            if (change.action === 'I') {
-                relevantChanges.push('Adicionado a lista de fundos');
-            } else if (change.action === 'D') {
-                relevantChanges.push('Removido da lista de fundos');
-            } else {
-                Object.keys(change.changed_fields).forEach(changedField => {
-                    const relevantFields = {
-                        xf_state: {
-                            title: 'Captação',
-                            text: formatters.field['xf_state']
-                        },
-                        xf_formal_risk: {
-                            title: 'Risco formal',
-                            text: formatters.field['xf_formal_risk']
-                        },
-                        xf_initial_investment: {
-                            title: 'Investimento inicial',
-                            text: formatters.field['xf_initial_investment']
-                        },
-                        xf_rescue_financial_settlement: {
-                            title: 'Dias para resgate',
-                            text: formatters.field['xf_rescue_financial_settlement']
-                        },
-                        bf_is_blacklist: {
-                            title: 'Captação',
-                            text: formatters.field['bf_is_blacklist']
-                        },
-                        bf_inactive: {
-                            title: 'Atividade',
-                            text: formatters.field['bf_inactive']
-                        },
-                        bf_risk_name: {
-                            title: 'Risco formal',
-                            text: formatters.field['bf_risk_name']
-                        },
-                        bf_minimum_initial_investment: {
-                            title: 'Investimento inicial',
-                            text: formatters.field['bf_minimum_initial_investment']
-                        },
-                        bf_rescue_financial_settlement: {
-                            title: 'Dias para resgate',
-                            text: formatters.field['bf_rescue_financial_settlement']
-                        },
-                        bf_investor_type: {
-                            title: 'Tipo de investidor',
-                            text: formatters.field['bf_investor_type']
-                        },
-                        mf_risk_level: {
-                            title: 'Risco formal',
-                            text: formatters.field['mf_risk_level']
-                        },
-                        mf_minimum_initial_investment: {
-                            title: 'Investimento inicial',
-                            text: formatters.field['mf_minimum_initial_investment']
-                        },
-                        mf_rescue_quota: {
-                            title: 'Dias para resgate',
-                            text: formatters.field['mf_rescue_quota']
-                        },
-                        mf_active: {
-                            title: 'Ativo',
-                            text: formatters.field['mf_active']
-                        }
-                    };
-                    if (relevantFields[changedField]) {
-                        relevantChanges.push(`${relevantFields[changedField].title} mudou de ${relevantFields[changedField].text(change.row_data[changedField])} para ${relevantFields[changedField].text(change.changed_fields[changedField])}`);
-                    }
-                });
-            }
-
-            if (relevantChanges.length > 0)
-                fundsChanges[key].push({
-                    date: change.action_tstamp_stm,
-                    name: change.f_short_name,
-                    cnpj: change.f_cnpj,
-                    changes: relevantChanges
-                });
-        });
-
-        return fundsChanges;
-    }
-
-    render() {
-        const { classes } = this.props;
-
-        return (
-            <div>
-                <div className={classes.appBarSpacer} />
-                <Grid container spacing={2} alignItems="center">
-                    <Grid item xs>
-                        <Grid container alignItems="center" spacing={1}>
-                            <Grid item>
-                                <Tooltip enterTouchDelay={100} leaveTouchDelay={5000} title={
-                                    <React.Fragment>
-                                        <p>Indicadores gerais de mercado e dos fundos de investimento.</p>
-                                        <p>No lado direito é possível alterar o intervalo visualizado.</p>
-                                    </React.Fragment>
-                                }>
-                                    <Typography variant="h5" className={classes.withTooltip}>Indicadores</Typography>
-                                </Tooltip>
-                            </Grid>
-                        </Grid>
-                    </Grid>
-                    <Grid item>
-                        <Grid container alignItems="center" spacing={1}>
-                            <Grid item>
-                                <Select
-                                    value={this.state.config.range}
-                                    onChange={this.handleConfigRangeChange}
-                                    className={classes.select}
-                                    inputProps={{
-                                        name: 'range',
-                                        id: 'range',
-                                    }}>
-                                    {rangeOptions.filter(range => range.name !== 'all' && range.name !== '1w' && range.name !== 'best').map(range => (<MenuItem key={range.name} value={range.name}>{range.displayName}</MenuItem>))}
-                                </Select>
-                            </Grid>
-                        </Grid>
-                    </Grid>
-                </Grid>
-                <Grid container spacing={2} alignItems="center">
-                    <Grid item xs>
-                        <Typography variant="h6">Mercado</Typography>
-                    </Grid>
-                </Grid>
-                <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                        <Paper className={classes.paper} elevation={1} square={true}>
-                            <Hidden smDown>
-                                <DataHistoryChartComponent
-                                    data={this.state.data.economyIndicatorsChartLarge}
-                                    onInitialized={(figure) => this.handleChartInitialized(figure)}
-                                    onUpdate={(figure) => this.handleChartUpdate(figure)} />
-                            </Hidden>
-                            <Hidden mdUp>
-                                <DataHistoryChartComponent
-                                    data={this.state.data.economyIndicatorsChartSmall}
-                                    onInitialized={(figure) => this.handleChartInitialized(figure)}
-                                    onUpdate={(figure) => this.handleChartUpdate(figure)} />
-                            </Hidden>
-                        </Paper>
-                    </Grid>
-                </Grid>
-                <Grid container spacing={2} alignItems="center">
-                    <Grid item xs>
-                        <Grid container alignItems="center" spacing={1}>
-                            <Grid item>
-                                <Tooltip enterTouchDelay={100} leaveTouchDelay={5000} title={
-                                    <React.Fragment>
-                                        <p>Lista de melhores e piores fundos de investimento. </p>
-                                        <p>Por padrão somente fundos listados na BTG Pactual, XP Investimentos e Modal Mais são exibidos. No lado direito é possível alterar o filtro.</p>
-                                    </React.Fragment>
-                                }>
-                                    <Typography variant="h6" className={classes.withTooltip}>Fundos de Investimento</Typography>
-                                </Tooltip>
-                            </Grid>
-                        </Grid>
-                    </Grid>
-                    <Hidden smDown>
-                        <Grid item>
-                            <Grid container alignItems="center" spacing={1}>
-                                <Grid item>
-                                    <IconButton
-                                        aria-label="Filtro"
-                                        onClick={this.handleFilterClick}>
-                                        <FilterListIcon />
-                                    </IconButton>
-                                </Grid>
-                            </Grid>
-                        </Grid>
-                    </Hidden>
-                </Grid>
-                <Hidden smDown>
-                    <Grid container spacing={this.state.layout.showingFilter ? 16 : 0}>
-                        <Grid item xs={12}>
-                            <Paper elevation={1} square={true}>
-                                <Collapse in={this.state.layout.showingFilter}>
-                                    <FundFilterComponent onFilterChanged={this.handleFilterChange} />
-                                </Collapse>
-                            </Paper>
-                        </Grid>
-                    </Grid>
-                </Hidden>
-                <Grid container spacing={2} alignItems="center">
-                    <Grid item xs={12} sm={6} md={3} xl={3}>
-                        <IndicatorPaper title="Desempenho" field="investment_return" range={this.state.config.range} data={this.state.data.fundIndicators} classes={classes} />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3} xl={3}>
-                        <IndicatorPaper title="Patrimônio" field="networth" range={this.state.config.range} data={this.state.data.fundIndicators} classes={classes} />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3} xl={3}>
-                        <IndicatorPaper title="Cotistas" field="quotaholders" range={this.state.config.range} data={this.state.data.fundIndicators} classes={classes} />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3} xl={3}>
-                        <IndicatorPaper title="Risco" field="risk" range={this.state.config.range} data={this.state.data.fundIndicators} classes={classes} inverted />
-                    </Grid>
-                </Grid>
-                <Grid container spacing={2} alignItems="center">
-                    <Grid item xs>
-                        <Grid container alignItems="center" spacing={1}>
-                            <Grid item>
-                                <Tooltip enterTouchDelay={100} leaveTouchDelay={5000} title={
-                                    <React.Fragment>
-                                        <p>Lista de mudanças que ocorreram recentemente nos fundos de investimento. </p>
-                                        <p>Somente algumas informações são monitoradas. No lado direito é possível filtrar o intervalo de exibição.</p>
-                                        <p>Início da coleta em 16/02/2019.</p>
-                                    </React.Fragment>
-                                }>
-                                    <Typography variant="h6" className={classes.withTooltip}>Mudanças nos Fundos</Typography>
-                                </Tooltip>
-                            </Grid>
-                        </Grid>
-                    </Grid>
-                    <Grid item>
-                        <Grid container alignItems="center" spacing={1}>
-                            <Grid item>
-                                <Select
-                                    value={this.state.config.changesRange}
-                                    onChange={this.handleConfigChangesRangeChange}
-                                    className={classes.select}
-                                    inputProps={{
-                                        name: 'changesRange',
-                                        id: 'changesRange',
-                                    }}>
-                                    {rangeOptions.filter(range => range.name !== 'all' && range.name !== 'best').map(range => (<MenuItem key={range.name} value={range.name}>{range.displayName}</MenuItem>))}
-                                </Select>
-                            </Grid>
-                        </Grid>
-                    </Grid>
-                </Grid>
-                <Grid container spacing={2}>
-                    <Grid item xs={12} sm={12} md={6} xl={6}>
-                        <FundsChangedPaper title="XP Investimentos" data={this.state.data.fundsChanged} broker="xpi" classes={classes} />
-                    </Grid>
-                    <Grid item xs={12} sm={12} md={6} xl={6}>
-                        <FundsChangedPaper title="BTG Pactual" data={this.state.data.fundsChanged} broker="btgpactual" classes={classes} />
-                    </Grid>
-                    <Grid item xs={12} sm={12} md={6} xl={6}>
-                        <FundsChangedPaper title="Modal Mais" data={this.state.data.fundsChanged} broker="modalmais" classes={classes} />
-                    </Grid>
-                </Grid>
-            </div >
-        );
+const reportErrorIfNecessary = data => {
+    if (data instanceof Error) {
+        Sentry.captureException(data);
+        console.error(data.message);
     }
 }
 
-const IndicatorPaper = (props) => {
+async function updateEconomyIndicators(setEconomyIndicators, range) {
+    const economyIndicators = await settle(getEconomyIndicators(range));
+
+    setEconomyIndicators({
+        small: buildChart(economyIndicators, 'small'),
+        large: buildChart(economyIndicators, 'large')
+    });
+
+    reportErrorIfNecessary(economyIndicators);    
+}
+
+async function updateFundIndicators(setFundIndicators, range, filter) {
+    const fundIndicators = await settle(getFundIndicators(range, filter));
+
+    setFundIndicators(fundIndicators);
+
+    reportErrorIfNecessary(fundIndicators);    
+}
+
+async function updateFundsChanged(setFundsChanged, range) {
+    const fundsChanged = await settle(getFundsChanged(range));
+
+    setFundsChanged(fundsChanged);
+
+    reportErrorIfNecessary(fundsChanged);    
+}
+
+function buildChart(economyIndicators, size = 'small') {
+    let colorIndex = 0;
+
+    let domain = null;
+    if (size === 'large') domain = [0.08, 0.90];
+    else domain = [0, 1];
+
+    let margin = null;
+    if (size === 'large') margin = { l: 0, r: 0, t: 50, b: 0 };
+    else margin = { l: 15, r: 15, t: 50, b: 10 };
+
+    return {
+        data: [
+            {
+                x: economyIndicators.date,
+                y: economyIndicators.bovespa,
+                type: 'scatter',
+                name: 'Bovespa',
+                line: { color: nextColorIndex(colorIndex++) }
+            },
+            {
+                x: economyIndicators.date,
+                y: economyIndicators.dolar,
+                type: 'scatter',
+                name: 'Dólar',
+                yaxis: 'y2',
+                line: { color: nextColorIndex(colorIndex++) }
+            },
+            {
+                x: economyIndicators.date,
+                y: economyIndicators.euro,
+                type: 'scatter',
+                name: 'Euro',
+                yaxis: 'y3',
+                line: { color: nextColorIndex(colorIndex++) }
+            }
+        ],
+        layout: {
+            separators: ',.',
+            autosize: true,
+            showlegend: true,
+            legend: { 'orientation': 'h' },
+            dragmode: size === 'small' ? false : 'zoom',
+            height: size === 'small' ? 300 : null,
+            font: {
+                family: '"Roboto", "Helvetica", "Arial", sans-serif'
+            },
+            size,
+            margin,
+            xaxis: {
+                showspikes: true,
+                spikemode: 'across',
+                domain,
+                fixedrange: size === 'small' ? true : false
+            },
+            yaxis: {
+                title: 'Bovespa',
+                tickformat: chartFormatters.int.tickformat,
+                hoverformat: chartFormatters.int.hoverformat,
+                fixedrange: true,
+                visible: size === 'small' ? false : true,
+            },
+            yaxis2: {
+                title: 'Dólar',
+                anchor: 'x',
+                overlaying: 'y',
+                side: 'right',
+                tickprefix: chartFormatters.money.tickprefix,
+                tickformat: chartFormatters.money.tickformat,
+                hoverformat: chartFormatters.money.hoverformat,
+                fixedrange: true,
+                position: 0.90,
+                visible: size === 'small' ? false : true,
+            },
+            yaxis3: {
+                title: 'Euro',
+                anchor: 'free',
+                overlaying: 'y',
+                side: 'right',
+                tickprefix: chartFormatters.money.tickprefix,
+                tickformat: chartFormatters.money.tickformat,
+                hoverformat: chartFormatters.money.hoverformat,
+                fixedrange: true,
+                position: 0.95,
+                visible: size === 'small' ? false : true
+            }
+        },
+        frames: [],
+        config: {
+            locale: 'pt-BR',
+            displayModeBar: true
+        }
+    };
+}
+
+function getEconomyIndicators(range) {
+    const from = rangeOptions.find(rangeOption => rangeOption.name === range).toDate();
+
+    return API.getEconomyIndicators(from);
+}
+
+function getFundIndicators(range, filter) {
+    return API.getFundIndicators({ range, filter });
+}
+
+async function getFundsChanged(range) {
+    const from = rangeOptions.find(rangeOption => rangeOption.name === range).toDate();
+
+    const fundsChanged = await API.getFundsChanged(from);
+
+    const fundsChanges = {
+        btgpactual: [],
+        xpi: [],
+        modalmais: []
+    };
+
+    fundsChanged.forEach(change => {
+        let key = null;
+
+        if (change.table_name === 'btgpactual_funds') key = 'btgpactual';
+        else if (change.table_name === 'xpi_funds') key = 'xpi';
+        else if (change.table_name === 'modalmais_funds') key = 'modalmais';
+
+        const relevantChanges = [];
+
+        if (change.action === 'I') {
+            relevantChanges.push('Adicionado a lista de fundos');
+        } else if (change.action === 'D') {
+            relevantChanges.push('Removido da lista de fundos');
+        } else {
+            Object.keys(change.changed_fields).forEach(changedField => {
+                const relevantFields = {
+                    xf_state: {
+                        title: 'Captação',
+                        text: formatters.field['xf_state']
+                    },
+                    xf_formal_risk: {
+                        title: 'Risco formal',
+                        text: formatters.field['xf_formal_risk']
+                    },
+                    xf_initial_investment: {
+                        title: 'Investimento inicial',
+                        text: formatters.field['xf_initial_investment']
+                    },
+                    xf_rescue_financial_settlement: {
+                        title: 'Dias para resgate',
+                        text: formatters.field['xf_rescue_financial_settlement']
+                    },
+                    bf_is_blacklist: {
+                        title: 'Captação',
+                        text: formatters.field['bf_is_blacklist']
+                    },
+                    bf_inactive: {
+                        title: 'Atividade',
+                        text: formatters.field['bf_inactive']
+                    },
+                    bf_risk_name: {
+                        title: 'Risco formal',
+                        text: formatters.field['bf_risk_name']
+                    },
+                    bf_minimum_initial_investment: {
+                        title: 'Investimento inicial',
+                        text: formatters.field['bf_minimum_initial_investment']
+                    },
+                    bf_rescue_financial_settlement: {
+                        title: 'Dias para resgate',
+                        text: formatters.field['bf_rescue_financial_settlement']
+                    },
+                    bf_investor_type: {
+                        title: 'Tipo de investidor',
+                        text: formatters.field['bf_investor_type']
+                    },
+                    mf_risk_level: {
+                        title: 'Risco formal',
+                        text: formatters.field['mf_risk_level']
+                    },
+                    mf_minimum_initial_investment: {
+                        title: 'Investimento inicial',
+                        text: formatters.field['mf_minimum_initial_investment']
+                    },
+                    mf_rescue_quota: {
+                        title: 'Dias para resgate',
+                        text: formatters.field['mf_rescue_quota']
+                    },
+                    mf_active: {
+                        title: 'Ativo',
+                        text: formatters.field['mf_active']
+                    }
+                };
+                if (relevantFields[changedField]) {
+                    relevantChanges.push(`${relevantFields[changedField].title} mudou de ${relevantFields[changedField].text(change.row_data[changedField])} para ${relevantFields[changedField].text(change.changed_fields[changedField])}`);
+                }
+            });
+        }
+
+        if (relevantChanges.length > 0)
+            fundsChanges[key].push({
+                date: change.action_tstamp_stm,
+                name: change.f_short_name,
+                cnpj: change.f_cnpj,
+                changes: relevantChanges
+            });
+    });
+
+    return fundsChanges;
+}
+
+function IndicatorsView(props) {
+    // Data
+    const [economyIndicators, setEconomyIndicators] = useState(emptyState.data.economyIndicators);
+    const [fundIndicators, setFundIndicators] = useState(emptyState.data.fundIndicators);
+    const [fundsChanged, setFundsChanged] = useState(emptyState.data.fundsChanged);
+
+    // Config
+    const [economyIndicatorAndFundsRange, setEconomyIndicatorAndFundsRange] = useState(emptyState.config.economyIndicatorAndFundsRange);
+    const [fundsChangeRange, setFundsChangeRange] = useState(emptyState.config.fundsChangeRange);
+    const [fundsFilter, setFundsFilter] = useState(FundFilterComponent.emptyState.config.filter);
+
+    // Layout
+    const [showingFilter, setShowingFilter] = useState(emptyState.layout.showingFilter);
+
+    const { classes } = props;
+
+    console.log('Updating UI');
+
+    useEffect(() => {
+        updateFundIndicators(setFundIndicators, economyIndicatorAndFundsRange, fundsFilter);
+    }, [economyIndicatorAndFundsRange, fundsFilter]);
+
+    useEffect(() => {
+        updateEconomyIndicators(setEconomyIndicators, economyIndicatorAndFundsRange);
+    }, [economyIndicatorAndFundsRange]);
+
+    useEffect(() => {
+        updateFundsChanged(setFundsChanged, fundsChangeRange);
+    }, [fundsChangeRange]);
+
+    function handleConfigRangeChange(event) {
+        setEconomyIndicators(emptyState.data.economyIndicators);
+        setFundIndicators(emptyState.data.fundIndicators);
+        setEconomyIndicatorAndFundsRange(event.target.value);
+    }
+
+    function handleChartInitialized(figure) {
+        setEconomyIndicators(produce(economyIndicators, draft => {
+            if (figure.layout.size === 'small') draft.small = figure;
+            else if (figure.layout.size === 'large') draft.large = figure;
+        }));
+    }
+
+    function handleChartUpdate(figure) {
+        setEconomyIndicators(produce(economyIndicators, draft => {
+            if (figure.layout.size === 'small') draft.small = figure;
+            else if (figure.layout.size === 'large') draft.large = figure;
+        }));
+    }
+
+    function handleFilterClick() {
+        setShowingFilter(!showingFilter);
+    }
+
+    function handleFilterChange(filter) {
+        setShowingFilter(false);
+        setFundIndicators(emptyState.data.fundIndicators);
+        setFundsFilter(filter);
+    }
+
+    function handleConfigChangesRangeChange(event) {
+        setFundsChanged(emptyState.data.fundsChanged);
+        setFundsChangeRange(event.target.value);
+    }
+
+    return (
+        <div>
+            <div className={classes.appBarSpacer} />
+            <Grid container spacing={2} alignItems="center">
+                <Grid item xs>
+                    <Grid container alignItems="center" spacing={1}>
+                        <Grid item>
+                            <Tooltip enterTouchDelay={100} leaveTouchDelay={5000} title={
+                                <React.Fragment>
+                                    <p>Indicadores gerais de mercado e dos fundos de investimento.</p>
+                                    <p>No lado direito é possível alterar o intervalo visualizado.</p>
+                                </React.Fragment>
+                            }>
+                                <Typography variant="h5" className={classes.withTooltip}>Indicadores</Typography>
+                            </Tooltip>
+                        </Grid>
+                    </Grid>
+                </Grid>
+                <Grid item>
+                    <Grid container alignItems="center" spacing={1}>
+                        <Grid item>
+                            <Select
+                                value={economyIndicatorAndFundsRange}
+                                onChange={handleConfigRangeChange}
+                                className={classes.select}
+                                inputProps={{
+                                    name: 'range',
+                                    id: 'range',
+                                }}>
+                                {rangeOptions.filter(range => range.name !== 'all' && range.name !== '1w' && range.name !== 'best').map(range => (<MenuItem key={range.name} value={range.name}>{range.displayName}</MenuItem>))}
+                            </Select>
+                        </Grid>
+                    </Grid>
+                </Grid>
+            </Grid>
+            <Grid container spacing={2} alignItems="center">
+                <Grid item xs>
+                    <Typography variant="h6">Mercado</Typography>
+                </Grid>
+            </Grid>
+            <Grid container spacing={2}>
+                <Grid item xs={12}>
+                    <Paper className={classes.paper} elevation={1} square={true}>
+                        <Hidden smDown>
+                            <DataHistoryChartComponent
+                                data={economyIndicators.large}
+                                onInitialized={figure => handleChartInitialized(figure)}
+                                onUpdate={figure => handleChartUpdate(figure)} />
+                        </Hidden>
+                        <Hidden mdUp>
+                            <DataHistoryChartComponent
+                                data={economyIndicators.small}
+                                onInitialized={figure => handleChartInitialized(figure)}
+                                onUpdate={figure => handleChartUpdate(figure)} />
+                        </Hidden>
+                    </Paper>
+                </Grid>
+            </Grid>
+            <Grid container spacing={2} alignItems="center">
+                <Grid item xs>
+                    <Grid container alignItems="center" spacing={1}>
+                        <Grid item>
+                            <Tooltip enterTouchDelay={100} leaveTouchDelay={5000} title={
+                                <React.Fragment>
+                                    <p>Lista de melhores e piores fundos de investimento. </p>
+                                    <p>Por padrão somente fundos listados na BTG Pactual, XP Investimentos e Modal Mais são exibidos. No lado direito é possível alterar o filtro.</p>
+                                </React.Fragment>
+                            }>
+                                <Typography variant="h6" className={classes.withTooltip}>Fundos de Investimento</Typography>
+                            </Tooltip>
+                        </Grid>
+                    </Grid>
+                </Grid>
+                <Hidden smDown>
+                    <Grid item>
+                        <Grid container alignItems="center" spacing={1}>
+                            <Grid item>
+                                <IconButton
+                                    aria-label="Filtro"
+                                    onClick={handleFilterClick}>
+                                    <FilterListIcon />
+                                </IconButton>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                </Hidden>
+            </Grid>
+            <Hidden smDown>
+                <Grid container spacing={showingFilter ? 2 : 0}>
+                    <Grid item xs={12}>
+                        <Paper elevation={1} square={true}>
+                            <Collapse in={showingFilter}>
+                                <FundFilterComponent onFilterChanged={handleFilterChange} />
+                            </Collapse>
+                        </Paper>
+                    </Grid>
+                </Grid>
+            </Hidden>
+            <Grid container spacing={2} alignItems="center">
+                <Grid item xs={12} sm={6} md={3} xl={3}>
+                    <IndicatorPaper title="Desempenho" field="investment_return" range={economyIndicatorAndFundsRange} data={fundIndicators} classes={classes} />
+                </Grid>
+                <Grid item xs={12} sm={6} md={3} xl={3}>
+                    <IndicatorPaper title="Patrimônio" field="networth" range={economyIndicatorAndFundsRange} data={fundIndicators} classes={classes} />
+                </Grid>
+                <Grid item xs={12} sm={6} md={3} xl={3}>
+                    <IndicatorPaper title="Cotistas" field="quotaholders" range={economyIndicatorAndFundsRange} data={fundIndicators} classes={classes} />
+                </Grid>
+                <Grid item xs={12} sm={6} md={3} xl={3}>
+                    <IndicatorPaper title="Risco" field="risk" range={economyIndicatorAndFundsRange} data={fundIndicators} classes={classes} inverted />
+                </Grid>
+            </Grid>
+            <Grid container spacing={2} alignItems="center">
+                <Grid item xs>
+                    <Grid container alignItems="center" spacing={1}>
+                        <Grid item>
+                            <Tooltip enterTouchDelay={100} leaveTouchDelay={5000} title={
+                                <React.Fragment>
+                                    <p>Lista de mudanças que ocorreram recentemente nos fundos de investimento. </p>
+                                    <p>Somente algumas informações são monitoradas. No lado direito é possível filtrar o intervalo de exibição.</p>
+                                    <p>Início da coleta em 16/02/2019.</p>
+                                </React.Fragment>
+                            }>
+                                <Typography variant="h6" className={classes.withTooltip}>Mudanças nos Fundos</Typography>
+                            </Tooltip>
+                        </Grid>
+                    </Grid>
+                </Grid>
+                <Grid item>
+                    <Grid container alignItems="center" spacing={1}>
+                        <Grid item>
+                            <Select
+                                value={fundsChangeRange}
+                                onChange={handleConfigChangesRangeChange}
+                                className={classes.select}
+                                inputProps={{
+                                    name: 'changesRange',
+                                    id: 'changesRange',
+                                }}>
+                                {rangeOptions.filter(range => range.name !== 'all' && range.name !== 'best').map(range => (<MenuItem key={range.name} value={range.name}>{range.displayName}</MenuItem>))}
+                            </Select>
+                        </Grid>
+                    </Grid>
+                </Grid>
+            </Grid>
+            <Grid container spacing={2}>
+                <Grid item xs={12} sm={12} md={6} xl={6}>
+                    <FundsChangedPaper title="XP Investimentos" data={fundsChanged} broker="xpi" classes={classes} />
+                </Grid>
+                <Grid item xs={12} sm={12} md={6} xl={6}>
+                    <FundsChangedPaper title="BTG Pactual" data={fundsChanged} broker="btgpactual" classes={classes} />
+                </Grid>
+                <Grid item xs={12} sm={12} md={6} xl={6}>
+                    <FundsChangedPaper title="Modal Mais" data={fundsChanged} broker="modalmais" classes={classes} />
+                </Grid>
+            </Grid>
+        </div >
+    );
+
+}
+
+const IndicatorPaper = props => {
     const { classes, range, title, field, data, inverted = false } = props;
 
     const getClassForValue = value => {
@@ -577,40 +591,42 @@ const IndicatorPaper = (props) => {
                 <ShowStateComponent
                     data={data}
                     hasData={() => {
-                        const positive = data[range][field]['top'].map((indicator, index) => (
-                            <div key={index}>
-                                <ListItem divider>
-                                    <ListItemText disableTypography classes={{ root: classes.listItemText }}>
-                                        <Typography variant="body2" component="span" className={classes.cropText}><Link to={'/funds/' + indicator.cnpj} className={classes.link}>{indicator.name}</Link></Typography>
-                                    </ListItemText>
-                                    <ListItemSecondaryAction>
-                                        <Typography variant="body2" component="span" className={getClassForValue(indicator.value)}>{formatters.percentage(indicator.value)}</Typography>
-                                    </ListItemSecondaryAction>
-                                </ListItem>
-                            </div>
-                        ));
-                        const divider = (< ListItem divider >
-                            <ListItemText disableTypography={true}>
-                                <Typography variant="body2" component="span" align="center">...</Typography>
-                            </ListItemText>
-                        </ListItem>);
-                        const negative = data[range][field]['bottom'].map((indicator, index) => (
-                            <div key={index}>
-                                <ListItem divider>
-                                    <ListItemText disableTypography classes={{ root: classes.listItemText }}>
-                                        <Typography variant="body2" component="span" className={classes.cropText}><Link to={'/funds/' + indicator.cnpj} className={classes.link}>{indicator.name}</Link></Typography>
-                                    </ListItemText>
-                                    <ListItemSecondaryAction>
-                                        <Typography variant="body2" component="span" className={getClassForValue(indicator.value)}>{formatters.percentage(indicator.value)}</Typography>
-                                    </ListItemSecondaryAction>
-                                </ListItem>
-                            </div>
-                        ));
-                        return (<List>
-                            {positive}
-                            {divider}
-                            {negative}
-                        </List>);
+                        if (data[range]) {
+                            const positive = data[range][field]['top'].map((indicator, index) => (
+                                <div key={index}>
+                                    <ListItem divider>
+                                        <ListItemText disableTypography classes={{ root: classes.listItemText }}>
+                                            <Typography variant="body2" component="span" className={classes.cropText}><Link to={'/funds/' + indicator.cnpj} className={classes.link}>{indicator.name}</Link></Typography>
+                                        </ListItemText>
+                                        <ListItemSecondaryAction>
+                                            <Typography variant="body2" component="span" className={getClassForValue(indicator.value)}>{formatters.percentage(indicator.value)}</Typography>
+                                        </ListItemSecondaryAction>
+                                    </ListItem>
+                                </div>
+                            ));
+                            const divider = (< ListItem divider >
+                                <ListItemText disableTypography={true}>
+                                    <Typography variant="body2" component="span" align="center">...</Typography>
+                                </ListItemText>
+                            </ListItem>);
+                            const negative = data[range][field]['bottom'].map((indicator, index) => (
+                                <div key={index}>
+                                    <ListItem divider>
+                                        <ListItemText disableTypography classes={{ root: classes.listItemText }}>
+                                            <Typography variant="body2" component="span" className={classes.cropText}><Link to={'/funds/' + indicator.cnpj} className={classes.link}>{indicator.name}</Link></Typography>
+                                        </ListItemText>
+                                        <ListItemSecondaryAction>
+                                            <Typography variant="body2" component="span" className={getClassForValue(indicator.value)}>{formatters.percentage(indicator.value)}</Typography>
+                                        </ListItemSecondaryAction>
+                                    </ListItem>
+                                </div>
+                            ));
+                            return (<List>
+                                {positive}
+                                {divider}
+                                {negative}
+                            </List>);
+                        }
                     }}
                     isNull={() => (
                         <List>
@@ -640,7 +656,7 @@ const IndicatorPaper = (props) => {
         </div>);
 };
 
-const FundsChangedPaper = (props) => {
+const FundsChangedPaper = props => {
     const { classes, title, data, broker } = props;
 
     return (
