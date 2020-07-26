@@ -785,7 +785,7 @@ class FundComparisonView extends React.Component {
                                             </tbody>
                                         </table>
                                     )}
-                                    isNull={() => (<Typography variant="subtitle1" align="center"><Skeleton /></Typography>)}
+                                    isNull={() => (<Typography variant="subtitle1" align="center"><Skeleton variant="rect" height={300}/></Typography>)}
                                     isErrored={() => (<Typography variant="subtitle1" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>)}
                                 />
                             </React.Fragment>}
@@ -841,7 +841,27 @@ class FundComparisonView extends React.Component {
                                             </Grid>
                                         );
                                     }}
-                                    isNull={() => (<Typography variant="subtitle1" align="center"><Skeleton /></Typography>)}
+                                    isNull={() => {
+                                        let availableSlots = 0;
+
+                                        if (isWidthUp('lg', this.props.width)) availableSlots = 5;
+                                        else if (isWidthUp('md', this.props.width)) availableSlots = 4;
+                                        else if (isWidthUp('sm', this.props.width)) availableSlots = 1;
+                                        else if (isWidthUp('xs', this.props.width)) availableSlots = 0;
+
+                                        return (
+                                            <Grid item xs={4} sm={6} md={7} lg={9}>
+                                                <Grid container spacing={1} alignItems="center" justify="center">
+                                                    {
+                                                        [...Array(availableSlots).keys()].map(field => (
+                                                            <Grid item key={field} xs={12} sm={6} md={3} lg={2}>
+                                                                <Typography variant="body2" align="center"><b><Skeleton /></b></Typography>
+                                                            </Grid>))
+                                                    }
+                                                </Grid>
+                                            </Grid>
+                                        );
+                                    }}
                                     isErrored={() => (<Typography variant="subtitle1" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>)}
                                 />
                                 <Grid item xs={1}>
@@ -895,14 +915,35 @@ class FundComparisonView extends React.Component {
                                                     </Grid>
                                                 );
                                             }}
-                                            isNull={() => (<Typography variant="subtitle1" align="center"><Skeleton /></Typography>)}
+                                            isNull={() => {
+                                                let availableSlots = 0;
+
+                                                if (isWidthUp('lg', this.props.width)) availableSlots = 5;
+                                                else if (isWidthUp('md', this.props.width)) availableSlots = 4;
+                                                else if (isWidthUp('sm', this.props.width)) availableSlots = 1;
+                                                else if (isWidthUp('xs', this.props.width)) availableSlots = 0;
+
+                                                return (
+                                                    <Grid item xs={4} sm={6} md={7} lg={9}>
+                                                        <Grid container spacing={1} alignItems="center" justify="center">
+                                                            {
+                                                                [...Array(availableSlots).keys()].map(field => (
+                                                                    <Grid item key={field} xs={12} sm={6} md={3} lg={2}>
+                                                                        <Typography variant="body2" align="center"><Skeleton /></Typography>
+                                                                    </Grid>))
+                                                            }
+                                                        </Grid>
+                                                    </Grid>
+                                                );
+                                            }}
                                             isErrored={() => (<Typography variant="subtitle1" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>)}
                                         />
                                         <Grid item xs={1}>
                                             <Typography variant="body2">&nbsp;</Typography>
                                         </Grid>
                                     </Grid>
-                                )}
+                                )
+                                }
                                 isNull={() => (<Typography variant="subtitle1" align="center"><Skeleton /></Typography>)}
                                 isErrored={() => (<Typography variant="subtitle1" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>)}
                             />
@@ -932,7 +973,20 @@ class FundComparisonView extends React.Component {
                                                                 </Grid>
                                                             </Grid>
                                                         )}
-                                                        isNull={() => (<Typography variant="subtitle1" align="center"><Skeleton /></Typography>)}
+                                                        isNull={() => (
+                                                            <Grid item xs>
+                                                                <Grid container spacing={1}>
+                                                                    <Grid item>
+                                                                        <span style={{ backgroundColor: nextColorIndex(index + 1), minWidth: '10px', height: '100%', display: 'block' }}></span>
+                                                                    </Grid>
+                                                                    <Grid item xs>
+                                                                        <Typography variant="body2">
+                                                                            <Skeleton />
+                                                                        </Typography>
+                                                                    </Grid>
+                                                                </Grid>
+                                                            </Grid>
+                                                        )}
                                                         isErrored={() => (<Typography variant="subtitle1" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>)}
                                                     />
                                                     <ShowStateComponent
@@ -968,7 +1022,27 @@ class FundComparisonView extends React.Component {
                                                                 </Grid>
                                                             );
                                                         }}
-                                                        isNull={() => (<Typography variant="subtitle1" align="center"><Skeleton /></Typography>)}
+                                                        isNull={() => {
+                                                            let availableSlots = 0;
+
+                                                            if (isWidthUp('lg', this.props.width)) availableSlots = 5;
+                                                            else if (isWidthUp('md', this.props.width)) availableSlots = 4;
+                                                            else if (isWidthUp('sm', this.props.width)) availableSlots = 1;
+                                                            else if (isWidthUp('xs', this.props.width)) availableSlots = 0;
+
+                                                            return (
+                                                                <Grid item xs={4} sm={6} md={7} lg={9}>
+                                                                    <Grid container spacing={1} key={index} alignItems="center" justify="center">
+                                                                        {
+                                                                            [...Array(availableSlots).keys()].map(field => (
+                                                                                <Grid item key={field} xs={12} sm={6} md={3} lg={2}>
+                                                                                    <Typography variant="body2" align="center"><Skeleton /></Typography>
+                                                                                </Grid>))
+                                                                        }
+                                                                    </Grid>
+                                                                </Grid>
+                                                            );
+                                                        }}
                                                     />
                                                     <Grid item xs={1}>
                                                         <Typography variant="body2" align="center">
