@@ -22,6 +22,7 @@ import FundComparisonView from './fundComparisonView';
 import FundCompariveView from './fundComparativeView';
 import ProgressView from './progressView';
 import API from '../api';
+import GA from '../util/googleAnalytics';
 
 const styles = theme => ({
     root: {
@@ -106,7 +107,7 @@ const routes = [
     {
         path: ['/progress'],
         name: 'Progresso de atualização',
-        showInMenu: false,        
+        showInMenu: false,
         main: (props, classes) => <ProgressView basePath={'/progress'} />
     }
 ];
@@ -146,6 +147,7 @@ class Dashboard extends React.Component {
             );
         else return (
             <Router>
+                {GA.init() && <GA.RouteTracker />}
                 <React.Fragment>
                     <CssBaseline />
                     <div className={classes.root}>
