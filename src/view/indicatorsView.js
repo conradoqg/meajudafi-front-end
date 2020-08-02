@@ -24,8 +24,7 @@ import ShowStateComponent from './component/showStateComponent';
 import DataHistoryChartComponent from './component/dataHistoryChartComponent';
 import API from '../api';
 import { rangeOptions } from './option';
-import { formatters, nextColorIndex, chartFormatters } from '../util';
-import * as Sentry from '@sentry/browser';
+import { settle, reportErrorIfNecessary, formatters, nextColorIndex, chartFormatters } from '../util';
 
 const styles = theme => ({
     root: {
@@ -90,21 +89,6 @@ const emptyState = {
     },
     layout: {
         showingFilter: false
-    }
-};
-
-const settle = async promise => {
-    try {
-        return await promise;
-    } catch (ex) {
-        return ex;
-    }
-};
-
-const reportErrorIfNecessary = data => {
-    if (data instanceof Error) {
-        Sentry.captureException(data);
-        console.error(data.message);
     }
 };
 
@@ -356,7 +340,7 @@ function IndicatorsView(props) {
     // Layout
     const [showingFilter, setShowingFilter] = useState(emptyState.layout.showingFilter);
 
-    const { classes } = props;    
+    const { classes } = props;
 
     useEffect(() => {
         updateFundIndicators(setFundIndicators, economyIndicatorAndFundsRange, fundsFilter);

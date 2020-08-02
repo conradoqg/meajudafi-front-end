@@ -4,6 +4,7 @@ import LocalizedFormat from 'dayjs/plugin/localizedFormat';
 import dayjs from 'dayjs';
 import 'dayjs/locale/pt-br';
 import { filterOptions } from '../view/option';
+import * as Sentry from '@sentry/browser';
 
 dayjs.extend(LocalizedFormat);
 dayjs.locale('pt-br');
@@ -160,4 +161,19 @@ export const getGradientColor = (start_color, end_color, percent) => {
     if (diff_blue.length === 1) diff_blue = '0' + diff_blue;
 
     return '#' + diff_red + diff_green + diff_blue;
+};
+
+export const settle = async promise => {
+    try {
+        return await promise;
+    } catch (ex) {
+        return ex;
+    }
+};
+
+export const reportErrorIfNecessary = data => {
+    if (data instanceof Error) {
+        Sentry.captureException(data);
+        console.error(data.message);
+    }
 };

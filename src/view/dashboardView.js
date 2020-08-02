@@ -71,7 +71,7 @@ const routes = [
         main: (props, classes) => <IndicatorsView {...props} />
     },
     {
-        path: '/funds/:cnpj',
+        path: ['/funds/:cnpj/:benchmark?/:range?/:field?', '/funds/:cnpj'],
         name: 'Informações sobre o fundo',
         showInMenu: false,
         icon: () => (<TableChartIcon />),
@@ -93,22 +93,22 @@ const routes = [
         showInMenu: true,
         icon: () => (<ScatterPlotIcon />),
         widthUp: 'xs',
-        main: (props, classes) => <FundComparisonView basePath={'/compare'} />
+        main: (props, classes) => <FundComparisonView {...props} basePath={'/compare'} />
     },
     {
-        path: ['/comparative/:range/:sizeField/:yField/:xField', '/compare'],
+        path: ['/comparative/:range/:sizeField/:yField/:xField', '/comparative'],
         linkTo: '/comparative/1y/irm_accumulated_networth/irm_investment_return_1y/irm_risk_1y',
         name: 'Comparativo de Fundos',
         showInMenu: true,
         icon: () => (<ScatterPlotIcon />),
         widthUp: 'sm',
-        main: (props, classes) => <FundCompariveView basePath={'/comparative'} />
+        main: (props, classes) => <FundCompariveView {...props} basePath={'/comparative'} />
     },
     {
         path: ['/progress'],
         name: 'Progresso de atualização',
         showInMenu: false,
-        main: (props, classes) => <ProgressView basePath={'/progress'} />
+        main: (props, classes) => <ProgressView {...props} basePath={'/progress'} />
     }
 ];
 
