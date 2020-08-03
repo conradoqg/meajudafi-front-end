@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useParams, useHistory } from 'react-router-dom';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
@@ -333,31 +333,42 @@ function IndicatorsView(props) {
     const [fundsChanged, setFundsChanged] = useState(emptyState.data.fundsChanged);
 
     // Config
-    const [economyIndicatorAndFundsRange, setEconomyIndicatorAndFundsRange] = useState(emptyState.config.economyIndicatorAndFundsRange);
-    const [fundsChangeRange, setFundsChangeRange] = useState(emptyState.config.fundsChangeRange);
+    // const [economyIndicatorAndFundsRange, setEconomyIndicatorAndFundsRange] = useState(emptyState.config.economyIndicatorAndFundsRange);
+    // const [fundsChangeRange, setFundsChangeRange] = useState(emptyState.config.fundsChangeRange);
     const [fundsFilter, setFundsFilter] = useState(FundFilterComponent.emptyState.config.filter);
 
     // Layout
     const [showingFilter, setShowingFilter] = useState(emptyState.layout.showingFilter);
 
+    let { economyIndicatorAndFundsRange, fundsChangeRange } = useParams();
+    let history = useHistory();
+
     const { classes } = props;
 
+    if (typeof (economyIndicatorAndFundsRange) == 'undefined') economyIndicatorAndFundsRange = emptyState.config.economyIndicatorAndFundsRange;
+    if (typeof (fundsChangeRange) == 'undefined') fundsChangeRange = emptyState.config.fundsChangeRange;
+
     useEffect(() => {
+        setFundIndicators(emptyState.data.fundIndicators);
         updateFundIndicators(setFundIndicators, economyIndicatorAndFundsRange, fundsFilter);
     }, [economyIndicatorAndFundsRange, fundsFilter]);
 
     useEffect(() => {
+        setEconomyIndicators(emptyState.data.economyIndicators);
         updateEconomyIndicators(setEconomyIndicators, economyIndicatorAndFundsRange);
     }, [economyIndicatorAndFundsRange]);
 
     useEffect(() => {
+        setFundsChanged(emptyState.data.fundsChanged);
         updateFundsChanged(setFundsChanged, fundsChangeRange);
     }, [fundsChangeRange]);
 
     function handleConfigRangeChange(event) {
-        setEconomyIndicators(emptyState.data.economyIndicators);
-        setFundIndicators(emptyState.data.fundIndicators);
-        setEconomyIndicatorAndFundsRange(event.target.value);
+        history.push(`/indicators/${event.target.value}/${fundsChangeRange}`);
+    }
+
+    function handleConfigChangesRangeChange(event) {
+        history.push(`/indicators/${economyIndicatorAndFundsRange}/${event.target.value}`);
     }
 
     function handleChartInitialized(figure) {
@@ -380,13 +391,7 @@ function IndicatorsView(props) {
 
     function handleFilterChange(filter) {
         setShowingFilter(false);
-        setFundIndicators(emptyState.data.fundIndicators);
         setFundsFilter(filter);
-    }
-
-    function handleConfigChangesRangeChange(event) {
-        setFundsChanged(emptyState.data.fundsChanged);
-        setFundsChangeRange(event.target.value);
     }
 
     return (

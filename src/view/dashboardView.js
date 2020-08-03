@@ -60,19 +60,10 @@ const styles = theme => ({
     }
 });
 
-const routes = [
-    {
-        path: '/',
-        name: 'Indicadores',
-        showInMenu: true,
-        exact: true,
-        icon: () => (<ShowChartIcon />),
-        widthUp: 'xs',
-        main: (props, classes) => <IndicatorsView {...props} />
-    },
+const routes = [    
     {
         path: ['/funds/:cnpj/:benchmark?/:range?/:field?', '/funds/:cnpj'],
-        name: 'Informações sobre o fundo',
+        name: 'Informações sobre o fundo',        
         showInMenu: false,
         icon: () => (<TableChartIcon />),
         widthUp: 'xs',
@@ -82,6 +73,7 @@ const routes = [
         path: '/funds',
         name: 'Lista de Fundos',
         showInMenu: true,
+        order: 2,
         icon: () => (<TableChartIcon />),
         widthUp: 'xs',
         main: (props, classes) => <FundListView {...props} />
@@ -91,6 +83,7 @@ const routes = [
         linkTo: '/compare/cdi/1y/investment_return',
         name: 'Comparação de Fundos',
         showInMenu: true,
+        order: 3,
         icon: () => (<ScatterPlotIcon />),
         widthUp: 'xs',
         main: (props, classes) => <FundComparisonView {...props} basePath={'/compare'} />
@@ -100,6 +93,7 @@ const routes = [
         linkTo: '/comparative/1y/irm_accumulated_networth/irm_investment_return_1y/irm_risk_1y',
         name: 'Comparativo de Fundos',
         showInMenu: true,
+        order: 4,
         icon: () => (<ScatterPlotIcon />),
         widthUp: 'sm',
         main: (props, classes) => <FundCompariveView {...props} basePath={'/comparative'} />
@@ -109,6 +103,16 @@ const routes = [
         name: 'Progresso de atualização',
         showInMenu: false,
         main: (props, classes) => <ProgressView {...props} basePath={'/progress'} />
+    },
+    {
+        path: ['/indicators/:economyIndicatorAndFundsRange?/:fundsChangeRange?', '/'],
+        name: 'Indicadores',
+        showInMenu: true,
+        exact: true,
+        order: 1,
+        icon: () => (<ShowChartIcon />),
+        widthUp: 'xs',
+        main: (props, classes) => <IndicatorsView {...props} basePath={'/'} />
     }
 ];
 
@@ -117,7 +121,7 @@ const MenuLink = ({ label, to, activeOnlyWhenExact, classes }) => (
         path={to}
         exact={activeOnlyWhenExact}
         children={({ match }) => (
-            <Link to={to} className={match ? classes.menuLinkSelected : classes.menuLink}>
+            <Link to={Array.isArray(to) ? to[to.length - 1] : to} className={match ? classes.menuLinkSelected : classes.menuLink}>
                 <Button color="inherit" >{label}</Button>
             </Link>
         )}
@@ -157,7 +161,7 @@ class Dashboard extends React.Component {
                                 <Typography variant="h5" color="inherit" noWrap className={classes.toolbarTitle}>
                                     Me Ajuda FI
                                 </Typography>
-                                {routes.filter(route => route.showInMenu).filter(route => isWidthUp(route.widthUp, this.props.width)).map((route, index) => (
+                                {routes.filter(route => route.showInMenu).sort((routeA, routeB) => routeA.order - routeB.order).filter(route => isWidthUp(route.widthUp, this.props.width)).map((route, index) => (
                                     <MenuLink activeOnlyWhenExact={route.exact} to={route.linkTo ? route.linkTo : route.path} classes={classes} label={route.name} icon={route.icon} key={index} />
                                 ))}
                                 <Hidden smDown>

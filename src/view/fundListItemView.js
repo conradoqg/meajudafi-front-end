@@ -314,11 +314,6 @@ function FundListItemView(props) {
     const [fundHistory, setFundHistory] = useState(emptyState.data.history);
     const [chart, setChart] = useState(emptyState.data.chart);
 
-    // Config    
-    // const [benchmark, setBenchmark] = useState(emptyState.config.benchmark);
-    // const [range, setRange] = useState(emptyState.config.range);
-    // const [field, setField] = useState(emptyState.config.filter);
-
     let { cnpj, benchmark, range, field } = useParams();
     let history = useHistory();
 
