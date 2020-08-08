@@ -73,10 +73,18 @@ async function updateHistoryAndChart(cnpj, fund, range, benchmark, setFundHistor
         const fundHistory = await settle(getFundStatistic(cnpj, range, benchmark));
 
         setFundHistory(fundHistory);
-        setChart({
-            small: buildChart(benchmark, fund.f_short_name, fundHistory, 'small'),
-            large: buildChart(benchmark, fund.f_short_name, fundHistory, 'large')
-        });
+
+        if (fundHistory instanceof Error) {
+            setChart({
+                small: fundHistory,
+                large: fundHistory
+            });
+        } else {
+            setChart({
+                small: buildChart(benchmark, fund.f_short_name, fundHistory, 'small'),
+                large: buildChart(benchmark, fund.f_short_name, fundHistory, 'large')
+            });
+        }
 
         reportErrorIfNecessary(fundHistory);
     }

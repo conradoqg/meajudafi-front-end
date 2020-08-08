@@ -95,10 +95,17 @@ const emptyState = {
 async function updateEconomyIndicators(setEconomyIndicators, range) {
     const economyIndicators = await settle(getEconomyIndicators(range));
 
-    setEconomyIndicators({
-        small: buildChart(economyIndicators, 'small'),
-        large: buildChart(economyIndicators, 'large')
-    });
+    if (economyIndicators instanceof Error) {
+        setEconomyIndicators({
+            small: economyIndicators,
+            large: economyIndicators
+        });
+    } else {
+        setEconomyIndicators({
+            small: buildChart(economyIndicators, 'small'),
+            large: buildChart(economyIndicators, 'large')
+        });
+    }
 
     reportErrorIfNecessary(economyIndicators);
 }
