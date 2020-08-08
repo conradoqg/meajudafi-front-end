@@ -14,8 +14,6 @@ export default async () => {
     if (workerVersion.length > 0) {
         const workerVersionArray = workerVersion[0].version.split('.').map(value => parseInt(value));
         workerMinor = parseInt(workerVersionArray[workerVersionArray.length - 2]);
-    }
-
-    console.log(`Minor: ${minor} - Worker: ${workerMinor}`);
+    }    
     return minor < workerMinor;
 };
