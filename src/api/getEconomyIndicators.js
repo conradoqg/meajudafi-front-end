@@ -1,16 +1,14 @@
-import { PROTOCOL, API_URL } from './index';
+import fetchBE from '../util/fetchBE';
 
-export default async lastDaysOrFromDate => {
+async function getEconomyIndicators(lastDaysOrFromDate) {
     let limit = '';
     if (lastDaysOrFromDate instanceof Date)
         limit = `&dt_comptc=gte.${lastDaysOrFromDate.toJSON().slice(0, 10)}`;
     else if (typeof (lastDaysOrFromDate) == 'number')
         limit = `&limit=${lastDaysOrFromDate - 1}`;
 
-    const fundIndicatorsObject = await fetch(`${PROTOCOL}//${API_URL}/running_days_with_indicators?select=dt_comptc,cdi_valor,selic_valor,bovespa_valor,euro_valor,dolar_valor${limit}&order=dt_comptc.desc`);
-    if (fundIndicatorsObject.status < 200 || fundIndicatorsObject.status > 299)
-        throw new Error('Unable to retrieve economy indicators');
-    let data = await fundIndicatorsObject.json();
+    let { data } = await fetchBE(`running_days_with_indicators?select=dt_comptc,cdi_valor,selic_valor,bovespa_valor,euro_valor,dolar_valor${limit}&order=dt_comptc.desc`);
+
     const fields = [
         'date',
         'cdi',
@@ -37,3 +35,5 @@ export default async lastDaysOrFromDate => {
     });
     return economyIndicators;
 };
+
+export default getEconomyIndicators;

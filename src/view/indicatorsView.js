@@ -339,9 +339,7 @@ function IndicatorsView(props) {
     const [fundIndicators, setFundIndicators] = useState(emptyState.data.fundIndicators);
     const [fundsChanged, setFundsChanged] = useState(emptyState.data.fundsChanged);
 
-    // Config
-    // const [economyIndicatorAndFundsRange, setEconomyIndicatorAndFundsRange] = useState(emptyState.config.economyIndicatorAndFundsRange);
-    // const [fundsChangeRange, setFundsChangeRange] = useState(emptyState.config.fundsChangeRange);
+    // Config    
     const [fundsFilter, setFundsFilter] = useState(FundFilterComponent.emptyState.config.filter);
 
     // Layout
@@ -501,16 +499,16 @@ function IndicatorsView(props) {
             </Hidden>
             <Grid container spacing={2} alignItems="center">
                 <Grid item xs={12} sm={6} md={3} xl={3}>
-                    <IndicatorPaper title="Desempenho" field="investment_return" range={economyIndicatorAndFundsRange} data={fundIndicators} classes={classes} />
+                    <IndicatorPaper title="Desempenho" field="investment_return" data={fundIndicators} classes={classes} />
                 </Grid>
                 <Grid item xs={12} sm={6} md={3} xl={3}>
-                    <IndicatorPaper title="Patrimônio" field="networth" range={economyIndicatorAndFundsRange} data={fundIndicators} classes={classes} />
+                    <IndicatorPaper title="Patrimônio" field="networth" data={fundIndicators} classes={classes} />
                 </Grid>
                 <Grid item xs={12} sm={6} md={3} xl={3}>
-                    <IndicatorPaper title="Cotistas" field="quotaholders" range={economyIndicatorAndFundsRange} data={fundIndicators} classes={classes} />
+                    <IndicatorPaper title="Cotistas" field="quotaholders" data={fundIndicators} classes={classes} />
                 </Grid>
                 <Grid item xs={12} sm={6} md={3} xl={3}>
-                    <IndicatorPaper title="Risco" field="risk" range={economyIndicatorAndFundsRange} data={fundIndicators} classes={classes} inverted />
+                    <IndicatorPaper title="Risco" field="risk" data={fundIndicators} classes={classes} inverted />
                 </Grid>
             </Grid>
             <Grid container spacing={2} alignItems="center">
@@ -563,7 +561,7 @@ function IndicatorsView(props) {
 }
 
 const IndicatorPaper = props => {
-    const { classes, range, title, field, data, inverted = false } = props;
+    const { classes, title, field, data, inverted = false } = props;
 
     const getClassForValue = value => {
         if (value === 0)
@@ -585,42 +583,41 @@ const IndicatorPaper = props => {
                 <ShowStateComponent
                     data={data}
                     hasData={() => {
-                        if (data[range]) {
-                            const positive = data[range][field]['top'].map((indicator, index) => (
-                                <div key={index}>
-                                    <ListItem divider>
-                                        <ListItemText disableTypography classes={{ root: classes.listItemText }}>
-                                            <Typography variant="body2" component="span" className={classes.cropText}><Link to={'/funds/' + indicator.cnpj} className={classes.link}>{indicator.name}</Link></Typography>
-                                        </ListItemText>
-                                        <ListItemSecondaryAction>
-                                            <Typography variant="body2" component="span" className={getClassForValue(indicator.value)}>{formatters.percentage(indicator.value)}</Typography>
-                                        </ListItemSecondaryAction>
-                                    </ListItem>
-                                </div>
-                            ));
-                            const divider = (< ListItem divider >
-                                <ListItemText disableTypography={true}>
-                                    <Typography variant="body2" component="span" align="center">...</Typography>
-                                </ListItemText>
-                            </ListItem>);
-                            const negative = data[range][field]['bottom'].map((indicator, index) => (
-                                <div key={index}>
-                                    <ListItem divider>
-                                        <ListItemText disableTypography classes={{ root: classes.listItemText }}>
-                                            <Typography variant="body2" component="span" className={classes.cropText}><Link to={'/funds/' + indicator.cnpj} className={classes.link}>{indicator.name}</Link></Typography>
-                                        </ListItemText>
-                                        <ListItemSecondaryAction>
-                                            <Typography variant="body2" component="span" className={getClassForValue(indicator.value)}>{formatters.percentage(indicator.value)}</Typography>
-                                        </ListItemSecondaryAction>
-                                    </ListItem>
-                                </div>
-                            ));
-                            return (<List>
-                                {positive}
-                                {divider}
-                                {negative}
-                            </List>);
-                        }
+
+                        const positive = data[field]['top'].map((indicator, index) => (
+                            <div key={index}>
+                                <ListItem divider>
+                                    <ListItemText disableTypography classes={{ root: classes.listItemText }}>
+                                        <Typography variant="body2" component="span" className={classes.cropText}><Link to={'/funds/' + indicator.cnpj} className={classes.link}>{indicator.name}</Link></Typography>
+                                    </ListItemText>
+                                    <ListItemSecondaryAction>
+                                        <Typography variant="body2" component="span" className={getClassForValue(indicator.value)}>{formatters.percentage(indicator.value)}</Typography>
+                                    </ListItemSecondaryAction>
+                                </ListItem>
+                            </div>
+                        ));
+                        const divider = (< ListItem divider >
+                            <ListItemText disableTypography={true}>
+                                <Typography variant="body2" component="span" align="center">...</Typography>
+                            </ListItemText>
+                        </ListItem>);
+                        const negative = data[field]['bottom'].map((indicator, index) => (
+                            <div key={index}>
+                                <ListItem divider>
+                                    <ListItemText disableTypography classes={{ root: classes.listItemText }}>
+                                        <Typography variant="body2" component="span" className={classes.cropText}><Link to={'/funds/' + indicator.cnpj} className={classes.link}>{indicator.name}</Link></Typography>
+                                    </ListItemText>
+                                    <ListItemSecondaryAction>
+                                        <Typography variant="body2" component="span" className={getClassForValue(indicator.value)}>{formatters.percentage(indicator.value)}</Typography>
+                                    </ListItemSecondaryAction>
+                                </ListItem>
+                            </div>
+                        ));
+                        return (<List>
+                            {positive}
+                            {divider}
+                            {negative}
+                        </List>);
                     }}
                     isNull={() => (
                         <List>

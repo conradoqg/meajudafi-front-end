@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
-import { PROTOCOL, API_URL } from './index';
+import fetchBE from '../util/fetchBE';
 
-export default async (options, fromDate = dayjs().subtract(1, 'month').toDate()) => {
+async function getFundList(options, fromDate = dayjs().subtract(1, 'month').toDate()) {
     const range = options.page === 0 ? `&limit=${options.rowsPerPage}` : `&offset=${(options.page * options.rowsPerPage)}&limit=${options.rowsPerPage}`;
     const sort = `${options.sort.field}.${options.sort.order}`;
     let filterPart = '';
@@ -51,21 +51,21 @@ export default async (options, fromDate = dayjs().subtract(1, 'month').toDate())
             }
         }
     }
-    const fundListObject = await fetch(`${PROTOCOL}//${API_URL}/icf_with_xf_and_bf_and_mf_and_iry_and_f_of_last_year?select=icf_cnpj_fundo,f_cnpj,f_short_name,iry_accumulated_networth,iry_accumulated_quotaholders,icf_rentab_fundo,iry_investment_return_1y,iry_investment_return_2y,iry_investment_return_3y,iry_risk_1y,iry_risk_2y,iry_risk_3y&${filterPart}${searchPart}iry_dt_comptc=gte.${fromDate.toJSON().slice(0, 10)}&order=${sort}${range}`, {
+    const { data, headers } = await fetchBE(`icf_with_xf_and_bf_and_mf_and_iry_and_f_of_last_year?select=icf_cnpj_fundo,f_cnpj,f_short_name,iry_accumulated_networth,iry_accumulated_quotaholders,icf_rentab_fundo,iry_investment_return_1y,iry_investment_return_2y,iry_investment_return_3y,iry_risk_1y,iry_risk_2y,iry_risk_3y&${filterPart}${searchPart}iry_dt_comptc=gte.${fromDate.toJSON().slice(0, 10)}&order=${sort}${range}`, {
         method: 'GET',
         headers: {
             'Prefer': 'count=exact'
         }
     });
-    if (fundListObject.status < 200 || fundListObject.status > 299)
-        throw new Error('Unable to retrieve fund list');
     const CONTENT_RANGE_REGEX = /(\d+)-(\d+)\/(\d+)/gm;
-    const contentRange = fundListObject.headers.get('Content-Range');
+    const contentRange = headers.get('Content-Range');
     const matchResult = CONTENT_RANGE_REGEX.exec(contentRange);
     const totalRows = matchResult && matchResult.length > 3 ? matchResult[3] : 0;
     return {
         range,
         totalRows: parseInt(totalRows),
-        data: await fundListObject.json()
+        data
     };
 };
+
+export default getFundList;

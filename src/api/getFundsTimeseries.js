@@ -1,6 +1,6 @@
-import { PROTOCOL, API_URL } from './index';
+import fetchBE from '../util/fetchBE';
 
-export default async (lastDaysOrFromDate, additionalFields) => {
+async function getFundsTimeseries(lastDaysOrFromDate, additionalFields) {
     let limit = '';
     if (lastDaysOrFromDate instanceof Date)
         limit = `&irm_dt_comptc=gte.${lastDaysOrFromDate.toJSON().slice(0, 10)}`;
@@ -11,9 +11,9 @@ export default async (lastDaysOrFromDate, additionalFields) => {
     if (Array.isArray(additionalFields) && additionalFields.length > 0)
         additionalFieldsPart = additionalFields.join(',');
 
-    const investment_return_monthly_complete = await fetch(`${PROTOCOL}//${API_URL}/irm_timeseries?select=irm_dt_comptc,f_short_name,f_cnpj,icf_classe,${additionalFieldsPart}${limit}`);
-    if (investment_return_monthly_complete.status < 200 || investment_return_monthly_complete.status > 299)
-        throw new Error('Unable to retrieve fund data');
+    const { data } = await fetchBE(`irm_timeseries?select=irm_dt_comptc,f_short_name,f_cnpj,icf_classe,${additionalFieldsPart}${limit}`);
 
-    return investment_return_monthly_complete.json();
+    return data;
 };
+
+export default getFundsTimeseries;

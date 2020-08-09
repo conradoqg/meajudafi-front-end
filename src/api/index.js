@@ -11,10 +11,6 @@ import getFundsTimeseries from './getFundsTimeseries';
 import getProgress from './getProgress';
 import isInMaintenanceMode from './isInMaintenanceMode';
 
-/* global process */
-export const API_URL = process.env.REACT_APP_API_URL || `api.${window.location.host}`;
-export const PROTOCOL = process.env.REACT_APP_PROTOCOL ? process.env.REACT_APP_PROTOCOL + ':' : '';
-
 export default {
     getFundList,
     getFundData,

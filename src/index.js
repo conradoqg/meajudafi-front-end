@@ -6,16 +6,6 @@ import theme from './util/theme';
 import DashboardView from './view/dashboardView';
 import * as serviceWorker from './serviceWorker';
 import * as Sentry from '@sentry/browser';
-import createFetch from 'fetch-retry';
-
-// eslint-disable-next-line no-native-reassign
-fetch = createFetch(fetch, {
-    retryOn: [404],
-    retries: 4,
-    retryDelay: function (attempt) {
-        return Math.pow(2, attempt) * 1000; // 1000, 2000, 4000
-    }
-});
 
 const Root = () => (
     <MuiThemeProvider theme={theme}>

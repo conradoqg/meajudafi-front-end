@@ -1,12 +1,10 @@
-import { PROTOCOL, API_URL } from './index';
+import fetchBE from '../util/fetchBE';
 
-export default async () => {
+async function getProgress() {
 
-    const progressObject = await fetch(`${PROTOCOL}//${API_URL}/progress?order=data->progressTracker->state->start.desc`, {
-        method: 'GET'
-    });
-    if (progressObject.status < 200 || progressObject.status > 299)
-        throw new Error('Unable to retrieve fund list');
+    const { data } = await fetchBE(`progress?order=data->progressTracker->state->start.desc`);
 
-    return progressObject.json();
+    return data;
 };
+
+export default getProgress;
