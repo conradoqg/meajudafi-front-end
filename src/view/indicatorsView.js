@@ -14,8 +14,7 @@ import IconButton from '@material-ui/core/IconButton';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import Collapse from '@material-ui/core/Collapse';
 import Tooltip from '@material-ui/core/Tooltip';
-import { withStyles } from '@material-ui/core/styles';
-import withWidth from '@material-ui/core/withWidth';
+import { makeStyles } from '@material-ui/core/styles';
 import Hidden from '@material-ui/core/Hidden';
 import Skeleton from '@material-ui/lab/Skeleton';
 import { produce } from 'immer';
@@ -26,7 +25,7 @@ import API from '../api';
 import { rangeOptions } from './option';
 import { settle, reportErrorIfNecessary, formatters, nextColorIndex, chartFormatters } from '../util';
 
-const styles = theme => ({
+const useStyles = makeStyles(theme => ({
     root: {
         flexGrow: 1,
     },
@@ -71,7 +70,7 @@ const styles = theme => ({
     appBarSpacer: theme.mixins.toolbar,
     withTooltip: theme.withTooltip,
     link: theme.link
-});
+}));
 
 const emptyState = {
     data: {
@@ -346,9 +345,8 @@ function IndicatorsView(props) {
     const [showingFilter, setShowingFilter] = useState(emptyState.layout.showingFilter);
 
     let { economyIndicatorAndFundsRange, fundsChangeRange } = useParams();
-    let history = useHistory();
-
-    const { classes } = props;
+    const history = useHistory();
+    const classes = useStyles();
 
     if (typeof (economyIndicatorAndFundsRange) == 'undefined') economyIndicatorAndFundsRange = emptyState.config.economyIndicatorAndFundsRange;
     if (typeof (fundsChangeRange) == 'undefined') fundsChangeRange = emptyState.config.fundsChangeRange;
@@ -702,4 +700,4 @@ const FundsChangedPaper = props => {
         </div >);
 };
 
-export default withWidth()(withStyles(styles)(IndicatorsView));
+export default IndicatorsView;

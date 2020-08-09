@@ -6,8 +6,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import Divider from '@material-ui/core/Divider';
-import { withStyles } from '@material-ui/core/styles';
-import withWidth from '@material-ui/core/withWidth';
+import { makeStyles } from '@material-ui/core/styles';
 import Hidden from '@material-ui/core/Hidden';
 import Link from '@material-ui/core/Link';
 import Skeleton from '@material-ui/lab/Skeleton';
@@ -20,7 +19,7 @@ import DataHistoryChartComponent from './component/dataHistoryChartComponent';
 import { fieldOptions, benchmarkOptions, rangeOptions } from './option';
 import { nextColorIndex, formatters, chartFormatters, settle, reportErrorIfNecessary } from '../util';
 
-const styles = theme => ({
+const useStyles = makeStyles(theme => ({
     select: {
         margin: theme.spacing(1)
     },
@@ -38,7 +37,7 @@ const styles = theme => ({
     historyCell: {
         padding: '5px'
     }
-});
+}));
 
 const emptyState = {
     data: {
@@ -323,9 +322,8 @@ function FundListItemView(props) {
     const [chart, setChart] = useState(emptyState.data.chart);
 
     let { cnpj, benchmark, range, field } = useParams();
-    let history = useHistory();
-
-    const { classes } = props;
+    const history = useHistory();
+    const classes = useStyles();
 
     if (typeof (benchmark) == 'undefined') benchmark = emptyState.config.benchmark;
     if (typeof (range) == 'undefined') range = emptyState.config.range;
@@ -642,4 +640,4 @@ function FundListItemView(props) {
     );
 }
 
-export default withWidth()(withStyles(styles)(FundListItemView));
+export default FundListItemView;
