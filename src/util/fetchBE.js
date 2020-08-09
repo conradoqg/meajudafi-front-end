@@ -15,7 +15,7 @@ async function wrappedFecth(...args) {
     const URL = `${PROTOCOL}//${API_URL}/${args[0]}`;
     const fetchResult = await retryFetch(URL, ...args.splice(1));
 
-    if (fetchResult.status < 200 || fetchResult.status > 299) throw new Error(`Fetch failed with status ${fetchResult.status} for '${URL}'`);
+    if (fetchResult.status < 200 || fetchResult.status > 299) throw new Error(`Fetch to BE failed with status ${fetchResult.status} for '${URL}'`);
     else return { data: await fetchResult.json(), headers: fetchResult.headers };
 }
 

@@ -1,9 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
+import useInterval from '@use-it/interval';
 import Grid from '@material-ui/core/Grid';
-import { withStyles } from '@material-ui/core/styles';
-import withWidth from '@material-ui/core/withWidth';
-import { produce } from 'immer';
-import { withRouter } from 'react-router-dom';
+import { makeStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import ShowStateComponent from './component/showStateComponent';
@@ -26,7 +24,7 @@ const defaultTemplate = (progressTracker, prettyProgress) => {
     }
 };
 
-const styles = theme => ({
+const useStyles = makeStyles(theme => ({
     appBarSpacer: theme.mixins.toolbar,
     filterPaperContent: {
         padding: theme.spacing(2)
@@ -37,92 +35,84 @@ const styles = theme => ({
     progress: {
         margin: theme.spacing(2)
     }
-});
+}));
 
 const emptyState = {
     data: {
-        progress: null,
+        data: null,
         lastKnownStart: null,
         lastKnownFinish: null
     }
 };
 
-class ProgressView extends React.Component {
-    state = emptyState;
-    interval = null;
+async function updateData(setProgress) {
+    const data = await getProgress();
 
-    componentDidMount() {
-        this.interval = setInterval(() => this.updateData(), 2000);
-    }
+    const cvmDataWorkerProgresss = data.find(item => item.path === 'CVMDataWorker');
+    const xpiFundWorkerProgresss = data.find(item => item.path === 'XPIFundWorker');
 
-    componentWillUnmount() {
-        this.interval && clearInterval(this.interval);
-    }
+    setProgress({
+        data,
+        lastKnownStart: cvmDataWorkerProgresss && cvmDataWorkerProgresss.data.progressTracker.state.start,
+        lastKnownFinish: xpiFundWorkerProgresss && xpiFundWorkerProgresss.data.progressTracker.state.finish
+    });
+}
 
-    updateData = async () => {
-        const progress = await this.getProgress();
+function getProgress() {
+    return API.getProgress();
+}
 
-        const cvmDataWorkerProgresss = progress.find(item => item.path === 'CVMDataWorker');
-        const xpiFundWorkerProgresss = progress.find(item => item.path === 'XPIFundWorker');
+function ProgressView(props) {
+    const [progress, setProgress] = useState(emptyState.data);
 
+    useInterval(() => updateData(setProgress), 2000);
 
-        this.setState(produce(draft => {
-            draft.data.progress = progress;
-            draft.data.lastKnownStart = cvmDataWorkerProgresss && cvmDataWorkerProgresss.data.progressTracker.state.start;
-            draft.data.lastKnownFinish = xpiFundWorkerProgresss && xpiFundWorkerProgresss.data.progressTracker.state.finish;
-        }));
-    }
+    const classes = useStyles();
 
-    getProgress = () => API.getProgress();
-
-    render() {
-        const { classes } = this.props;
-
-        return (
-            <div>
-                <div className={classes.appBarSpacer} />
-                <Grid container spacing={2} alignItems="center">
-                    <Grid item xs>
-                        <Grid container alignItems="center" spacing={1}>
-                            <Grid item>
-                                <Typography variant="h5">Progresso de atualização</Typography>
-                            </Grid>
-                            <Grid item>
-                                <Typography variant="body2">(Último início: {this.state.data.lastKnownStart ? formatters.dateWithTime(this.state.data.lastKnownStart) : 'Desconhecido'} - Último fim: {this.state.data.lastKnownFinish ? formatters.dateWithTime(this.state.data.lastKnownFinish) : 'Desconhecido'})</Typography>
-                            </Grid>
+    return (
+        <div>
+            <div className={classes.appBarSpacer} />
+            <Grid container spacing={2} alignItems="center">
+                <Grid item xs>
+                    <Grid container alignItems="center" spacing={1}>
+                        <Grid item>
+                            <Typography variant="h5">Progresso de atualização</Typography>
+                        </Grid>
+                        <Grid item>
+                            <Typography variant="body2">(Último início: {progress.lastKnownStart ? formatters.dateWithTime(progress.lastKnownStart) : 'Desconhecido'} - Último fim: {progress.lastKnownFinish ? formatters.dateWithTime(progress.lastKnownFinish) : 'Desconhecido'})</Typography>
                         </Grid>
                     </Grid>
                 </Grid>
-                <Grid container spacing={2} alignItems="center">
-                    <Grid item xs>
-                        <ShowStateComponent
-                            data={this.state.data.progress}
-                            hasData={() => (<Paper elevation={1} square={true}>
-                                <Grid container className={classes.progressContent}>
-                                    <Grid item>
-                                        <Typography variant="body2" style={{ fontFamily: "monospace" }}>
-                                            {this.state.data.progress.filter(item => item.data.progressTracker.state.start > this.state.data.lastKnownStart).map(item => (<span key={item.path}>{defaultTemplate(item.data.progressTracker, item.data.prettyProgressTracker)}<br /></span>))}
-                                        </Typography>
-                                    </Grid>
+            </Grid>
+            <Grid container spacing={2} alignItems="center">
+                <Grid item xs>
+                    <ShowStateComponent
+                        data={progress.data}
+                        hasData={() => (<Paper elevation={1} square={true}>
+                            <Grid container className={classes.progressContent}>
+                                <Grid item>
+                                    <Typography variant="body2" style={{ fontFamily: "monospace" }}>
+                                        {progress.data.filter(item => item.data.progressTracker.state.start > progress.lastKnownStart).map(item => (<span key={item.path}>{defaultTemplate(item.data.progressTracker, item.data.prettyProgressTracker)}<br /></span>))}
+                                    </Typography>
                                 </Grid>
-                            </Paper>)}
-                            isNull={() => (<Paper elevation={1} square={true}>
-                                <Grid container className={classes.progressContent}>
-                                    <Grid item xs={12} sm={12} md={12} xl={12}>
-                                        <Typography variant="body2" style={{ fontFamily: "monospace" }} component="span" display="block">
-                                            {[...Array(10).keys()].map(item => (<Skeleton key={item} />))}
-                                        </Typography>
-                                    </Grid>
+                            </Grid>
+                        </Paper>)}
+                        isNull={() => (<Paper elevation={1} square={true}>
+                            <Grid container className={classes.progressContent}>
+                                <Grid item xs={12} sm={12} md={12} xl={12}>
+                                    <Typography variant="body2" style={{ fontFamily: "monospace" }} component="span" display="block">
+                                        {[...Array(10).keys()].map(item => (<Skeleton key={item} />))}
+                                    </Typography>
                                 </Grid>
-                            </Paper>)}
-                            isErrored={() => (<Paper elevation={1} square={true} className={classes.filterPaperContent}><Typography variant="subtitle1" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography></Paper>)}
-                            isEmpty={() => (<Paper elevation={1} square={true} className={classes.filterPaperContent}><Typography variant="subtitle1" align="center">Sem dados à exibir</Typography></Paper>)}
-                        />
-                    </Grid>
+                            </Grid>
+                        </Paper>)}
+                        isErrored={() => (<Paper elevation={1} square={true} className={classes.filterPaperContent}><Typography variant="subtitle1" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography></Paper>)}
+                        isEmpty={() => (<Paper elevation={1} square={true} className={classes.filterPaperContent}><Typography variant="subtitle1" align="center">Sem dados à exibir</Typography></Paper>)}
+                    />
                 </Grid>
-            </div >
-        );
-    }
+            </Grid>
+        </div >
+    );
 }
 
-export default withWidth()(withStyles(styles)(withRouter(ProgressView)));
+export default ProgressView;

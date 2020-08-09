@@ -8,6 +8,7 @@
     "@material-ui/icons": "^4.9.1",
     "@material-ui/lab": "^4.0.0-alpha.56",
     "@sentry/browser": "^5.20.1",
+    "@use-it/interval": "^0.1.3",
     "classnames": "^2.2.6",
     "comlinkjs": "^3.2.0",
     "cross-env": "^7.0.2",
@@ -26,13 +27,15 @@
     "react-router-dom": "^5.2.0",
     "react-scripts": "3.4.1",
     "slugify": "^1.4.4",
+    "source-map-explorer": "^2.4.2",
     "worker-loader": "^2.0.0"
   },
   "scripts": {
     "start": "cross-env REACT_APP_API_URL=api.meajudafi.com.br PORT=9966 EXTEND_ESLINT=true react-app-rewired start",
     "build": "react-app-rewired build",
     "test": "react-app-rewired test",
-    "eject": "react-app-rewired eject"
+    "eject": "react-app-rewired eject",
+    "analyze": "source-map-explorer 'build/static/js/*.js'"
   },
   "eslintConfig": {
     "extends": "react-app",
