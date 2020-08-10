@@ -7,29 +7,27 @@ import createPlotlyComponent from 'react-plotly.js/factory';
 
 const Plot = createPlotlyComponent(Plotly);
 
-export default class DataHistoryChartComponent extends React.Component {
+function DataHistoryChartComponent({ data, onInitialized, onUpdate }) {
 
-    render() {
-        const { data, onInitialized, onUpdate } = this.props;
-
-        return (
-            <ShowStateComponent
-                data={data}
-                hasData={() => (
-                    <Plot
-                        data={data.data}
-                        layout={data.layout}
-                        frames={data.frames}
-                        config={data.config}
-                        onInitialized={onInitialized}
-                        onUpdate={onUpdate}
-                        useResizeHandler={true}
-                        style={{ width: '100%', height: '100%' }}
-                    />
-                )}
-                isNull={() => (<Skeleton height={300}/>)}
-                isErrored={() => (<Typography variant="subtitle1" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>)}
-            />
-        );
-    }
+    return (
+        <ShowStateComponent
+            data={data}
+            hasData={() => (
+                <Plot
+                    data={data.data}
+                    layout={data.layout}
+                    frames={data.frames}
+                    config={data.config}
+                    onInitialized={onInitialized}
+                    onUpdate={onUpdate}
+                    useResizeHandler={true}
+                    style={{ width: '100%', height: '100%' }}
+                />
+            )}
+            isNull={() => (<Skeleton height={300} />)}
+            isErrored={() => (<Typography variant="subtitle1" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>)}
+        />
+    );
 }
+
+export default DataHistoryChartComponent;
