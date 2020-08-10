@@ -26,7 +26,7 @@ import withWidth, { isWidthUp } from '@material-ui/core/withWidth';
 import { produce } from 'immer';
 import promisesEach from 'promise-results';
 import API from '../api';
-import FundFilterComponent from './component/fundFilterComponent';
+import FundFilterComponent, { emptyState as FundFilterComponentEmptyState } from './component/fundFilterComponent';
 import FundSearchComponent from './component/fundSearchComponent';
 import ShowStateComponent from './component/showStateComponent';
 import DataHistoryChartComponent from './component/dataHistoryChartComponent';
@@ -63,7 +63,7 @@ const emptyState = {
         page: 0,
         rowsPerPage: 25,
         sort: sortOptions[0],
-        filter: FundFilterComponent.emptyState.config.filter,
+        filter: FundFilterComponentEmptyState.config.filter,
         chart: {
             range: 'all',
             benchmark: 'cdi'

@@ -18,7 +18,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Hidden from '@material-ui/core/Hidden';
 import Skeleton from '@material-ui/lab/Skeleton';
 import { produce } from 'immer';
-import FundFilterComponent from './component/fundFilterComponent';
+import FundFilterComponent, { emptyState as FundFilterComponentEmptyState } from './component/fundFilterComponent';
 import ShowStateComponent from './component/showStateComponent';
 import DataHistoryChartComponent from './component/dataHistoryChartComponent';
 import API from '../api';
@@ -84,7 +84,7 @@ const emptyState = {
     config: {
         economyIndicatorAndFundsRange: '1y',
         fundsChangeRange: '1w',
-        fundsFilter: FundFilterComponent.emptyState.config.filter
+        fundsFilter: FundFilterComponentEmptyState.config.filter
     },
     layout: {
         showingFilter: false
@@ -339,7 +339,7 @@ function IndicatorsView(props) {
     const [fundsChanged, setFundsChanged] = useState(emptyState.data.fundsChanged);
 
     // Config    
-    const [fundsFilter, setFundsFilter] = useState(FundFilterComponent.emptyState.config.filter);
+    const [fundsFilter, setFundsFilter] = useState(FundFilterComponentEmptyState.config.filter);
 
     // Layout
     const [showingFilter, setShowingFilter] = useState(emptyState.layout.showingFilter);
