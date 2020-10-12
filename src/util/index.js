@@ -1,3 +1,5 @@
+import React from 'react';
+import { useImmer as localUseImmer } from "use-immer";
 import * as d3Format from 'd3-format';
 import ptBR from 'd3-format/locale/pt-BR.json';
 import LocalizedFormat from 'dayjs/plugin/localizedFormat';
@@ -172,8 +174,60 @@ export const settle = async promise => {
 };
 
 export const reportErrorIfNecessary = data => {
-    if (data instanceof Error) {
+    if (isError(data)) {
         Sentry.captureException(data);
         console.error(data.message);
     }
 };
+
+export const isError = e => e && e.stack && e.message;
+
+export function useState(...args) {
+    const [state, setState] = React.useState(...args);
+
+    const newSetState = (...setStateArgs) => {
+        if (process.env.NODE_ENV !== 'production') {
+            const targetObject = {};
+            Error.captureStackTrace(targetObject);
+            console.log(`setState ${targetObject.stack.split('\n').splice(2, 1)[0].trim()}`);
+        }
+        return setState(...setStateArgs);
+    };
+
+    return [state, newSetState];
+}
+
+export function useImmer(...args) {
+    const [state, setState] = localUseImmer(...args);
+
+    const newSetState = (...setStateArgs) => {
+        if (process.env.NODE_ENV !== 'production') {
+            const targetObject = {};
+            Error.captureStackTrace(targetObject);
+            console.log(`setImmer ${targetObject.stack.split('\n').splice(2, 1)[0].trim()}`);
+        }
+        return setState(...setStateArgs);
+    };
+
+    return [state, newSetState];
+}
+
+export function useEffect(effect, deps) {
+    const targetObject = {};
+    if (process.env.NODE_ENV !== 'production') {
+        Error.captureStackTrace(targetObject);
+    }
+    const newEffect = () => {
+        if (process.env.NODE_ENV !== 'production') {
+            console.log(`useEffect ${targetObject.stack.split('\n').splice(2, 1)[0].trim()}`);
+        }
+        return effect();
+    };
+    return React.useEffect(newEffect, deps);
+}
+
+export function useRendering() {
+    const targetObject = {};
+    Error.captureStackTrace(targetObject);
+    console.log(`rendering ${targetObject.stack.split('\n').splice(2, 1)[0].trim()}`);
+}

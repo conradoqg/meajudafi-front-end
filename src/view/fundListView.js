@@ -1,14 +1,11 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { withStyles } from '@material-ui/core/styles';
+import { JsonParam, NumberParam, StringParam, useQueryParam, withDefault } from 'use-query-params';
+import { makeStyles } from '@material-ui/core/styles';
+import useMediaQuery from '@material-ui/core/useMediaQuery';
 import Paper from '@material-ui/core/Paper';
-import Accordion from '@material-ui/core/Accordion';
-import AccordionDetails from '@material-ui/core/AccordionDetails';
-import AccordionSummary from '@material-ui/core/AccordionSummary';
-import Divider from '@material-ui/core/Divider';
 import TablePagination from '@material-ui/core/TablePagination';
 import Typography from '@material-ui/core/Typography';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import Grid from '@material-ui/core/Grid';
 import IconButton from '@material-ui/core/IconButton';
 import Menu from '@material-ui/core/Menu';
@@ -18,23 +15,18 @@ import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import Collapse from '@material-ui/core/Collapse';
-import Select from '@material-ui/core/Select';
 import Tooltip from '@material-ui/core/Tooltip';
 import Skeleton from '@material-ui/lab/Skeleton';
 import Hidden from '@material-ui/core/Hidden';
-import withWidth, { isWidthUp } from '@material-ui/core/withWidth';
-import { produce } from 'immer';
-import promisesEach from 'promise-results';
 import API from '../api';
 import FundFilterComponent, { emptyState as FundFilterComponentEmptyState } from './component/fundFilterComponent';
 import FundSearchComponent from './component/fundSearchComponent';
 import ShowStateComponent from './component/showStateComponent';
-import DataHistoryChartComponent from './component/dataHistoryChartComponent';
-import { sortOptions, benchmarkOptions, rangeOptions } from './option';
-import { formatters, nextColorIndex, chartFormatters } from '../util';
-import * as Sentry from '@sentry/browser';
+import { sortOptions } from './option';
+import { settle, reportErrorIfNecessary, isError, formatters, useRendering, useState, useEffect } from '../util';
 
-const styles = theme => ({
+
+const useStyles = makeStyles(theme => ({
     filterPaperContent: {
         padding: theme.spacing(2)
     },
@@ -50,14 +42,13 @@ const styles = theme => ({
     appBarSpacer: theme.mixins.toolbar,
     withTooltip: theme.withTooltip,
     link: theme.link
-});
+}));
 
 const emptyState = {
     data: {
         fundList: null,
         fundDetail: {},
-        totalRows: null,
-        sortOptions: sortOptions
+        totalRows: null
     },
     config: {
         page: 0,
@@ -68,512 +59,177 @@ const emptyState = {
             range: 'all',
             benchmark: 'cdi'
         },
-        search: FundSearchComponent.emptyState.config.search
+        search: ''
     },
     layout: {
         anchorEl: null,
-        showingFundDetail: {}
+        showingFundDetail: {},
+        showingFilter: false
     }
 };
 
-class FundListView extends React.Component {
-    state = emptyState;
+function FundListView(props) {
+    // Data
+    const [fundList, setFundList] = useState(emptyState.data.fundList);
+    const [totalRows, setTotalRows] = useState(emptyState.data.totalRows);
 
-    async componentDidMount() {
-        try {
-            const result = await this.getFundList(this.state.config);
+    // Config            
+    const [filter, setFilter] = useState(emptyState.config.filter); // TODO: This should be a query param but for that I need to figure out a simpler filtering structure
 
-            this.setState(produce(draft => {
-                draft.data.totalRows = result.totalRows;
-                draft.data.fundList = result.data;
-            }));
-        } catch (ex) {
-            Sentry.captureException(ex);
-            console.error(ex.message);
-            this.setState(produce(draft => {
-                draft.data.fundList = ex.message;
-            }));
+    // Config from URL
+    const [search, setSearch] = useQueryParam('s', withDefault(StringParam, emptyState.config.search));
+    const [page, setPage] = useQueryParam('p', withDefault(NumberParam, emptyState.config.page));
+    const [rowsPerPage, setRowsPerPage] = useQueryParam('r', withDefault(NumberParam, emptyState.config.rowsPerPage));
+    const [sort, setSort] = useQueryParam('sr', withDefault(JsonParam, emptyState.config.sort));
+
+    // Layout
+    const [anchorEl, setAnchorEl] = useState(emptyState.layout.anchorEl);
+    const [showingFilter, setShowingFilter] = useState(emptyState.layout.showingFilter);
+
+    const styles = useStyles();
+    useRendering();
+
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const isWidthUpSm = useMediaQuery(theme => theme.breakpoints.up('sm'));
+
+    // Updaters
+    const updateFundListAndTotalRows = useCallback(async function updateFundListAndTotalRows(config) {
+        const result = await settle(fetchFundList(config));
+
+        if (isError(result)) {
+            setFundList(result);
+            setTotalRows(emptyState.data.totalRows);
+        } else {
+            setFundList(result.data);
+            setTotalRows(result.totalRows);
         }
+
+        reportErrorIfNecessary(result);
+    }, []);
+
+    // Effects    
+    useEffect(function fundUpdate() {
+        setFundList(emptyState.data.fundList);
+        setTotalRows(emptyState.data.totalRows);
+
+        updateFundListAndTotalRows({ search, page, rowsPerPage, sort, filter });
+
+    }, [search, page, rowsPerPage, sort, filter, updateFundListAndTotalRows]);
+
+    // Fetchers
+    function fetchFundList(options) {
+        return API.getFundList(options);
     }
 
-    handleChangePage = async (object, page) => {
-        this.setState(produce(draft => {
-            draft.data.totalRows = emptyState.data.totalRows;
-            draft.data.fundList = emptyState.data.fundList;
-        }));
-
-        const nextState = produce(this.state, draft => {
-            draft.config.page = page;
-        });
-
-        try {
-            const result = await this.getFundList(nextState.config);
-
-            this.setState(produce(nextState, draft => {
-                draft.data.totalRows = result.totalRows;
-                draft.data.fundList = result.data;
-            }));
-        } catch (ex) {
-            Sentry.captureException(ex);
-            console.error(ex.message);
-            this.setState(produce(nextState, draft => {
-                draft.data.fundList = ex.message;
-            }));
-        }
+    // Handlers
+    function handleChangePage(object, page) {
+        setPage(page);
     }
 
-    handleChangeRowsPerPage = async event => {
-        const nextState = produce(this.state, draft => {
-            draft.config.rowsPerPage = event.target.value;
-        });
-
-        this.setState(produce(draft => {
-            draft.config.rowsPerPage = emptyState.config.rowsPerPage;
-            draft.data.totalRows = emptyState.data.totalRows;
-            draft.data.fundList = emptyState.data.fundList;
-        }));
-
-        try {
-            const result = await this.getFundList(nextState.config);
-
-            this.setState(produce(nextState, draft => {
-                draft.config.rowsPerPage = event.target.value;
-                draft.data.totalRows = result.totalRows;
-                draft.data.fundList = result.data;
-            }));
-        } catch (ex) {
-            Sentry.captureException(ex);
-            console.error(ex.message);
-            this.setState(produce(nextState, draft => {
-                draft.data.fundList = ex.message;
-            }));
-        }
+    function handleChangeRowsPerPage(event) {
+        setRowsPerPage(event.target.value);
     }
 
-    handleSearchChange = async search => {
-        const nextState = produce(this.state, draft => {
-            draft.config.search = search;
-            draft.config.page = 0;
-        });
-
-        this.setState(produce(draft => {
-            draft.data.totalRows = emptyState.data.totalRows;
-            draft.data.fundList = emptyState.data.fundList;
-        }));
-
-        try {
-            const result = await this.getFundList(nextState.config);
-
-            this.setState(produce(nextState, draft => {
-                draft.data.totalRows = result.totalRows;
-                draft.data.fundList = result.data;
-            }));
-        } catch (ex) {
-            Sentry.captureException(ex);
-            console.error(ex.message);
-            this.setState(produce(draft => {
-                draft.data.fundList = ex.message;
-            }));
-        }
+    function handleSearchChange(search) {
+        if (page > 0) setPage(emptyState.config.page);
+        setSearch(search);
     }
 
-    handleChartConfigChange = event => {
-        const nextState = produce(this.state, draft => {
-            draft.config.chart[event.target.name] = event.target.value;
-            draft.data.fundDetail = emptyState.data.fundDetail;
-        });
-        this.setState(nextState);
-
-        for (const key in this.state.layout.showingFundDetail) {
-            if (this.state.layout.showingFundDetail[key]) this.updateData(true, nextState.config.chart, key);
-        }
+    function handleSortClick(event) {
+        setAnchorEl(event.currentTarget);
     };
 
-    handleSortClick = event => {
-        const anchorEl = event.currentTarget;
-        this.setState(produce(draft => { draft.layout.anchorEl = anchorEl; }));
+    function handleSortClose() {
+        setAnchorEl(emptyState.layout.anchorEl);
     };
 
-    handleSortClose = () => {
-        this.setState(produce(draft => { draft.layout.anchorEl = null; }));
-    };
-
-    handleSortMenuItemClick = async (event, index) => {
-        const nextState = produce(this.state, draft => {
-            draft.config.sort = draft.data.sortOptions[index];
-        });
-
-        this.setState(produce(draft => {
-            draft.layout.anchorEl = emptyState.layout.anchorEl;
-            draft.data.totalRows = emptyState.data.totalRows;
-            draft.data.fundList = emptyState.data.fundList;
-        }));
-
-        try {
-            const result = await this.getFundList(nextState.config);
-
-            this.setState(produce(nextState, draft => {
-                draft.layout.anchorEl = null;
-                draft.data.totalRows = result.totalRows;
-                draft.data.fundList = result.data;
-            }));
-        } catch (ex) {
-            Sentry.captureException(ex);
-            console.error(ex.message);
-            this.setState(produce(nextState, draft => {
-                draft.data.fundList = ex.message;
-            }));
-        }
+    function handleSortMenuItemClick(event, index) {
+        setAnchorEl(emptyState.layout.anchorEl);
+        setSort(sortOptions[index]);
     }
 
-    handleFilterClick = () => {
-        this.setState(produce(draft => {
-            draft.layout.showingFilter = !draft.layout.showingFilter;
-            draft.layout.showingChartConfig = false;
-        }));
+    function handleFilterClick() {
+        setShowingFilter(!showingFilter);
     }
 
-    handleFilterChange = async filter => {
-        const nextState = produce(this.state, draft => {
-            draft.config.filter = filter;
-        });
-
-        this.setState(produce(draft => {
-            draft.data.totalRows = emptyState.data.totalRows;
-            draft.data.fundList = emptyState.data.fundList;
-            draft.layout.showingFilter = false;
-        }));
-
-        try {
-            const result = await this.getFundList(nextState.config);
-
-            this.setState(produce(nextState, draft => {
-                draft.data.totalRows = result.totalRows;
-                draft.data.fundList = result.data;
-            }));
-        } catch (ex) {
-            Sentry.captureException(ex);
-            console.error(ex.message);
-            this.setState(produce(draft => {
-                draft.data.fundList = ex.message;
-            }));
-        }
+    function handleFilterChange(filter) {
+        setShowingFilter(false);
+        setFilter(filter);
     }
 
-    handleChartInitialized = (fund, figure) => {
-        this.setState(produce(draft => {
-            draft.data.fundDetail[fund.icf_cnpj_fundo] = figure;
-        }));
-    }
-
-    handleChartUpdate = (fund, figure) => {
-        this.setState(produce(draft => {
-            draft.data.fundDetail[fund.icf_cnpj_fundo] = figure;
-        }));
-    }
-
-    handleFundExpansion = (expanded, fund) => {
-        this.setState(produce(draft => {
-            draft.data.fundDetail[fund.icf_cnpj_fundo] = null;
-            draft.layout.showingFundDetail[fund.icf_cnpj_fundo] = expanded;
-        }));
-
-        this.updateData(expanded, this.state.config.chart, fund.icf_cnpj_fundo);
-    }
-
-    updateData = async (expanded, chartConfig, cnpj) => {
-        let nextState = null;
-
-        if (expanded) {
-            const { fundStatistic, fundData } = await promisesEach({
-                fundStatistic: this.getFundStatistic(cnpj, chartConfig),
-                fundData: this.getFundData(cnpj)
-            });
-
-            nextState = produce(this.state, draft => {
-                const benchmarkText = benchmarkOptions.find(benchmark => benchmark.name === chartConfig.benchmark).displayName;
-
-                if (fundStatistic instanceof Error) {
-                    Sentry.captureException(fundStatistic);
-                    draft.data.fundDetail[cnpj] = fundStatistic;
-                } else if (fundData instanceof Error) {
-                    Sentry.captureException(fundData);
-                    draft.data.fundDetail[cnpj] = fundData;
-                }
-                else draft.data.fundDetail[cnpj] = this.buildChart(fundStatistic, fundData, benchmarkText);
-            });
-        }
-
-        this.setState(nextState);
-    }
-
-    buildChart = (statistics, infCadastral, benchmarkText) => {
-        let colorIndex = 0;
-
-        const name = infCadastral[0].f_short_name;
-
-        let min_y = Math.min(statistics.daily.min_investment_return, statistics.daily.min_benchmark_investment_return);
-        let max_y = Math.max(statistics.daily.max_investment_return, statistics.daily.max_benchmark_investment_return);
-
-        return {
-            data: [
-                {
-                    x: statistics.daily.date,
-                    y: statistics.daily.investment_return,
-                    type: 'scatter',
-                    name: 'Desempenho',
-                    line: { color: nextColorIndex(colorIndex++) }
-                },
-                {
-                    x: statistics.daily.date,
-                    y: statistics.daily.benchmark_investment_return,
-                    type: 'scatter',
-                    name: `Benchmark (${benchmarkText})`,
-                    yaxis: 'y2',
-                    line: { color: nextColorIndex(colorIndex++) }
-                },
-                {
-                    x: statistics.daily.date,
-                    y: statistics.daily.risk,
-                    type: 'scatter',
-                    name: 'Risco',
-                    yaxis: 'y3',
-                    line: { color: nextColorIndex(colorIndex++) },
-                    visible: 'legendonly'
-                },
-                {
-                    x: statistics.daily.date,
-                    y: statistics.daily.sharpe,
-                    type: 'scatter',
-                    name: 'Sharpe',
-                    yaxis: 'y4',
-                    line: { color: nextColorIndex(colorIndex++) },
-                    visible: 'legendonly'
-                },
-                {
-                    x: statistics.daily.date,
-                    y: statistics.daily.consistency,
-                    type: 'scatter',
-                    name: 'Consistência',
-                    yaxis: 'y5',
-                    line: { color: nextColorIndex(colorIndex++) },
-                    visible: 'legendonly'
-                },
-                {
-                    x: statistics.daily.date,
-                    y: statistics.daily.networth,
-                    type: 'scatter',
-                    name: 'Patrimônio',
-                    yaxis: 'y6',
-                    line: { color: nextColorIndex(colorIndex++) },
-                    visible: 'legendonly'
-                },
-                {
-                    x: statistics.daily.date,
-                    y: statistics.daily.quotaholders,
-                    type: 'scatter',
-                    name: 'Cotistas',
-                    yaxis: 'y7',
-                    line: { color: nextColorIndex(colorIndex++) },
-                    visible: 'legendonly'
-                }
-            ],
-            layout: {
-                title: name,
-                separators: ',.',
-                autosize: true,
-                showlegend: true,
-                legend: { 'orientation': 'h' },
-                forSize: this.props.width,
-                font: {
-                    family: '"Roboto", "Helvetica", "Arial", sans-serif'
-                },
-                xaxis: {
-                    showspikes: true,
-                    spikemode: 'across',
-                    domain: [0.05, 0.74]
-                },
-                yaxis: {
-                    title: 'Desempenho',
-                    tickformat: chartFormatters.investment_return.tickformat,
-                    hoverformat: chartFormatters.investment_return.hoverformat,
-                    fixedrange: true,
-                    range: [min_y, max_y],
-                },
-                yaxis2: {
-                    title: `Benchmark (${benchmarkText})`,
-                    tickformat: chartFormatters.investment_return.tickformat,
-                    hoverformat: chartFormatters.investment_return.hoverformat,
-                    anchor: 'free',
-                    overlaying: 'y',
-                    side: 'left',
-                    range: [min_y, max_y],
-                    fixedrange: true,
-                    position: 0
-                },
-                yaxis3: {
-                    title: 'Risco',
-                    tickformat: chartFormatters.risk.tickformat,
-                    hoverformat: chartFormatters.risk.hoverformat,
-                    anchor: 'x',
-                    overlaying: 'y',
-                    side: 'right',
-                    fixedrange: true
-                },
-                yaxis4: {
-                    title: 'Sharpe',
-                    tickformat: chartFormatters.sharpe.tickformat,
-                    hoverformat: chartFormatters.sharpe.hoverformat,
-                    anchor: 'free',
-                    overlaying: 'y',
-                    side: 'right',
-                    fixedrange: true,
-                    position: 0.78
-                },
-                yaxis5: {
-                    title: 'Consistência',
-                    tickformat: chartFormatters.consistency.tickformat,
-                    hoverformat: chartFormatters.consistency.hoverformat,
-                    anchor: 'free',
-                    overlaying: 'y',
-                    side: 'right',
-                    fixedrange: true,
-                    position: 0.84
-                },
-                yaxis6: {
-                    title: 'Patrimônio',
-                    type: 'linear',
-                    tickprefix: chartFormatters.networth.tickprefix,
-                    tickformat: chartFormatters.networth.tickformat,
-                    hoverformat: chartFormatters.networth.hoverformat,
-                    anchor: 'free',
-                    overlaying: 'y',
-                    side: 'right',
-                    fixedrange: true,
-                    position: 0.89
-                },
-                yaxis7: {
-                    title: 'Cotistas',
-                    anchor: 'free',
-                    overlaying: 'y',
-                    side: 'right',
-                    fixedrange: true,
-                    position: 1
-                }
-            },
-            frames: [],
-            config: {
-                locale: 'pt-BR',
-                displayModeBar: true
-            }
-        };
-    }
-
-    getFundList = options => API.getFundList(options);
-
-    getFundStatistic = (cnpj, chartConfig) => {
-        const from = rangeOptions.find(range => range.name === chartConfig.range).toDate();
-
-        return API.getFundStatistic(cnpj, chartConfig.benchmark, from);
-    }
-
-    getFundData = cnpj => API.getFundData(cnpj);
-
-    render() {
-        const { classes } = this.props;
-        const { layout } = this.state;
-        const open = Boolean(layout.anchorEl);
-
-        return (
-            <div>
-                <div className={classes.appBarSpacer} />
-                <Grid container spacing={2} alignItems="center">
-                    <Grid item xs>
-                        <Grid container alignItems="center" spacing={1}>
-                            <Grid item>
-                                <Tooltip enterTouchDelay={100} leaveTouchDelay={5000} title={
-                                    <React.Fragment>
-                                        <p>Lista de fundos de investimento com gráfico diário.</p>
-                                        <p>Por padrão somente fundos listados na BTG Pactual, XP Investimentos e Modal Mais são exibidos. No lado esquerdo é possível procurar fundos pelo nome e no lado direito é possível alterar o filtro, ordem, intervalo e benchmark.</p>
-                                        <p>Clique no fundo para visualizar o gráfico.</p>
-                                    </React.Fragment>
-                                }>
-                                    <Typography variant="h5" className={classes.withTooltip}>Lista de Fundos</Typography>
-                                </Tooltip>
-                            </Grid>
+    return (
+        <div>
+            <div className={styles.appBarSpacer} />
+            <Grid container spacing={2} alignItems="center">
+                <Grid item xs>
+                    <Grid container alignItems="center" spacing={1}>
+                        <Grid item>
+                            <Tooltip enterTouchDelay={100} leaveTouchDelay={5000} title={
+                                <React.Fragment>
+                                    <p>Lista de fundos de investimento com gráfico diário.</p>
+                                    <p>Por padrão somente fundos listados na BTG Pactual, XP Investimentos e Modal Mais são exibidos. No lado esquerdo é possível procurar fundos pelo nome e no lado direito é possível alterar o filtro, ordem, intervalo e benchmark.</p>
+                                    <p>Clique no fundo para visualizar o gráfico.</p>
+                                </React.Fragment>
+                            }>
+                                <Typography variant="h5" className={styles.withTooltip}>Lista de Fundos</Typography>
+                            </Tooltip>
                         </Grid>
                     </Grid>
                 </Grid>
-                <Grid container spacing={2}>
-                    <Grid item xs>
-                        <Paper elevation={1} square={true} >
-                            <Grid container wrap="nowrap" className={classes.optionsBar}>
-                                <FundSearchComponent onSearchChanged={this.handleSearchChange} />
-                                <Grid container justify="flex-end" spacing={1}>
-                                    <Grid item>
-                                        <Hidden smDown>
-                                            <Select
-                                                value={this.state.config.chart.range}
-                                                onChange={this.handleChartConfigChange}
-                                                className={classes.chartSelect}
-                                                inputProps={{
-                                                    name: 'range',
-                                                    id: 'range',
-                                                }}>
-                                                {rangeOptions.filter(range => range.name !== 'best').map(range => (<MenuItem key={range.name} value={range.name}>{range.displayName}</MenuItem>))}
-                                            </Select>
-                                            <Select
-                                                value={this.state.config.chart.benchmark}
-                                                onChange={this.handleChartConfigChange}
-                                                className={classes.chartSelect}
-                                                inputProps={{
-                                                    name: 'benchmark',
-                                                    id: 'benchmark',
-                                                }}>
-                                                {benchmarkOptions.map(benchmark => (<MenuItem key={benchmark.name} value={benchmark.name}>{benchmark.displayName}</MenuItem>))}
-                                            </Select>
-                                        </Hidden>
+            </Grid>
+            <Grid container spacing={2}>
+                <Grid item xs>
+                    <Paper elevation={1} square={true} >
+                        <Grid container wrap="nowrap" className={styles.optionsBar}>
+                            <FundSearchComponent key={search} onSearchChanged={handleSearchChange} search={search} />
+                            <Grid container justify="flex-end" spacing={1}>
+                                <Grid item>
+                                    <Tooltip title="Ordem" aria-label="Ordem">
                                         <IconButton
                                             aria-label="Ordem"
-                                            aria-owns={open ? 'long-menu' : null}
+                                            aria-owns={Boolean(anchorEl) ? 'long-menu' : null}
                                             aria-haspopup="true"
-                                            onClick={this.handleSortClick}>
+                                            onClick={handleSortClick}>
                                             <SortIcon />
                                         </IconButton>
-                                        <Menu
-                                            id="long-menu"
-                                            anchorEl={layout.anchorEl}
-                                            open={open}
-                                            onClose={this.handleSortClose}>
-                                            {this.state.data.sortOptions.map((option, index) => (
-                                                <MenuItem key={option.displayName + option.order} selected={option.displayName === this.state.config.sort.displayName && option.order === this.state.config.sort.order} onClick={event => this.handleSortMenuItemClick(event, index)}>
-                                                    {option.displayName}&nbsp;
-                                                    {option.order === 'asc' ? <ArrowDownwardIcon /> : <ArrowUpwardIcon />}
-                                                </MenuItem>
-                                            ))}
-                                        </Menu>
+                                    </Tooltip>
+                                    <Menu
+                                        id="long-menu"
+                                        anchorEl={anchorEl}
+                                        open={Boolean(anchorEl)}
+                                        onClose={handleSortClose}>
+                                        {sortOptions.map((option, index) => (
+                                            <MenuItem key={option.displayName + option.order} selected={option.displayName === sort.displayName && option.order === sort.order} onClick={event => handleSortMenuItemClick(event, index)}>
+                                                {option.displayName}&nbsp;
+                                                {option.order === 'asc' ? <ArrowDownwardIcon /> : <ArrowUpwardIcon />}
+                                            </MenuItem>
+                                        ))}
+                                    </Menu>
+                                    <Tooltip title="Filtro" aria-label="Filtro">
                                         <IconButton
                                             aria-label="Filtro"
-                                            onClick={this.handleFilterClick}>
+                                            onClick={handleFilterClick}>
                                             <FilterListIcon />
                                         </IconButton>
-                                    </Grid>
+                                    </Tooltip>
                                 </Grid>
                             </Grid>
-                        </Paper>
-                        <Paper elevation={1} square={true}>
-                            <Collapse in={layout.showingFilter}>
-                                <FundFilterComponent onFilterChanged={this.handleFilterChange} />
-                            </Collapse>
-                        </Paper>
-                        <ShowStateComponent
-                            data={this.state.data.fundList}
-                            hasData={() => this.state.data.fundList.map((fund, index) => {
-                                const content = (
+                        </Grid>
+                    </Paper>
+                    <Paper elevation={1} square={true}>
+                        <Collapse in={showingFilter}>
+                            <FundFilterComponent onFilterChanged={handleFilterChange} />
+                        </Collapse>
+                    </Paper>
+                    <ShowStateComponent
+                        data={fundList}
+                        hasData={() => fundList.map((fund, index) => (
+                            <Paper key={index} elevation={1} square={true} className={styles.filterPaperContent}>
+                                <Link to={'/funds/' + fund.f_cnpj} className={styles.link}>
                                     <Grid container spacing={1}>
                                         <Grid item xs={8}>
                                             <Typography variant="body2">
-                                                <b><Link to={'/funds/' + fund.f_cnpj} className={classes.link}>{fund.f_short_name}</Link></b><br />
+                                                <b>{fund.f_short_name}</b><br />
                                                 <small>
                                                     <b>Patrimônio:</b> {formatters.field['iry_accumulated_networth'](fund.iry_accumulated_networth)}<br />
                                                     <b>Quotistas:</b> {fund.iry_accumulated_quotaholders} <br />
@@ -597,8 +253,8 @@ class FundListView extends React.Component {
                                                     <Typography variant="body2">
                                                         <small>
                                                             1A: {formatters.field['iry_investment_return_1y'](fund.iry_investment_return_1y)}<br />
-                                                            2A: {formatters.field['iry_investment_return_2y'](fund.iry_investment_return_2y)}<br />
-                                                            3A: {formatters.field['iry_investment_return_3y'](fund.iry_investment_return_3y)}
+                                                        2A: {formatters.field['iry_investment_return_2y'](fund.iry_investment_return_2y)}<br />
+                                                        3A: {formatters.field['iry_investment_return_3y'](fund.iry_investment_return_3y)}
                                                         </small>
                                                     </Typography>
                                                 </Grid>
@@ -607,8 +263,8 @@ class FundListView extends React.Component {
                                                         <Typography variant="body2">
                                                             <small>
                                                                 1A: {formatters.field['iry_risk_1y'](fund.iry_risk_1y)}<br />
-                                                                2A: {formatters.field['iry_risk_2y'](fund.iry_risk_2y)}<br />
-                                                                3A: {formatters.field['iry_risk_3y'](fund.iry_risk_3y)}<br />
+                                                            2A: {formatters.field['iry_risk_2y'](fund.iry_risk_2y)}<br />
+                                                            3A: {formatters.field['iry_risk_3y'](fund.iry_risk_3y)}<br />
                                                             </small>
                                                         </Typography>
                                                     </Grid>
@@ -616,130 +272,85 @@ class FundListView extends React.Component {
                                             </Grid>
                                         </Grid>
                                     </Grid>
-                                );
-                                return (
-                                    <React.Fragment key={index}>
-                                        <Hidden xsDown>
-                                            <Accordion elevation={1} expanded={this.state.layout.showingFundDetail[fund.icf_cnpj_fundo] ? true : false} onChange={(e, expanded) => this.handleFundExpansion(expanded, fund)}>
-                                                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                                                    {content}
-                                                </AccordionSummary>
-                                                <Divider />
-                                                <AccordionDetails>
-                                                    <Grid container spacing={1}>
-                                                        <Grid item xs>
-                                                            <DataHistoryChartComponent
-                                                                data={this.state.data.fundDetail[fund.icf_cnpj_fundo]}
-                                                                onInitialized={figure => this.handleChartInitialized(fund, figure)}
-                                                                onUpdate={figure => this.handleChartUpdate(fund, figure)}
-                                                            />
-                                                        </Grid>
-                                                    </Grid>
-                                                </AccordionDetails>
-                                            </Accordion>
-                                        </Hidden>
-                                        <Hidden smUp>
-                                            <Paper elevation={1} square={true} className={classes.filterPaperContent}>
-                                                {content}
-                                            </Paper>
-                                        </Hidden>
-                                    </React.Fragment>
-                                );
-                            })}
-                            isNull={() => [...Array(this.state.config.rowsPerPage).keys()].map((fund, index) => {
-                                const content = (
-                                    <Grid container spacing={1}>
-                                        <Grid item xs={8}>
-                                            <Typography variant="body2">
-                                                <b><Skeleton /></b>
-                                                <small>
-                                                    <Skeleton />
-                                                    <Skeleton />
-                                                    <Skeleton />
-                                                </small>
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item xs={4}>
-                                            <Grid container spacing={1}>
+                                </Link>
+                            </Paper>
+                        ))}
+                        isNull={() => [...Array(rowsPerPage).keys()].map((fund, index) => (
+                            <Paper key={index} elevation={1} square={true} className={styles.filterPaperContent}>
+                                <Grid container spacing={1}>
+                                    <Grid item xs={8}>
+                                        <Typography variant="body2">
+                                            <b><Skeleton /></b>
+                                            <small>
+                                                <Skeleton />
+                                                <Skeleton />
+                                                <Skeleton />
+                                            </small>
+                                        </Typography>
+                                    </Grid>
+                                    <Grid item xs={4}>
+                                        <Grid container spacing={1}>
+                                            <Grid item xs={6}>
+                                                <Typography variant="body2"><b><Skeleton /></b></Typography>
+                                            </Grid>
+                                            <Hidden smDown>
                                                 <Grid item xs={6}>
                                                     <Typography variant="body2"><b><Skeleton /></b></Typography>
                                                 </Grid>
-                                                <Hidden smDown>
-                                                    <Grid item xs={6}>
-                                                        <Typography variant="body2"><b><Skeleton /></b></Typography>
-                                                    </Grid>
-                                                </Hidden>
+                                            </Hidden>
+                                        </Grid>
+                                        <Grid container spacing={1}>
+                                            <Grid item sm={6} xs={12}>
+                                                <Typography variant="body2">
+                                                    <small>
+                                                        <Skeleton />
+                                                        <Skeleton />
+                                                        <Skeleton />
+                                                    </small>
+                                                </Typography>
                                             </Grid>
-                                            <Grid container spacing={1}>
-                                                <Grid item sm={6} xs={12}>
+                                            <Hidden smDown>
+                                                <Grid item xs={6}>
                                                     <Typography variant="body2">
                                                         <small>
                                                             <Skeleton />
-                                                            <Skeleton  />
-                                                            <Skeleton  />
+                                                            <Skeleton />
+                                                            <Skeleton />
                                                         </small>
                                                     </Typography>
                                                 </Grid>
-                                                <Hidden smDown>
-                                                    <Grid item xs={6}>
-                                                        <Typography variant="body2">
-                                                            <small>
-                                                                <Skeleton  />
-                                                                <Skeleton  />
-                                                                <Skeleton  />
-                                                            </small>
-                                                        </Typography>
-                                                    </Grid>
-                                                </Hidden>
-                                            </Grid>
+                                            </Hidden>
                                         </Grid>
                                     </Grid>
-                                );
-                                return (
-                                    <React.Fragment key={index}>
-                                        <Hidden xsDown>
-                                            <Accordion elevation={1} expanded={false}>
-                                                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                                                    {content}
-                                                </AccordionSummary>
-                                                <Divider />
-                                            </Accordion>
-                                        </Hidden>
-                                        <Hidden smUp>
-                                            <Paper elevation={1} square={true} className={classes.filterPaperContent}>
-                                                {content}
-                                            </Paper>
-                                        </Hidden>
-                                    </React.Fragment>
-                                );
-                            })}
-                            isErrored={() => (<Paper elevation={1} square={true} className={classes.filterPaperContent}><Typography variant="subtitle1" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography></Paper>)}
-                            isEmpty={() => (<Paper elevation={1} square={true} className={classes.filterPaperContent}><Typography variant="subtitle1" align="center">Sem dados à exibir</Typography></Paper>)}
+                                </Grid>
+                            </Paper>
+                        ))}
+                        isErrored={() => (<Paper elevation={1} square={true} className={styles.filterPaperContent}><Typography variant="subtitle1" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography></Paper>)}
+                        isEmpty={() => (<Paper elevation={1} square={true} className={styles.filterPaperContent}><Typography variant="subtitle1" align="center">Sem dados à exibir</Typography></Paper>)}
+                    />
+                    {totalRows ?
+                        <TablePagination
+                            component="div"
+                            count={totalRows}
+                            rowsPerPage={rowsPerPage}
+                            page={page}
+                            backIconButtonProps={{
+                                'aria-label': 'Página Anterior',
+                            }}
+                            nextIconButtonProps={{
+                                'aria-label': 'Próxima Página',
+                            }}
+                            onChangePage={handleChangePage}
+                            onChangeRowsPerPage={handleChangeRowsPerPage}
+                            labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
+                            labelRowsPerPage={isWidthUpSm ? 'Registros por página:' : ''}
+                            rowsPerPageOptions={[5, 10, 25, 50, 100]}
                         />
-                        {this.state.data.totalRows ?
-                            <TablePagination
-                                component="div"
-                                count={this.state.data.totalRows}
-                                rowsPerPage={this.state.config.rowsPerPage}
-                                page={this.state.config.page}
-                                backIconButtonProps={{
-                                    'aria-label': 'Página Anterior',
-                                }}
-                                nextIconButtonProps={{
-                                    'aria-label': 'Próxima Página',
-                                }}
-                                onChangePage={this.handleChangePage}
-                                onChangeRowsPerPage={this.handleChangeRowsPerPage}
-                                labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
-                                labelRowsPerPage={isWidthUp('sm', this.props.width, true) ? 'Registros por página:' : ''}
-                                rowsPerPageOptions={[5, 10, 25, 50, 100]}
-                            />
-                            : null}
-                    </Grid>
+                        : null}
                 </Grid>
-            </div >
-        );
-    }
+            </Grid>
+        </div >
+    );
 }
 
-export default withWidth()(withStyles(styles)(FundListView));
+export default FundListView;

@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback } from 'react';
+import { StringParam, useQueryParam, withDefault } from 'use-query-params';
+import createPersistedState from 'use-persisted-state';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
@@ -11,13 +13,16 @@ import Hidden from '@material-ui/core/Hidden';
 import Link from '@material-ui/core/Link';
 import Skeleton from '@material-ui/lab/Skeleton';
 import { produce } from 'immer';
-import { useParams, useHistory } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
+//import useTitle from "@hookeasy/use-title";
 import slugify from 'slugify';
 import API from '../api';
 import ShowStateComponent from './component/showStateComponent';
 import DataHistoryChartComponent from './component/dataHistoryChartComponent';
 import { fieldOptions, benchmarkOptions, rangeOptions } from './option';
-import { nextColorIndex, formatters, chartFormatters, settle, reportErrorIfNecessary } from '../util';
+import { nextColorIndex, formatters, chartFormatters, settle, reportErrorIfNecessary, useState, useEffect, useRendering } from '../util';
+
+const usePersistedConfigState = createPersistedState('fundListItemView.config');
 
 const useStyles = makeStyles(theme => ({
     select: {
@@ -57,37 +62,6 @@ const emptyState = {
         field: 'investment_return'
     }
 };
-
-async function updateFund(cnpj, setFund) {
-    const fund = await settle(getFundData(cnpj));
-
-    if (fund instanceof Error) setFund(fund);
-    else setFund(fund[0]);
-
-    reportErrorIfNecessary(fund);
-}
-
-async function updateHistoryAndChart(cnpj, fund, range, benchmark, setFundHistory, setChart) {
-    if (fund != null) {
-        const fundHistory = await settle(getFundStatistic(cnpj, range, benchmark));
-
-        setFundHistory(fundHistory);
-
-        if (fundHistory instanceof Error) {
-            setChart({
-                small: fundHistory,
-                large: fundHistory
-            });
-        } else {
-            setChart({
-                small: buildChart(benchmark, fund.f_short_name, fundHistory, 'small'),
-                large: buildChart(benchmark, fund.f_short_name, fundHistory, 'large')
-            });
-        }
-
-        reportErrorIfNecessary(fundHistory);
-    }
-}
 
 function buildChart(benchmark, name, statistics, size = 'small') {
     let colorIndex = 0;
@@ -268,88 +242,146 @@ function buildChart(benchmark, name, statistics, size = 'small') {
     };
 }
 
-function getFundData(cnpj) {
-    const additionalFields = [
-        'f_cnpj',
-        'icf_dt_ini_exerc',
-        'icf_dt_fim_exerc',
-        'icf_classe',
-        'icf_sit',
-        'icf_condom',
-        'icf_fundo_cotas',
-        'icf_fundo_exclusivo',
-        'icf_rentab_fundo',
-        'icf_vl_patrim_liq',
-        'xf_name',
-        'xf_id',
-        'xf_formal_risk',
-        'xf_initial_investment',
-        'xf_rescue_quota',
-        'xf_benchmark',
-        'xf_type',
-        'xf_state',
-        'bf_id',
-        'bf_product',
-        'bf_risk_level',
-        'bf_minimum_initial_investment',
-        'bf_rescue_quota',
-        'bf_category_description',
-        'bf_anbima_rating',
-        'bf_is_blacklist',
-        'bf_inactive',
-        'mf_id',
-        'mf_name',
-        'mf_risk_level',
-        'mf_minimum_initial_investment',
-        'mf_rescue_quota',
-        'mf_benchmark',
-        'mf_active',
-        'mf_detail_link'];
-
-    return API.getFundData(cnpj, additionalFields);
-}
-
-function getFundStatistic(cnpj, range, benchmark) {
-    const from = rangeOptions.find(rangeOption => rangeOption.name === range).toDate();
-
-    return API.getFundStatistic(cnpj, benchmark, from);
-}
-
 function FundListItemView(props) {
+
     // Data
     const [fund, setFund] = useState(emptyState.data.fund);
     const [fundHistory, setFundHistory] = useState(emptyState.data.history);
     const [chart, setChart] = useState(emptyState.data.chart);
 
-    let { cnpj, benchmark, range, field } = useParams();
-    const history = useHistory();
-    const classes = useStyles();
+    // Config from URL
+    const { cnpj } = useParams();
+    const [benchmark, setBenchmark] = useQueryParam('b', withDefault(StringParam, emptyState.config.benchmark));
+    const [range, setRange] = useQueryParam('r', withDefault(StringParam, emptyState.config.range));
+    const [field, setField] = useQueryParam('f', withDefault(StringParam, emptyState.config.field));
 
-    if (typeof (benchmark) == 'undefined') benchmark = emptyState.config.benchmark;
-    if (typeof (range) == 'undefined') range = emptyState.config.range;
-    if (typeof (field) == 'undefined') field = emptyState.config.field;
+    // const [persistedConfig, setPersistedConfig] = usePersistedConfigState({
+    //     benchmark: emptyState.config.benchmark,
+    //     range: emptyState.config.range,
+    //     field: emptyState.config.field,
+    // });
 
+    const styles = useStyles();
+    useRendering();
+
+    // if (typeof (benchmark) == 'undefined' || typeof (range) == 'undefined' || typeof (field) == 'undefined') {
+    //     if (typeof (benchmark) == 'undefined') benchmark = persistedConfig.benchmark;
+    //     if (typeof (range) == 'undefined') range = persistedConfig.range;
+    //     if (typeof (field) == 'undefined') field = persistedConfig.field;
+    //     history.replace(pathTemplate(benchmark, range, field));
+    // }    
+
+    // useEffect(() => {
+    //     setPersistedConfig({
+    //         benchmark,
+    //         field,
+    //         range: range
+    //     });
+    // }, [setPersistedConfig, benchmark, range, field]);
+
+    // Updaters
+    const updateFund = useCallback(async function updateFund(cnpj, setFund) {
+        const fund = await settle(fetchFundData(cnpj));
+
+        if (fund instanceof Error) setFund(fund);
+        else setFund(fund[0]);
+
+        reportErrorIfNecessary(fund);
+    }, []);
+
+    const updateHistoryAndChart = useCallback(async function updateHistoryAndChart(cnpj, fund, range, benchmark) {
+        if (fund != null) {
+            const fundHistory = await settle(fetchFundStatistic(cnpj, range, benchmark));
+
+            setFundHistory(fundHistory);
+
+            if (fundHistory instanceof Error) {
+                setChart({
+                    small: fundHistory,
+                    large: fundHistory
+                });
+            } else {
+                setChart({
+                    small: buildChart(benchmark, fund.f_short_name, fundHistory, 'small'),
+                    large: buildChart(benchmark, fund.f_short_name, fundHistory, 'large')
+                });
+            }
+
+            reportErrorIfNecessary(fundHistory);
+        }
+    }, []);
+
+    // Effects
     useEffect(() => {
         setFund(emptyState.data.fund);
         updateFund(cnpj, setFund);
-    }, [cnpj]);
+    }, [updateFund, cnpj]);
 
     useEffect(() => {
         setFundHistory(emptyState.data.history);
         setChart(emptyState.data.chart);
-        updateHistoryAndChart(cnpj, fund, range, benchmark, setFundHistory, setChart);
-    }, [cnpj, fund, range, benchmark]);
+        updateHistoryAndChart(cnpj, fund, range, benchmark);
+    }, [updateHistoryAndChart, cnpj, fund, range, benchmark]);
 
+    // Fetchers
+    function fetchFundData(cnpj) {
+        const additionalFields = [
+            'f_cnpj',
+            'icf_dt_ini_exerc',
+            'icf_dt_fim_exerc',
+            'icf_classe',
+            'icf_sit',
+            'icf_condom',
+            'icf_fundo_cotas',
+            'icf_fundo_exclusivo',
+            'icf_rentab_fundo',
+            'icf_vl_patrim_liq',
+            'xf_name',
+            'xf_id',
+            'xf_formal_risk',
+            'xf_initial_investment',
+            'xf_rescue_quota',
+            'xf_benchmark',
+            'xf_type',
+            'xf_state',
+            'bf_id',
+            'bf_product',
+            'bf_risk_level',
+            'bf_minimum_initial_investment',
+            'bf_rescue_quota',
+            'bf_category_description',
+            'bf_anbima_rating',
+            'bf_is_blacklist',
+            'bf_inactive',
+            'mf_id',
+            'mf_name',
+            'mf_risk_level',
+            'mf_minimum_initial_investment',
+            'mf_rescue_quota',
+            'mf_benchmark',
+            'mf_active',
+            'mf_detail_link'];
+
+        return API.getFundData(cnpj, additionalFields);
+    }
+
+    function fetchFundStatistic(cnpj, range, benchmark) {
+        const from = rangeOptions.find(rangeOption => rangeOption.name === range).toDate();
+
+        return API.getFundStatistic(cnpj, benchmark, from);
+    }
+
+    // Handlers
     function handleConfigRangeChange(event) {
-        history.push(`${props.basePath}/${cnpj}/${benchmark}/${event.target.value}/${field}`);
+        setRange(event.target.value);
     }
 
     function handleConfigBenchmarkChange(event) {
-        history.push(`${props.basePath}/${cnpj}/${event.target.value}/${range}/${field}`);
+        setBenchmark(event.target.value);
     }
 
     function handleConfigFieldChange(event) {
-        history.push(`${props.basePath}/${cnpj}/${benchmark}/${range}/${event.target.value}`);
+        setField(event.target.value);
     }
 
     function handleChartInitialized(figure) {
@@ -368,7 +400,7 @@ function FundListItemView(props) {
 
     return (
         <div>
-            <div className={classes.appBarSpacer} />
+            <div className={styles.appBarSpacer} />
             <Grid container spacing={2} alignItems="center">
                 <Grid item xs>
                     <Grid container alignItems="center" spacing={1}>
@@ -379,7 +411,7 @@ function FundListItemView(props) {
                                     <p>No lado direito é possível alterar o benchmark e intervalo visualizado.</p>
                                 </React.Fragment>
                             }>
-                                <Typography variant="h5" className={classes.withTooltip}>{fund && formatters.field['f_short_name'](fund.f_short_name)}</Typography>
+                                <Typography variant="h5" className={styles.withTooltip}>{fund && formatters.field['f_short_name'](fund.f_short_name)}</Typography>
                             </Tooltip>
                         </Grid>
                     </Grid>
@@ -390,7 +422,7 @@ function FundListItemView(props) {
                             <Select
                                 value={benchmark}
                                 onChange={handleConfigBenchmarkChange}
-                                className={classes.select}
+                                className={styles.select}
                                 inputProps={{
                                     name: 'benchmark',
                                     id: 'benchmark',
@@ -402,7 +434,7 @@ function FundListItemView(props) {
                             <Select
                                 value={range}
                                 onChange={handleConfigRangeChange}
-                                className={classes.select}
+                                className={styles.select}
                                 inputProps={{
                                     name: 'range',
                                     id: 'range',
@@ -420,7 +452,7 @@ function FundListItemView(props) {
             </Grid>
             <Grid container spacing={2}>
                 <Grid item xs>
-                    <Paper elevation={1} square={true} className={classes.chart} >
+                    <Paper elevation={1} square={true} className={styles.chart} >
                         <ShowStateComponent
                             data={fund}
                             hasData={() => (
@@ -448,7 +480,7 @@ function FundListItemView(props) {
                                                         <Divider variant="middle" />
                                                     </Grid>
                                                     <Grid item xs={12}>
-                                                        <Typography variant="subtitle1" gutterBottom><b><Link className={classes.link} href={`https://institucional.xpi.com.br/investimentos/fundos-de-investimento/detalhes-de-fundos-de-investimento.aspx?F=${fund.xf_id}`} target="_new" rel="noopener">XP Investimentos</Link></b></Typography>
+                                                        <Typography variant="subtitle1" gutterBottom><b>XP Investimentos</b></Typography>
                                                     </Grid>
                                                 </Grid>
                                                 <Grid container spacing={2}>
@@ -471,7 +503,7 @@ function FundListItemView(props) {
                                                         <Divider variant="middle" />
                                                     </Grid>
                                                     <Grid item xs={12}>
-                                                        <Typography variant="subtitle1" gutterBottom><b><Link className={classes.link} href={`https://www.btgpactualdigital.com/investimentos/fundos-de-investimento/detalhe/${fund.bf_id}/${slugify(fund.bf_product.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(), "_")}`} target="_new" rel="noopener">BTG Pactual</Link></b></Typography>
+                                                        <Typography variant="subtitle1" gutterBottom><b><Link className={styles.link} href={`https://www.btgpactualdigital.com/fundos-de-investimento/${slugify(fund.bf_product.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(), "-")}`} target="_new" rel="noopener">BTG Pactual</Link></b></Typography>
                                                     </Grid>
                                                 </Grid>
                                                 <Grid container spacing={2}>
@@ -495,7 +527,7 @@ function FundListItemView(props) {
                                                         <Divider variant="middle" />
                                                     </Grid>
                                                     <Grid item xs={12}>
-                                                        <Typography variant="subtitle1" gutterBottom><b><Link className={classes.link} href={`https://www.modalmais.com.br${fund.mf_detail_link}`} target="_new" rel="noopener">Modal Mais</Link></b></Typography>
+                                                        <Typography variant="subtitle1" gutterBottom><b><Link className={styles.link} href={`https://www.modalmais.com.br${fund.mf_detail_link}`} target="_new" rel="noopener">Modal Mais</Link></b></Typography>
                                                     </Grid>
                                                 </Grid>
                                                 <Grid container spacing={2}>
@@ -526,7 +558,7 @@ function FundListItemView(props) {
                                     <p>É possível visualizar as outras séries clicando nelas.</p>
                                 </React.Fragment>
                             }>
-                                <Typography variant="h6" className={classes.withTooltip}>Gráfico Histórico</Typography>
+                                <Typography variant="h6" className={styles.withTooltip}>Gráfico Histórico</Typography>
                             </Tooltip>
                         </Grid>
                     </Grid>
@@ -534,7 +566,7 @@ function FundListItemView(props) {
             </Grid>
             <Grid container spacing={2}>
                 <Grid item xs>
-                    <Paper elevation={1} square={true} className={classes.chart} >
+                    <Paper elevation={1} square={true} className={styles.chart} >
                         <Hidden smDown>
                             <DataHistoryChartComponent
                                 data={chart.large}
@@ -560,7 +592,7 @@ function FundListItemView(props) {
                                     <p>No lado direito é possível alterar a informação visualizada.</p>
                                 </React.Fragment>
                             }>
-                                <Typography variant="h6" className={classes.withTooltip}>Tabela Histórica</Typography>
+                                <Typography variant="h6" className={styles.withTooltip}>Tabela Histórica</Typography>
                             </Tooltip>
                         </Grid>
                     </Grid>
@@ -571,7 +603,7 @@ function FundListItemView(props) {
                             <Select
                                 value={field}
                                 onChange={handleConfigFieldChange}
-                                className={classes.select}
+                                className={styles.select}
                                 inputProps={{
                                     name: 'field',
                                     id: 'field',
@@ -584,15 +616,15 @@ function FundListItemView(props) {
             </Grid>
             <Grid container spacing={2}>
                 <Grid item xs>
-                    <Paper elevation={1} square={true} className={classes.chart}>
+                    <Paper elevation={1} square={true} className={styles.chart}>
                         <ShowStateComponent
                             data={fundHistory}
                             hasData={() => (
                                 <React.Fragment>
-                                    <table className={classes.historyTable}>
+                                    <table className={styles.historyTable}>
                                         <thead>
-                                            <tr className={classes.historyCell}>
-                                                <th className={classes.historyCell}>Ano</th>
+                                            <tr className={styles.historyCell}>
+                                                <th className={styles.historyCell}>Ano</th>
                                                 <Hidden mdDown>
                                                     <th><Typography variant="body2">Jan</Typography></th>
                                                     <th><Typography variant="body2">Fev</Typography></th>
@@ -614,8 +646,8 @@ function FundListItemView(props) {
                                         <tbody>
                                             {
                                                 Object.keys(fundHistory.byYear).map(year => (
-                                                    <tr className={classes.historyCell} key={year}>
-                                                        <th className={classes.historyCell}>{year}</th>
+                                                    <tr className={styles.historyCell} key={year}>
+                                                        <th className={styles.historyCell}>{year}</th>
                                                         <Hidden mdDown>
                                                             {
                                                                 ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'].map(month => (

@@ -52,7 +52,6 @@ function FundFilterComponent({ onFilterChanged }) {
 
     const classes = useStyles();
 
-
     function handleFilterOptionsChange(field) {
         return event => {
             const value = event.target.value;

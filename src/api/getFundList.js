@@ -41,13 +41,13 @@ async function getFundList(options, fromDate = dayjs().subtract(1, 'month').toDa
     }
     let searchPart = '';
     if (options.search) {
-        if (options.search.term !== '') {
+        if (options.search !== '') {
             // Identify if it's a CNPJ or a fund name
-            if (/^\d+$/.test(options.search.term)) {
-                searchPart = `and=(f_cnpj.ilike.*${options.search.term}*)&`;
+            if (/^\d+$/.test(options.search)) {
+                searchPart = `and=(f_cnpj.ilike.*${options.search}*)&`;
             }
             else {
-                searchPart = `or=(f_unaccented_name.ilike.*${options.search.term.normalize('NFD').replace(/[\u0300-\u036f]/g, '')}*,f_unaccented_short_name.ilike.*${options.search.term.normalize('NFD').replace(/[\u0300-\u036f]/g, '')}*)&`;
+                searchPart = `or=(f_unaccented_name.ilike.*${options.search.normalize('NFD').replace(/[\u0300-\u036f]/g, '')}*,f_unaccented_short_name.ilike.*${options.search.normalize('NFD').replace(/[\u0300-\u036f]/g, '')}*)&`;
             }
         }
     }

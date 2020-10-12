@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Link, Switch } from 'react-router-dom';
+import { QueryParamProvider } from 'use-query-params';
 import { makeStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import AppBar from '@material-ui/core/AppBar';
@@ -79,7 +80,7 @@ const routes = [
     },
     {
         path: ['/compare/:benchmark/:range/:field/:cnpjs*', '/compare'],
-        linkTo: '/compare/cdi/1y/investment_return',
+        linkTo: '/compare',
         name: 'Comparação de Fundos',
         showInMenu: true,
         order: 3,
@@ -89,7 +90,7 @@ const routes = [
     },
     {
         path: ['/comparative/:range/:sizeField/:yField/:xField', '/comparative'],
-        linkTo: '/comparative/1y/irm_accumulated_networth/irm_investment_return_1y/irm_risk_1y',
+        linkTo: '/comparative',
         name: 'Comparativo de Fundos',
         showInMenu: true,
         order: 4,
@@ -101,6 +102,7 @@ const routes = [
         path: ['/progress'],
         name: 'Progresso de atualização',
         showInMenu: false,
+        widthUp: 'xs',
         main: (props, classes) => <ProgressView {...props} basePath={'/progress'} />
     },
     {
@@ -137,75 +139,77 @@ function Dashboard(props) {
         updateData();
     }, []);
 
-    const classes = useStyles();
+    const styles = useStyles();
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const isWidthUp = breakpoint => useMediaQuery(theme => theme.breakpoints.up(breakpoint));
 
     if (isInMaintenanceMode)
         return (
-            <div className={classes.centered}>
+            <div className={styles.centered}>
                 <Typography variant="h6" component="span">
-                    <img src="/img/emoticon-cry-outline.png" className={classes.centeredImage} alt="saddiness" />
+                    <img src="/img/emoticon-cry-outline.png" className={styles.centeredImage} alt="saddiness" />
                     Estamos em manutenção, volte em alguns minutos.
             </Typography>
             </div>
         );
     else return (
         <Router>
-            {GA.init() && <GA.RouteTracker />}
-            <React.Fragment>
-                <CssBaseline />
-                <div className={classes.root}>
-                    <AppBar
-                        position="absolute">
-                        <Toolbar>
-                            <Typography variant="h5" color="inherit" noWrap className={classes.toolbarTitle}>
-                                Me Ajuda FI
+            <QueryParamProvider ReactRouterRoute={Route}>
+                {GA.init() && <GA.RouteTracker />}
+                <React.Fragment>
+                    <CssBaseline />
+                    <div className={styles.root}>
+                        <AppBar
+                            position="absolute">
+                            <Toolbar>
+                                <Typography variant="h5" color="inherit" noWrap className={styles.toolbarTitle}>
+                                    Me Ajuda FI
                             </Typography>
-                            {routes.filter(route => route.showInMenu).sort((routeA, routeB) => routeA.order - routeB.order).filter(route => isWidthUp(route.widthUp, props.width)).map((route, index) => (
-                                <MenuLink activeOnlyWhenExact={route.exact} to={route.linkTo ? route.linkTo : route.path} classes={classes} label={route.name} icon={route.icon} key={index} />
-                            ))}
-                            <Hidden smDown>
-                                <IconButton color="inherit" aria-label="Repositório no Github" href="https://github.com/conradoqg/meajudafi-stack" target="_new" rel="noopener">
-                                    <GithubIcon fontSize="default" />
-                                </IconButton>
-                            </Hidden>
-                        </Toolbar>
-                    </AppBar>
-                    <main className={classes.content}>
-                        <Switch>
-                            {routes.filter(route => isWidthUp(route.widthUp, props.width)).map((route, index) => (
-                                <Route
-                                    key={index}
-                                    path={route.path}
-                                    exact={route.exact}
-                                    render={props => route.main(props, classes)}
-                                />
-                            ))}
-                            <Route component={() => (
-                                <div>
-                                    <div className={classes.appBarSpacer} />
-                                    <Grid container spacing={2}>
-                                        <Grid item xs={12}>
-                                            <Typography variant="h6" align="center" noWrap>Página não encontrada.</Typography>
+                                {routes.filter(route => route.showInMenu).sort((routeA, routeB) => routeA.order - routeB.order).filter(route => isWidthUp(route.widthUp, props.width)).map((route, index) => (
+                                    <MenuLink activeOnlyWhenExact={route.exact} to={route.linkTo ? route.linkTo : route.path} classes={styles} label={route.name} icon={route.icon} key={index} />
+                                ))}
+                                <Hidden smDown>
+                                    <IconButton color="inherit" aria-label="Repositório no Github" href="https://github.com/conradoqg/meajudafi-stack" target="_new" rel="noopener">
+                                        <GithubIcon fontSize="default" />
+                                    </IconButton>
+                                </Hidden>
+                            </Toolbar>
+                        </AppBar>
+                        <main className={styles.content}>
+                            <Switch>
+                                {routes.filter(route => isWidthUp(route.widthUp, props.width)).map((route, index) => (
+                                    <Route
+                                        key={index}
+                                        path={route.path}
+                                        exact={route.exact}
+                                        render={props => route.main(props, styles)}
+                                    />
+                                ))}
+                                <Route component={() => (
+                                    <div>
+                                        <div className={styles.appBarSpacer} />
+                                        <Grid container spacing={2}>
+                                            <Grid item xs={12}>
+                                                <Typography variant="h6" align="center" noWrap>Página não encontrada.</Typography>
+                                            </Grid>
                                         </Grid>
-                                    </Grid>
-                                </div>)} />
-                        </Switch>
-                        <Grid container spacing={2}>
-                            <Grid item xs={12}>
-                                <Typography variant="caption" gutterBottom>
-                                    <p>Rentabilidade passada não representa garantia de rentabilidade futura.</p>
-                                    <p>A rentabilidade divulgada não é líquida de impostos.</p>
-                                    <p>Fundos de investimento não contam com garantia do administrador, do gestor, de qualquer mecanismo de seguro ou fundo garantidor de crédito – FGC.</p>
-                                    <p>Alguns fundos tem menos de 12 (doze) meses. Para avaliação da performance de um fundo de investimento, é recomendável a análise de, no mínimo, 12 (doze) meses.</p>
-                                    <p>Os dados são extraídos do site da CVM <Link to='/progress'>diariamente</Link> e podem conter erros.</p>
-                                </Typography>
+                                    </div>)} />
+                            </Switch>
+                            <Grid container spacing={2}>
+                                <Grid item xs={12}>
+                                    <Typography variant="caption" gutterBottom>
+                                        <p>Rentabilidade passada não representa garantia de rentabilidade futura.</p>
+                                        <p>A rentabilidade divulgada não é líquida de impostos.</p>
+                                        <p>Fundos de investimento não contam com garantia do administrador, do gestor, de qualquer mecanismo de seguro ou fundo garantidor de crédito – FGC.</p>
+                                        <p>Alguns fundos tem menos de 12 (doze) meses. Para avaliação da performance de um fundo de investimento, é recomendável a análise de, no mínimo, 12 (doze) meses.</p>
+                                        <p>Os dados são extraídos do site da CVM <Link to='/progress'>diariamente</Link> e podem conter erros.</p>
+                                    </Typography>
+                                </Grid>
                             </Grid>
-                        </Grid>
-                    </main>
-                </div>
-            </React.Fragment>
+                        </main>
+                    </div>
+                </React.Fragment>
+            </QueryParamProvider>
         </Router>
     );
 }

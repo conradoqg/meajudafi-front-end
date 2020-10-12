@@ -1,83 +1,75 @@
 import React from 'react';
-import { withStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import SearchIcon from '@material-ui/icons/Search';
 import Input from '@material-ui/core/Input';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import Grid from '@material-ui/core/Grid';
-import { produce, setAutoFreeze } from 'immer';
+import { useState, useRendering } from '../../util';
 
-setAutoFreeze(false);
-
-const styles = theme => ({
+const useStyles = makeStyles(theme => ({
     input: {
         marginLeft: theme.spacing(1)
     },
-});
+}));
 
 const emptyState = {
     config: {
-        search: {
-            term: ''
-        }
+        search: ''
     }
 };
 
-class FundSearchComponent extends React.Component {
-    state = emptyState;
+let timeout = null;
 
-    static emptyState = emptyState;
+function FundSearchComponent(props) {
+    const [search, setSearch] = useState(props.search || emptyState.config.search);
 
-    timeout = null;
+    const styles = useStyles();
+    useRendering();
 
-    triggerOnSearchChanged = () => this.props.onSearchChanged(this.state.config.search);
-
-    handleSearchChange = event => {
-        const value = event.target.value;
-        this.setState(produce(draft => {
-            draft.config.search.term = value;
-        }));
-        if (this.timeout) clearTimeout(this.timeout);
-        this.timeout = setTimeout(this.triggerOnSearchChanged, 1000);
+    function triggerOnSearchChanged(value) {
+        props.onSearchChanged(value);
     }
 
-    handleKeyPress = event => {
+    function handleSearchChange(event) {
+        const value = event.target.value;
+        setSearch(value);
+
+        if (timeout) clearTimeout(timeout);
+        timeout = setTimeout(() => triggerOnSearchChanged(value), 1000);
+    }
+
+    function handleKeyPress(event) {
         if (event.key === 'Enter') {
             const value = event.target.value;
-            this.setState(produce(draft => {
-                draft.config.search.term = value;
-            }));
-            if (this.timeout) clearTimeout(this.timeout);
-            this.triggerOnSearchChanged();
+            setSearch(value);
+
+            if (timeout) clearTimeout(timeout);
+            triggerOnSearchChanged(value);
         }
     }
 
-    render() {
-        const { classes } = this.props;
-
-        return (
-            <Grid container alignItems="center" justify="flex-start">
-                <Input
-                    id="input-with-icon-grid"
-                    placeholder="Nome do fundo ou CNPJ"
-                    value={this.state.config.search.term}
-                    onChange={this.handleSearchChange}
-                    onKeyPress={this.handleKeyPress}
-                    className={classes.input}
-                    autoComplete="new-search"
-                    fullWidth
-                    startAdornment={
-                        <InputAdornment position="start">
-                            <SearchIcon />
-                        </InputAdornment>
-                    }
-                    inputProps={{
-                        'aria-label': 'Procura',
-                    }}
-                />
-            </Grid>
-        );
-    }
-
+    return (
+        <Grid container alignItems="center" justify="flex-start">
+            <Input
+                id="input-with-icon-grid"
+                placeholder="Nome do fundo ou CNPJ"
+                value={search}
+                onChange={handleSearchChange}
+                onKeyPress={handleKeyPress}
+                className={styles.input}
+                autoComplete="new-search"
+                fullWidth
+                startAdornment={
+                    <InputAdornment position="start">
+                        <SearchIcon />
+                    </InputAdornment>
+                }
+                inputProps={{
+                    'aria-label': 'Procura',
+                }}
+            />
+        </Grid>
+    );
 }
 
-export default withStyles(styles)(FundSearchComponent);
+export default FundSearchComponent;

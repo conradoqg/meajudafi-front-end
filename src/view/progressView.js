@@ -67,11 +67,11 @@ function ProgressView(props) {
 
     useInterval(() => updateData(setProgress), 2000);
 
-    const classes = useStyles();
+    const styles = useStyles();
 
     return (
         <div>
-            <div className={classes.appBarSpacer} />
+            <div className={styles.appBarSpacer} />
             <Grid container spacing={2} alignItems="center">
                 <Grid item xs>
                     <Grid container alignItems="center" spacing={1}>
@@ -89,7 +89,7 @@ function ProgressView(props) {
                     <ShowStateComponent
                         data={progress.data}
                         hasData={() => (<Paper elevation={1} square={true}>
-                            <Grid container className={classes.progressContent}>
+                            <Grid container className={styles.progressContent}>
                                 <Grid item>
                                     <Typography variant="body2" style={{ fontFamily: "monospace" }}>
                                         {progress.data.filter(item => item.data.progressTracker.state.start > progress.lastKnownStart).map(item => (<span key={item.path}>{defaultTemplate(item.data.progressTracker, item.data.prettyProgressTracker)}<br /></span>))}
@@ -98,7 +98,7 @@ function ProgressView(props) {
                             </Grid>
                         </Paper>)}
                         isNull={() => (<Paper elevation={1} square={true}>
-                            <Grid container className={classes.progressContent}>
+                            <Grid container className={styles.progressContent}>
                                 <Grid item xs={12} sm={12} md={12} xl={12}>
                                     <Typography variant="body2" style={{ fontFamily: "monospace" }} component="span" display="block">
                                         {[...Array(10).keys()].map(item => (<Skeleton key={item} />))}
@@ -106,8 +106,8 @@ function ProgressView(props) {
                                 </Grid>
                             </Grid>
                         </Paper>)}
-                        isErrored={() => (<Paper elevation={1} square={true} className={classes.filterPaperContent}><Typography variant="subtitle1" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography></Paper>)}
-                        isEmpty={() => (<Paper elevation={1} square={true} className={classes.filterPaperContent}><Typography variant="subtitle1" align="center">Sem dados à exibir</Typography></Paper>)}
+                        isErrored={() => (<Paper elevation={1} square={true} className={styles.filterPaperContent}><Typography variant="subtitle1" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography></Paper>)}
+                        isEmpty={() => (<Paper elevation={1} square={true} className={styles.filterPaperContent}><Typography variant="subtitle1" align="center">Sem dados à exibir</Typography></Paper>)}
                     />
                 </Grid>
             </Grid>

@@ -24,6 +24,8 @@ $ npm start
 - `check-build`: Same as build but generating development bundle file and reports to debug the size of it;
 - `dist`: Agreggates the necessary front-end files.
 
+chrome.exe --user-data-dir="C:/Chrome dev session" --disable-web-security
+
 ## Related repositories
 
 - [meajudafi-stack](https://github.com/conradoqg/meajudafi-stack)

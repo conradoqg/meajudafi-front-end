@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useParams, useHistory } from 'react-router-dom';
+import React, { useCallback } from 'react';
+import { StringParam, useQueryParam, withDefault } from 'use-query-params';
+import { Link } from 'react-router-dom';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
@@ -23,7 +24,7 @@ import ShowStateComponent from './component/showStateComponent';
 import DataHistoryChartComponent from './component/dataHistoryChartComponent';
 import API from '../api';
 import { rangeOptions } from './option';
-import { settle, reportErrorIfNecessary, formatters, nextColorIndex, chartFormatters } from '../util';
+import { settle, reportErrorIfNecessary, formatters, nextColorIndex, chartFormatters, useState, useEffect, useRendering } from '../util';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -90,40 +91,6 @@ const emptyState = {
         showingFilter: false
     }
 };
-
-async function updateEconomyIndicators(setEconomyIndicators, range) {
-    const economyIndicators = await settle(getEconomyIndicators(range));
-
-    if (economyIndicators instanceof Error) {
-        setEconomyIndicators({
-            small: economyIndicators,
-            large: economyIndicators
-        });
-    } else {
-        setEconomyIndicators({
-            small: buildChart(economyIndicators, 'small'),
-            large: buildChart(economyIndicators, 'large')
-        });
-    }
-
-    reportErrorIfNecessary(economyIndicators);
-}
-
-async function updateFundIndicators(setFundIndicators, range, filter) {
-    const fundIndicators = await settle(getFundIndicators(range, filter));
-
-    setFundIndicators(fundIndicators);
-
-    reportErrorIfNecessary(fundIndicators);
-}
-
-async function updateFundsChanged(setFundsChanged, range) {
-    const fundsChanged = await settle(getFundsChanged(range));
-
-    setFundsChanged(fundsChanged);
-
-    reportErrorIfNecessary(fundsChanged);
-}
 
 function buildChart(economyIndicators, size = 'small') {
     let colorIndex = 0;
@@ -220,118 +187,6 @@ function buildChart(economyIndicators, size = 'small') {
     };
 }
 
-function getEconomyIndicators(range) {
-    const from = rangeOptions.find(rangeOption => rangeOption.name === range).toDate();
-
-    return API.getEconomyIndicators(from);
-}
-
-function getFundIndicators(range, filter) {
-    return API.getFundIndicators({ range, filter });
-}
-
-async function getFundsChanged(range) {
-    const from = rangeOptions.find(rangeOption => rangeOption.name === range).toDate();
-
-    const fundsChanged = await API.getFundsChanged(from);
-
-    const fundsChanges = {
-        btgpactual: [],
-        xpi: [],
-        modalmais: []
-    };
-
-    fundsChanged.forEach(change => {
-        let key = null;
-
-        if (change.table_name === 'btgpactual_funds') key = 'btgpactual';
-        else if (change.table_name === 'xpi_funds') key = 'xpi';
-        else if (change.table_name === 'modalmais_funds') key = 'modalmais';
-
-        const relevantChanges = [];
-
-        if (change.action === 'I') {
-            relevantChanges.push('Adicionado a lista de fundos');
-        } else if (change.action === 'D') {
-            relevantChanges.push('Removido da lista de fundos');
-        } else {
-            Object.keys(change.changed_fields).forEach(changedField => {
-                const relevantFields = {
-                    xf_state: {
-                        title: 'Captação',
-                        text: formatters.field['xf_state']
-                    },
-                    xf_formal_risk: {
-                        title: 'Risco formal',
-                        text: formatters.field['xf_formal_risk']
-                    },
-                    xf_initial_investment: {
-                        title: 'Investimento inicial',
-                        text: formatters.field['xf_initial_investment']
-                    },
-                    xf_rescue_financial_settlement: {
-                        title: 'Dias para resgate',
-                        text: formatters.field['xf_rescue_financial_settlement']
-                    },
-                    bf_is_blacklist: {
-                        title: 'Captação',
-                        text: formatters.field['bf_is_blacklist']
-                    },
-                    bf_inactive: {
-                        title: 'Atividade',
-                        text: formatters.field['bf_inactive']
-                    },
-                    bf_risk_name: {
-                        title: 'Risco formal',
-                        text: formatters.field['bf_risk_name']
-                    },
-                    bf_minimum_initial_investment: {
-                        title: 'Investimento inicial',
-                        text: formatters.field['bf_minimum_initial_investment']
-                    },
-                    bf_rescue_financial_settlement: {
-                        title: 'Dias para resgate',
-                        text: formatters.field['bf_rescue_financial_settlement']
-                    },
-                    bf_investor_type: {
-                        title: 'Tipo de investidor',
-                        text: formatters.field['bf_investor_type']
-                    },
-                    mf_risk_level: {
-                        title: 'Risco formal',
-                        text: formatters.field['mf_risk_level']
-                    },
-                    mf_minimum_initial_investment: {
-                        title: 'Investimento inicial',
-                        text: formatters.field['mf_minimum_initial_investment']
-                    },
-                    mf_rescue_quota: {
-                        title: 'Dias para resgate',
-                        text: formatters.field['mf_rescue_quota']
-                    },
-                    mf_active: {
-                        title: 'Ativo',
-                        text: formatters.field['mf_active']
-                    }
-                };
-                if (relevantFields[changedField]) {
-                    relevantChanges.push(`${relevantFields[changedField].title} mudou de ${relevantFields[changedField].text(change.row_data[changedField])} para ${relevantFields[changedField].text(change.changed_fields[changedField])}`);
-                }
-            });
-        }
-
-        if (relevantChanges.length > 0)
-            fundsChanges[key].push({
-                date: change.action_tstamp_stm,
-                name: change.f_short_name,
-                cnpj: change.f_cnpj,
-                changes: relevantChanges
-            });
-    });
-
-    return fundsChanges;
-}
-
 function IndicatorsView(props) {
     // Data
     const [economyIndicators, setEconomyIndicators] = useState(emptyState.data.economyIndicators);
@@ -341,37 +196,187 @@ function IndicatorsView(props) {
     // Config    
     const [fundsFilter, setFundsFilter] = useState(FundFilterComponentEmptyState.config.filter);
 
+    // Config from URL
+    const [economyIndicatorAndFundsRange, setEconomyIndicatorAndFundsRange] = useQueryParam('eir', withDefault(StringParam, emptyState.config.economyIndicatorAndFundsRange));
+    const [fundsChangeRange, setFundsChangeRange] = useQueryParam('fr', withDefault(StringParam, emptyState.config.fundsChangeRange));
+
     // Layout
     const [showingFilter, setShowingFilter] = useState(emptyState.layout.showingFilter);
 
-    let { economyIndicatorAndFundsRange, fundsChangeRange } = useParams();
-    const history = useHistory();
-    const classes = useStyles();
+    const styles = useStyles();
+    useRendering();
 
-    if (typeof (economyIndicatorAndFundsRange) == 'undefined') economyIndicatorAndFundsRange = emptyState.config.economyIndicatorAndFundsRange;
-    if (typeof (fundsChangeRange) == 'undefined') fundsChangeRange = emptyState.config.fundsChangeRange;
+    // Updaters
+    const updateEconomyIndicators = useCallback(async function updateEconomyIndicators(setEconomyIndicators, range) {
+        const economyIndicators = await settle(fetchEconomyIndicators(range));
 
+        if (economyIndicators instanceof Error) {
+            setEconomyIndicators({
+                small: economyIndicators,
+                large: economyIndicators
+            });
+        } else {
+            setEconomyIndicators({
+                small: buildChart(economyIndicators, 'small'),
+                large: buildChart(economyIndicators, 'large')
+            });
+        }
+
+        reportErrorIfNecessary(economyIndicators);
+    }, []);
+
+    const updateFundIndicators = useCallback(async function updateFundIndicators(setFundIndicators, range, filter) {
+        const fundIndicators = await settle(fetchFundIndicators(range, filter));
+
+        setFundIndicators(fundIndicators);
+
+        reportErrorIfNecessary(fundIndicators);
+    }, []);
+
+    const updateFundsChanged = useCallback(async function updateFundsChanged(setFundsChanged, range) {
+        const fundsChanged = await settle(fetchFundsChanged(range));
+
+        setFundsChanged(fundsChanged);
+
+        reportErrorIfNecessary(fundsChanged);
+    }, []);
+
+    // Effects
     useEffect(() => {
         setFundIndicators(emptyState.data.fundIndicators);
         updateFundIndicators(setFundIndicators, economyIndicatorAndFundsRange, fundsFilter);
-    }, [economyIndicatorAndFundsRange, fundsFilter]);
+    }, [updateFundIndicators, economyIndicatorAndFundsRange, fundsFilter]);
 
     useEffect(() => {
         setEconomyIndicators(emptyState.data.economyIndicators);
         updateEconomyIndicators(setEconomyIndicators, economyIndicatorAndFundsRange);
-    }, [economyIndicatorAndFundsRange]);
+    }, [updateEconomyIndicators, economyIndicatorAndFundsRange]);
 
     useEffect(() => {
         setFundsChanged(emptyState.data.fundsChanged);
         updateFundsChanged(setFundsChanged, fundsChangeRange);
-    }, [fundsChangeRange]);
+    }, [updateFundsChanged, fundsChangeRange]);
 
+    // Fetchers
+    function fetchEconomyIndicators(range) {
+        const from = rangeOptions.find(rangeOption => rangeOption.name === range).toDate();
+
+        return API.getEconomyIndicators(from);
+    }
+
+    function fetchFundIndicators(range, filter) {
+        return API.getFundIndicators({ range, filter });
+    }
+
+    async function fetchFundsChanged(range) {
+        const from = rangeOptions.find(rangeOption => rangeOption.name === range).toDate();
+
+        const fundsChanged = await API.getFundsChanged(from);
+
+        const fundsChanges = {
+            btgpactual: [],
+            xpi: [],
+            modalmais: []
+        };
+
+        fundsChanged.forEach(change => {
+            let key = null;
+
+            if (change.table_name === 'btgpactual_funds') key = 'btgpactual';
+            else if (change.table_name === 'xpi_funds') key = 'xpi';
+            else if (change.table_name === 'modalmais_funds') key = 'modalmais';
+
+            const relevantChanges = [];
+
+            if (change.action === 'I') {
+                relevantChanges.push('Adicionado a lista de fundos');
+            } else if (change.action === 'D') {
+                relevantChanges.push('Removido da lista de fundos');
+            } else {
+                Object.keys(change.changed_fields).forEach(changedField => {
+                    const relevantFields = {
+                        xf_state: {
+                            title: 'Captação',
+                            text: formatters.field['xf_state']
+                        },
+                        xf_formal_risk: {
+                            title: 'Risco formal',
+                            text: formatters.field['xf_formal_risk']
+                        },
+                        xf_initial_investment: {
+                            title: 'Investimento inicial',
+                            text: formatters.field['xf_initial_investment']
+                        },
+                        xf_rescue_financial_settlement: {
+                            title: 'Dias para resgate',
+                            text: formatters.field['xf_rescue_financial_settlement']
+                        },
+                        bf_is_blacklist: {
+                            title: 'Captação',
+                            text: formatters.field['bf_is_blacklist']
+                        },
+                        bf_inactive: {
+                            title: 'Atividade',
+                            text: formatters.field['bf_inactive']
+                        },
+                        bf_risk_name: {
+                            title: 'Risco formal',
+                            text: formatters.field['bf_risk_name']
+                        },
+                        bf_minimum_initial_investment: {
+                            title: 'Investimento inicial',
+                            text: formatters.field['bf_minimum_initial_investment']
+                        },
+                        bf_rescue_financial_settlement: {
+                            title: 'Dias para resgate',
+                            text: formatters.field['bf_rescue_financial_settlement']
+                        },
+                        bf_investor_type: {
+                            title: 'Tipo de investidor',
+                            text: formatters.field['bf_investor_type']
+                        },
+                        mf_risk_level: {
+                            title: 'Risco formal',
+                            text: formatters.field['mf_risk_level']
+                        },
+                        mf_minimum_initial_investment: {
+                            title: 'Investimento inicial',
+                            text: formatters.field['mf_minimum_initial_investment']
+                        },
+                        mf_rescue_quota: {
+                            title: 'Dias para resgate',
+                            text: formatters.field['mf_rescue_quota']
+                        },
+                        mf_active: {
+                            title: 'Ativo',
+                            text: formatters.field['mf_active']
+                        }
+                    };
+                    if (relevantFields[changedField]) {
+                        relevantChanges.push(`${relevantFields[changedField].title} mudou de ${relevantFields[changedField].text(change.row_data[changedField])} para ${relevantFields[changedField].text(change.changed_fields[changedField])}`);
+                    }
+                });
+            }
+
+            if (relevantChanges.length > 0)
+                fundsChanges[key].push({
+                    date: change.action_tstamp_stm,
+                    name: change.f_short_name,
+                    cnpj: change.f_cnpj,
+                    changes: relevantChanges
+                });
+        });
+
+        return fundsChanges;
+    }
+
+    // Handlers
     function handleConfigRangeChange(event) {
-        history.push(`/indicators/${event.target.value}/${fundsChangeRange}`);
+        setEconomyIndicatorAndFundsRange(event.target.value);
     }
 
     function handleConfigChangesRangeChange(event) {
-        history.push(`/indicators/${economyIndicatorAndFundsRange}/${event.target.value}`);
+        setFundsChangeRange(event.target.value);
     }
 
     function handleChartInitialized(figure) {
@@ -399,7 +404,7 @@ function IndicatorsView(props) {
 
     return (
         <div>
-            <div className={classes.appBarSpacer} />
+            <div className={styles.appBarSpacer} />
             <Grid container spacing={2} alignItems="center">
                 <Grid item xs>
                     <Grid container alignItems="center" spacing={1}>
@@ -410,7 +415,7 @@ function IndicatorsView(props) {
                                     <p>No lado direito é possível alterar o intervalo visualizado.</p>
                                 </React.Fragment>
                             }>
-                                <Typography variant="h5" className={classes.withTooltip}>Indicadores</Typography>
+                                <Typography variant="h5" className={styles.withTooltip}>Indicadores</Typography>
                             </Tooltip>
                         </Grid>
                     </Grid>
@@ -421,7 +426,7 @@ function IndicatorsView(props) {
                             <Select
                                 value={economyIndicatorAndFundsRange}
                                 onChange={handleConfigRangeChange}
-                                className={classes.select}
+                                className={styles.select}
                                 inputProps={{
                                     name: 'range',
                                     id: 'range',
@@ -439,7 +444,7 @@ function IndicatorsView(props) {
             </Grid>
             <Grid container spacing={2}>
                 <Grid item xs={12}>
-                    <Paper className={classes.paper} elevation={1} square={true}>
+                    <Paper className={styles.paper} elevation={1} square={true}>
                         <Hidden smDown>
                             <DataHistoryChartComponent
                                 data={economyIndicators.large}
@@ -465,7 +470,7 @@ function IndicatorsView(props) {
                                     <p>Por padrão somente fundos listados na BTG Pactual, XP Investimentos e Modal Mais são exibidos. No lado direito é possível alterar o filtro.</p>
                                 </React.Fragment>
                             }>
-                                <Typography variant="h6" className={classes.withTooltip}>Fundos de Investimento</Typography>
+                                <Typography variant="h6" className={styles.withTooltip}>Fundos de Investimento</Typography>
                             </Tooltip>
                         </Grid>
                     </Grid>
@@ -474,11 +479,13 @@ function IndicatorsView(props) {
                     <Grid item>
                         <Grid container alignItems="center" spacing={1}>
                             <Grid item>
-                                <IconButton
-                                    aria-label="Filtro"
-                                    onClick={handleFilterClick}>
-                                    <FilterListIcon />
-                                </IconButton>
+                                <Tooltip title="Filtro" aria-label="Filtro">
+                                    <IconButton
+                                        aria-label="Filtro"
+                                        onClick={handleFilterClick}>
+                                        <FilterListIcon />
+                                    </IconButton>
+                                </Tooltip>
                             </Grid>
                         </Grid>
                     </Grid>
@@ -497,16 +504,16 @@ function IndicatorsView(props) {
             </Hidden>
             <Grid container spacing={2} alignItems="center">
                 <Grid item xs={12} sm={6} md={3} xl={3}>
-                    <IndicatorPaper title="Desempenho" field="investment_return" data={fundIndicators} classes={classes} />
+                    <IndicatorPaper title="Desempenho" field="investment_return" data={fundIndicators} classes={styles} />
                 </Grid>
                 <Grid item xs={12} sm={6} md={3} xl={3}>
-                    <IndicatorPaper title="Patrimônio" field="networth" data={fundIndicators} classes={classes} />
+                    <IndicatorPaper title="Patrimônio" field="networth" data={fundIndicators} classes={styles} />
                 </Grid>
                 <Grid item xs={12} sm={6} md={3} xl={3}>
-                    <IndicatorPaper title="Cotistas" field="quotaholders" data={fundIndicators} classes={classes} />
+                    <IndicatorPaper title="Cotistas" field="quotaholders" data={fundIndicators} classes={styles} />
                 </Grid>
                 <Grid item xs={12} sm={6} md={3} xl={3}>
-                    <IndicatorPaper title="Risco" field="risk" data={fundIndicators} classes={classes} inverted />
+                    <IndicatorPaper title="Risco" field="risk" data={fundIndicators} classes={styles} inverted />
                 </Grid>
             </Grid>
             <Grid container spacing={2} alignItems="center">
@@ -520,7 +527,7 @@ function IndicatorsView(props) {
                                     <p>Início da coleta em 16/02/2019.</p>
                                 </React.Fragment>
                             }>
-                                <Typography variant="h6" className={classes.withTooltip}>Mudanças nos Fundos</Typography>
+                                <Typography variant="h6" className={styles.withTooltip}>Mudanças nos Fundos</Typography>
                             </Tooltip>
                         </Grid>
                     </Grid>
@@ -531,7 +538,7 @@ function IndicatorsView(props) {
                             <Select
                                 value={fundsChangeRange}
                                 onChange={handleConfigChangesRangeChange}
-                                className={classes.select}
+                                className={styles.select}
                                 inputProps={{
                                     name: 'changesRange',
                                     id: 'changesRange',
@@ -544,13 +551,13 @@ function IndicatorsView(props) {
             </Grid>
             <Grid container spacing={2}>
                 <Grid item xs={12} sm={12} md={6} xl={6}>
-                    <FundsChangedPaper title="XP Investimentos" data={fundsChanged} broker="xpi" classes={classes} />
+                    <FundsChangedPaper title="XP Investimentos" data={fundsChanged} broker="xpi" classes={styles} />
                 </Grid>
                 <Grid item xs={12} sm={12} md={6} xl={6}>
-                    <FundsChangedPaper title="BTG Pactual" data={fundsChanged} broker="btgpactual" classes={classes} />
+                    <FundsChangedPaper title="BTG Pactual" data={fundsChanged} broker="btgpactual" classes={styles} />
                 </Grid>
                 <Grid item xs={12} sm={12} md={6} xl={6}>
-                    <FundsChangedPaper title="Modal Mais" data={fundsChanged} broker="modalmais" classes={classes} />
+                    <FundsChangedPaper title="Modal Mais" data={fundsChanged} broker="modalmais" classes={styles} />
                 </Grid>
             </Grid>
         </div >
