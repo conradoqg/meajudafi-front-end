@@ -14,25 +14,35 @@ const useStyles = makeStyles(theme => ({
 
 const emptyState = {
     config: {
-        search: ''
+        search: {
+            term: '',
+            isTyping: false
+        }
     }
 };
 
 let timeout = null;
 
 function FundSearchComponent(props) {
-    const [search, setSearch] = useState(props.search || emptyState.config.search);
+    const [search, setSearch] = useState(emptyState.config.search);
 
     const styles = useStyles();
     useRendering();
 
     function triggerOnSearchChanged(value) {
         props.onSearchChanged(value);
+        setSearch({
+            term: value,
+            isTyping: false
+        });
     }
 
     function handleSearchChange(event) {
         const value = event.target.value;
-        setSearch(value);
+        setSearch({
+            term: value,
+            isTyping: true
+        });
 
         if (timeout) clearTimeout(timeout);
         timeout = setTimeout(() => triggerOnSearchChanged(value), 1000);
@@ -41,19 +51,26 @@ function FundSearchComponent(props) {
     function handleKeyPress(event) {
         if (event.key === 'Enter') {
             const value = event.target.value;
-            setSearch(value);
+            setSearch({
+                term: value,
+                isTyping: true
+            });
 
             if (timeout) clearTimeout(timeout);
             triggerOnSearchChanged(value);
         }
     }
 
+    console.log(search);
+
+    let validTerm = (search.isTyping ? search.term : props.term);
+
     return (
         <Grid container alignItems="center" justify="flex-start">
             <Input
                 id="input-with-icon-grid"
                 placeholder="Nome do fundo ou CNPJ"
-                value={search}
+                value={validTerm}
                 onChange={handleSearchChange}
                 onKeyPress={handleKeyPress}
                 className={styles.input}

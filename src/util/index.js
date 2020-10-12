@@ -227,7 +227,9 @@ export function useEffect(effect, deps) {
 }
 
 export function useRendering() {
-    const targetObject = {};
-    Error.captureStackTrace(targetObject);
-    console.log(`rendering ${targetObject.stack.split('\n').splice(2, 1)[0].trim()}`);
+    if (process.env.NODE_ENV !== 'production') {
+        const targetObject = {};
+        Error.captureStackTrace(targetObject);
+        console.log(`rendering ${targetObject.stack.split('\n').splice(2, 1)[0].trim()}`);
+    }
 }

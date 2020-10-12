@@ -11,7 +11,7 @@ const retryFetch = createFetch(fetch, {
     }
 });
 
-async function wrappedFecth(...args) {
+async function wrappedFecth(...args) {    
     const URL = `${PROTOCOL}//${API_URL}/${args[0]}`;
     const fetchResult = await retryFetch(URL, ...args.splice(1));
 

@@ -225,7 +225,7 @@ function FundComparisonView(props) {
     const [field, setField] = useQueryParam('f', withDefault(StringParam, emptyState.new.config.field));
     const [fundsToCompare, setFundsToCompare] = useQueryParam('fc', withDefault(ArrayParam, emptyState.new.config.fundsToCompare));
 
-    const styles = useStyles();    
+    const styles = useStyles();
     const isLGUp = useMediaQuery(theme => theme.breakpoints.up('lg'));
     const isMDUp = useMediaQuery(theme => theme.breakpoints.up('md'));
     const isSMUp = useMediaQuery(theme => theme.breakpoints.up('sm'));
@@ -234,7 +234,7 @@ function FundComparisonView(props) {
     useRendering();
 
     // Updaters
-    const updateData = useCallback(async function updateData(nextState, field, benchmark, range) {        
+    const updateData = useCallback(async function updateData(nextState, field, benchmark, range) {
         const statisticsServiceInstance = await StatisticsService.getInstance();
         const benchmarkToUpdate = nextState.data.benchmark && nextState.data.benchmark.data == null ? nextState.data.benchmark : null;
         const fundsToUpdate = nextState.data.fundListCompare.filter(fund => fund.data == null);
@@ -430,44 +430,41 @@ function FundComparisonView(props) {
     }, [field]);
 
     useEffect(() => {
-        function effect(fundsToCompare) {
-            // Find the new funds to compare
-            const newFundsToAdd = [];
-            const newFundsToRemove = [];
-            fundsToCompare.forEach(fundToCompareItem => {
-                if (!oldState.data.fundListCompare.find(fundListCompareItem => fundToCompareItem === fundListCompareItem.cnpj)) {
-                    newFundsToAdd.push(fundToCompareItem);
-                }
-            });
-            oldState.data.fundListCompare.forEach(fundListCompareItem => {
-                if (!fundsToCompare.find(fundToCompareItem => fundToCompareItem === fundListCompareItem.cnpj)) {
-                    newFundsToRemove.push(fundListCompareItem.cnpj);
-                }
-            });
 
-            if (newFundsToAdd.length > 0 || newFundsToRemove.length > 0) {
-                const nextState = produce(oldState, draft => {
-                    newFundsToAdd.forEach(newFundToAdd => {
-                        if (!draft.data.fundListCompare.find(existingFund => existingFund.cnpj === newFundToAdd)) {
-                            // TODO: It should come from a initial state variable
-                            draft.data.fundListCompare.push({
-                                cnpj: newFundToAdd,
-                                detail: null,
-                                data: null,
-                                statistics: null
-                            });
-                        }
-                    });
-
-                    newFundsToRemove.forEach(newFundToRemove => {
-                        draft.data.fundListCompare = draft.data.fundListCompare.filter(fundItem => fundItem.cnpj !== newFundToRemove);
-                    });
-                });
-                updateData(nextState, field, benchmark, range);
+        // Find the new funds to compare
+        const newFundsToAdd = [];
+        const newFundsToRemove = [];
+        fundsToCompare.forEach(fundToCompareItem => {
+            if (!oldState.data.fundListCompare.find(fundListCompareItem => fundToCompareItem === fundListCompareItem.cnpj)) {
+                newFundsToAdd.push(fundToCompareItem);
             }
-        }
+        });
+        oldState.data.fundListCompare.forEach(fundListCompareItem => {
+            if (!fundsToCompare.find(fundToCompareItem => fundToCompareItem === fundListCompareItem.cnpj)) {
+                newFundsToRemove.push(fundListCompareItem.cnpj);
+            }
+        });
 
-        effect(fundsToCompare);
+        if (newFundsToAdd.length > 0 || newFundsToRemove.length > 0) {
+            const nextState = produce(oldState, draft => {
+                newFundsToAdd.forEach(newFundToAdd => {
+                    if (!draft.data.fundListCompare.find(existingFund => existingFund.cnpj === newFundToAdd)) {
+                        // TODO: It should come from a initial state variable
+                        draft.data.fundListCompare.push({
+                            cnpj: newFundToAdd,
+                            detail: null,
+                            data: null,
+                            statistics: null
+                        });
+                    }
+                });
+
+                newFundsToRemove.forEach(newFundToRemove => {
+                    draft.data.fundListCompare = draft.data.fundListCompare.filter(fundItem => fundItem.cnpj !== newFundToRemove);
+                });
+            });
+            updateData(nextState, field, benchmark, range);
+        }
 
     }, [fundsToCompare]);
 
@@ -504,7 +501,7 @@ function FundComparisonView(props) {
         setSearchConfig(draft => {
             draft.page = page;
         });
-    }    
+    }
 
     function handleChangeRowsPerPage(event) {
         setSearchConfig(draft => {
@@ -619,7 +616,7 @@ function FundComparisonView(props) {
                 <Grid item xs>
                     <Paper elevation={1} square={true} >
                         <Grid container wrap="nowrap" className={styles.optionsBar}>
-                            <FundSearchComponent key={searchConfig.search} term={searchConfig.search} onSearchChanged={handleSearchChange} />
+                            <FundSearchComponent term={searchConfig.search} onSearchChanged={handleSearchChange} />
                         </Grid>
                     </Paper>
                     <ShowStateComponent
@@ -759,7 +756,11 @@ function FundComparisonView(props) {
                                             </Grid>
                                             <Grid item xs={1}>
                                                 <Typography variant="body2" align="center" >
-                                                    <Skeleton />
+                                                    <Tooltip title="Adicionar" aria-label="Adicionar">
+                                                        <IconButton className={styles.button}>
+                                                            <Skeleton />
+                                                        </IconButton>
+                                                    </Tooltip>
                                                 </Typography>
                                             </Grid>
                                         </Grid>

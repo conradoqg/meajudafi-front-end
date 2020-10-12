@@ -179,7 +179,7 @@ function FundListView(props) {
                 <Grid item xs>
                     <Paper elevation={1} square={true} >
                         <Grid container wrap="nowrap" className={styles.optionsBar}>
-                            <FundSearchComponent key={search} onSearchChanged={handleSearchChange} search={search} />
+                            <FundSearchComponent onSearchChanged={handleSearchChange} term={search} />
                             <Grid container justify="flex-end" spacing={1}>
                                 <Grid item>
                                     <Tooltip title="Ordem" aria-label="Ordem">

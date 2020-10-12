@@ -39,6 +39,7 @@
   "scripts": {
     "start": "cross-env REACT_APP_API_URL=api.meajudafi.com.br PORT=9966 EXTEND_ESLINT=true react-app-rewired start",
     "build": "react-app-rewired build",
+    "build-local": "cross-env REACT_APP_API_URL=api.meajudafi.com.br react-app-rewired build",
     "test": "react-app-rewired test",
     "eject": "react-app-rewired eject",
     "analyze": "source-map-explorer 'build/static/js/*.js'"
