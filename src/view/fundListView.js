@@ -87,10 +87,8 @@ function FundListView(props) {
     const [showingFilter, setShowingFilter] = useState(emptyState.layout.showingFilter);
 
     const styles = useStyles();
-    useRendering();
-
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const isWidthUpSm = useMediaQuery(theme => theme.breakpoints.up('sm'));
+    const isSMUp = useMediaQuery(theme => theme.breakpoints.up('sm'));
+    useRendering();    
 
     // Updaters
     const updateFundListAndTotalRows = useCallback(async function updateFundListAndTotalRows(config) {
@@ -343,7 +341,7 @@ function FundListView(props) {
                             onChangePage={handleChangePage}
                             onChangeRowsPerPage={handleChangeRowsPerPage}
                             labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
-                            labelRowsPerPage={isWidthUpSm ? 'Registros por página:' : ''}
+                            labelRowsPerPage={isSMUp ? 'Registros por página:' : ''}
                             rowsPerPageOptions={[5, 10, 25, 50, 100]}
                         />
                         : null}
