@@ -666,7 +666,7 @@ const FundsChangedPaper = props => {
                 <Grid container spacing={1} alignItems="center" justify="center">
                     <ShowStateComponent
                         data={data}
-                        hasData={() => data[broker].map((change, index) => (
+                        hasData={() => (data[broker].length > 0 ? data[broker].map((change, index) => (
                             <React.Fragment key={index}>
                                 <Grid item xs={12}>
                                     <Grid container spacing={1}>
@@ -679,7 +679,7 @@ const FundsChangedPaper = props => {
                                     </Grid>
                                 </Grid>
                             </React.Fragment>
-                        ))
+                        )) : (<Typography variant="subtitle1" align="center">Não foram rastreadas mudanças</Typography>))
                         }
                         isNull={() => (
                             <React.Fragment>

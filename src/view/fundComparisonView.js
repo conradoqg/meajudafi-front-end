@@ -504,9 +504,7 @@ function FundComparisonView(props) {
         setSearchConfig(draft => {
             draft.page = page;
         });
-    }
-
-    // TODO: Improve "Sem dados à exibir" message
+    }    
 
     function handleChangeRowsPerPage(event) {
         setSearchConfig(draft => {
@@ -626,7 +624,7 @@ function FundComparisonView(props) {
                     </Paper>
                     <ShowStateComponent
                         data={searchData.fundListSearch}
-                        isEmpty={() => searchConfig.search === '' ? (<React.Fragment></React.Fragment>) : (<Paper elevation={1} square={true} className={styles.optionsBar}><Typography variant="subtitle1" align="center">Sem dados à exibir</Typography></Paper>)}
+                        isEmpty={() => searchConfig.search === '' ? (<React.Fragment></React.Fragment>) : (<Paper elevation={1} square={true} className={styles.optionsBar}><Typography variant="subtitle1" align="center">Não foram encontrados fundos</Typography></Paper>)}
                         hasData={() => (
                             <Paper elevation={1} square={true} className={styles.optionsBar}>
                                 {

@@ -324,7 +324,7 @@ function FundListView(props) {
                             </Paper>
                         ))}
                         isErrored={() => (<Paper elevation={1} square={true} className={styles.filterPaperContent}><Typography variant="subtitle1" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography></Paper>)}
-                        isEmpty={() => (<Paper elevation={1} square={true} className={styles.filterPaperContent}><Typography variant="subtitle1" align="center">Sem dados à exibir</Typography></Paper>)}
+                        isEmpty={() => (<Paper elevation={1} square={true} className={styles.filterPaperContent}><Typography variant="subtitle1" align="center">Não foram encontrados fundos</Typography></Paper>)}
                     />
                     {totalRows ?
                         <TablePagination
