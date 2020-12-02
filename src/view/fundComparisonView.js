@@ -18,7 +18,6 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import TablePagination from '@material-ui/core/TablePagination';
 import Skeleton from '@material-ui/lab/Skeleton';
-import { produce } from 'immer';
 import promisesEach from 'promise-results';
 import API from '../api';
 import StatisticsService from '../service/statisticsService';
@@ -109,6 +108,19 @@ const emptyState = {
             search: {
                 fundListSearch: [],
                 totalRows: null
+            },
+            correlationMatrix: null,
+            chart: {
+                small: null,
+                large: null
+            },
+            comparationData: {
+                fundListCompare: [],
+                benchmark: {
+                    name: benchmarkOptions.find(benchmark => benchmark.name === 'cdi').displayName,
+                    data: null,
+                    statistics: null
+                }
             }
         },
         config: {
@@ -124,19 +136,6 @@ const emptyState = {
             range: '1y',
             field: 'investment_return',
             fundsToCompare: []
-        }
-    },
-    old: {
-        data: {
-            fundListCompare: [],
-            benchmark: {
-                name: benchmarkOptions.find(benchmark => benchmark.name === 'cdi').displayName,
-                data: null,
-                statistics: null
-            },
-            correlationMatrix: null,
-            chartSmall: null,
-            chartLarge: null
         }
     }
 };
@@ -213,7 +212,9 @@ function buildChart(field, benchmark, fundList, size = 'small') {
 function FundComparisonView(props) {
     // Data
     const [searchData, setSearchData] = useImmer(emptyState.new.data.search);
-    const [oldState, setOldState] = useState(emptyState.old);
+    const [correlationMatrixData, setCorrelationMatrixData] = useState(emptyState.new.data.correlationMatrix);
+    const [chartData, setChartData] = useState(emptyState.new.data.chart);
+    const [comparationData, setComparationData] = useImmer(emptyState.new.data.comparationData);
 
     // Config
     const [searchConfig, setSearchConfig] = useImmer(emptyState.new.config.search);
@@ -234,123 +235,126 @@ function FundComparisonView(props) {
     useRendering();
 
     // Updaters
-    const updateData = useCallback(async function updateData(nextState, field, benchmark, range) {
+    const updateComparisonData = useCallback(async function updateComparison(fundsToCompare, field, benchmark, range) {
         const statisticsServiceInstance = await StatisticsService.getInstance();
-        const benchmarkToUpdate = nextState.data.benchmark && nextState.data.benchmark.data == null ? nextState.data.benchmark : null;
-        const fundsToUpdate = nextState.data.fundListCompare.filter(fund => fund.data == null);
-
-        setOldState(produce(nextState, draft => {
-            draft.data.chartSmall = null;
-            draft.data.chartLarge = null;
-            draft.data.correlationMatrix = null;
-        }));
 
         // Retrieve funds and benchmark data
         let dataPromises = {};
-        fundsToUpdate.forEach(fund => {
-            dataPromises[fund.cnpj] = promisesEach({
-                detail: fetchFundData(fund.cnpj),
-                data: fetchFundHistory(fund.cnpj, benchmark, range)
+        fundsToCompare.forEach(fund => {
+            dataPromises[fund] = promisesEach({
+                detail: fetchFundData(fund),
+                data: fetchFundHistory(fund, benchmark, range)
             });
         });
-        dataPromises.benchmark = benchmarkToUpdate ? fetchBenchmarkHistory(benchmark, range) : null;
+        dataPromises.benchmark = fetchBenchmarkHistory(benchmark, range);
 
         const dataResults = await promisesEach(dataPromises);
 
         // If the selected range is "best", find the max first date available so the statistics will be calculated starting from that date
         let startingFrom = '0001-01-01';
         if (range === 'best') {
-            const minDatesDataResults = Object.values(dataResults).filter(result => result != null && !(result.data instanceof Error)).map(value => value.data ? value.data[value.data.length - 1].ird_dt_comptc : null);
-            const minDatesFundListCompare = nextState.data.fundListCompare.map(value => value.data ? value.data[value.data.length - 1].ird_dt_comptc : null);
-
-            startingFrom = minDatesDataResults.concat(minDatesFundListCompare).filter(date => date != null).reduce((acc, curr) => acc > curr ? acc : curr, '0001-01-01');
+            const minDatesDataResults = Object.values(dataResults).filter(result => result != null && !(result.data instanceof Error)).map(value => value.data ? value.data[value.data.length - 1].ird_dt_comptc : null);            
+            startingFrom = minDatesDataResults.filter(date => date != null).reduce((acc, curr) => acc > curr ? acc : curr, '0001-01-01');
         }
 
         // Calculate funds and benchmark statistics
         let statisticsPromises = {};
-        fundsToUpdate.forEach(fund => {
-            if (dataResults[fund.cnpj].data instanceof Error) {
-                Sentry.captureException(dataResults[fund.cnpj].data);
-                statisticsPromises[fund.cnpj] = dataResults[fund.cnpj].data;
-            } else statisticsPromises[fund.cnpj] = statisticsServiceInstance.calculateFundStatistics(dataResults[fund.cnpj].data, benchmark, startingFrom);
+        fundsToCompare.forEach(fund => {
+            if (dataResults[fund].data instanceof Error) {
+                Sentry.captureException(dataResults[fund].data);
+                statisticsPromises[fund] = dataResults[fund].data;
+            } else statisticsPromises[fund] = statisticsServiceInstance.calculateFundStatistics(dataResults[fund].data, benchmark, startingFrom);
         });
-        statisticsPromises.benchmark = benchmarkToUpdate ? statisticsServiceInstance.calculateBenchmarkStatistics(dataResults.benchmark, benchmark, startingFrom) : null;
+        statisticsPromises.benchmark = statisticsServiceInstance.calculateBenchmarkStatistics(dataResults.benchmark, benchmark, startingFrom);
 
         const statisticsResults = await promisesEach(statisticsPromises);
 
-        nextState = produce(nextState, draft => {
-            // If there's a dataResult for the benchmark, the benchmark's data was updated
-            if (dataResults.benchmark) {
-                draft.data.benchmark.name = benchmarkOptions.find(benchmarkItem => benchmarkItem.name === benchmark).displayName;
-                draft.data.benchmark.data = dataResults.benchmark;
-                draft.data.benchmark.statistics = statisticsResults.benchmark;
-            }
+        // If there's a dataResult for the benchmark, the benchmark's data was updated
+        const newBenchmark = {
+            name: benchmarkOptions.find(benchmarkItem => benchmarkItem.name === benchmark).displayName,
+            data: dataResults.benchmark,
+            statistics: statisticsResults.benchmark
+        };
 
-            draft.data.fundListCompare = draft.data.fundListCompare.map(fund => {
-                // If there's a dataResult for a CNPJ, the fund's data was updated
-                if (dataResults[fund.cnpj]) {
-                    if (dataResults[fund.cnpj].data instanceof Error) {
-                        Sentry.captureException(dataResults[fund.cnpj].data);
-                        fund.data = dataResults[fund.cnpj].data;
-                    } else fund.data = dataResults[fund.cnpj].data;
+        const newFundListCompare = fundsToCompare.map(fund => {
+            const newFund = {
+                cnpj: fund,
+                data: null,
+                statistics: null,
+                detail: null
+            };
+            // If there's a dataResult for a CNPJ, the fund's data was updated
+            if (dataResults[fund]) {
+                if (dataResults[fund].data instanceof Error) {
+                    Sentry.captureException(dataResults[fund].data);
+                    newFund.data = dataResults[fund].data;
+                } else newFund.data = dataResults[fund].data;
 
-                    if (statisticsResults[fund.cnpj] instanceof Error) {
-                        Sentry.captureException(statisticsResults[fund.cnpj]);
-                        fund.statistics = statisticsResults[fund.cnpj];
-                    } else fund.statistics = statisticsResults[fund.cnpj];
+                if (statisticsResults[fund] instanceof Error) {
+                    Sentry.captureException(statisticsResults[fund]);
+                    newFund.statistics = statisticsResults[fund];
+                } else newFund.statistics = statisticsResults[fund];
 
-                    if (dataResults[fund.cnpj].detail instanceof Error) {
-                        Sentry.captureException(dataResults[fund.cnpj].detail);
-                        fund.detail = dataResults[fund.cnpj].detail;
-                    } else {
-                        if (dataResults[fund.cnpj].detail.length === 0) fund.detail = 'Não encontrado';
-                        else {
-                            fund.detail = {
-                                name: dataResults[fund.cnpj].detail[0].f_short_name,
-                                benchmark: dataResults[fund.cnpj].detail[0].icf_rentab_fundo
-                            };
-                        }
+                if (dataResults[fund].detail instanceof Error) {
+                    Sentry.captureException(dataResults[fund].detail);
+                    newFund.detail = dataResults[fund].detail;
+                } else {
+                    if (dataResults[fund].detail.length === 0) fund.detail = 'Não encontrado';
+                    else {
+                        newFund.detail = {
+                            name: dataResults[fund].detail[0].f_short_name,
+                            benchmark: dataResults[fund].detail[0].icf_rentab_fundo
+                        };
                     }
                 }
-
-                return fund;
-            });
-
-            // Every state change results in the chart being updated
-            // We don't check draft.data.fundListCompare for erros, because the chart can be shown without the funds (it's only necessary the benchmark data)
-            if (dataResults.benchmark && dataResults.benchmark instanceof Error) {
-                Sentry.captureException(dataResults.benchmark);
-                draft.data.chartSmall = dataResults.benchmark;
-                draft.data.chartLarge = dataResults.benchmark;
-            } else if (dataResults.benchmark && dataResults.benchmark.statistics instanceof Error) {
-                Sentry.captureException(dataResults.benchmark.statistics);
-                draft.data.chartSmall = dataResults.benchmark.statistics;
-                draft.data.chartLarge = dataResults.benchmark.statistics;
-            } else {
-                draft.data.chartSmall = buildChart(field, draft.data.benchmark, draft.data.fundListCompare, 'small');
-                draft.data.chartLarge = buildChart(field, draft.data.benchmark, draft.data.fundListCompare, 'large');
             }
+
+            return newFund;
         });
+
+        setComparationData(draft => {
+            draft.benchmark = newBenchmark;
+            draft.fundListCompare = newFundListCompare;
+        });
+
+        // Every state change results in the chart being updated
+
+        // We don't check nextState.data.fundListCompare for erros, because the chart can be shown without the funds (it's only necessary the benchmark data)
+        if (dataResults.benchmark && dataResults.benchmark instanceof Error) {
+            Sentry.captureException(dataResults.benchmark);
+            setChartData({
+                small: dataResults.benchmark,
+                large: dataResults.benchmark,
+            });
+        } else if (dataResults.benchmark && dataResults.benchmark.statistics instanceof Error) {
+            Sentry.captureException(dataResults.benchmark.statistics);
+            setChartData({
+                small: dataResults.benchmark.statistics,
+                large: dataResults.benchmark.statistics,
+            });
+        } else {
+            setChartData({
+                small: buildChart(field, newBenchmark, newFundListCompare, 'small'),
+                large: buildChart(field, newBenchmark, newFundListCompare, 'large')
+            });
+        }
 
         // Calculate the correlation matrix of the not errored funds and benchmark
         const notErroredFunds = fundHistory => !(fundHistory.data instanceof Error);
-        const notErroredBenchmark = !(nextState.data.benchmark.data instanceof Error);
+        const notErroredBenchmark = !(newBenchmark.data instanceof Error);
 
-        const fundsHistory = nextState.data.fundListCompare.filter(notErroredFunds).map(fund => fund.data);
-        const fundsHeader = nextState.data.fundListCompare.filter(notErroredFunds).map(fund => fund.detail.name);
-        const benchmarksHistory = notErroredBenchmark ? [nextState.data.benchmark.data] : [];
-        const benchmarkHeader = notErroredBenchmark ? [nextState.data.benchmark.name.toUpperCase()] : [];
+        const fundsHistory = newFundListCompare.filter(notErroredFunds).map(fund => fund.data);
+        const fundsHeader = newFundListCompare.filter(notErroredFunds).map(fund => fund.detail.name);
+        const benchmarksHistory = notErroredBenchmark ? [newBenchmark.data] : [];
+        const benchmarkHeader = notErroredBenchmark ? [newBenchmark.name.toUpperCase()] : [];
 
         const data = await statisticsServiceInstance.calculateCorrelationMatrix(fundsHistory, benchmarksHistory, benchmark);
-        nextState = produce(nextState, draft => {
-            draft.data.correlationMatrix = {
-                headers: benchmarkHeader.concat(fundsHeader),
-                data
-            };
-        });
 
-        setOldState(nextState);
-    }, []);
+        setCorrelationMatrixData({
+            headers: benchmarkHeader.concat(fundsHeader),
+            data
+        });
+    }, [setComparationData]);
 
     const updateSearchData = useCallback(async function updateSearchData(searchConfig) {
         if (searchConfig.search !== '') {
@@ -372,7 +376,7 @@ function FundComparisonView(props) {
         } else {
             setSearchData(() => emptyState.new.data.search);
         }
-    }, []);
+    }, [setSearchData]);
 
     // Effects
     useEffect(() => {
@@ -381,92 +385,22 @@ function FundComparisonView(props) {
             draft.totalRows = emptyState.new.data.search.totalRows;
         });
         updateSearchData(searchConfig);
-    }, [updateSearchData, searchConfig]);
+    }, [setSearchData, searchConfig, updateSearchData]);
 
     useEffect(() => {
-        updateData(oldState, field, benchmark, range);
-    }, []);
-
-    useEffect(() => {
-        const nextState = produce(oldState, draft => {
-            draft.data.fundListCompare = draft.data.fundListCompare.map(fund => {
+        setComparationData(draft => {
+            draft.fundListCompare = draft.fundListCompare.map(fund => {
                 fund.data = null;
                 fund.statistics = null;
                 return fund;
             });
-            draft.data.benchmark.data = null;
-            draft.data.benchmark.statistics = null;
-            draft.data.chartSmall = null;
-            draft.data.chartLarge = null;
-            draft.data.correlationMatrix = null;
+            draft.benchmark.data = null;
+            draft.benchmark.statistics = null;
         });
-        updateData(nextState, field, benchmark, range);
-    }, [range]);
-
-    useEffect(() => {
-        const nextState = produce(oldState, draft => {
-            draft.data.fundListCompare = draft.data.fundListCompare.map(fund => {
-                fund.data = null;
-                fund.statistics = null;
-                return fund;
-            });
-            draft.data.benchmark = {
-                name: benchmarkOptions.find(benchmarkItem => benchmarkItem.name === benchmark).displayName,
-                data: null
-            };
-            draft.data.chartSmall = null;
-            draft.data.chartLarge = null;
-            draft.data.correlationMatrix = null;
-        });
-        updateData(nextState, field, benchmark, range);
-    }, [benchmark]);
-
-    useEffect(() => {
-        const nextState = produce(oldState, draft => {
-            draft.data.chartSmall = null;
-            draft.data.chartLarge = null;
-        });
-        updateData(nextState, field, benchmark, range);
-    }, [field]);
-
-    useEffect(() => {
-
-        // Find the new funds to compare
-        const newFundsToAdd = [];
-        const newFundsToRemove = [];
-        fundsToCompare.forEach(fundToCompareItem => {
-            if (!oldState.data.fundListCompare.find(fundListCompareItem => fundToCompareItem === fundListCompareItem.cnpj)) {
-                newFundsToAdd.push(fundToCompareItem);
-            }
-        });
-        oldState.data.fundListCompare.forEach(fundListCompareItem => {
-            if (!fundsToCompare.find(fundToCompareItem => fundToCompareItem === fundListCompareItem.cnpj)) {
-                newFundsToRemove.push(fundListCompareItem.cnpj);
-            }
-        });
-
-        if (newFundsToAdd.length > 0 || newFundsToRemove.length > 0) {
-            const nextState = produce(oldState, draft => {
-                newFundsToAdd.forEach(newFundToAdd => {
-                    if (!draft.data.fundListCompare.find(existingFund => existingFund.cnpj === newFundToAdd)) {
-                        // TODO: It should come from a initial state variable
-                        draft.data.fundListCompare.push({
-                            cnpj: newFundToAdd,
-                            detail: null,
-                            data: null,
-                            statistics: null
-                        });
-                    }
-                });
-
-                newFundsToRemove.forEach(newFundToRemove => {
-                    draft.data.fundListCompare = draft.data.fundListCompare.filter(fundItem => fundItem.cnpj !== newFundToRemove);
-                });
-            });
-            updateData(nextState, field, benchmark, range);
-        }
-
-    }, [fundsToCompare]);
+        setChartData(emptyState.new.data.chart);
+        setCorrelationMatrixData(emptyState.new.data.correlationMatrix);
+        updateComparisonData(fundsToCompare, field, benchmark, range);
+    }, [benchmark, field, fundsToCompare, range, setComparationData, updateComparisonData]);
 
     // Fetchers
     function fetchBenchmarkHistory(benchmark, range) {
@@ -541,17 +475,17 @@ function FundComparisonView(props) {
     }
 
     function handleChartInitialized(figure) {
-        setOldState(produce(draft => {
-            if (figure.layout.size === 'small') draft.data.chartSmall = figure;
-            else if (figure.layout.size === 'large') draft.data.chartLarge = figure;
-        }));
+        setChartData({
+            small: (figure.layout.size === 'small') ? figure : null,
+            large: (figure.layout.size === 'large') ? figure : null
+        });
     }
 
     function handleChartUpdate(figure) {
-        setOldState(produce(draft => {
-            if (figure.layout.size === 'small') draft.data.chartSmall = figure;
-            else if (figure.layout.size === 'large') draft.data.chartLarge = figure;
-        }));
+        setChartData({
+            small: (figure.layout.size === 'small') ? figure : null,
+            large: (figure.layout.size === 'large') ? figure : null
+        });
     }
 
     return (
@@ -787,26 +721,26 @@ function FundComparisonView(props) {
                         {(selectedTab === 0 || isSMDown) && <React.Fragment>
                             <Hidden smDown>
                                 <DataHistoryChartComponent
-                                    data={oldState.data.chartLarge}
+                                    data={chartData.large}
                                     onInitialized={figure => handleChartInitialized(figure)}
                                     onUpdate={figure => handleChartUpdate(figure)} />
                             </Hidden>
                             <Hidden mdUp>
                                 <DataHistoryChartComponent
-                                    data={oldState.data.chartSmall}
+                                    data={chartData.large}
                                     onInitialized={figure => handleChartInitialized(figure)}
                                     onUpdate={figure => handleChartUpdate(figure)} />
                             </Hidden>
                         </React.Fragment>}
                         {(selectedTab === 1 && !isSMDown) && <React.Fragment>
                             <ShowStateComponent
-                                data={oldState.data.correlationMatrix}
+                                data={correlationMatrixData}
                                 hasData={() => (
                                     <table className={styles.historyTable}>
                                         <thead>
                                             <tr className={styles.historyCell}>
                                                 <th className={styles.historyCell}>&nbsp;</th>
-                                                {oldState.data.correlationMatrix.headers.map((correlationItem, index) => (
+                                                {correlationMatrixData.headers.map((correlationItem, index) => (
                                                     <th key={`head${correlationItem}`} className={styles.historyCell} style={{ borderWidth: '0px 0px 5px 0px', borderColor: nextColorIndex(index), borderStyle: 'solid' }}>
                                                         <Typography variant="body2" className={styles.textOverflowDynamicContainer}>
                                                             <span className={styles.textOverflowDynamicEllipsis}>
@@ -819,21 +753,21 @@ function FundComparisonView(props) {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {oldState.data.correlationMatrix.headers.map((name, index) => {
-                                                const restOfCorrelations = oldState.data.correlationMatrix.headers.slice(index + 1);
+                                            {correlationMatrixData.headers.map((name, index) => {
+                                                const restOfCorrelations = correlationMatrixData.headers.slice(index + 1);
                                                 const correlationMirror = restOfCorrelations.map((name, indexCol) => {
-                                                    const correlation = oldState.data.correlationMatrix.data[index + indexCol + 1][index];
+                                                    const correlation = correlationMatrixData.data[index + indexCol + 1][index];
                                                     return (
                                                         <td key={`bodyreverse${name}${index}`} className={styles.historyCell} style={{ backgroundColor: getGradientColor('#FFFFFF', '#E6194B', Math.abs(correlation)) }}>
                                                             <Typography variant="body2" style={{ color: Math.abs(correlation) > 0.3 ? '#FFFFFF' : '#000000' }}>
-                                                                {formatters.percentage(oldState.data.correlationMatrix.data[index + indexCol + 1][index])}
+                                                                {formatters.percentage(correlationMatrixData.data[index + indexCol + 1][index])}
                                                             </Typography>
                                                         </td>
                                                     );
                                                 });
                                                 return (<tr key={`row${name}`}>
                                                     <th style={{ minWidth: '100px', borderWidth: '0px 5px 0px 0px', borderColor: nextColorIndex(index), borderStyle: 'solid' }}><Typography className={styles.textOverflowDynamicContainer}><span className={styles.textOverflowDynamicEllipsis} title={name}><b>{name}</b></span></Typography></th>
-                                                    {oldState.data.correlationMatrix.data[index].map(correlation => (
+                                                    {correlationMatrixData.data[index].map(correlation => (
                                                         <td key={`body${name}${index}${correlation}`} className={styles.historyCell} style={{ backgroundColor: getGradientColor('#FFFFFF', '#E6194B', Math.abs(correlation)) }}>
                                                             <Typography variant="body2" style={{ color: Math.abs(correlation) > 0.3 ? '#FFFFFF' : '#000000' }}>
                                                                 {formatters.percentage(correlation)}
@@ -871,7 +805,7 @@ function FundComparisonView(props) {
                                 </Grid>
                             </Grid>
                             <ShowStateComponent
-                                data={oldState.data.benchmark.statistics}
+                                data={comparationData.benchmark.statistics}
                                 hasData={() => {
                                     let availableSlots = 0;
 
@@ -931,7 +865,7 @@ function FundComparisonView(props) {
                             </Grid>
                         </Grid>
                         <ShowStateComponent
-                            data={oldState.data.benchmark}
+                            data={comparationData.benchmark}
                             hasData={() => (
                                 <Grid container spacing={2} key={benchmark} alignItems="center">
                                     <Grid item xs>
@@ -940,12 +874,12 @@ function FundComparisonView(props) {
                                                 <span style={{ backgroundColor: nextColorIndex(0), minWidth: '10px', height: '100%', display: 'block' }}></span>
                                             </Grid>
                                             <Grid item xs>
-                                                <Typography variant="body2" className={styles.benchmarkCell}><b>{oldState.data.benchmark.name.toUpperCase()}</b></Typography>
+                                                <Typography variant="body2" className={styles.benchmarkCell}><b>{comparationData.benchmark.name.toUpperCase()}</b></Typography>
                                             </Grid>
                                         </Grid>
                                     </Grid>
                                     <ShowStateComponent
-                                        data={oldState.data.benchmark.statistics}
+                                        data={comparationData.benchmark.statistics}
                                         hasData={() => {
                                             let availableSlots = 0;
 
@@ -970,7 +904,7 @@ function FundComparisonView(props) {
                                                         {
                                                             selectedFields.map(field => (
                                                                 <Grid item key={field} xs={12} sm={6} md={3} lg={2}>
-                                                                    {oldState.data.benchmark.statistics.accumulated[field] ? (<Typography variant="body2" align="center">{formatters.field[field](oldState.data.benchmark.statistics.accumulated[field])}</Typography>) : (<Typography variant="body2" align="center">-</Typography>)}
+                                                                    {comparationData.benchmark.statistics.accumulated[field] ? (<Typography variant="body2" align="center">{formatters.field[field](comparationData.benchmark.statistics.accumulated[field])}</Typography>) : (<Typography variant="body2" align="center">-</Typography>)}
                                                                 </Grid>))
                                                         }
                                                     </Grid>
@@ -1010,11 +944,11 @@ function FundComparisonView(props) {
                             isErrored={() => (<Typography variant="subtitle1" align="center">Não foi possível carregar o dado, tente novamente mais tarde.</Typography>)}
                         />
                         <ShowStateComponent
-                            data={oldState.data.fundListCompare}
+                            data={comparationData.fundListCompare}
                             hasData={() => (
                                 <React.Fragment>
                                     {
-                                        oldState.data.fundListCompare.map((fundObject, index) => (
+                                        comparationData.fundListCompare.map((fundObject, index) => (
                                             <Grid container spacing={1} key={index} alignItems="center" justify="center">
                                                 <ShowStateComponent
                                                     data={fundObject.detail}
