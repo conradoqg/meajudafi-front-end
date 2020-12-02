@@ -48,23 +48,23 @@ GoogleAnalytics.propTypes = {
 const RouteTracker = () => <Route component={GoogleAnalytics} />;
 
 const init = (options = {}) => {
-    //const isGAEnabled = process.env.NODE_ENV === 'production';
+    const isGAEnabled = process.env.NODE_ENV === 'production';
 
-    // if (isGAEnabled) {
-    //     ReactGA.initialize("UA-173524018-1", {            
-    //         gaOptions: {
-    //             cookieFlags: 'SameSite=None, Secure',                
-    //         }    
-    //     });
-    // } else {
-    //     ReactGA.initialize("UA-173524018-1", {            
-    //         debug: true,            
-    //         gaOptions: {
-    //             cookieFlags: 'SameSite=None, Secure'                
-    //         }    
-    //     });
-    //     ReactGA.set({sendHitTask: model => console.log(model.get('hitPayload'))});
-    // }
+    if (isGAEnabled) {
+        ReactGA.initialize("UA-173524018-1", {
+            gaOptions: {
+                cookieFlags: 'SameSite=None, Secure',
+            }
+        });
+    } else {
+        ReactGA.initialize("UA-173524018-1", {
+            debug: true,
+            gaOptions: {
+                cookieFlags: 'SameSite=None, Secure'
+            }
+        });
+        ReactGA.set({ sendHitTask: model => console.log(model.get('hitPayload')) });
+    }
 
     return false;
 };
