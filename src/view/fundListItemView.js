@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { StringParam, useQueryParam, withDefault } from 'use-query-params';
-import createPersistedState from 'use-persisted-state';
+// import createPersistedState from 'use-persisted-state';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
@@ -22,7 +22,7 @@ import DataHistoryChartComponent from './component/dataHistoryChartComponent';
 import { fieldOptions, benchmarkOptions, rangeOptions } from './option';
 import { nextColorIndex, formatters, chartFormatters, settle, reportErrorIfNecessary, useState, useEffect, useRendering } from '../util';
 
-const usePersistedConfigState = createPersistedState('fundListItemView.config');
+//const usePersistedConfigState = createPersistedState('fundListItemView.config');
 
 const useStyles = makeStyles(theme => ({
     select: {
