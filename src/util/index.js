@@ -187,8 +187,8 @@ export function useState(...args) {
     const newSetState = (...setStateArgs) => {
         if (process.env.NODE_ENV !== 'production') {
             const targetObject = {};
-            //Error.captureStackTrace(targetObject);
-            //console.log(`setState ${targetObject.stack.split('\n').splice(2, 1)[0].trim()}`);
+            Error.captureStackTrace(targetObject);
+            console.log(`setState ${targetObject.stack.split('\n').splice(2, 1)[0].trim()}`);
         }
         return setState(...setStateArgs);
     };
@@ -202,8 +202,8 @@ export function useImmer(...args) {
     const newSetState = (...setStateArgs) => {
         if (process.env.NODE_ENV !== 'production') {
             const targetObject = {};
-            //Error.captureStackTrace(targetObject);
-            //console.log(`setImmer ${targetObject.stack.split('\n').splice(2, 1)[0].trim()}`);
+            Error.captureStackTrace(targetObject);
+            console.log(`setImmer ${targetObject.stack.split('\n').splice(2, 1)[0].trim()}`);
         }
         return setState(...setStateArgs);
     };
@@ -214,11 +214,11 @@ export function useImmer(...args) {
 export function useEffect(effect, deps) {
     const targetObject = {};
     if (process.env.NODE_ENV !== 'production') {
-        //Error.captureStackTrace(targetObject);
+        Error.captureStackTrace(targetObject);
     }
     const newEffect = () => {
         if (process.env.NODE_ENV !== 'production') {
-            //console.log(`useEffect ${targetObject.stack.split('\n').splice(2, 1)[0].trim()}`);
+            console.log(`useEffect ${targetObject.stack.split('\n').splice(2, 1)[0].trim()}`);
         }
         return effect();
     };
@@ -228,7 +228,7 @@ export function useEffect(effect, deps) {
 export function useRendering() {
     if (process.env.NODE_ENV !== 'production') {
         const targetObject = {};
-        //Error.captureStackTrace(targetObject);
-        //console.log(`rendering ${targetObject.stack.split('\n').splice(2, 1)[0].trim()}`);
+        Error.captureStackTrace(targetObject);
+        console.log(`rendering ${targetObject.stack.split('\n').splice(2, 1)[0].trim()}`);
     }
 }
