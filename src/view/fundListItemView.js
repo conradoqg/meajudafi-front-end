@@ -338,12 +338,12 @@ function FundListItemView(props) {
             'icf_vl_patrim_liq',
             'xf_name',
             'xf_id',
-            'xf_formal_risk',
-            'xf_initial_investment',
-            'xf_rescue_quota',
+            'xf_risk',
+            'xf_minimal_initial_investment',
+            'xf_redemption_quotation_days',
             'xf_benchmark',
-            'xf_type',
-            'xf_state',
+            'xf_classification_xp',
+            'xf_funding_blocked',
             'bf_id',
             'bf_product',
             'bf_risk_level',
@@ -485,12 +485,12 @@ function FundListItemView(props) {
                                                 </Grid>
                                                 <Grid container spacing={2}>
                                                     <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography variant="body2"><b>Nome:</b> {formatters.field['xf_name'](fund.xf_name)}</Typography></Grid>
-                                                    <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography variant="body2"><b>Risco Formal:</b> {formatters.field['xf_formal_risk'](fund.xf_formal_risk)}</Typography></Grid>
-                                                    <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography variant="body2"><b>Investimento Inicial:</b> {formatters.field['xf_initial_investment'](fund.xf_initial_investment)}</Typography></Grid>
-                                                    <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography variant="body2"><b>Dias para Resgate:</b> {formatters.field['xf_rescue_quota'](fund.xf_rescue_quota)}</Typography></Grid>
+                                                    <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography variant="body2"><b>Risco Formal:</b> {formatters.field['xf_risk'](fund.xf_risk)}</Typography></Grid>
+                                                    <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography variant="body2"><b>Investimento Inicial:</b> {formatters.field['xf_minimal_initial_investment'](fund.xf_minimal_initial_investment)}</Typography></Grid>
+                                                    <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography variant="body2"><b>Dias para Resgate:</b> {formatters.field['xf_redemption_quotation_days'](fund.xf_redemption_quotation_days)}</Typography></Grid>
                                                     <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography variant="body2"><b>Benchmark:</b> {formatters.field['xf_benchmark'](fund.xf_benchmark)}</Typography></Grid>
-                                                    <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography variant="body2"><b>Categoria:</b> {formatters.field['xf_type'](fund.xf_type)}</Typography></Grid>
-                                                    <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography variant="body2"><b>Capitação:</b> {formatters.field['xf_state'](fund.xf_state)}</Typography></Grid>
+                                                    <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography variant="body2"><b>Categoria:</b> {formatters.field['xf_classification_xp'](fund.xf_classification_xp)}</Typography></Grid>
+                                                    <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography variant="body2"><b>Capitação:</b> {formatters.field['xf_funding_blocked'](fund.xf_funding_blocked)}</Typography></Grid>
                                                 </Grid>
                                             </React.Fragment>
                                         )

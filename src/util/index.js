@@ -77,17 +77,16 @@ Object.keys(filterOptions).map(key => fieldFormatters[key] = value => {
     if (foundItem) return foundItem.displayName;
     else return value;
 });
-
 fieldFormatters['icf_vl_patrim_liq'] = formatters.money;
 fieldFormatters['f_short_name'] = value => value;
 fieldFormatters['f_name'] = value => value;
 fieldFormatters['f_cnpj'] = value => value.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
 fieldFormatters['xf_name'] = value => value;
-fieldFormatters['xf_formal_risk'] = value => value == null ? 'Não Identificado' : ['Desconhecido', 'Risco baixo', 'Risco médio baixo', 'Risco médio', 'Risco médio alto', 'Risco alto'][value];
-fieldFormatters['xf_initial_investment'] = formatters.money;
-fieldFormatters['xf_rescue_quota'] = value => 'D+' + value;
+fieldFormatters['xf_risk'] = value => value == null ? 'Não Identificado' : ['Desconhecido', 'Risco baixo', 'Risco médio baixo', 'Risco médio', 'Risco médio alto', 'Risco alto'][value];
+fieldFormatters['xf_minimal_initial_investment'] = formatters.money;
+fieldFormatters['xf_redemption_quotation_days'] = value => 'D+' + value;
 fieldFormatters['xf_benchmark'] = value => value;
-fieldFormatters['xf_type'] = value => value;
+fieldFormatters['xf_classification_xp'] = value => value;
 fieldFormatters['bf_product'] = value => value;
 fieldFormatters['bf_risk_level'] = value => value == null ? 'Não Identificado' : ['Desconhecido', 'Risco baixo', 'Risco médio baixo', 'Risco médio', 'Risco médio alto', 'Risco alto'][value];
 fieldFormatters['bf_minimum_initial_investment'] = formatters.money;
@@ -107,7 +106,7 @@ fieldFormatters['iry_investment_return_3y'] = formatters.percentage;
 fieldFormatters['iry_risk_1y'] = formatters.percentage;
 fieldFormatters['iry_risk_2y'] = formatters.percentage;
 fieldFormatters['iry_risk_3y'] = formatters.percentage;
-fieldFormatters['xf_state'] = value => value === '0' ? 'Fechada' : 'Aberta';
+fieldFormatters['xf_funding_blocked'] = value => value ? 'Fechada' : 'Aberta';
 fieldFormatters['xf_rescue_financial_settlement'] = value => 'D+' + value;
 fieldFormatters['bf_is_blacklist'] = value => (value === true || value === 't') ? 'Fechada' : 'Aberta';
 fieldFormatters['bf_inactive'] = value => (value === true || value === 't') ? 'Inativo' : 'Ativo';
@@ -188,8 +187,8 @@ export function useState(...args) {
     const newSetState = (...setStateArgs) => {
         if (process.env.NODE_ENV !== 'production') {
             const targetObject = {};
-            Error.captureStackTrace(targetObject);
-            console.log(`setState ${targetObject.stack.split('\n').splice(2, 1)[0].trim()}`);
+            //Error.captureStackTrace(targetObject);
+            //console.log(`setState ${targetObject.stack.split('\n').splice(2, 1)[0].trim()}`);
         }
         return setState(...setStateArgs);
     };
@@ -203,8 +202,8 @@ export function useImmer(...args) {
     const newSetState = (...setStateArgs) => {
         if (process.env.NODE_ENV !== 'production') {
             const targetObject = {};
-            Error.captureStackTrace(targetObject);
-            console.log(`setImmer ${targetObject.stack.split('\n').splice(2, 1)[0].trim()}`);
+            //Error.captureStackTrace(targetObject);
+            //console.log(`setImmer ${targetObject.stack.split('\n').splice(2, 1)[0].trim()}`);
         }
         return setState(...setStateArgs);
     };
@@ -215,11 +214,11 @@ export function useImmer(...args) {
 export function useEffect(effect, deps) {
     const targetObject = {};
     if (process.env.NODE_ENV !== 'production') {
-        Error.captureStackTrace(targetObject);
+        //Error.captureStackTrace(targetObject);
     }
     const newEffect = () => {
         if (process.env.NODE_ENV !== 'production') {
-            console.log(`useEffect ${targetObject.stack.split('\n').splice(2, 1)[0].trim()}`);
+            //console.log(`useEffect ${targetObject.stack.split('\n').splice(2, 1)[0].trim()}`);
         }
         return effect();
     };
@@ -229,7 +228,7 @@ export function useEffect(effect, deps) {
 export function useRendering() {
     if (process.env.NODE_ENV !== 'production') {
         const targetObject = {};
-        Error.captureStackTrace(targetObject);
-        console.log(`rendering ${targetObject.stack.split('\n').splice(2, 1)[0].trim()}`);
+        //Error.captureStackTrace(targetObject);
+        //console.log(`rendering ${targetObject.stack.split('\n').splice(2, 1)[0].trim()}`);
     }
 }

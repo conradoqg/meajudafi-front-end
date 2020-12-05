@@ -295,17 +295,17 @@ function IndicatorsView(props) {
             } else {
                 Object.keys(change.changed_fields).forEach(changedField => {
                     const relevantFields = {
-                        xf_state: {
+                        xf_funding_blocked: {
                             title: 'Captação',
-                            text: formatters.field['xf_state']
+                            text: formatters.field['xf_funding_blocked']
                         },
-                        xf_formal_risk: {
+                        xf_risk: {
                             title: 'Risco formal',
-                            text: formatters.field['xf_formal_risk']
+                            text: formatters.field['xf_risk']
                         },
-                        xf_initial_investment: {
+                        xf_minimal_initial_investment: {
                             title: 'Investimento inicial',
-                            text: formatters.field['xf_initial_investment']
+                            text: formatters.field['xf_minimal_initial_investment']
                         },
                         xf_rescue_financial_settlement: {
                             title: 'Dias para resgate',
