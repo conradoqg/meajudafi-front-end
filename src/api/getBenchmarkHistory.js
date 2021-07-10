@@ -10,8 +10,8 @@ async function getBenchmarkHistory(benchmark, lastDaysOrFromDate) {
         dateField = 'data';
     }
     else if (benchmark === 'bovespa') {
-        tablePart = 'eod_historial_data';
-        selectPart = 'data:date,valor:adjusted_close';
+        tablePart = 'yahoo_data';
+        selectPart = 'data:date,valor:close';
         dateField = 'date';
     }
     else if (benchmark === 'dolar') {

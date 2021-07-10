@@ -3,7 +3,7 @@ import fetchBE from '../util/fetchBE';
 async function getEconomyIndicators(lastDaysOrFromDate) {
     let limit = '';
     if (lastDaysOrFromDate instanceof Date)
-        limit = `&dt_comptc=gte.${lastDaysOrFromDate.toJSON().slice(0, 10)}`;
+        limit = `&dt_comptc=gte.${lastDaysOrFromDate.toJSON().slice(0, 10)}`;        
     else if (typeof (lastDaysOrFromDate) == 'number')
         limit = `&limit=${lastDaysOrFromDate - 1}`;
 
@@ -20,7 +20,7 @@ async function getEconomyIndicators(lastDaysOrFromDate) {
     const economyIndicators = {};
     const lastValue = {};
     fields.map(field => economyIndicators[field] = []);
-    fields.map(field => lastValue[field] = 0);
+    fields.map(field => lastValue[field] = null);
     data = data.reverse();
     data.forEach(row => {
         fields.forEach(field => {

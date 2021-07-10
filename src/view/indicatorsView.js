@@ -259,7 +259,7 @@ function IndicatorsView(props) {
 
     // Fetchers
     function fetchEconomyIndicators(range) {
-        const from = rangeOptions.find(rangeOption => rangeOption.name === range).toDate();
+        const from = rangeOptions.find(rangeOption => rangeOption.name === range).toDate();        
 
         return API.getEconomyIndicators(from);
     }
