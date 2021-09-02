@@ -17,7 +17,7 @@
     "d3-format": "^1.4.4",
     "dayjs": "^1.8.29",
     "fetch-retry": "^4.0.1",
-    "immer": "^7.0.5",
+    "immer": "^9.0.6",
     "mdi-material-ui": "^6.16.0",
     "mime": "^2.4.6",
     "promise-results": "^0.6.2",
