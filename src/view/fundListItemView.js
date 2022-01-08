@@ -640,7 +640,7 @@ function FundListItemView(props) {
                                                     <th><Typography variant="body2">Dez</Typography></th>
                                                 </Hidden>
                                                 <th><Typography variant="body2">Ano</Typography></th>
-                                                <th><Typography variant="body2">Accumulado</Typography></th>
+                                                <th><Typography variant="body2">Acumulado</Typography></th>
                                             </tr>
                                         </thead>
                                         <tbody>
