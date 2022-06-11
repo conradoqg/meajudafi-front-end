@@ -519,28 +519,6 @@ function FundListItemView(props) {
                                             </React.Fragment>
                                         )
                                     }
-                                    {
-                                        fund.mf_id && (
-                                            <React.Fragment>
-                                                <Grid container spacing={2}>
-                                                    <Grid item xs={12}>
-                                                        <Divider variant="middle" />
-                                                    </Grid>
-                                                    <Grid item xs={12}>
-                                                        <Typography variant="subtitle1" gutterBottom><b><Link className={styles.link} href={`https://www.modalmais.com.br${fund.mf_detail_link}`} target="_new" rel="noopener">Modal Mais</Link></b></Typography>
-                                                    </Grid>
-                                                </Grid>
-                                                <Grid container spacing={2}>
-                                                    <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography variant="body2"><b>Nome:</b> {formatters.field['mf_name'](fund.bf_product)}</Typography></Grid>
-                                                    <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography variant="body2"><b>Risco Formal:</b> {formatters.field['mf_risk_level'](fund.mf_risk_level)}</Typography></Grid>
-                                                    <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography variant="body2"><b>Investimento Inicial:</b> {formatters.field['mf_minimum_initial_investment'](fund.mf_minimum_initial_investment)}</Typography></Grid>
-                                                    <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography variant="body2"><b>Dias para Resgate:</b> {formatters.field['mf_rescue_quota'](fund.mf_rescue_quota)}</Typography></Grid>
-                                                    <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography variant="body2"><b>Benchmark:</b> {formatters.field['mf_benchmark'](fund.mf_benchmark)}</Typography></Grid>
-                                                    <Grid item xl={3} lg={3} md={4} sm={6} xs={12}><Typography variant="body2"><b>Atividade:</b> {formatters.field['mf_active'](fund.mf_active)}</Typography></Grid>
-                                                </Grid>
-                                            </React.Fragment>
-                                        )
-                                    }
                                 </React.Fragment>
                             )}
                             isNull={() => (<Typography variant="subtitle1" align="center"><Skeleton /></Typography>)}

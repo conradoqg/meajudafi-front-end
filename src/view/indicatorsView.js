@@ -259,7 +259,7 @@ function IndicatorsView(props) {
 
     // Fetchers
     function fetchEconomyIndicators(range) {
-        const from = rangeOptions.find(rangeOption => rangeOption.name === range).toDate();        
+        const from = rangeOptions.find(rangeOption => rangeOption.name === range).toDate();
 
         return API.getEconomyIndicators(from);
     }
@@ -555,9 +555,6 @@ function IndicatorsView(props) {
                 </Grid>
                 <Grid item xs={12} sm={12} md={6} xl={6}>
                     <FundsChangedPaper title="BTG Pactual" data={fundsChanged} broker="btgpactual" classes={styles} />
-                </Grid>
-                <Grid item xs={12} sm={12} md={6} xl={6}>
-                    <FundsChangedPaper title="Modal Mais" data={fundsChanged} broker="modalmais" classes={styles} />
                 </Grid>
             </Grid>
         </div >
