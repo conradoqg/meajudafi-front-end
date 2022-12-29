@@ -28,13 +28,13 @@
     "react-ga": "^3.1.2",
     "react-plotly.js": "^2.4.0",
     "react-router-dom": "^5.2.0",
-    "react-scripts": "^3.4.3",
+    "react-scripts": "^5.0.1",
     "slugify": "^1.4.4",
     "source-map-explorer": "^2.4.2",
     "use-immer": "^0.4.1",
     "use-persisted-state": "^0.3.0",
     "use-query-params": "^1.1.8",
-    "worker-loader": "^2.0.0"
+    "worker-loader": "^3.0.8"
   },
   "scripts": {
     "start": "cross-env REACT_APP_API_URL=api.meajudafi.com.br PORT=9966 EXTEND_ESLINT=true react-app-rewired start",
